@@ -104,6 +104,12 @@ The user guide can also be viewed with:
 
 	$ info trip-user-guide
 
+## Source Control
+
+The source is maintained in a Git repository which can be cloned with:
+
+	$ git clone --recursive git://www.fdsd.co.uk/trip-server-2.git
+
 ## Building
 
 These instructions are for building and installing from the source
@@ -164,7 +170,18 @@ Install:
 
 	$ sudo make install
 
-Additional packages required to build from Git clone:
+The build requires resources from the [Bootstrap][] and [OpenLayers][]
+distributions.  These are included in the
+[distribution tarballs of this
+application](http://www.fdsd.co.uk/trip-server-2/)
+or can be downloaded from the respective websites.  (In this case, view the
+contents of `./Makefile.am` to determine the required versions and directory
+structure for the build.)
+
+[Bootstrap]: https://getbootstrap.com
+[OpenLayers]: https://openlayers.org
+
+Additional packages required to build from a Git clone:
 
 - autoconf
 - autoconf-archive
