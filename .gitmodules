@@ -1,0 +1,3 @@
+[submodule "trip-server-common"]
+	path = trip-server-common
+	url = ../trip-server-common/

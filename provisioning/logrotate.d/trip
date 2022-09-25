@@ -1,0 +1,8 @@
+/var/log/trip.log {
+	hourly
+	rotate 48
+	copytruncate
+	compress
+	notifempty
+	create 0640 vagrant vagrant
+}

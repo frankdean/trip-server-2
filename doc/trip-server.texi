@@ -1,0 +1,1448 @@
+\input texinfo.tex   @c -*-texinfo-*-
+@c %**start of header
+@setfilename trip-server.info
+@documentencoding US-ASCII
+@c Automake automatically updates version.texi to @set VERSION and
+@c @set UPDATED to appropriate values.
+@include version.texi
+@settitle trip-server version @value{VERSION}
+@c @paragraphindent none
+@c %**end of header
+
+@direntry
+* trip-server: (trip-server).   Trip Recording and Itinerary Planning.
+@end direntry
+
+@copying
+This User Guide is for using Trip, version @value{VERSION},
+@value{UPDATED} in a browser.  Trip is a an application supporting trip
+recording and itinerary planning.
+
+Copyright @copyright{} 2021-2022 Frank Dean
+@end copying
+
+@titlepage
+@title Trip Server
+@author Frank Dean
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@ifnottex
+@node Top, Invoking trip-server, (dir), (dir)
+@top trip-server
+@end ifnottex
+
+@c @setchapternewpage off
+
+@chapter Overview
+
+This document describes using @code{trip-server} --- Trip Recording and
+Itinerary Planning, version @value{VERSION}, @value{UPDATED}.
+
+@menu
+* Invoking trip-server::
+* Upgrading from Trip Server v1::
+* PostgreSQL Setup::
+* Configuration::
+* Internationalisation and Localisation::
+* Proxy Web Servers::
+* Testing and Developing Trip::
+* Miscellaneous::
+* Database Backup::
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Options
+
+* PostgreSQL Setup::
+* Configuration::
+* Proxy Web Servers::
+* Internationalisation and Localisation::
+* Upgrading from Trip Server v1::
+* Testing and Developing Trip::
+* Miscellaneous::
+* Database Backup::
+
+
+Upgrading from Trip Server v1
+
+* Database URI::
+* Database Changes::
+
+PostgreSQL Setup
+
+* Creating a Database User::
+* Creating the trip Database::
+* Creating Tables and Roles::
+* Creating an Initial Admin User::
+
+Creating the trip Database
+
+* Database User Permissions::
+
+Creating Tables and Roles
+
+* Lookup Tables::
+* Indexes for Query Performance::
+
+Configuration
+
+* Tile Server Configuration::
+* Elevation Data::
+
+Proxy Web Servers
+
+* Nginx Web Server::
+* Apache::
+
+Apache
+
+* Reverse Proxy Configuration::
+* Redirecting to HTTPS::
+* Redirecting Traccar Client URLs::
+
+Testing and Developing Trip
+
+* Vagrant::
+* Testing with Curl::
+* Load Testing::
+
+Vagrant
+
+* Quick Start Using Vagrant::
+* Trouble-shooting::
+* Vagrant Errors::
+
+Quick Start Using Vagrant
+
+* Trouble-shooting::
+* Vagrant Errors::
+
+Miscellaneous
+
+* Useful Queries::
+
+Useful Queries
+
+* Map Tiles::
+* Useful Queries for Testing::
+
+Map Tles
+
+* Freeing System Disk Space::
+
+Useful Queries for Testing
+
+* Copying data::
+
+@end detailmenu
+@end menu
+
+@node Invoking trip-server, Upgrading from Trip Server v1, Top, Top
+@chapter Invoking trip-server
+@cindex Invoking trip-server
+
+@section Synopsis
+
+@quotation
+trip-server [
+-h
+|
+--help
+] [
+-v
+|
+--version
+] [
+-s
+|
+--listen
+@{
+address
+@}
+] [
+-p
+|
+--port
+@{
+port
+@}
+] [
+-r
+|
+--root
+@{
+directory
+@}
+] [
+-e
+|
+--expire-sessions
+] [
+-c
+|
+--config-file
+@{
+filename
+@}
+] [
+-u
+|
+--upgrade
+] [
+-V
+|
+--verbose
+]
+@end quotation
+
+@section Description
+
+@code{trip-server} is an application supporting trip recording and
+itinerary planning.
+
+The intended use is for a hiker, mountain-biker or other adventurer, to
+be able to publish and share their planned itinerary, then subsequently
+log their positions at intervals, allowing someone else the ability to
+monitor their progress.
+
+In the event of contact being lost, the plans and tracking information
+can be passed to rescue services etc., to assist with locating the
+missing adventurer.
+
+@c @setchapternewpage on
+@section Options
+
+@table @asis
+
+@item -h, --help
+Show help, then exit.
+
+@item -v, --version
+Show version information, then exit.
+
+@item -s, --listen=ADDRESS
+Listen address, e.g. 0.0.0.0
+
+@item -p, --port=PORT
+Port number, e.g. 8080.
+
+@item -r, --root=DIRECTORY
+Document root directory.
+
+@item -e, --expire-sessions
+Expires any active user web sessions.
+
+@item -c, --config-file=FILENAME
+Configuration file name.
+
+@item -u, --upgrade
+Upgrade the database.
+
+@item -V, --verbose
+Verbose output
+
+@end table
+
+@menu
+* PostgreSQL Setup::
+* Configuration::
+* Proxy Web Servers::
+* Internationalisation and Localisation::
+* Upgrading from Trip Server v1::
+* Testing and Developing Trip::
+* Miscellaneous::
+* Database Backup::
+
+@end menu
+
+@node Upgrading from Trip Server v1, PostgreSQL Setup, Invoking trip-server, Top
+@chapter Upgrading from Trip Server v1
+@cindex Upgrading from Trip Server v1
+
+@menu
+* Database URI::
+* Database Changes::
+@end menu
+
+@node Database URI, Database Changes, Upgrading from Trip Server v1, Upgrading from Trip Server v1
+@section Database URI
+@cindex Database URI
+
+There are some differences between what the
+@url{https://github.com/brianc/node-postgres,Node.js pgmodule}
+will accept and those defined as the
+@url{https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING,
+PostgreSQL libpq Connection Strings.}
+
+The former allows a @code{socket} scheme and a @code{database}
+parameter.  The latter requires @code{postgresql} and @code{dbname} to
+be use respectively.  It should be possible to form the connect string
+as a valid @code{libpq} URI without any query parameters, which the
+Node.js @code{pg} module will also work with, including connecting via a
+socket.  This allows both versions to run using the same application
+configuration file.
+
+E.g.
+
+Connect via a socket, using the @code{peer} method:
+
+@example
+uri: "postgresql://%2Fvar%2Frun%2Fpostgresql/trip"
+@end example
+
+@node Database Changes,  , Database URI, Upgrading from Trip Server v1
+@section Database Changes
+@cindex Database Changes
+
+The @code{pgcrypto} extension is needed for user password validation.
+Run the following command in the Trip database:
+
+@example
+$ psql trip
+CREATE EXTENSION pgcrypto;
+@end example
+
+@subsection Session Table
+@cindex Session Table
+
+There is a new table to handle user sessions.  It is created after
+running @code{trip-server} with the @code{--upgrade} option.
+
+@subsection Passwords
+@cindex Passwords
+
+The Blowfish algorithm appears to have been changed in PostgreSQL 13.
+The following SQL will update old style encrypted passwords to work in
+PostgreSQL 13.
+
+@example
+UPDATE usertable SET password = '$2a' || SUBSTRING(password, 4, 57)
+WHERE password NOT LIKE '$2a%';
+@end example
+
+This is also executed when running @code{trip-server} with the
+@code{--upgrade} option.
+
+@node PostgreSQL Setup, Configuration, Upgrading from Trip Server v1, Top
+@chapter PostgreSQL Setup
+@cindex PostgreSQL Setup
+
+The following packages are required to run the application with
+PostgreSQL:
+
+@itemize
+@item
+postgis
+@end itemize
+
+On a Debian distribution, install the @code{postgis} and
+@code{postgresql} packages.
+
+@menu
+* Creating a Database User::
+* Creating the trip Database::
+* Creating Tables and Roles::
+* Creating an Initial Admin User::
+@end menu
+
+@node Creating a Database User, Creating the trip Database, PostgreSQL Setup, PostgreSQL Setup
+@section Creating a Database User
+@cindex Creating a Database User
+
+Create a user for the application, with minimal rights, entering the
+password to be used by the @code{trip} system user, when prompted by the
+@code{createuser} utility:
+
+@example
+$ sudo -v
+$ sudo -u postgres createuser -P trip
+@end example
+
+@node Creating the trip Database, Creating Tables and Roles, Creating a Database User, PostgreSQL Setup
+@section Creating the trip Database
+@cindex Creating the trip Database
+
+Create a database for use by the application:
+
+@example
+$ sudo -u postgres createdb trip --owner=trip --locale=en_GB.UTF-8
+@end example
+
+If the default locale for the database does not match the running user's
+locale, e.g. @code{en_GB.UTF-8}, specify the locale when creating it.
+E.g.:
+
+@example
+$ sudo -u postgres createdb trip --owner=trip --locale=en_GB.UTF-8 \
+  --template=template0
+@end example
+
+@menu
+* Database User Permissions::
+@end menu
+
+@node Database User Permissions,  , Creating the trip Database, Creating the trip Database
+@subsection Database User Permissions
+@cindex Database User Permissions
+
+Allow the @code{trip} user access to the database by editing the
+PostgreSQL database configuration:
+
+@example
+$ sudoedit /etc/postgresql/13/main/pg_hba.conf
+@end example
+
+Insert a line, usually as the first non-comment line, to
+@code{pg_hba.conf}, with:
+
+@itemize
+@item
+TYPE = local
+@item
+DATABASE = trip
+@item
+USER = buget
+@item
+ADDRESS =
+@item
+METHOD = md5
+@end itemize
+
+e.g
+
+@example
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+local   trip          trip                                  md5
+@end example
+
+Restart PostgreSQL:
+
+@example
+$ sudo systemctrl restart postgresql
+@end example
+
+Test connecting to the database as the @code{trip} user and create the
+@code{pgcrypto} extension.
+
+@example
+$ psql -U trip -d trip
+Password for user trip:
+psql (13.5 (Debian 13.5-0+deb11u1))
+Type "help" for help.
+@end example
+
+Whilst connected to the database, create the @code{pgcrypto} module:
+
+@example
+trip=> CREATE EXTENSION pgcrypto;
+@end example
+
+@node Creating Tables and Roles, Creating an Initial Admin User, Creating the trip Database, PostgreSQL Setup
+@section Creating Tables and Roles
+@cindex Creating Tables and Roles, Tables, Roles
+
+As a Unix user who is also a postgresql superuser:
+
+@example
+$ cd ./spec/support
+$ psql trip <10_trip_role.sql
+$ psql trip <20_schema.sql
+$ psql trip <30_permissions.sql
+@end example
+
+Optionally, populate the database with data that can be used to perform
+end-to-end tests.  Do not insert the test data into a production database as
+it contains default application admin user credentials.
+
+@example
+$ psql trip <90_test-data.sql
+@end example
+
+@menu
+* Lookup Tables::
+* Indexes for Query Performance::
+@end menu
+
+@node Lookup Tables, Indexes for Query Performance, Creating Tables and Roles, Creating Tables and Roles
+@subsection Lookup Tables
+@cindex Lookup Tables
+
+The following tables are used to define lookup values for select boxes in the
+web application:
+
+@table @code
+
+@item waypoint_symbol
+Key-value pairs describing waypoint symbols. The @code{key} is written
+to waypoint entries when downloading GPX files.
+
+@item track_color
+
+Key-value pairs together with an HTML color code.  The 'key' is written
+to track entries when downloading GPX files and the HTML color code is
+used to render the tracks on the itinerary map page.
+
+@item georef_format
+
+Key-value pairs define how to format output of latitude and longitude
+values on the itinerary waypoint edit page.  Format parameters are
+defined using the @code{@{%@}} symbol and have the
+following meanings:
+@end table
+
+@itemize
+@item
+%d - degrees
+@item
+%m - minutes
+@item
+%s - seconds
+@item
+%D - zero prefix single digit degree values
+@item
+%M - zero prefix single digit minute values
+@item
+%S - zero prefix single digit second values
+@item
+%c - output the cardinal value, S, E, W or N
+@item
+%i - output a minus sign for W and S
+@item
+%p - output a minus sing for W and S and a plus sign for E and N
+@end itemize
+
+E.g. a format string of %d@textdegree{}%M'%S''%c would result in a
+lat/long value of @samp{1.5,-2.5} being displayed as
+1@textdegree{}30'00''N 2@textdegree{}30'00''W
+
+Scripts to create default values for these lookup tables are in the
+@code{./spec/support} folder;
+
+@itemize
+@item
+@code{60_waypoint_symbols.sql}
+@item
+@code{40_path_colors.sql}
+@item
+@code{50_georef_formats.sql}
+@end itemize
+
+The default waypoint symbols and track colours are generally appropriate
+for Garmin devices.  In fact, the colours are the only ones allowed by
+the @url{http://www8.garmin.com/xmlschemas/GpxExtensionsv3.xsd, Garmin
+Extensions XSD}.
+
+@node Indexes for Query Performance,  , Lookup Tables, Creating Tables and Roles
+@subsection Indexes for Query Performance
+@cindex Indexes for Query Performance
+
+The @code{location} table has an index that is clustered on the
+@code{time} column to improve the query performance of date range
+queries.  If the table becomes large and performance degrades, run the
+psql @code{cluster} command from time-to-time to re-cluster it.  Note an
+exclusive lock is placed on the table for the duration of the cluster
+command execution.
+
+See
+@url{http://dba.stackexchange.com/questions/39589/optimizing-queries-on-a-range-of-timestamps-two-columns}
+for more information.
+
+@node Creating an Initial Admin User,  , Creating Tables and Roles, PostgreSQL Setup
+@section Creating an Initial Admin User
+@cindex Creating an Initial Admin User
+
+An initial admin user needs to be created in the database.  Thereafter,
+that user maintains other users using web application.  Creating the
+initial admin user fundamentally consists of making entries in the
+@code{usertable}, @code{role} and @code{user_role} tables.
+
+Firstly, create the entries in the @code{role} table by running the
+following script using @code{psql}:
+
+@example
+INSERT INTO role (name) VALUES ('Admin'), ('User');
+@end example
+
+@c TODO Replace the helper script
+There is a [Node.js][] helper script
+(@code{./spec/support/startup_helper.js}) in Trip Server version 1,
+which will output the SQL commands to create an admin user.  You can
+either output the result to a file and then run the file into
+@code{psql}, or pipe the output directly to @code{psql}.  e.g.
+
+@example
+$ cd ./spec/support
+$ node startup_helper.js | psql trip
+@end example
+
+@node Configuration, Internationalisation and Localisation, PostgreSQL Setup, Top
+@chapter Configuration
+@cindex Configuration
+
+@c TODO instructions for creating the application's configuration file.
+
+T.B.D. Describe the changes to the YAML configuration in use with Trip
+Server version 1.
+
+@c Update how the password file is located - it is no longer triprc
+The application reads a configuration file named @code{.triprc} in the
+current working directory.  If not found, it then tries to read
+@code{/etc/triprc}.  Failing that, the PostgreSQL library will try other
+methods, potentially including using the environment variable
+@code{PGPASSWORD}, depending how the database has been configured.
+
+The password file should be readable by the user running @code{trip},
+e.g. @code{nobody}, but not world-readable.  On a Debian system, run
+@code{trip} using the @code{nobody} user and set the file permissions as
+follows:
+
+@example
+$ sudo chmod 0640 /etc/triprc
+$ sudo chown root:nogroup /etc/triprc
+@end example
+
+@menu
+* Tile Server Configuration::
+* Elevation Data::
+@end menu
+
+@node Tile Server Configuration, Elevation Data, Configuration, Configuration
+@section Tile Server Configuration
+@cindex Tile Server Configuration
+
+@c [Tile Usage Policy]: https://operations.osmfoundation.org/policies/tiles/ "OSM Tile Usage Policy"
+@set osmtileusageurl https://operations.osmfoundation.org/policies/tiles/
+
+Most if not all tile server providers have policies that you must comply
+with and there may be sanctions if you fail to do so.  E.g. If you are
+using the OpenStreetMap tile server, read and comply with their
+@url{@value{osmtileusageurl},Tile Usage Policy}.  Please ensure you
+configure the following entries correctly for the appropriate element of
+the @code{tile.providers} section(s) of @code{config.yaml}.
+
+@table @code
+@item userAgentInfo
+This is the e-mail address at which the system
+administrators can contact you
+
+@item refererInfo
+A link to a public website with information about your application's
+deployment
+@end table
+
+@strong{Note} these entries are sent in the HTTP header of each tile
+request and will therefore end up in system logs etc.  Currently the
+tile requests are sent over HTTP, therefore you should not mind this
+data being exposed.
+
+The @code{tile.providers[x].mapLayer} entries provide the ability to
+display tile map attributions most if not all tile providers require you
+to display.
+
+The @code{mapLayer.name} attribute will be displayed when the map layers
+icon is activated.  Only @code{xyz} map types are supported, so the
+@code{mapLayer.type} attribute should always be @code{xyz}.
+
+Map attributions are displayed on the map using the
+@code{mapLayer.tileAttributions} section of the @code{tile.providers}
+attribute, which allows attributions to be rendered with appropriate
+HTML links.  The @code{tileAttributions} are an array of items that have
+either text, text and link or just link attributes.  If the entry
+contains just text, the text will be displayed in the map attribution.
+If a link is included, the text will be wrapped in HTML link tags and
+included in the map attribution.  The entries are displayed in the
+sequence they have been defined.
+
+@node Elevation Data,  , Tile Server Configuration, Configuration
+@section Elevation Data
+@cindex Elevation Data, Altitude Data
+
+@strong{Note:} The Elevation Data feature has not yet been ported to
+Trip Server version 2.  The documentation is included here for
+completeness.
+
+The @url{http://srtm.csi.cgiar.org/, Consortium for Spatial Information}
+(CGIAR CSI) make
+@url{https://en.wikipedia.org/wiki/Digital_elevation_model, Digital
+Elevation Model} data covering about 80% of the globe, available for
+download.  It has been sourced and enhanced from data gathered by the
+NASA Shuttle Radar Topographic Mission (SRTM).
+
+From the main page of the CGIAR CSI website, follow the link to
+@code{SRTM Data} to download @code{zip} files that contain @code{tiff}
+files with 5m x 5m elevation data.
+
+Extract the @code{tiff} files to a folder,
+e.g. @code{/var/local/elevation-data} and configure an @code{elevation}
+section in @code{config.yaml}, e.g.
+
+@example
+"elevation" : @{
+    "tileCacheMs" : 60000,
+    "datasetDir" : "/var/local/elevation-data/"
+@},
+@end example
+
+When the Trip Server application is started, it reads all the
+@code{tiff} files in the folder specified by the
+@code{elevation.datasetDir} parameter and creates an in memory index
+containing the area covered by each tile.  When elevation data is
+required for a specific location, the relevant tile is loaded, the
+response provided, and the tile retained in memory for the number of
+milliseconds specified by the @code{elevation.tileCacheMs} parameter.
+
+The @code{tiff} files take up a lot of space.  Where space is at a
+premium, consider storing them in a compressed file system, e.g.
+on Linux use @url{http://squashfs.sourceforge.net, Squashfs.}
+
+e.g.
+
+@enumerate
+@item
+Download files to @code{~/downloads/srtm}
+
+@example
+$ mkdir -p ~/downloads/srtm
+$ cd ~/downloads/srtm
+$ wget http://srtm.csi.cgiar.org/wp-content/uploads/files/srtm_5x5/tiff/srtm_72_22.zip
+@end example
+
+@item
+Extract the tiff files to @code{~/tmp/tiff}
+
+@example
+$ mkdir -p ~/tmp/tiff
+$ cd ~/tmp/tiff
+$ find ~/downlods/srtm -name '*.zip' -exec unzip -n '@{@}' '*.tif' \;
+@end example
+
+@item
+Create a Squashfs compressed file containing the @code{tiff} images
+
+@example
+$ mksquashfs ~/tmp/tiff /var/local/elevation-data.squashfs -no-recovery
+@end example
+
+The @code{-no-recovery} option is to stop Squashfs leaving a recovery
+file behind in the destination folder.  However, it does mean that should the
+operation fail, there is no recovery information to unwind the
+command.  This is probably more of a potential problem when
+appending to an existing Squashfs file.
+
+@item
+Optionally, delete or archive the downloaded @code{zip} files to free up
+space.
+
+@item
+Download more files, extract them and squash them using the above steps.
+Repeating the @code{mksquashfs} command as above will append to an
+existing Squashfs file.
+
+@item
+You can list the contents of the Squashfs file with:
+
+@example
+$ unsquashfs -i -ll /var/local/elevation-data.squashfs
+@end example
+
+@item
+Test mounting the Squashfs file
+
+@example
+$ mkdir -p /var/local/elevation-data/
+$ sudo mount -t squashfs /var/local/elevation-data.squashfs /var/local/elevation-data/
+$ ls /var/local/elevation-data/
+$ sudo umount /var/local/elevation-data
+@end example
+
+@item
+Add an entry to @code{/etc/fstab} to mount the Squashfs file on boot:
+
+@example
+$ echo '/var/local/elevation-data.squashfs \
+/var/local/elevation-data squashfs ro,defaults 0 0' \
+| sudo tee -a /etc/fstab
+@end example
+
+@item
+Mount using the @code{/etc/fstab} entry:
+
+@example
+$ sudo mount /var/local/elevation-data
+$ ls /var/local/elevation-data
+$ sudo umount /var/local/elevation-data
+@end example
+
+@item
+If need be in the future, you can extract the files from the Squashfs
+file with:
+
+@example
+$ unsquashfs -i /var/local/elevation-data.squashfs
+@end example
+
+Which will extract all the files to a sub-folder of the current working
+folder named @code{squashfs-root}.
+
+Use the @code{-f} parameter if the @code{squashfs-root} folder already exists.
+
+@item
+To extract select files, create another file containing the names of the
+files to be extracted, prefixed by a forward-slash.  e.g.
+@code{/srtm_11_03.tiff}.
+
+@item
+$ unsquashfs -i -e list-of-files.txt /var/local/elevation-data.squashfs
+
+@item
+See @url{http://tldp.org/HOWTO/SquashFS-HOWTO/creatingandusing.html,
+SquashFS HOWTO} for more information
+@end enumerate
+
+@node Internationalisation and Localisation, Proxy Web Servers, Configuration, Top
+@chapter Internationalisation and Localisation
+@cindex Internationalisation and Localisation
+
+A quick way to test localization is to temporarily set the environment
+variable @code{LC_ALL} when running the server, e.g.
+
+@example
+$ LC_ALL=es_ES.UTF-8 ./src/trip-server
+@end example
+
+To update the PO files for translation:
+
+@example
+$ cd po
+$ make update-po
+@end example
+
+After updating the translations, run the same command to re-create the binary
+files, then install them in the correct location with:
+
+@example
+$ make
+$ sudo make install
+@end example
+
+@node Proxy Web Servers, Testing and Developing Trip, Internationalisation and Localisation, Top
+@chapter Proxy Web Servers
+@cindex Proxy Web Servers
+
+The section describes deploying Trip with either the Apache or Nginx web
+servers.
+
+@menu
+* Nginx Web Server::
+* Apache::
+@end menu
+
+@node Nginx Web Server, Apache, Proxy Web Servers, Proxy Web Servers
+@section Nginx Web Server
+@cindex Nginx Web Server
+
+Setting up Nginx isn't documented here but can readily be determined by
+looking at the Vagrant setup scripts under the @code{./provisioning/}
+folder in the source distribution, or by deploying using Vagrant and
+examining the working Vagrant installation.
+
+@node Apache,  , Nginx Web Server, Proxy Web Servers
+@section Apache
+@cindex Apache
+
+Optionally, the application can be run behind an
+@url{http://httpd.apache.org/, Apache} server, proxying requests to the
+application.
+
+This has the benefit of allowing the application to co-exist with other
+applications on the same server instance all running on the standard
+port 80.  Security of the server can also be enhanced by installing and
+configuring the @url{https://modsecurity.org/, mod-security Apache
+module}.
+
+@menu
+* Reverse Proxy Configuration::
+* Redirecting to HTTPS::
+* Redirecting Traccar Client URLs::
+@end menu
+
+@node Reverse Proxy Configuration, Redirecting to HTTPS, Apache, Apache
+@subsection Reverse Proxy Configuration
+@cindex Reverse Proxy Configuration
+
+Configure Apache 2 to enable the @code{mod_proxy} and
+@code{proxy_wstunnels} modules.  On Debian this can be done with:
+
+@example
+$ sudo a2enmod proxy
+$ sudo a2enmod proxy_wstunnel
+$ sudo a2enmod rewrite
+@end example
+
+The application should be run over HTTPS to keep the login credentials
+secure, otherwise others can see and re-use those credentials.
+
+Modify the server configuration to implement the following Apache
+rewrite rules.  Note that the default @code{socket.io} path is prefixed
+with @code{wstrack\} so that multiple applications using websockets can
+be run on the same Apache server using different prefixes.  (TRIP uses
+websockets to provide updates to the tracking map.)  The TRIP web client
+app will prefix the path when it is not calling a localhost URL.  These
+rules need to be in a @code{<VirtualHost _default_:443/>} or
+@code{<Directory/>} section of the @code{mod_ssl} configuration file.
+
+@example
+RewriteEngine on
+RewriteCond %@{REQUEST_URI@}  ^/wstrack/socket.io  [NC]
+RewriteCond %@{QUERY_STRING@} transport=websocket    [NC]
+RewriteRule /wstrack/(.*)           ws://localhost:8080/$1 [P,L]
+@end example
+
+Add the following to @code{trip.conf} outside the @code{<directory\>} directive:
+
+@example
+<IfModule mod_proxy.c>
+  ProxyPass /wstrack/socket.io/ http://localhost:8080/socket.io/
+  ProxyPassReverse /wstrack/socket.io/ http://localhost:8080/socket.io/
+
+  ProxyPass /trip/rest http://localhost:8080
+  ProxyPassReverse /trip/rest http://localhost:8080
+</IfModule>
+@end example
+
+@node Redirecting to HTTPS, Redirecting Traccar Client URLs, Reverse Proxy Configuration, Apache
+@subsection Redirecting to HTTPS
+@cindex Redirecting to HTTPS
+
+It is useful to ensure all users use HTTPS by providing a redirect rule to
+redirect any HTTP requests to use HTTPS.  However, some logging clients do not
+support HTTP, so it may be preferable to exclude the logging patterns from
+redirection.  Generally, the logging URLs will be of the form
+@code{http://$@{HOST@}:$@{PORT@}/trip/rest/log_point}.
+
+This rule will redirect URLs excepting those like @code{/trip/rest/}
+which can then be used by tracker clients that do not support HTTPS or
+redirections, to log locations without being redirected.
+
+This rule needs to be in the @code{<VirtualHost *:80/>} section of the
+HTTP server.
+
+@example
+RedirectMatch ^/trip/app/(.*)$ https://$@{MY_HOST@}/trip/app/$1
+@end example
+
+@node Redirecting Traccar Client URLs,  , Redirecting to HTTPS, Apache
+@subsection Redirecting Traccar Client URLs
+@cindex Redirecting Traccar Client URLs, Traccar
+
+The @url{https://www.traccar.org/client/, Traccar Client app} does not
+provide a facility to define a URL prefix.  All calls are to the server
+root.
+
+A workaround is to configure the Apache server to redirect both HTTP and
+HTTPS requests that match the pattern of Traccar Client logging requests
+to the @code{/trip/rest/log_point} URL prefix.
+
+To support using the Traccar Client, enter the following in
+the Apache @code{<VirtualHost/>} sections:
+
+@example
+# Redirect for Traccar Client
+<IfModule mod_rewrite.c>
+        RewriteEngine On
+        RewriteCond "%@{QUERY_STRING@}" "^id=[\da-f]@{8@}-[\da-f]@{4@}-[\da-f]@{4@}-[\da-f]@{4@}-[\da-f]@{12@}&timestamp=\d+&lat=[-.\d]+&lon=[-.\d]+"
+        RewriteRule ^/ /trip/rest/log_point [PT,QSA]
+</IfModule>
+@end example
+
+@node Testing and Developing Trip, Miscellaneous, Proxy Web Servers, Top
+@chapter Testing and Developing Trip
+@cindex Testing and Developing Trip
+
+@menu
+* Vagrant::
+* Testing with Curl::
+* Load Testing::
+@end menu
+
+@node Vagrant, Testing with Curl, Testing and Developing Trip, Testing and Developing Trip
+@section Vagrant
+@cindex Vagrant
+
+@url{https://www.vagrantup.com,Vagrant} provides a simple and powerful
+development environment.
+
+@menu
+* Quick Start Using Vagrant::
+* Trouble-shooting::
+* Vagrant Errors::
+@end menu
+
+@node Quick Start Using Vagrant, Trouble-shooting, Vagrant, Vagrant
+@subsection Quick Start Using Vagrant
+@cindex Quick Start Using Vagrant
+
+This option provides a working example of the application running in a
+@url{https://www.virtualbox.org, VirtualBox} virtual machine (VM) for
+those @url{https://www.vagrantup.com/downloads.html, [operating systems
+supported by Vagrant.}  This also provides a complete example of running
+the application behind the @url{https://nginx.org, Nginx} ("engine x")
+HTTP reverse proxy server.  It is suitable for development or
+demonstration, but not as a production system.
+
+**Note:** Installing all the required software, including the Vagrant
+box involves downloading approximately 600MB of data.  Perhaps more of
+an "easy-start" rather than a "quick-start".
+
+@enumerate
+@item
+Download and install VirtualBox
+
+@item
+Download and install Vagrant
+
+@item
+Clone this repository to a suitable location on the machine you are
+going to use to host the application and VM:
+
+@example
+$ cd ~/projects
+$ git clone git://www.fdsd.co.uk/trip-server-2.git
+@end example
+
+@item
+Start the Vagrant VM
+
+@example
+$ cd ~/projects/trip-server
+$ vagrant up
+@end example
+
+The first time this is run, it will download a
+@url{https://www.vagrantup.com/docs/boxes.html,Vagrant box} containing a
+Debian Linux distribution, then install the required Debian packages,
+modify the default configuration and start the TRIP server.
+
+@item
+Use your browser to navigate to @url{http://localhost:8080/} on the host
+machine and login providing the above credentials
+
+@item
+When finished, halt the server with:
+
+@example
+$ vagrant halt
+@end example
+@end enumerate
+
+Vagrant shares the source folder with the VM so that you can modify the
+source files on the host server and immediately impact the deployed
+application.  This gives you a complete working development environment.
+
+Should you need it, e.g. for running a GUI in Vagrant, the @code{vagrant}
+user's default password is @code{vagrant}.
+
+Rendering of map tiles is disabled by default, in order to respect
+@url{@value{osmtileusageurl},OpenStreetMap's Tile Usage Policy.}  You
+will need to follow the instructions below, in the @xref{Tile Server
+Configuration} section, before map tiles are rendered.
+
+If you forget the admin user (@code{admin@@trip.test}) password, login
+into the VM and modify the database entry in the PostgreSQL database.
+Replace @code{SECRET} with your desired password.
+
+@example
+$ cd ~/projects/trip-server
+$ vagrant ssh
+$ psql trip
+trip=# UPDATE usertable SET password=crypt('SECRET', gen_salt('bf')) WHERE nickname='admin';
+trip=# \q
+@end example
+
+You can configure the time zone and locale settings by running the
+following commands on the guest VM and following the prompts:
+
+@example
+$ sudo dpkg-reconfigure tzdata
+$ sudo dpkg-reconfigure locales
+@end example
+
+Optionally, apply the latest Debian updates with:
+
+@example
+$ sudo apt-get upgrade
+@end example
+
+View the @code{Vagrantfile} configuration file in the root of the
+@code{trip-server} folder for some examples you can modify.  E.g. you
+can enable the @code{config.vm.network "public_network"} option to make
+the VM accessible from the public network.  This would allow you, for
+example, to test location updates, using a GPS enabled device sharing
+the same private LAN as the host VM.  Note the
+@url{https://www.vagrantup.com/docs/networking/public_network.html,
+warnings in the Vagrant documentation for this setting}, as for
+convenience, @strong{the VM is insecure by default and design}.
+
+@menu
+* Trouble-shooting::
+* Vagrant Errors::
+@end menu
+
+@node Trouble-shooting, Vagrant Errors, Quick Start Using Vagrant, Vagrant
+@subsection Trouble-shooting
+@cindex Trouble-shooting
+
+@subsubsection Guest additions on this VM do not match the installed version
+
+@code{Guest additions on this VM do not match the installed version of
+VirtualBox!}
+
+This means the installed box needs updating or an older version of
+VirtualBox needs to be used.
+
+There is a script in @code{./provisioning/init.sh} that automates the
+following manual process:
+
+In the past, it was sufficient simply to install the
+@url{https://github.com/dotless-de/vagrant-vbguest,vagrant-vbguest package.}
+
+@example
+$ vagrant plugin install vagrant-vbguest
+@end example
+
+However, if that fails:
+
+@enumerate
+@item
+Check the vagrant-vbguest plugin status:
+
+@example
+$ vagrant vbguest --status
+@end example
+
+@item
+If the guest version does not match the host, do:
+
+@example
+$ vagrant vbguest --do install
+@end example
+
+@item
+This may fail.  Halt and restart Vagrant:
+
+@example
+$ vagrant halt
+@end example
+
+@item
+Restart Vagrant and check the status again:
+
+@example
+$ vagrant up
+$ vagrant vbguest --status
+@end example
+@end enumerate
+
+The vbguest plugin host and guest versions should now match.
+
+For further information, see the
+@url{https://stackoverflow.com/questions/20308794/how-to-upgrade-to-virtualbox-guest-additions-on-vm-box#35678489,
+stackoverflow answer, "Existing VM".}
+
+@node Vagrant Errors,  , Trouble-shooting, Vagrant
+@subsection Vagrant Errors
+@cindex Vagrant Errors
+
+@subsubsection incompatible character encodings
+
+@code{incompatible character encodings: UTF-8 and ASCII-8BIT
+(Encoding::CompatibilityError)}
+
+If you receive this error when running @code{vagrant up}, even after
+@code{vagrant destroy}, use VirtualBox to see if the VM still exists.
+If so, delete it from within VirtualBox.
+
+@example
+$ VBoxManage list vms
+@end example
+
+This can occur after deleting the project's @code{.vagrant} sub-folder
+(e.g. through @code{git clean}), whilst there is still an activate
+Vagrant instance.  Web searches suggest there are other scenarios that
+result in a similarly confusing error message.
+
+@node Testing with Curl, Load Testing, Vagrant, Testing and Developing Trip
+@section Testing with Curl
+@cindex Testing with Curl
+
+The application can be tested outside a browser by using the
+@code{curl} command line utility.
+
+@enumerate
+@item
+Login and get a valid session ID, using @code{curl}:
+
+@example
+$ curl -i -X POST -d email='user@@trip.test' \
+-d password='rasHuthlutcew7' \
+http://localhost:8080/trip/app/login | grep SESSION_ID
+@end example
+
+@item
+Fetching a single page with @code{curl} using the session ID obtained
+from the previous command:
+
+@item
+$ curl -H 'Cookie: TRIP_SESSION_ID=b3571314-d5c4-4690-8164-8384fd748faa' \
+'http://localhost:8080/trip/app/tracks'
+@end enumerate
+
+@node Load Testing,  , Testing with Curl, Testing and Developing Trip
+@section Load Testing
+@cindex Load Testing
+
+Load testing can be done with @code{curl} and @code{ab} (Apache Bench,
+usually installed with Apache 2).
+
+@enumerate
+@item
+Login and get a valid session ID as described above using @code{curl}.
+@xref{Testing with Curl}.
+
+@item
+Test fetching a single page with @code{ab} using the session ID obtained
+from the previous command:
+
+@example
+$ ab -v 3 \
+-C 'TRIP_SESSION_ID=b3571314-d5c4-4690-8164-8384fd748faa' \
+http://localhost:8080/trip/app/tracks
+@end example
+
+@item
+Make sure the response gives a valid response, proving the session ID is
+valid and working.
+
+@item
+Add the options @code{-n 1000 -c 50} to perform 1,000 page fetches, with
+a maximum of 50 concurrent requests.  Add the @code{-k} option if you
+want to test @code{keep-alive} requests.  Make sure to configure the
+build with the @code{--enable-keep-alive} option.
+
+@end enumerate
+
+If using @code{keep-alive}, it's best to limit the number of concurrent
+requests to no more than the number of workers the application has been
+configured to start, otherwise some requests will fail.  As far as I
+understand, there is no real benefit using @code{keep-alive} these days,
+so by default it is disabled in the build.
+
+@node Miscellaneous, Database Backup, Testing and Developing Trip, Top
+@chapter Miscellaneous
+@cindex Miscellaneous
+
+The following sections mostly relate to information around system
+maintenance and application development.
+
+@menu
+* Useful Queries::
+@end menu
+
+@node Useful Queries,  , Miscellaneous, Miscellaneous
+@section Useful Queries
+@cindex Useful Queries
+
+@menu
+* Map Tiles::
+* Useful Queries for Testing::
+@end menu
+
+@node Map Tiles, Useful Queries for Testing, Useful Queries, Useful Queries
+@subsection Map Tles
+@cindex Map Tiles, Tiles
+
+Monthly cumulative totals of map tile usage for the last year:
+
+@example
+SELECT year, month, max(count) AS cumulative_total FROM (
+        SELECT time, extract(year from time) AS year,
+        extract(month from time) AS month,
+        extract(day from time) AS day,
+        count FROM tile_metric ORDER BY time DESC) AS q
+GROUP BY q.year, q.month ORDER BY q.year desc, q.month DESC LIMIT 12;
+@end example
+
+Count of expired tiles:
+
+@example
+SELECT count(*) FROM tile WHERE expires < now();
+@end example
+
+Count of unexpired tiles;
+
+@example
+SELECT count(*) FROM tile WHERE expires >= now();
+@end example
+
+Count of expired tiles older than 90 days:
+
+@example
+SELECT count(*) FROM tile WHERE expires < now() AND
+updated < now()::timestamp::date - INTERVAL '90 days';
+@end example
+
+Delete expired tiles older than 90 days:
+
+@example
+DELETE FROM tile WHERE expires < now() AND
+updated < now()::timestamp::date - INTERVAL '90 days';
+@end example
+
+Delete all expired tiles:
+
+@example
+DELETE FROM tile WHERE expires < now();
+@end example
+
+@menu
+* Freeing System Disk Space::
+@end menu
+
+@node Freeing System Disk Space,  , Map Tiles, Map Tiles
+@subsubsection Freeing System Disk Space
+@cindex Freeing System Disk Space
+
+This section describes freeing up system disk space after deleted tiles
+(or other records).
+
+To see how much space is begin used by the whole database:
+
+@example
+SELECT pg_size_pretty(pg_database_size('trip'));
+@end example
+
+To see how much space is being used the the tiles table:
+
+@example
+SELECT pg_size_pretty(pg_table_size('tile'));
+@end example
+
+Normally, a PostgreSQL installation will be configured to run the
+@url{https://www.postgresql.org/docs/9.4/static/sql-vacuum.html, VACUUM
+command} automatically from time-to-time.  This allows deleted records
+to be re-used, but does not generally free up the system disk space
+being used by the deleted records.  To do that, the @code{VACUUM}
+command needs to be run with the @code{FULL} option.
+
+@strong{Note} that @code{VACUUM FULL} requires an exclusive lock on the
+table it is working on so cannot be run in parallel with other database
+operations using the table.
+
+See the
+@url{https://www.postgresql.org/docs/9.4/static/routine-vacuuming.html#VACUUM-FOR-SPACE-RECOVERY,
+Recovering Disk Space} section of the
+@url{https://www.postgresql.org/docs/9.4/static/index.html, PostgreSQL
+documentation} for more information.
+
+To free up the system disk space used by the tiles table, in
+@code{plsql} run:
+
+@example
+VACUUM FULL tile;
+@end example
+
+or
+
+@example
+VACUUM (FULL, VERBOSE) tile;
+@end example
+
+To free up the system disk space used by all tables:
+
+@example
+VACUUM FULL;
+@end example
+
+or
+
+@example
+VACUUM (FULL, VERBOSE);
+@end example
+
+@node Useful Queries for Testing,  , Map Tiles, Useful Queries
+@subsection Useful Queries for Testing
+@cindex Useful Queries for Testing
+
+Copy location records for user with id 1 to user with id 2
+
+@example
+INSERT INTO location (user_id, location, "time", hdop, altitude, speed, bearing)
+SELECT 2, location, "time", hdop, altitude, speed, bearing FROM location WHERE user_id = 1;
+@end example
+
+Moved yesterday's test location data forward by 1 day:
+
+@example
+UPDATE location SET time = time + INTERVAL '1 day'
+WHERE user_id='1' AND time >= now()::timestamp::date - INTERVAL '1 day'
+AND	time <= now()::timestamp::date;
+@end example
+
+@menu
+* Copying data::
+@end menu
+
+@node Copying data,  , Useful Queries for Testing, Useful Queries for Testing
+@subsubsection Copying Data
+
+@example
+CREATE TABLE temp_location (LIKE location);
+
+INSERT INTO temp_location SELECT * FROM location q
+WHERE user_id=29 AND time >= '2015-12-14' AND
+time <= '2015-12-14T23:59:59'
+
+UPDATE temp_location SET user_id=3, id=NEXTVAL('location_seq'::regclass);
+
+INSERT INTO location SELECT * FROM temp_location;
+@end example
+
+@node Database Backup,  , Miscellaneous, Top
+@chapter Database Backup
+@cindex Database Backup, Backup
+
+Backup just the schema, no data:
+
+@example
+$ pg_dump --schema-only --no-owner --no-privileges trip > schema.sql
+@end example
+
+Backup just the data, keeping the invariably large @code{tile} table
+separate:
+
+@example
+$ pg_dump --data-only --no-owner --no-privileges --exclude-table=tile
+trip \
+> test-data.sql
+$ pg_dump --data-only --no-owner --no-privileges --table=tile trip \
+> tiles.sql
+@end example
+
+Backup schema, data and privileges, including commands to recreate
+tables, excluding the tile data:
+
+@example
+$ pg_dump --clean --if-exists --no-owner --exclude-table-data=tile trip
+\
+> test-schema-data.sql
+@end example
+
+The above backup is suitable for every-day backup.  If you intend to
+restore from the backup as part of your development and test cycle,
+remove the tile table data exclusion so that the cache is not lost.
+
+@bye

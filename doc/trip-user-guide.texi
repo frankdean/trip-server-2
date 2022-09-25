@@ -1,0 +1,1269 @@
+\input texinfo.tex   @c -*-texinfo-*-
+@c %**start of header
+@setfilename trip-user-guide.info
+@documentencoding US-ASCII
+@c Automake automatically updates version.texi to @set VERSION and
+@c @set UPDATED to appropriate values.
+@include version-ug.texi
+@settitle Trip Server User Guide for version @value{VERSION}
+@paragraphindent none
+@c %**end of header
+
+@direntry
+* trip-user-guide: (trip-user-guide).   User guide for TRIP
+@end direntry
+
+@copying
+This User Guide is for using Trip, version @value{VERSION},
+@value{UPDATED} in a browser.  Trip is a an application supporting trip
+recording and itinerary planning.
+
+Copyright @copyright{} 2021-2022 Frank Dean
+@end copying
+
+@titlepage
+@title Trip Server User Guide
+@author Frank Dean
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top Trip Server User Guide
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction::      Introduction to Trip Server
+* Overview::          Overview of Trip Server
+* Remote Logging::    Logging current location to a Trip server
+* Tracking::          Location tracking
+* Tracker Info::      Information about tracking configuration
+* Track Sharing::     Controlling sharing of tracking information
+* My Location::       Recording specific location information
+* Itineraries::       Itinerary management
+* Itinerary Search::  Searching itineraries
+* My Account::        Account management
+* Concept Index::     Index
+@end menu
+
+@node Introduction
+@chapter Introduction
+@cindex Introduction to Trip Server
+
+@ignore
+---
+date: 2018-03-17T17:16:36Z
+title: "About TRIP"
+type: homepage
+menu: main
+weight: 10
+draft: false
+---
+@end ignore
+
+TRIP - Trip Recording and Itinerary Planner, is a web-based application
+supporting trip recording and itinerary planning.
+
+The intended use is for a hiker, mountain-biker or other adventurer, to be
+able to publish and share their planned itinerary, then subsequently log their
+positions at intervals, allowing someone else to be able to monitor their
+progress.
+
+In the event of contact being lost, the plans and tracking information can be
+passed to rescue services etc., to assist with locating the missing
+adventurer.
+
+@c [trip-server]: https://www.fdsd.co.uk/trip-server/
+@set tripserverurl https://www.fdsd.co.uk/trip-server/
+
+The application is
+@url{https://en.wikipedia.org/wiki/Open-source_software, open-source}
+and can be obtained from
+@url{@value{tripserverurl}}.
+
+@c [TripLogger]: https://www.fdsd.co.uk/triplogger/ "TripLogger Remote for iOS"
+@set triploggerurl https://www.fdsd.co.uk/triplogger/
+@c [GPSLogger]: http://code.mendhak.com/gpslogger/ "A battery efficient GPS logging application"
+@set gpsloggerurl http://code.mendhak.com/gpslogger/
+@c [OpenStreetMap]: https://www.openstreetmap.org/
+@set osmurl https://www.openstreetmap.org/
+@c [gpx]: http://www.topografix.com/gpx.asp "The GPX Exchange Format"
+@set gpxurl http://www.topografix.com/gpx.asp
+@c [Markdown]: https://daringfireball.net/projects/markdown/ "Markdown is a text-to-HTML conversion tool for web writers."
+@set markdownurl https://daringfireball.net/projects/markdown/
+
+The following features are provided:
+
+@itemize @bullet
+@item
+Remote tracking server---client applications such as
+@url{@value{triploggerurl},TripLogger Remote for iOS} or
+@url{@value{gpsloggerurl},GPSLogger for Android} can be used to submit
+locations to the server.
+
+@item
+Sharing tracks with others.
+
+@item
+Viewing tracks on a map provided by a tile server,
+e.g. @url{@value{osmurl},OpenStreetMap tiles.}
+
+@cindex Markdown
+@item
+Creating and sharing itineraries using the
+@url{@value{markdownurl},Markdown markup language.}
+
+@item
+Using the map, interactively creating routes and waypoints for an itinerary.
+
+@item
+Uploading and downloading routes, tracks and waypoints for an itinerary as a
+@url{@value{gpxurl},GPX} file.
+
+@item
+Viewing routes, tracks and waypoints of an itinerary on the map.
+
+@item
+Splitting and joining routes and tracks.
+
+@item
+Deleting individual points from routes and tracks.
+@end itemize
+
+@node Overview
+@chapter Overview
+@cindex Overview of Trip Server
+
+To access the system, you will need to request the administrator of the TRIP
+installation to register your e-mail address and provide you with a password.
+
+Thereafter you will be able to login to the system using the provided e-mail
+address and associated password.  The applications uses nicknames to identify
+users as a way of avoiding disclosure of e-mail addresses between users.  In
+order to share your information with other users, you will need to know their
+nickname.
+
+@strong{Note:} nicknames are
+@url{https://en.wikipedia.org/wiki/Case_sensitivity,case-sensitive.}
+
+@c [trip-web-client]: https://www.fdsd.co.uk/trip-web-client-docs/
+
+@node Remote Logging
+@chapter Remote Logging
+@cindex Remote Logging, Logging
+
+@ignore
+---
+title: "Remote Logging"
+date: 2018-03-17T18:07:03Z
+menu: main
+weight: 10
+draft: false
+---
+@end ignore
+
+Currently, there are three remote logging applications known to work
+with @url{@value{tripserverurl}, TRIP}.
+
+@c [Traccar Client]: https://www.traccar.org/client/
+@set traccarurl https://www.traccar.org/client/
+
+@enumerate
+@item
+@url{@value{gpsloggerurl},GPSLogger} for Android phones
+
+@item
+@url{@value{triploggerurl},TripLogger Remote for iOS} for Apple Watch,
+iPhones and iPads
+
+@item
+@url{@value{traccarurl},Traccar Client} also for Apple iPhones and iPads
+@end enumerate
+
+@url{@value{triploggerurl},,TripLogger Remote} is an iOS application
+providing various options to minimise battery use of the iPhone or iPad.
+It also supports the Apple Watch Series 3 onwards.  If you would like to
+help test future versions of this app, please contact
+@email{support@@fdsd.co.uk}.
+
+Instructions for configuring @url{@value{gpsloggerurl},,GPSLogger} and
+@url{@value{traccarurl},,Traccar Client} are displayed on the
+@code{Tracker Info} page of the web application, @xref{Tracker Info}.
+There are also @url{@value{triploggerurl},,instructions} for using the
+@url{@value{triploggerurl},,TripLogger Remote app.}
+
+@node Tracking
+@chapter Tracking
+@cindex Tracking
+
+@ignore
+---
+title: "Tracking"
+date: 2018-03-17T18:04:33Z
+menu: main
+weight: 20
+draft: false
+---
+@end ignore
+
+Select @code{Tracking} from the menu to display your track log or the
+track log of another user who has chosen to share theirs with you.
+
+If another user has shared their track log with you, a selection list
+titled @code{Display shared user's tracks} will be displayed.  Select
+the user whose tracks you wish to see or set it to the blank option to
+see your own tracks.
+
+You must specify a time and date range for the track points you wish to see.
+Avoid using a large date range when viewing the track points on the map,
+downloading the track points or using the copy-and-paste functions if it might
+result in a large number of track points being returned.  This may put an
+undue load on the system.  Listing tracks for large ranges only retrieves one
+page of tracks at a time, so will not put undue strain on the system.
+
+@set hdopurl https://en.wikipedia.org/wiki/Dilution_of_precision_%28navigation%29
+
+You can also specify a maximum Horizontal Dilution of Precision
+@url{@value{hdopurl}, HDOP} value to exclude less accurate positions.
+
+@quotation
+@strong{Note:} Entering a @code{Max hdop} value will also exclude all
+positions that have no HDOP value.  Whether an HDOP value is available
+will depend on the features of the GPS logging application and hardware
+used.
+@end quotation
+
+You can further filter the results to show only those that include a note by
+selecting the @code{Show notes only} option.
+
+@node List Tracks
+@section List Tracks
+@cindex List Tracks
+
+Click the @code{List tracks} button to see any new locations.  The page
+is not automatically refreshed when a new location is received.
+
+@quotation
+@strong{Restricted Sharing:} When a user shares their tracks with you,
+they can restrict how far back you can view their track points.  In that
+event, the date range shown at the top of the page may be reduced to
+show the actual time period being viewed.
+@end quotation
+
+The following data is shown for each location.  The values are those sent from
+the device.  The units for those values are assumed to be as follows:
+
+@itemize
+@item
+Time--localized to the web browser's time zone.
+
+@item
+Latitude/Longitude--location using the WGS84 geodetic reference system.
+
+@item
+HDOP--Horizontal Dilution of Precision--estimated horizontal accuracy in metres.
+
+@item
+Altitude--metres.
+
+@item
+Speed--metres-per-second.
+
+@item
+Bearing-- degrees.
+
+@item
+Note--optional text entered by the user for the location.
+
+@item
+Provider--optional data provider, e.g. GPS, Network.
+
+@item
+Satellites--Optional value indicating how many satellites the fix was using.
+
+@item
+Battery--most recently recorded battery percentage.
+@end itemize
+
+To convert the speed to kilometres-per-hour, multiply by 3.6.  To convert the
+speed in metres-per-second to approximate miles-per-hour, multiply by 2.24.
+For an exact conversion to miles-per-hour, multiply by 3,600 then divide by
+1,609.344.
+
+@node Show Map
+@section Show Map
+@cindex Show Map
+
+Clicking the @code{Show map} button displays all the points matching the
+selection criteria on a map.
+
+There should be small vertical borders on both sides of the map which can be
+used to scroll the whole page.  Dragging within the map area moves the map.
+
+The map can be zoomed in and out using the @code{plus} and @code{minus}
+icons at the top left-hand side of the map.
+
+If the installation supports more than one map layer, there will also be
+a @code{stacked layer} icon beneath the zoom icons at the top left of
+the map.
+
+When you are viewing the track points of another user on the map, if any
+new track points are recorded by that user, the map will be updated.  If
+the @code{Auto-centre on live update} option is selected, the map is
+redrawn when a new track point is displayed.
+
+@quotation
+@strong{Live Map Date Ranges:} When new track points are recorded the
+map respects the date range and other criteria you have specified.  If
+the time of the new track points is outside the date range or does not
+meet the other criteria, it will not be included on the map.
+@end quotation
+
+@node Download Tracks
+@section Download Tracks
+@cindex Download Tracks
+
+@c [GIS]: https://en.wikipedia.org/wiki/Geographic_information_system "Geographic information system"
+@set gisurl https://en.wikipedia.org/wiki/Geographic_information_system
+
+Clicking the @code{Download Tracks} button initiates a browser file
+download of the track points meeting the specified date range and other
+selected criteria.  The downloaded file is in the common
+@url{@value{gpxurl},,GPX} file format which can be imported into many
+Geographic information system @url{@value{gisurl},GIS} based
+applications.
+
+@node Copy Tracks
+@section Copy Tracks
+@cindex Copy tracks
+
+The set of track points can be copied to an itinerary as a track log.
+Click the @code{Copy} button, then navigate to the intended destination
+itinerary.  When the itinerary page is displayed, click the @code{Paste}
+button.  After short a delay, the track will have been copied to the
+itinerary as a new track log.
+
+@quotation
+@strong{Note:} The copy and paste operations must be performed in the
+same browser window.
+
+The copy operation does not copy the entire detail of the items being copied,
+instead just copying a reference to them together with any criteria used to
+select them.  Should the results change in between the copy and paste
+operation, different values may be pasted from those displayed at the time the
+copy was initiated.
+@end quotation
+
+@c [KML]: https://en.wikipedia.org/wiki/Keyhole_Markup_Language
+@set kmlurl https://en.wikipedia.org/wiki/Keyhole_Markup_Language
+
+@quotation
+@cindex KML
+@strong{Tip:} To download the track as a @url{@value{kmlurl},,Keyhole
+Markup Language (KML)} file, click the @code{Copy} button, then
+temporarily create a new itinerary.  When the new itinerary page is
+displayed, click the @code{Paste} button.  After a delay, the new track
+will have been copied to the itinerary.  You can then select the track
+and click the @code{KML download} button to download it in the KML
+format.
+@end quotation
+
+@node Further Information
+@section Further Information
+@cindex Further Information
+
+@itemize
+@item
+@url{@value{kmlurl},KML - Keyhole Markup Language}
+@end itemize
+
+@node Tracker Info
+@chapter Tracker Info
+@cindex Tracker Info, Sharing
+
+@ignore
+---
+title: "Tracker Info"
+date: 2020-09-14T18:57:40+01:00
+menu: main
+weight: 23
+draft: false
+---
+@end ignore
+
+Select @code{Tracker Info} from the menu to display information on
+setting up a tracker client application.
+
+@c [UUID]: https://en.wikipedia.org/wiki/Universally_unique_identifier "Wikipedia article&mdash;Universally unique identifier"
+@set uuidurl https://en.wikipedia.org/wiki/Universally_unique_identifier
+
+@cindex UUID
+If you are using the @url{@value {triploggerurl},,TripLogger Remote for
+iOS} app, you only need this page to ascertain the @code{Device
+identifier} which is a @url{@value{uuidurl},Universally Unique
+Identifier} (UUID).  All the other information is for customising
+another client app.  The UUID consists of a string of 32 characters
+separated by four dashes.  This value needs to be copied, ideally by
+cut-and-paste, into the @code{User identifier} field in the app's
+settings page.
+
+If you think there is the slightest possibility that your UUID may have been
+exposed to an unauthorised person, simply click the @code{Generate new tracking ID}
+to immediately revoke the previous UUID and generate a new one.  There is
+absolutely no harm in creating new ones as frequently as you like.  Just make
+sure to update the client application you are using with the new UUID and test
+that it successfully reports your location to the remote server.
+
+@node Download TripLogger Settings
+@section Download TripLogger Settings
+@cindex Download TripLogger Settings
+
+You can upload the settings from the
+@url{@value{triploggerurl},,TripLogger Remote for iOS} app to the
+website as described in @ref{Upload TripLogger Settings}.
+
+@cindex UUID
+Clicking on the @code{Download Updated TripLogger Settings} button will
+download those settings, updating them with the latest user
+@url{@value{uuidurl},,UUID} that you may have generated.  The settings
+can then be imported into the @url{@value{triploggerurl},,TripLogger}
+app.  This can be easier than trying to copy and paste the UUID from a
+browser window etc.
+
+If you have never uploaded any settings, this option creates and
+downloads some default values that you can import into
+@url{@value{triploggerurl},,TripLogger}.  The values used for the
+default settings are configured by the administrator of your
+@url{@value{tripserverurl},,TripServer} website.  This procedure is
+intended for use when you are performing the app's initial
+configuration.
+
+The downloaded file contains your current UUID, so, if you intend to
+share the file with someone else, you should generate a new tracking
+UUID and import that into @url{@value{triploggerurl},,TripLogger} before
+passing the previous file containing the old UUID to anyone else.
+
+@node Track Sharing
+@chapter Track Sharing
+@cindex Track Sharing
+
+@ignore
+---
+title: "Track Sharing"
+date: 2018-03-17T19:00:55Z
+menu: main
+weight: 25
+draft: false
+---
+@end ignore
+
+The track points you record can be shared with another user, by nickname.
+
+@quotation
+@strong{Nicknames:} Note that nicknames are
+@url{https://en.wikipedia.org/wiki/Case_sensitivity,case-sensitive.}
+@end quotation
+
+You can limit the exposure of your track points to a point in time that
+is the lesser of the following:
+
+@itemize
+@item
+the most recently logged point
+@item
+a maximum time period in any event
+@end itemize
+
+The latter period effectively overrides the former, so there is little
+advantage in setting a most recently logged period of time that is
+longer than the overall maximum time period.
+
+Click on the @code{Track Sharing} menu option to display the @code{Track
+Sharing} page.  If you have already shared any tracks with another user,
+they are listed at the top of the page.
+
+The bottom of the page displays a form that allows you to modify the
+sharing details of another user.
+
+The form is displayed ready to add another user if you are not already
+sharing your tracks with someone else.  Otherwise click the @code{New}
+button to add another user.
+
+@node Amend Share Details
+@section Amend Share Details
+@cindex Amend Share Details
+
+To amend the details of a share, select the checkbox next to the appropriate
+user and click @code{Edit selected}.  The details are then displayed in the form
+below the list.  Amend the periods and click the @code{Save} button to update the
+list of shares.
+
+@node Activating and Deactivating Shares
+@section Activating and Deactivating Shares
+@cindex Activating and Deactivating Shares
+
+You can activate or deactivate location sharing by selecting one or more
+nicknames from the list and clicking the @code{Activate} or @code{Deactivate} buttons.
+
+@node Deleting Shares
+@section Deleting Shares
+@cindex Deleting Shares
+
+Although deactivating a shared location stops the relevant user from seeing
+your location history, you can delete the location sharing altogether.  The
+effect is the same other than the nickname is no longer shown in the list.
+Select one or more users and click the @code{Delete selected} button.
+
+@node My Location
+@chapter My Location
+@cindex My Location, Location
+
+@ignore
+---
+title: "My Location"
+date: 2018-03-17T18:08:43Z
+menu: main
+weight: 30
+draft: false
+---
+@end ignore
+
+To view your own location using the browser, select @code{Location} from
+the menu.
+
+The browser is asked to provide your current location.  You may need to
+allow permission before the location is provided.  After a short delay,
+you location details are displayed at the top of the page and a marker
+showing you location is displayed on the map.  You location information
+remains private and is not automatically recorded anywhere else at this
+stage.
+
+There is a checkbox titled @code{Request high accuracy location}.
+Selecting this option potentially provides a more accurate location.
+Some browsers will not provide a location at all without this option
+selected.
+
+Click the @code{Update position} button to request a new location.
+
+You can choose to display your location in a variety of formats by
+selecting different values in the @code{Display position format}
+selection list.  The chosen format is displayed directly beneath the
+selection list.
+
+@node Recording Your Current Location
+@section Recording Your Current Location
+@cindex Recording Your Current Location, Location
+
+If you wish, you can manually record the current location in your track
+log.  If you want to include a note together with your location, type it
+into the @code{Note} field.  To save your current location in your track
+log, click the @code{Record this position} button.  When the track log
+is viewed, the @code{Provider} column shows @code{web-browser}
+indicating how the location was determined.
+
+This can be a useful fallback in the event that the remote logging
+application is not working or that you are somewhere without GPS
+reception but can indicate on a map where you are.
+
+
+@node Adjusting Your Location
+@section Adjusting Your Location
+@cindex Adjusting Your Location, Location
+
+If you known the location shown is wrong on the map for some reason, you
+can adjust your location manually.
+
+@enumerate
+@item
+Click the @code{Edit icon} displayed at the top right-hand side of the
+map.
+
+@item
+The marker icon displays a red dotted outline.  Drag the marker to the
+desired location.
+
+@item
+Click the @code{Save} button that is adjacent to the @code{Edit icon} at
+the top right-hand side of the map.
+
+@item
+The location at the top of the page is updated with the coordinates of
+the marker position.
+
+@item
+Record this position in your track log by clicking the @code{Record this
+position} button.  When the track log is viewed, the @code{Provider}
+column shows @code{manual} indicating the location was specified
+manually.
+@end enumerate
+
+@node Copying Your Current Location to an Itinerary
+@section Copying Your Current Location to an Itinerary
+@cindex Copying Your Current Location to an Itinerary
+
+@enumerate
+@item
+Click the @code{Copy} button.
+
+@item
+Navigate to an itinerary.
+
+@item
+Click the paste button.
+
+@item
+A waypoint is created for the copied location.
+@end enumerate
+
+@node Itineraries
+@chapter Itineraries
+@cindex Itineraries
+
+@ignore
+---
+title: "Itineraries"
+date: 2018-03-17T19:32:12Z
+menu: main
+weight: 50
+draft: false
+---
+@end ignore
+
+Itineraries provide the ability to record information about a specific
+trip, together with useful waypoints and routes.  You may also wish to
+show and share previous track logs that relate to the trip or add track
+logs after the trip for future reference.
+
+Additionally you can create and modify routes and waypoints.  You can
+also modify track logs.
+
+Although routes and tracks are quite similar in that they both can
+denote a path, they are treated a little differently by the system.
+
+@itemize
+@item
+Routes are intended to be something that is planned.  Therefore new ones
+can be created and points can be added to existing ones.  Two or more
+routes can also be joined.
+@item
+Tracks are intended to relate to points that have been visited.  Each
+point must have a time related to it.  Additionally, tracks can be split
+into multiple segments.  Each segment represents a logical break in a
+track, which might be due to stopping and restarting a track or losing
+the GPS signal for a while.  New points cannot be added to a track.
+However, points can be removed, tracks and their segments can be split
+and joined.
+@end itemize
+
+Itineraries are listed in descending start date order.  Itineraries with
+no dates are listed in alphabetical order prior to those with dates.
+
+You can only edit itineraries that you created yourself.  You cannot
+edit itineraries shared with you by others.
+
+@node Itinerary Notes
+@section Itinerary Notes
+@cindex Itinerary Notes
+
+To create a new itinerary, select @code{Itineraries} from the main menu
+and click the @code{New} button.
+
+When you first create an itinerary, you must give it a title and can
+optionally enter start and end dates together with some descriptive
+text.
+
+@cindex Markdown
+The text is interpreted following the syntax of
+@url{@value{markdownurl},Markdown} as created by John Gruber.  Markdown
+is a wonderful way of being able to write markup in a format that is
+very presentable in its original text form and also efficiently
+displayed as formatted HTML on the web.  As you enter the Markdown text,
+the HTML representation is shown below the editable text area.
+
+Click the question mark icon at the top right hand side of the edit area
+for help on the Markdown syntax.  Clicking on the other edit area icons
+provide shortcuts for common formatting syntax.  Unfortunately the
+Markdown editor used by the application is not a perfect implementation
+of the Markdown standards but is usefully close.
+
+@node Live Map
+@section Live Map
+@cindex Live Map
+
+One or more live tracks can be viewed on an itinerary map.  From the
+itinerary page, optionally select any routes, waypoints and tracks and
+click the @code{Show map} button.
+
+To position the map based on the current location as reported by your
+browser, optionally select @code{Request high accuracy location}, then
+click the @code{My position} button.  Click the @code{Drop marker}
+button to drop a marker on the map centre.  The marker is added to the
+list of itinerary waypoints.
+
+To see live track logs on the map, select the @code{Enable live map}
+option displayed underneath the map.  A list of users who are sharing
+their tracks with you are displayed, including yourself.  You can modify
+the start range date and time for displaying locations and also filter
+the reported locations to only include those less than a maximum HDOP
+value.  Click the @code{Apply live map settings} to put your choices
+into effect.
+
+Any track points meeting your selection criteria are displayed on the
+map.  When new track points are received meeting the
+@url{@value{hdopurl},,HDOP} criteria, the map is updated.  Click the
+@code{Auto-centre on live update} checkbox to have the map centre on new
+updates.
+
+@node Sharing
+@section Sharing
+@cindex Sharing
+
+Sharing of itineraries is treated quite separately to that of sharing
+tracks, although when viewing an itinerary map you can choose to see the
+track points shared by others even if you haven't shared the itinerary
+with them.  In fact this is the only place where you can view and
+monitor the progress of multiple users.
+
+To access itinerary sharing, click the @code{Sharing} button beneath the
+itinerary's details and description.
+
+If you have not already shared the itinerary with anyone, you are
+prompted to enter the nickname of someone to share with.  Enter their
+nickname, optionally choose to make the share active then click
+@code{Save}.
+
+The list of shares is displayed.  You can choose one or more of the
+shares and click @code{Activate} or @code{Deactivate} buttons to change
+their activation status.  You can also choose to delete the share,
+although this has the same effect as simply deactivating the share, but
+additionally removes the nickname from the list.
+
+@node GPX Upload
+@section GPX Upload
+@cindex GPX Upload
+
+You can import waypoints, tracks and routes from a standard GPX file.  Not all
+the possible attributes within the GPX file are supported, so keep the
+original if the contents might be important.
+
+@quotation
+@strong{Importing GPX Files:} Some sources of GPX files create waypoints
+for every point on a route which can make a mess of an existing
+itinerary resulting in a laborious cleanup operation.  If you do not
+fully know the contents of a GPX file you wish to import, create a new
+itinerary for temporary purposes and import the file into the temporary
+itinerary.  Check the contents and delete any elements from the
+itinerary that are not required.  You can then use the copy-and-paste
+functionality to copy the desired contents to the ultimately intended
+itinerary.
+
+@strong{Processing Delays:} Uploading files into an itinerary happens as
+a background server operation.  This can take some time, depending on
+the number of attributes being imported.  Often, the itinerary page is
+displayed before the import has completed.  Click the @code{Refresh}
+button to refresh the contents of the page until you are satisified the
+file upload and import has fully completed.
+@end quotation
+
+@node GPX and KML Downloads
+@section GPX and KML Downloads
+@cindex GPX and KML Downloads, KML, GPX, GIS
+
+Select one or more routes, tracks and waypoints, then click the
+@code{GPX download} or @code{KML download} buttons at the bottom of the
+itinerary page to download the chosen items in @url{@value{gpxurl},,GPX}
+or @url{@value{kmlurl},,KML} files respectively.
+
+The GPX file format can be imported into many Geographic Information
+System (@url{@value{gisurl},,GIS}) based applications.  The KML file
+format is recognised by some GIS based applications, in particular
+@url{https://earth.google.com/,Google Earth.}
+
+@node Download Full Itinerary
+@section Download Full Itinerary
+@cindex Download Full Itinerary, YAML
+
+@c [YAML]: https://yaml.org "YAML Ain't Markup Language"
+@set yamlurl https://yaml.org "YAML Ain't Markup Language"
+
+The full details of the itinerary, including the dates, text, sharing,
+routes, waypoints and tracks can be downloaded by selecting the
+@code{Download Full Itinerary} option from the @code{Transfer} menu of
+the @code{Features} tab on the Itinerary page.  The downloaded file is
+in the @url{@value{yamlurl},YAML} format, a text file format that can be
+readily understood by humans.
+
+The YAML file can either be saved and used as a long-term backup or be
+imported into another instance of a
+@url{@value{tripserverurl},,TripServer} application.  The itinerary can
+be imported by clicking on the @code{Import} button on the itineraries
+page.
+
+If you are creating a backup, it is a good idea to also select all the GIS
+attributes (routes, waypoints and tracks) and export them in the GPX format,
+as this is a common format that can be imported into many other applications.
+
+@node Add Waypoint
+@section Add Waypoint
+@cindex Add Waypoint
+
+Click the @code{Add waypoint} button at the bottom of the itinerary page
+to add a new waypoint to the route.
+
+You must give the waypoint a name and position/location.
+
+A variety of common formats are recognised when entering a position.
+
+@quotation
+@strong{Position Recognition:} To be sure that the intended format has
+been recognised correctly, it is recommended you select the appropriate
+source position from the @code{Display position format} selection list
+and check the output matches the expected values.
+
+@strong{Tip:} If you are having difficulty persuading the system to
+recognise a particular format, enter a simple comma separated latitude
+and longitude value appropriate for the region, then select the
+@code{Display position format} you wish to use.  The formatting output
+below the select list will indicate a format you can enter values in.
+Values are case-significant.
+@end quotation
+
+@node Creating a New Route
+@section Creating a New Route
+@cindex Creating a New Route
+
+Optionally select one or more waypoints, routes or tracks in the
+itinerary that will help to zoom the map into the intended area.
+
+Click the @code{Show map} button at the bottom of the itinerary page.
+Pan and zoom to the desired area.
+
+To start creating a new route, click on the @code{new route icon} at the
+top right of the page.  The icon depicts two connected nodes.
+
+Click on each position you want the route to follow.  When you have
+finished entering all the points for the route, either click the
+@code{Finish} button adjacent to the @code{new route icon} of click on
+the last point of the route.
+
+@quotation
+@strong{Touch Screen Devices:} When creating routes with touch screen
+devices, after placing a point, the system often sees the click as also
+finishing the route, which normally happens when you click the last
+point of a new route.  A new route is created, perhaps with only two
+points.  In this event, select the option to edit the route (see below)
+and continue by moving the last point to the ultimate destination and
+filling in the intervening points by creating new points in between the
+existing ones.
+
+Additionally, the buttons adjacent to the @code{new route icon} are not
+recognised whilst creating a new route.  In this event, click on the
+last placed route point to terminate creating a new route.
+@end quotation
+
+When you view the itinerary page all the new routes are at at the end of
+the list of routes and are unnamed having only an ID.  To edit the
+route's attributes, select the route in the itinerary page and click the
+@code{Edit attributes} button.
+
+@node Creating Waypoints using the Map
+@section Creating Waypoints using the Map
+@cindex Creating Waypoints using the Map
+
+In addition to being able to create routes on the itinerary map, you can
+add waypoints by clicking the @code{new waypoint icon} at the top right
+of the page.  The icon looks like a place-marker, a circle with a point
+underneath.  Click on the map at the location you wish to create a
+waypoint.  A new anonymous waypoint is created.
+
+When you view the itinerary page all the new waypoints are at at the end
+of the list of waypoints and are unnamed having only an ID.  To edit the
+waypoint's attributes, select the waypoint in the itinerary page and
+click the @code{Edit attributes} button.
+
+@node Amending Routes
+@section Amending Routes
+@cindex Amending Routes
+
+To amend a route, select it in the itinerary page then click @code{Show
+map} at the bottom of the itinerary page.  To commence editing the
+routes on the itinerary map, click the @code{edit icon} at the top right
+hand side of the map.  The icon represents a pencil inside a square.
+
+Existing points can be dragged to a new location.  A feint square is
+displayed between each existing route point.  To create a new point in
+between the existing points, drag the feint square to a new position.
+
+Click the @code{Save} button adjacent to the @code{edit icon} at the top
+right hand side of the map.
+
+@node Copying and Renaming Routes and Tracks
+@section Copying and Renaming Routes and Tracks
+@cindex Copying and Renaming Routes and Tracks
+
+Route and track names and colours can be amended by selecting the route
+or track in the itinerary page and clicking the @code{Edit attributes}
+button at the bottom of the itinerary page.
+
+To create a copy of a route, click the @code{Save as copy} checkbox.
+Optionally select the @code{Reverse route} checkbox which will create a
+copy of the route in its reverse direction.
+
+@quotation
+@strong{Copying Tracks:} Tracks cannot be copied with this option, but
+another way to make copies of waypoints, tracks and routes is to select
+them in the itinerary list, click the @code{Copy} button, then click the
+@code{Paste} button.
+@end quotation
+
+@node Copying and Pasting between Itineraries
+@section Copying and Pasting between Itineraries
+@cindex Copying and Pasting between Itineraries
+
+Select the waypoint, routes and tracks in the itinerary list to be
+copied, click the @code{Copy} button at the bottom of the itinerary
+page.  Navigate to the target itinerary, then click the @code{Paste}
+button.
+
+@quotation
+@strong{Copy and Paste:} The copy and paste operations must be performed
+in the same browser window.
+
+The copy operation does not copy the entire detail of the items being
+copied, instead just copying a reference to them together with any
+criteria used to select them.  Should the results change in between the
+copy and paste operation, different values may be pasted from those
+displayed at the time the copy was initiated.
+@end quotation
+
+@node Moving Waypoints
+@section Moving Waypoints
+@cindex Moving Waypoints, Waypoints
+
+To move a waypoint to a different position, select it in the itinerary
+page then click @code{Show map} at the bottom of the itinerary page.  To
+commence editing the routes on the itinerary map, click the @code{edit
+icon} at the top right hand side of the map.  The icon represents a
+pencil inside a square.
+
+All waypoints on the map are depicted with a surrounding red dotted
+square.  Drag the waypoint to the new location and click the @code{Save}
+button adjacent to the @code{edit icon} at the top right hand side of
+the map.
+
+@quotation
+@strong{Tip:} Multiple routes and waypoints can be selected for editing
+on the map in a single session.
+
+You can also select tracks to be displayed on the map whilst editing
+routes and waypoints, but you cannot modify the tracks interactively on
+the map.
+@end quotation
+
+@node Joining Routes and Tracks
+@section Joining Routes and Tracks
+@cindex Joining Routes and Tracks, Routes, Tracks
+
+Two different itinerary routes or itinerary tracks can be joined
+together to create a single route or track.  Tracks cannot be joined to
+routes and vice versa.  To simply the instructions, both routes and
+tracks are referred to as paths in these instructions.
+
+Select all the paths to be joined and click the @code{Join paths} button
+at the bottom of the itinerary page.
+
+@quotation
+@strong{Tip:} To make it easier to visualise the different paths, give
+them each a different colour before attempting to join them.
+@end quotation
+
+A map is displayed showing each of the paths in their individual
+colours.
+
+Use the @code{Up} and @code{Down} buttons to reorder the paths into the
+desired order.
+
+To help visualise how the paths will be joined, click the @code{Show
+joined routes} button below the map.
+
+Once satisfied with your choices, optionally edit the new path name and
+select a colour.  Then click the @code{Save} button to make a copy of
+the combined paths.
+
+@node Editing Tracks
+@section Editing Tracks
+@cindex Editing Tracks, Tracks
+
+Tracks can be edited by;
+
+@itemize
+@item
+splitting track segments
+
+@item
+splitting the track between segments to form two tracks
+
+@item
+deleting individual points
+@end itemize
+
+Select the track to be edited by clicking the @code{Edit path} button at
+the bottom of the itinerary page.
+
+@node Split Track
+@section Split Track
+@cindex Split Track
+
+If a track has multiple segments, selecting a segment and clicking the
+@code{Split track} button splits the existing track into two.  The
+selected and following segments are moved from the current track to a
+new one.
+
+@subsection Split Segment
+@cindex Split Segment, Segment
+
+Click on the segment ID to display the track segment points.
+
+Clicking on the checkbox in the table header above the list of segments,
+selects all segments and displays them on the map below.
+
+If there are more than 10 track segment points, you can page forwards
+and backwards through them.
+
+@quotation
+@strong{Tip:} Whether the checkbox in the table header was selected when
+you navigate to a new page is remembered.  Therefore, selecting the
+checkbox and navigating through the pages allows you to quickly review a
+track segment.
+@end quotation
+
+To split a segment into two, select a single track segment checkbox and
+click the @code{Split segment} button.  The selected track segment point
+and all subsequent ones in the same segment are moved from the current
+segment into a new following segment.
+
+@quotation
+@strong{Tip:} To split a track at a particular track segment point,
+split the track in two operations.  Firstly split the track segment at
+that track segment point, then secondly split the track at the new track
+segment.
+@end quotation
+
+@node Editing Route Points
+@section Editing Route Points
+@cindex Editing Route Points
+
+In addition to being able to edit routes on the itinerary map, you can
+perform some operations using the @code{Edit path} button at the bottom
+of the itinerary page which cannot be easily accomplished on the map.
+E.g. Splitting the route.  Sometimes it can also be difficult to select
+and delete points on the map when they are very close together, so
+navigating through the points in the @code{Edit path} mode provides
+another method to identify and delete them.
+
+Editing routes is very similar to editing tracks as described above.
+
+@node Duplicating the Itinerary
+@section Duplicating the Itinerary
+@cindex Duplicating the Itinerary, Itinerary
+
+The @code{Create duplicate itinerary} option on the @code{Edit} menu of
+the @code{Features} tab of the Itinerary page creates a duplicate of the
+current itinerary.  The new itinerary is displayed once it has been
+created.
+
+@node Assigning Colours to Routes and Tracks
+@section Assigning Colours to Routes and Tracks
+@cindex Assigning Colours to Routes and Tracks, Colours, Routes, Tracks
+
+This option is intended to make it easy to quickly give routes and
+tracks different colours, to more easily identify them on the map.
+
+Select select the routes and tracks you wish to convert and choose the
+@code{Assign colours to routes and tracks} from the @code{Edit} menu of
+the @code{Features} tab.  After confirmation each colour defined on the
+system is assigned to each route then each track in sequence.  If there
+are more tracks and routes selected than there are colours, the colours
+are repeated from the beginning again.
+
+@node Convert Tracks to Routes
+@section Convert Tracks to Routes
+@cindex  Convert Tracks to Routes, Routes, Tracks, Convertion
+
+To create routes from tracks, select the tracks you wish to convert and
+choose the @code{Convert tracks to routes} from the @code{Edit} menu of
+the @code{Features} tab.  After confirmation, a copy of each track is
+created and will be shown under the @code{Routes} section after a short
+delay, depending on the number of points in the tracks.
+
+There is not an option to convert routes to tracks.  Tracks are a
+reflection of an actual journey, with timestamps for each point, so it
+is not envisaged that there would be a need for this functionality.
+However, feedback is welcome, should you do find a need for it.
+
+@node Simplify Track
+@section Simplify Track
+@cindex Simplify Track, Track
+
+Sometimes, a track log has a high frequency of points.  You might wish
+to reduce the number of points, (simplifying the path), perhaps before
+converting it to a route, or just make it smaller to fit the maximum
+point constraint of some software.
+
+Trip uses the @url{http://mourner.github.io/simplify-js/,
+@code{simplify-js} library by Vladimir Agafonkin} which uses a
+combination of the
+@url{https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm,
+Ramer---Douglas---Peucker} and Radial Distance algorithms.
+
+Select a single track, then choose the @code{Simplify track} option from
+the @code{Edit} menu of the @code{Features} tab.
+
+The selected track is displayed on a map.  A slider control is used to
+change the @code{tolerance} value.  The higher the tolerance value is,
+the more likely points are reduced.
+
+The display shows the total number of points originally in the track
+together with the total number of points that remain, after applying the
+tolerance factor.  The original track is shown translucent, in the same
+colour, so that you can judge the impact of the simplification.
+
+The @code{High quality} option excludes the distance-based preprocessing
+step which provides a higher quality simplification.  If the track has a
+considerable number of points, turning this option off should speed up
+the re-drawing of the path.
+
+Where a track has multiple segments, there is a @code{Show joined track
+segments} option to choose whether to show the segments individually, or
+as one continuous track.
+
+The first and last point of each segment are always retained.  If that
+behaviour is undesired, consider joining the segments before-hand, as
+described in @ref{Joining Routes and Tracks}.
+
+Selecting the @code{Save} button saves a copy of the track, appending
+@code{(simplified)} to the track name.
+
+@node Miscellaneous
+@section Miscellaneous
+@cindex Miscellaneous
+
+@quotation
+@strong{Route and Track Direction:} The direction of routes and tracks
+is not shown on the map.  As a workaround, use the @code{Edit path}
+option and the @code{Select all} checkbox on the first page to see where
+the route starts.  Paging through the route remembers that @code{Select
+all} was chosen and you can quickly navigate the route to determine its
+direction.
+@end quotation
+
+@node Itinerary Search
+@chapter Itinerary Search
+@cindex Itinerary Search
+
+@ignore
+---
+title: "Itinerary Search"
+date: 2020-05-14T16:01:04+01:00
+menu: main
+weight: 60
+draft: false
+---
+@end ignore
+
+Itineraries can be searched for by their location and a radius.  Click
+the @code{Search} button at the bottom of the @code{Itineraries} list
+page.
+
+Enter the position of the centre of the area to search, in any of the
+formats supported when adding a waypoint.  @ref{Add Waypoint} Enter the
+radius in kilometres in the @code{Distance} input field.  (E.g. 0.125
+for 125 metres.)  Click @code{Search} to perform the search.
+
+@quotation
+@strong{Tip:} To visually select a position using a map, create a
+temporary itinerary, copying features from other itineraries that may be
+helpful, then using the itinerary to view the map and place a waypoint
+at the desired position.  @xref{Copying and Pasting between
+Itineraries}.
+
+Select the waypoint in the temporary itinerary and click the @code{Copy}
+button.  Use the @code{Paste} button in the @code{Itinerary Search by
+Location} page to paste the position into the search field.
+@end quotation
+
+The itinerary search results shows a list of itineraries that have
+either waypoints, tracks or routes with a point lying within the search
+radius.
+
+@quotation
+@strong{Note:} A path that intersects with the search radius but doesn't
+actually have a point within it, is excluded from the results.
+@end quotation
+
+Click on an itinerary name to expand the results.  Only those features
+belonging to the itinerary that match the search criteria are displayed.
+Click the check box next to a feature to display it on a map below the
+search results.
+
+Clicking on the itinerary name a second time collapses the results.
+
+Click on the @code{View itinerary} link just below the itinerary name to
+view the entire itinerary.  Use the @code{Back} button in the itinerary
+(not the browser's back button) to return to the itinerary search
+results.
+
+Features from other itineraries in the search results can also be
+selected to be show the combined features on the map.
+
+@node My Account
+@chapter My Account
+@cindex My Account
+
+@ignore
+---
+title: "My Account"
+date: 2020-11-11T16:36:14Z
+menu: main
+weight: 80
+draft: false
+---
+@end ignore
+
+@node Change Password
+@section Change Password
+@cindex  Change Password, Password
+
+Click on @code{Change password} to change your current password.  You
+need to enter your current password before any changes can be made.
+Then enter your new password.
+
+As you type the password, the system evaluates it's apparent strength.
+The @code{Save} button remains disabled until the password is apparently
+sufficiently strong.  Repeat the password in the next field, then click
+the @code{Save} button.
+
+@node Upload TripLogger Settings
+@section Upload TripLogger Settings
+@cindex Upload TripLogger Settings
+
+If you are using the @url{@value{triploggerurl},,TripLogger Remote for
+iOS app}, you can export your settings from TripLogger, save them to a
+file, then upload them by clicking @code{Choose File}, selecting the
+saved settings file and then clicking the @code{Upload} button to store
+the settings in the database.  This can act as a quick backup of your
+settings, but can also make it easier to update your unique user
+@url{@value{uuidurl},,UUID.}  @xref{Download TripLogger Settings}
+
+@node Concept Index
+@unnumbered Index
+
+@printindex cp
+
+@bye

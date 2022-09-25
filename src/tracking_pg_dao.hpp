@@ -1,0 +1,174 @@
+// -*- mode: c++; fill-column: 80; indent-tabs-mode: nil; c-basic-offset: 2; -*-
+// vim: set tw=80 ts=2 sts=0 sw=2 et ft=cpp norl:
+/*
+    This file is part of Trip Server 2, a program to support trip recording and
+    itinerary planning.
+
+    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+#ifndef TRACKS_PG_DAO_HPP
+#define TRACKS_PG_DAO_HPP
+
+#include "trip_pg_dao.hpp"
+#include "geo_utils.hpp"
+#include "../trip-server-common/src/dao_helper.hpp"
+#include <map>
+#include <ostream>
+#include <string>
+#include <vector>
+#include <nlohmann/json.hpp>
+
+namespace fdsd {
+namespace trip {
+
+class TrackPgDao : public TripPgDao {
+public:
+
+  struct location_search_query_params : utils::dao_helper {
+    location_search_query_params();
+    location_search_query_params(std::string user_id,
+                                 const std::map<std::string,
+                                 std::string> &params);
+    static void to_json(nlohmann::json& j, const location_search_query_params& qp);
+    static void from_json(const nlohmann::json& j, location_search_query_params& qp);
+    /// this is the integer user_id stored in the session an relates to the
+    /// `id` column of `usertable`.
+    std::string user_id = "";
+    std::string nickname = "";
+    std::time_t date_from;
+    std::time_t date_to;
+    int max_hdop = -1;
+    bool notes_only_flag = false;
+    dao_helper::result_order order = ascending;
+    long page = 1;
+    long page_offset = -1;
+    long page_size = -1;
+    std::string to_string() const;
+    inline friend std::ostream& operator<<
+        (std::ostream& out, const location_search_query_params& rhs) {
+      return out << rhs.to_string();
+    }
+    std::map<std::string, std::string> query_params();
+  private:
+    static std::mutex mutex;
+  };
+
+  /// Holds a result for a tracked location.  Nullable fields use a pair with
+  /// a boolean specifying whether the value is not null.  i.e. true == is not
+  /// null.
+  struct tracked_location : public location {
+    std::time_t time;
+    std::pair<bool, float> hdop;
+    std::pair<bool, float> speed;
+    std::pair<bool, double> bearing;
+    std::pair<bool, int> satellite_count;
+    std::string provider;
+    std::pair<bool, float> battery;
+    std::string note;
+  };
+
+  struct tracked_locations_result {
+    tracked_locations_result() : total_count(0), locations() {}
+    long total_count;
+    std::time_t date_from;
+    std::time_t date_to;
+    std::vector<tracked_location> locations;
+  };
+
+  struct nickname_result {
+    /// Current user's nickname
+    std::string nickname;
+    /// List of shared nicknames
+    std::vector<std::string> nicknames;
+    std::string to_string() const;
+    inline friend std::ostream& operator<<
+        (std::ostream& out, const nickname_result& rhs) {
+      return out << rhs.to_string();
+    }
+  };
+
+  struct location_share_details {
+    std::string shared_by_id;
+    std::pair<bool, int> recent_minutes;
+    std::pair<bool, int> max_minutes;
+    std::pair<bool, bool> active;
+  };
+
+  struct date_range {
+    std::time_t from;
+    std::time_t to;
+  };
+
+  /**
+   * Fetches a list of nicknames.
+   *
+   * \param user_id the user id to fetch the information for.
+   *
+   * \return an object containing the user's nickname and a list of
+   * nicknames that are sharing their location data with the specified user.
+   */
+  nickname_result get_nicknames(std::string user_id);
+
+  /**
+   * Gets the tracked locations, either for the current user, or for a shared
+   * user, depending on whether nickname is not empty.
+   *
+   * \param location_search_query_params the search criteria
+   *
+   * \param fill_distance_and_elevation_values true if any empty distance and
+   * elevation values in the locations points are to be calculated and looked
+   * up, respectively.
+   *
+   * \return a tracked_locations_result object
+   */
+  tracked_locations_result get_tracked_locations(
+      const location_search_query_params& location_search,
+      bool fill_distance_and_elevation_values = false) const;
+
+private:
+  /// Mutex used to lock access to non-threadsafe functions
+  date_range constrain_shared_location_dates(
+      std::string shared_by_id,
+      std::time_t date_from,
+      std::time_t date_to,
+      std::pair<bool, int> max_minutes,
+      std::pair<bool, int> recent_minutes) const;
+  std::pair<bool, std::time_t>
+      get_most_recent_location_time(std::string shared_by_id) const;
+  tracked_locations_result get_tracked_locations_for_user(
+      const location_search_query_params& location_search) const;
+  tracked_locations_result get_shared_tracked_locations(
+      const location_search_query_params& qp) const;
+  void append_location_query_where_clause(
+      std::ostringstream& os,
+      const pqxx::work& tx,
+      const location_search_query_params& qp) const;
+  std::pair<bool, location_share_details>
+      get_tracked_location_share_details(
+          std::string shared_by_nickname,
+          std::string shared_to_user_id) const;
+};
+
+/// Allows Argument-depenedent lookup for the nlohmann/json library to find this method
+void to_json(nlohmann::json& j, const TrackPgDao::location_search_query_params& qp);
+
+/// Allows Argument-depenedent lookup for the nlohmann/json library to find this method
+void from_json(const nlohmann::json& j, TrackPgDao::location_search_query_params& qp);
+
+} // namespace trip
+} // namespace fdsd
+
+#endif // TRACKS_PG_DAO_HPP

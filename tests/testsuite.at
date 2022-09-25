@@ -1,0 +1,30 @@
+AT_INIT
+AT_COPYRIGHT([Copyright (C) 2021-2022 Frank Dean])
+AT_COLOR_TESTS
+AT_SETUP([generate-uuid])
+AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_uuid],,ignore,ignore)
+AT_CLEANUP
+AT_SETUP([test-date-utils])
+AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_date_utils],,ignore,ignore)
+AT_CLEANUP
+AT_SETUP([test-file-utils])
+AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_file_utils],,ignore,ignore)
+AT_CLEANUP
+AT_SETUP([test-uri-utils])
+AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_uri_utils],,ignore,ignore)
+AT_CLEANUP
+AT_SETUP([test-debug-utils])
+AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_debug_utils],,ignore,ignore)
+AT_CLEANUP
+AT_SETUP([test-pagination])
+AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_pagination],,ignore, ignore)
+AT_CLEANUP
+AT_SETUP([test-pool])
+AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_pool],,ignore, ignore)
+AT_CLEANUP
+AT_SETUP([test-tracking])
+AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_tracking],,ignore, ignore)
+AT_CLEANUP
+AT_SETUP([test-geo-utils])
+AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_geo_utils],,ignore, ignore)
+AT_CLEANUP

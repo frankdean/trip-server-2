@@ -1,0 +1,111 @@
+.\" -*- coding: us-ascii -*-
+.if \n(.g .ds T< \\FC
+.if \n(.g .ds T> \\F[\n[.fam]]
+.de URL
+\\$2 \(la\\$1\(ra\\$3
+..
+.if \n(.g .mso www.tmac
+.TH trip-server 1 2022-09-17 "trip-server 2.0.0-alpha.2" ""
+.SH NAME
+trip-server \- Trip Recording and Itinerary Planning. 
+.PP
+UNIX/Linux
+.SH SYNOPSIS
+'nh
+.fi
+.ad l
+\fBtrip-server\fR \kx
+.if (\nx>(\n(.l/2)) .nr x (\n(.l/5)
+'in \n(.iu+\nxu
+[
+\fB-h\fR
+| 
+\fB--help\fR
+] [
+\fB-v\fR
+| 
+\fB--version\fR
+] [
+\fB-s\fR
+| 
+\fB--listen\fR
+{
+\fIaddress\fR
+}
+] [
+\fB-p\fR
+| 
+\fB--port\fR
+{
+\fIport\fR
+}
+] [
+\fB-r\fR
+| 
+\fB--root\fR
+{
+\fIdirectory\fR
+}
+] [
+\fB-e\fR
+| 
+\fB--expire-sessions\fR
+] [
+\fB-c\fR
+| 
+\fB--config-file\fR
+{
+\fIfilename\fR
+}
+] [
+\fB-u\fR
+| 
+\fB--upgrade\fR
+] [
+\fB-V\fR
+| 
+\fB--verbose\fR
+]
+'in \n(.iu-\nxu
+.ad b
+'hy
+.SH DESCRIPTION
+\fBtrip-server\fR is an application supporting trip
+recording and itinerary planning.
+.PP
+The intended use is for a hiker, mountain-biker or other adventurer, to
+be able to publish and share their planned itinerary, then subsequently
+log their positions at intervals, allowing someone else the ability to
+monitor their progress.
+.PP
+In the event of contact being lost, the plans and tracking information
+can be passed to rescue services etc., to assist with locating the
+missing adventurer.
+.SH OPTIONS
+.TP 
+\*(T<\fB\-h\fR\*(T>, \*(T<\fB\-\-help\fR\*(T>
+Show help, then exit.
+.TP 
+\*(T<\fB\-v\fR\*(T>, \*(T<\fB\-\-version\fR\*(T>
+Show version information, then exit.
+.TP 
+\*(T<\fB\-s\fR\*(T>, \*(T<\fB\-\-listen=ADDRESS\fR\*(T>
+Listen address, e.g. 0.0.0.0
+.TP 
+\*(T<\fB\-p\fR\*(T>, \*(T<\fB\-\-port=PORT\fR\*(T>
+Port number, e.g. 8080.
+.TP 
+\*(T<\fB\-r\fR\*(T>, \*(T<\fB\-\-root=DIRECTORY\fR\*(T>
+Document root directory.
+.TP 
+\*(T<\fB\-e\fR\*(T>, \*(T<\fB\-\-expire\-sessions\fR\*(T>
+Expires any active user web sessions.
+.TP 
+\*(T<\fB\-c\fR\*(T>, \*(T<\fB\-\-config\-file=FILENAME\fR\*(T>
+Configuration file name.
+.TP 
+\*(T<\fB\-u\fR\*(T>, \*(T<\fB\-\-upgrade\fR\*(T>
+Upgrade the database.
+.TP 
+\*(T<\fB\-V\fR\*(T>, \*(T<\fB\-\-verbose\fR\*(T>
+Verbose output

@@ -1,0 +1,334 @@
+# English translations for trip package.
+# Copyright (C) 2022 THE trip'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the trip package.
+# Frank Dean <frank@fdsd.co.uk>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: trip 2.0.0\n"
+"Report-Msgid-Bugs-To: frank.dean@fdsd.co.uk\n"
+"POT-Creation-Date: 2022-09-21 16:52+0100\n"
+"PO-Revision-Date: 2022-09-17 14:03+0100\n"
+"Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
+"Language-Team: English (British) <(nothing)>\n"
+"Language: en_GB\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Label for the version text of the application
+#: src/main.cpp:107
+msgid "version"
+msgstr "version"
+
+#. Label for the web address the application is listening at
+#: src/main.cpp:109
+msgid "listening at"
+msgstr "listening at"
+
+#. Text displayed when the application ends
+#: src/main.cpp:134
+msgid "Bye!"
+msgstr "Bye!"
+
+#. The title of the location tracking page
+#: src/tracking_request_handler.cpp:69
+msgid "Tracks"
+msgstr "Tracks"
+
+#. Message showing the location tracking search result
+#: src/tracking_request_handler.cpp:76
+msgid "{1} track point received"
+msgid_plural "{1} track points received"
+msgstr[0] "{1} track point received"
+msgstr[1] "{1} track points received"
+
+#. Message showing the date range for the location tracking search result
+#: src/tracking_request_handler.cpp:78
+msgid "Between {1} and {2}"
+msgstr "Between {1} and {2}"
+
+#. The column heading for the database unique numeric identifier of a tracked location point
+#: src/tracking_request_handler.cpp:87
+msgid "ID"
+msgstr "ID"
+
+#. The column heading for the date and time of a tracked location point
+#: src/tracking_request_handler.cpp:89
+msgid "Time"
+msgstr "Time"
+
+#. The column heading for the latitude coordinate of a tracked location point
+#: src/tracking_request_handler.cpp:91
+msgid "Latitude"
+msgstr "Latitude"
+
+#. The column heading for the longitude coordinate of a tracked location point
+#: src/tracking_request_handler.cpp:93
+msgid "Longitude"
+msgstr "Longitude"
+
+#. The column heading for the Horizontal Dilution Of Precision (estimated accuracy in metres) of a tracked location point
+#. The column heading for the altitude of a tracked location point
+#: src/tracking_request_handler.cpp:97
+msgid "Altitude"
+msgstr "Altitude"
+
+#. The column heading for the speed of a tracked location point
+#: src/tracking_request_handler.cpp:99
+msgid "Speed"
+msgstr "Speed"
+
+#. The column heading for the bearing (angle of heading) of a tracked location point
+#: src/tracking_request_handler.cpp:101
+msgid "Bearing"
+msgstr "Bearing"
+
+#. The column heading of a user provided note for the tracked location point
+#: src/tracking_request_handler.cpp:103
+msgid "Note"
+msgstr "Note"
+
+#. The column heading indicating how the location point was provided, e.g. iPhone, Apple Watch, GPS, manually, mobile phone mast
+#: src/tracking_request_handler.cpp:105
+msgid "Provider"
+msgstr "Provider"
+
+#. The column heading indicating how many satellites were used to determine the location
+#: src/tracking_request_handler.cpp:107
+msgid "Satellites"
+msgstr "Satellites"
+
+#. The column heading showing the remaining battery percentage recoreded at the time of the tracked location point
+#: src/tracking_request_handler.cpp:109
+msgid "Battery"
+msgstr "Battery"
+
+#. "      <div class=\"row\">\n"
+#. The input start date to search for location tracks
+#: src/tracking_request_handler.cpp:202
+msgid "Date from"
+msgstr "Date from"
+
+#. The input end date to search for location tracks
+#: src/tracking_request_handler.cpp:208
+msgid "Date to"
+msgstr "Date to"
+
+#. The input to select another user's nickname to view their shared location tracks
+#: src/tracking_request_handler.cpp:219
+msgid "Display shared user's tracks"
+msgstr "Display shared user's tracks"
+
+#. The maximum Horizontal Dilution of Precision (accuracy in metres) to filter locations by
+#: src/tracking_request_handler.cpp:248
+msgid "Max hdop"
+msgstr "Max hdop"
+
+#. instructions to disable filtering locations by HDOP (accuracy in metres)
+#: src/tracking_request_handler.cpp:255
+msgid "leave blank for no maximum"
+msgstr "leave blank for no maximum"
+
+#. Whether the user wishes to filter the results to only include those with notes attached
+#: src/tracking_request_handler.cpp:265
+msgid "Show notes only"
+msgstr "Show notes only"
+
+#. Label for the button to perform the search that lists the tracked locations
+#: src/tracking_request_handler.cpp:270
+msgid "List tracks"
+msgstr "List tracks"
+
+#. Label for the button to display a map showing the tracked locations
+#: src/tracking_request_handler.cpp:272
+msgid "Show map"
+msgstr "Show map"
+
+#. Prompt to confirm the user wished to download a data file with the tracked locations
+#: src/tracking_request_handler.cpp:276
+msgid "Download tracks?"
+msgstr "Download tracks?"
+
+#. Label for the button to download the tracks as an XML data file
+#: src/tracking_request_handler.cpp:278
+msgid "Download tracks"
+msgstr "Download tracks"
+
+#. Label for the button to make a copy of the tracked locations
+#: src/tracking_request_handler.cpp:280
+msgid "Copy"
+msgstr "Copy"
+
+#. Label for the button which resets the form's input criteria to that originally displayed
+#: src/tracking_request_handler.cpp:283
+msgid "Reset"
+msgstr "Reset"
+
+#. Heading before showing command line usage and options with the program name as the parameter
+#: src/trip_get_options.cpp:101
+msgid ""
+"Usage:\n"
+" {1} [OPTIONS]\n"
+"\n"
+"Options:\n"
+msgstr ""
+"Usage:\n"
+" {1} [OPTIONS]\n"
+"\n"
+"Options:\n"
+
+#. Command line short description for the --help option
+#: src/trip_get_options.cpp:103
+msgid "show this help, then exit"
+msgstr "show this help, then exit"
+
+#. Command line short description for the --version option
+#: src/trip_get_options.cpp:105
+msgid "show version information, then exit"
+msgstr "show version information, then exit"
+
+#. Command line short description for the --listen option
+#: src/trip_get_options.cpp:107
+msgid "listen address, e.g. 0.0.0.0"
+msgstr "listen address, e.g. 0.0.0.0"
+
+#. Command line short description for the --port option
+#: src/trip_get_options.cpp:109
+msgid "port number, e.g. 8080"
+msgstr "port number, e.g. 8080"
+
+#. Command line short description for the --root option
+#: src/trip_get_options.cpp:112
+msgid "document root directory"
+msgstr "document root directory"
+
+#. Command line short description for the --expire-sessions option
+#: src/trip_get_options.cpp:115
+msgid "expires any active user web sessions"
+msgstr "expires any active user web sessions"
+
+#. Command line short description for the --config-file option
+#: src/trip_get_options.cpp:117
+msgid "configuration file name"
+msgstr "configuration file name"
+
+#. Command line short description for the --upgrade option
+#: src/trip_get_options.cpp:119
+msgid "upgrade database"
+msgstr "upgrade database"
+
+#. Command line short description for the --verbose option
+#: src/trip_get_options.cpp:121
+msgid "verbose output"
+msgstr "verbose output"
+
+#. Example usage when the application is configured to serve static files
+#: src/trip_get_options.cpp:125
+msgid "Usage: {1} <address> <port> <doc_root>"
+msgstr "Usage: {1} <address> <port> <doc_root>"
+
+#. Example usage when the application is not configured to serve static files
+#: src/trip_get_options.cpp:128
+msgid "Usage: {1} <address> <port>"
+msgstr "Usage: {1} <address> <port>"
+
+#. Heading before showing command line usage
+#: src/trip_get_options.cpp:133
+msgid "Example:\n"
+msgstr "Example:\n"
+
+#: src/trip_request_handler.cpp:75
+#: trip-server-common/src/http_request_handler.cpp:545
+msgid "Login"
+msgstr "Login"
+
+#. Menu item to select the location tracking page
+#: src/trip_request_handler.cpp:177
+msgid "Tracking"
+msgstr "Tracking"
+
+#. Menu item to select the tracker information page
+#: src/trip_request_handler.cpp:181
+msgid "Tracker Info"
+msgstr "Tracker Info"
+
+#. Menu item to select the track sharing page
+#: src/trip_request_handler.cpp:184
+msgid "Tracker Sharing"
+msgstr "Tracker Sharing"
+
+#. Menu item to select the list of itineraries page
+#: src/trip_request_handler.cpp:187
+msgid "Itineraries"
+msgstr "Itineraries"
+
+#. Menu item to select the page potentially showing or recording the user's current location
+#: src/trip_request_handler.cpp:190
+msgid "Location"
+msgstr "Location"
+
+#. Menu item for an admin user to administer user accounts, create, delete, reset password
+#: src/trip_request_handler.cpp:196
+msgid "Users"
+msgstr "Users"
+
+#. Menu item for an admin user to view the system status report
+#: src/trip_request_handler.cpp:199
+msgid "Status"
+msgstr "Status"
+
+#. Menu item for a user to administer their own account
+#: src/trip_request_handler.cpp:204
+msgid "Account"
+msgstr "Account"
+
+#. Menu item linking to the user guide
+#: src/trip_request_handler.cpp:208
+msgid "Help"
+msgstr "Help"
+
+#. Menu item for the user to logout
+#: src/trip_request_handler.cpp:211
+msgid "Logout"
+msgstr "Logout"
+
+#. Error message shown when a configuration filename has not been specified
+#: trip-server-common/src/application.cpp:103
+msgid "Configuration filename not specified\n"
+msgstr "Configuration filename not specified\n"
+
+#. Shows which configuration filename is being read
+#: trip-server-common/src/application.cpp:113
+msgid "Reading configuration from {1}"
+msgstr "Reading configuration from {1}"
+
+#. Shows how many worker processes are being created for the application
+#: trip-server-common/src/application.cpp:160
+msgid "Creating {1} worker"
+msgid_plural "Creating {1} workers"
+msgstr[0] "Creating {1} worker"
+msgstr[1] "Creating {1} workers"
+
+#: trip-server-common/src/http_request_handler.cpp:501
+#: trip-server-common/src/http_request_handler.cpp:511
+msgid "Username"
+msgstr "Username"
+
+#: trip-server-common/src/http_request_handler.cpp:523
+#: trip-server-common/src/http_request_handler.cpp:533
+msgid "Password"
+msgstr "Password"
+
+#. Message showing the server administrator the URL a browser is being redirected to
+#: trip-server-common/src/http_request_handler.cpp:692
+msgid "Redirecting to: {1}"
+msgstr "Redirecting to: {1}"
+
+#. Shows how many database connections are being created for the application
+#: trip-server-common/src/pg_pool.cpp:43
+msgid "Creating database pool with {1} connection"
+msgid_plural "Creating database pool with {1} connections"
+msgstr[0] "Creating database pool with {1} connection"
+msgstr[1] "Creating database pool with {1} connections"

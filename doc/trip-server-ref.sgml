@@ -1,0 +1,227 @@
+<?xml version='1.0'?>
+<!DOCTYPE refentry PUBLIC "-/OASIS//DTD DocBook V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+<!ENTITY tssurname "Dean">
+<!ENTITY tsfirstname "Frank">
+<!ENTITY tsemail "frank.dean@fdsd.co.uk">
+<!ENTITY tsfullname "&tsfirstname; &tssurname;">
+<!ENTITY tspackage "trip-server">
+<!ENTITY tsversion "2.0.0-alpha.2">
+]>
+<refentry>
+  <refentryinfo>
+    <title>Trip Server 2 User Manual</title>
+    <date>2022-09-17</date>
+    <productname>&tspackage;</productname>
+    <authorgroup>
+      <author>
+        <firstname>Frank</firstname>
+        <surname>Dean</surname>
+        <contrib>Application and man page author.</contrib>
+        <address>
+          <email>frank.dean@fdsd.co.uk</email>
+        </address>
+      </author>
+    </authorgroup>
+    <copyright>
+      <year>2022</year>
+      <holder>&tsfullname; &lt;&tsemail;&gt;</holder>
+    </copyright>
+  </refentryinfo>
+  <refmeta>
+    <refentrytitle>&tspackage;</refentrytitle>
+    <manvolnum>1</manvolnum>
+    <refmiscinfo>&tspackage; &tsversion;</refmiscinfo>
+  </refmeta>
+  <refnamediv>
+    <refname>&tspackage;</refname>
+    <refpurpose>
+      Trip Recording and Itinerary Planning.
+    </refpurpose>
+    <refclass>UNIX/Linux</refclass>
+  </refnamediv>
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>&tspackage;</command>
+      <group>
+        <arg choice="plain">
+          <option>-h</option>
+        </arg>
+        <arg choice="plain">
+          <option>--help</option>
+        </arg>
+      </group>
+      <group>
+        <arg choice="plain">
+          <option>-v</option>
+        </arg>
+        <arg choice="plain">
+          <option>--version</option>
+        </arg>
+      </group>
+      <arg choice="opt">
+        <group choice="plain">
+          <arg choice="plain">
+            <option>-s</option>
+          </arg>
+          <arg choice="plain">
+            <option>--listen</option>
+          </arg>
+        </group>
+        <arg choice="req">
+          <replaceable>address</replaceable>
+        </arg>
+      </arg>
+      <arg>
+        <group choice="plain">
+          <arg choice="plain">
+            <option>-p</option>
+          </arg>
+          <arg choice="plain">
+            <option>--port</option>
+          </arg>
+        </group>
+        <arg choice="req">
+          <replaceable>port</replaceable>
+        </arg>
+      </arg>
+      <arg>
+        <group choice="plain">
+          <arg choice="plain">
+            <option>-r</option>
+          </arg>
+          <arg choice="plain">
+            <option>--root</option>
+          </arg>
+        </group>
+        <arg choice="req">
+          <replaceable>directory</replaceable>
+        </arg>
+      </arg>
+      <group>
+        <arg choice="plain">
+          <option>-e</option>
+        </arg>
+        <arg choice="plain">
+          <option>--expire-sessions</option>
+        </arg>
+      </group>
+      <arg>
+        <group choice="plain">
+          <arg choice="plain">
+            <option>-c</option>
+          </arg>
+          <arg choice="plain">
+            <option>--config-file</option>
+          </arg>
+        </group>
+        <arg choice="req">
+          <replaceable>filename</replaceable>
+        </arg>
+      </arg>
+      <group>
+        <arg choice="plain">
+          <option>-u</option>
+        </arg>
+        <arg choice="plain">
+          <option>--upgrade</option>
+        </arg>
+      </group>
+      <group>
+        <arg choice="plain">
+          <option>-V</option>
+        </arg>
+        <arg choice="plain">
+          <option>--verbose</option>
+        </arg>
+      </group>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  <refsect1 id="description">
+    <title>DESCRIPTION</title>
+    <para>
+      <command>&tspackage;</command> is an application supporting trip
+      recording and itinerary planning.
+    </para>
+    <para>
+      The intended use is for a hiker, mountain-biker or other adventurer, to
+      be able to publish and share their planned itinerary, then subsequently
+      log their positions at intervals, allowing someone else the ability to
+      monitor their progress.
+    </para>
+    <para>
+      In the event of contact being lost, the plans and tracking information
+      can be passed to rescue services etc., to assist with locating the
+      missing adventurer.
+    </para>
+  </refsect1>
+  <refsect1 id="options">
+    <title>OPTIONS</title>
+    <variablelist>
+      <varlistentry>
+        <term><option>-h</option></term>
+        <term><option>--help</option></term>
+        <listitem>
+          <para>Show help, then exit.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-v</option></term>
+        <term><option>--version</option></term>
+        <listitem>
+          <para>Show version information, then exit.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-s</option></term>
+        <term><option>--listen=ADDRESS</option></term>
+        <listitem>
+          <para>Listen address, e.g. 0.0.0.0</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-p</option></term>
+        <term><option>--port=PORT</option></term>
+        <!-- <term><replaceable class="option">PORT</replaceable></term> -->
+        <listitem>
+          <para>Port number, e.g. 8080.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-r</option></term>
+        <term><option>--root=DIRECTORY</option></term>
+        <listitem>
+          <para>Document root directory.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-e</option></term>
+        <term><option>--expire-sessions</option></term>
+        <listitem>
+          <para>Expires any active user web sessions.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-c</option></term>
+        <term><option>--config-file=FILENAME</option></term>
+        <listitem>
+          <para>Configuration file name.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-u</option></term>
+        <term><option>--upgrade</option></term>
+        <listitem>
+          <para>Upgrade the database.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-V</option></term>
+        <term><option>--verbose</option></term>
+        <listitem>
+          <para>Verbose output</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+</refentry>

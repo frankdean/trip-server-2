@@ -1,0 +1,92 @@
+// -*- mode: c++; fill-column: 80; indent-tabs-mode: nil; c-basic-offset: 2; -*-
+// vim: set tw=80 ts=2 sts=0 sw=2 et ft=cpp norl:
+/*
+    This file is part of Trip Server 2, a program to support trip recording and
+    itinerary planning.
+
+    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+#include "../config.h"
+#include "trip_application.hpp"
+#include "trip_config.hpp"
+#include "trip_request_factory.hpp"
+#include "session_pg_dao.hpp"
+#include "../trip-server-common/src/session.hpp"
+#include <chrono>
+
+using namespace fdsd::utils;
+using namespace fdsd::web;
+using namespace fdsd::trip;
+
+TripApplication::TripApplication(std::string listen_address,
+                                 std::string port,
+                                 std::string config_filename,
+                                 std::string locale) :
+  Application(
+    listen_address,
+    port,
+    locale)
+{
+  this->config_filename = config_filename.empty() ?
+    SYSCONFDIR "/trip-server.yaml" : config_filename;
+  config = std::make_shared<TripConfig>(TripConfig(this->config_filename));
+}
+
+std::string TripApplication::get_config_filename() const
+{
+  // TODO super class shouldn't enforce opening a configuration file
+  return "";
+}
+
+std::string TripApplication::get_db_connect_string() const {
+  return config->get_db_connect_string();
+}
+int TripApplication::get_worker_count() const {
+  return config->get_worker_count();
+}
+int TripApplication::get_pg_pool_size() const {
+  return config->get_pg_pool_size();
+}
+std::string TripApplication::get_application_prefix_url() const {
+  return config->get_application_prefix_url();
+}
+
+void TripApplication::set_root_directory(std::string directory) {
+  // TODO remove document_root from super class
+  document_root = directory;
+  config->set_root_directory(directory);
+}
+
+std::shared_ptr<HTTPRequestFactory>
+    TripApplication::get_request_factory() const
+{
+  TripRequestFactory factory(config);
+  return std::make_shared<TripRequestFactory>(factory);
+}
+
+void TripApplication::initialize_user_sessions(bool expire_sessions)
+{
+  if (expire_sessions) {
+    SessionManager::get_session_manager()->clear_sessions();
+    SessionManager::get_session_manager()->persist_sessions();
+    SessionPgDao dao;
+    // Actually delete the session records, as persisting them only deletes
+    // persisted sessions based on their expiry date
+    dao.delete_all_sessions();
+  } else {
+    SessionManager::get_session_manager()->load_sessions();
+  }
+}
