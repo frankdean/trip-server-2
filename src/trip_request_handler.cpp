@@ -105,7 +105,7 @@ void TripAuthenticatedRequestHandler::append_head_content(std::ostream& os) cons
   os <<
     // Bootstrap
     // "    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx\" crossorigin=\"anonymous\">\n"
-    "    <link rel=\"stylesheet\" href=\"./static/bootstrap-5.2.0-dist/css/bootstrap.min.css\"/>\n"
+    "    <link rel=\"stylesheet\" href=\"./static/bootstrap-5.2.1-dist/css/bootstrap.min.css\"/>\n"
     "    <link rel=\"stylesheet\" href=\"./static/css/trip.css\"/>\n";
 }
 
@@ -137,7 +137,7 @@ void TripAuthenticatedRequestHandler::append_bootstrap_scripts(std::ostream& os)
   // Boostrap
   // "    <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js\" integrity=\"sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK\" crossorigin=\"anonymous\"></script>\n"
   os <<
-    "    <script type=\"module\" src=\"./static/bootstrap-5.2.0-dist/js/bootstrap.min.js\"></script>\n";
+    "    <script type=\"module\" src=\"./static/bootstrap-5.2.1-dist/js/bootstrap.min.js\"></script>\n";
 }
 
 void TripAuthenticatedRequestHandler::append_openlayers_scripts(
@@ -261,7 +261,7 @@ void BaseMapHandler::append_head_content(std::ostream& os) const
   os <<
     // Bootstrap
     // "    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx\" crossorigin=\"anonymous\">\n"
-    "    <link rel=\"stylesheet\" href=\"./static/bootstrap-5.2.0-dist/css/bootstrap.min.css\"/>\n"
+    "    <link rel=\"stylesheet\" href=\"./static/bootstrap-5.2.1-dist/css/bootstrap.min.css\"/>\n"
     // OpenLayers
     // "    <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.css\">\n"
     "    <link rel=\"stylesheet\" href=\"./static/openlayers-7.0.0-legacy/ol.css\"/>\n"

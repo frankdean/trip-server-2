@@ -39,6 +39,9 @@ localedef -i en_GB -c -f UTF-8 -A /usr/share/locale/locale.alias en_GB.UTF-8
 update-locale LANG LANGUAGE
 
 ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime
+# Other time zones, useful for testing
+#ln -fs /usr/share/zoneinfo/Asia/Kolkata  /etc/localtime # UTC +05:30
+
 apt-get install -y tzdata
 dpkg-reconfigure tzdata
 
@@ -46,7 +49,7 @@ apt-get install $DEB_OPTIONS apt-transport-https
 apt-get install $DEB_OPTIONS g++ git postgresql postgresql-contrib postgis \
 	libpqxx-dev screen autoconf autoconf-doc automake autoconf-archive \
 	libtool gettext valgrind uuid-dev uuid-runtime make nginx apg \
-	libboost-locale-dev autopoint intltool gdb \
+	libboost-locale-dev libpugixml-dev autopoint intltool gdb \
 	libyaml-cpp-dev nlohmann-json3-dev \
 	docbook2x texlive info
 

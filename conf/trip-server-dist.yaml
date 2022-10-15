@@ -3,7 +3,7 @@ app:
     indent:
       level: 0
   gpx:
-    allowInvalidXsd: false
+    allowInvalidXsd: false # Ignored in trip v2
   origins:
     - "*:*"
   maxItinerarySearchRadius: 50000
@@ -21,7 +21,7 @@ tile:
   providers_READ_TILE_USAGE_POLICY_BELOW_AND_SET_USER_AGENT_AND_REFERRER_INFO_BEFORE_USING:
     - cache: true
       prune: true
-      _help: " see http://wiki.openstreetmap.org/wiki/Tile_usage_policy"
+      # see http://wiki.openstreetmap.org/wiki/Tile_usage_policy"
       userAgentInfo: (mailto:your.contact@email.address)
       refererInfo: http://link_to_deployed_application_information
       options:

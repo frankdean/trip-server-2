@@ -107,17 +107,16 @@ TilePgDao::tile_result TileHandler::fetch_remote_tile(
   std::istringstream is(expires_str);
   is.imbue(std::locale("C"));
   is >> std::get_time(&tm, "%a, %d %b %Y %T %Z");
-  std::time_t expires_t = std::mktime(&tm);
+  auto expires_tp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
   // Use the expires value from the source tile provider
-  retval.expires = expires_t;
+  retval.expires = expires_tp;
   if (provider.cache == true) {
     auto now = std::chrono::system_clock::now();
     // Set minimum, increased if the expires header is not specified
     auto min = expires_str.empty() ? std::chrono::hours(4) :
       std::chrono::minutes(10);
-    auto time_t = std::max(expires_t,
-                           std::chrono::system_clock::to_time_t(now + min));
-    dao.save_tile(provider_index, z, x, y, client.body, time_t);
+    auto time_tp = std::max(expires_tp, now + min);
+    dao.save_tile(provider_index, z, x, y, client.body, time_tp);
   }
   retval.tile = client.body;
   return retval;
@@ -141,10 +140,9 @@ TilePgDao::tile_result TileHandler::find_tile(int provider_index,
         get_tile_cache_max_age();
       const auto keep_tiles_until = max_age > 0
         ?
-        std::chrono::system_clock::to_time_t(std::chrono::system_clock::now() +
-                                             std::chrono::hours(max_age * 24))
+        std::chrono::system_clock::now() + std::chrono::hours(max_age * 24)
         :
-        std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        std::chrono::system_clock::now();
 
       if (tile_result.second.expires < keep_tiles_until) {
         try {

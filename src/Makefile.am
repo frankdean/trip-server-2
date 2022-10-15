@@ -9,10 +9,14 @@ trip_server_SOURCES = \
 	tile_handler.hpp \
 	tile_pg_dao.cpp \
 	tile_pg_dao.hpp \
-	tracking_pg_dao.cpp \
-	tracking_pg_dao.hpp \
+	track_logging_handler.cpp \
+	track_logging_handler.hpp \
+	tracking_download_handler.cpp \
+	tracking_download_handler.hpp \
 	tracking_map_handler.cpp \
 	tracking_map_handler.hpp \
+	tracking_pg_dao.cpp \
+	tracking_pg_dao.hpp \
 	tracking_request_handler.cpp \
 	tracking_request_handler.hpp \
 	tracking_rest_handler.cpp \
@@ -74,10 +78,15 @@ trip_server_SOURCES = \
 	../trip-server-common/src/worker.cpp \
 	../trip-server-common/src/worker.hpp
 
-check_PROGRAMS = test_uuid test_date_utils test_file_utils test_uri_utils \
-	test_debug_utils test_pagination test_pool \
+check_PROGRAMS = test_uuid test_dao_helper test_date_utils test_file_utils \
+	test_uri_utils test_debug_utils test_pagination test_pool \
 	test_tracking test_geo_utils
 test_uuid_SOURCES = ../trip-server-common/src/test_uuid.cpp
+test_dao_helper_SOURCES = ../trip-server-common/src/test_dao_helper.cpp \
+	../trip-server-common/src/date_utils.cpp \
+	../trip-server-common/src/date_utils.hpp \
+	../trip-server-common/src/logger.cpp \
+	../trip-server-common/src/logger.hpp
 test_date_utils_SOURCES = ../trip-server-common/src/test_date_utils.cpp \
 	../trip-server-common/src/logger.cpp \
 	../trip-server-common/src/logger.hpp
@@ -95,6 +104,7 @@ test_pagination_SOURCES = ../trip-server-common/src/test_pagination.cpp \
 	../trip-server-common/src/debug_utils.hpp
 test_pool_SOURCES = ../trip-server-common/src/test_pool.cpp
 test_tracking_SOURCES = test_tracking.cpp \
+	geo_utils.cpp \
 	../trip-server-common/src/logger.cpp \
 	../trip-server-common/src/logger.hpp
 test_geo_utils_SOURCES = test_geo_utils.cpp

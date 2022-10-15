@@ -78,7 +78,9 @@ void TrackingRestHandler::handle_authenticated_request(
 
     auto most_recent = locations_result.locations.back();
     std::ostringstream time;
-    time << as::datetime << most_recent.time;
+    time << as::datetime <<
+      std::chrono::duration_cast<std::chrono::seconds>(
+          most_recent.time_point.time_since_epoch()).count();
     json marker {
       {"position",
        { std::round(most_recent.longitude * 1e6) / 1e6,

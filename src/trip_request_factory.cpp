@@ -23,6 +23,8 @@
 #include "trip_request_factory.hpp"
 #include "tile_handler.hpp"
 #include "trip_config.hpp"
+#include "track_logging_handler.hpp"
+#include "tracking_download_handler.hpp"
 #include "tracking_map_handler.hpp"
 #include "tracking_request_handler.hpp"
 #include "tracking_rest_handler.hpp"
@@ -59,6 +61,9 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
           FileRequestHandler(get_uri_prefix(),
                              config->get_root_directory())));
 #endif
+  pre_login_handlers.push_back(
+      std::make_shared<TrackLoggingHandler>(
+          TrackLoggingHandler(config)));
   post_login_handlers.push_back(
       std::make_shared<TrackingMapHandler>(
           TrackingMapHandler(config)));
@@ -68,6 +73,9 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
   post_login_handlers.push_back(
       std::make_shared<TrackingRestHandler>(
           TrackingRestHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<TrackingDownloadHandler>(
+          TrackingDownloadHandler(config)));
   post_login_handlers.push_back(
       std::make_shared<TileHandler>(
           TileHandler(config)));

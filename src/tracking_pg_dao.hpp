@@ -70,7 +70,7 @@ public:
   /// a boolean specifying whether the value is not null.  i.e. true == is not
   /// null.
   struct tracked_location : public location {
-    std::time_t time;
+    std::chrono::system_clock::time_point time_point;
     std::pair<bool, float> hdop;
     std::pair<bool, float> speed;
     std::pair<bool, double> bearing;
@@ -78,6 +78,11 @@ public:
     std::string provider;
     std::pair<bool, float> battery;
     std::string note;
+    virtual std::string to_string() const override;
+    inline friend std::ostream& operator<<
+        (std::ostream& out, const tracked_location& rhs) {
+      return out << rhs.to_string();
+    }
   };
 
   struct tracked_locations_result {
@@ -86,6 +91,21 @@ public:
     std::time_t date_from;
     std::time_t date_to;
     std::vector<tracked_location> locations;
+  };
+
+  struct tracked_location_query_params :
+    public tracked_location, utils::dao_helper {
+
+    tracked_location_query_params() {}
+    tracked_location_query_params(std::string user_id,
+                                  const std::map<std::string,
+                                  std::string> &params);
+    std::string user_id;
+    virtual std::string to_string() const override;
+    inline friend std::ostream& operator<<
+        (std::ostream& out, const tracked_location_query_params& rhs) {
+      return out << rhs.to_string();
+    }
   };
 
   struct nickname_result {
@@ -137,6 +157,12 @@ public:
   tracked_locations_result get_tracked_locations(
       const location_search_query_params& location_search,
       bool fill_distance_and_elevation_values = false) const;
+
+  /// \return the user_id associated with the passed UUID
+  std::string get_user_id_by_uuid(std::string uuid);
+  /// Saves the passed tracked location.
+  void save_tracked_location(
+      const TrackPgDao::tracked_location_query_params& qp);
 
 private:
   /// Mutex used to lock access to non-threadsafe functions

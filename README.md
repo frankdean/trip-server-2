@@ -21,8 +21,8 @@ Server version 1.10.x installation.
 
 The Trip application consists of two primary components, [a server
 application][trip-server], written in [ECMAScript][] (a JavaScript standard),
-running under [Node.js][] and [a browser application][], also written in
-ECMAScript using [AngularJS][], a web framework.
+running under [Node.js][] and [a browser application][trip-web-client], also
+written in ECMAScript using [AngularJS][], a web framework.
 
 Subsequently, Google's support for AngularJS has ended with a recommendation
 of migration to [Angular 2+](https://angular.io/).
@@ -65,7 +65,7 @@ desire is to keep the YAML configuration file requiring minimal changes.
 
 ### Proposed Features
 
-The following features are provided:
+The following features are proposed:
 
 * Remote tracking server—client applications such as
   [TripLogger Remote for iOS][TripLogger] &ndash;
@@ -127,6 +127,7 @@ Minimal packages required to build from the source distribution tarball:
 - gawk
 - libboost-locale-dev
 - libpqxx-dev
+- libpugixml-dev
 - libyaml-cpp-dev
 - make
 - nlohmann-json3-dev
@@ -267,3 +268,4 @@ differs from the GNU version.
 [gpx]: http://www.topografix.com/gpx.asp "The GPX Exchange Format"
 [semver]: http://semver.org
 [trip-server]: https://www.fdsd.co.uk/trip-server/ "TRIP - Trip Recording and Itinerary Planner"
+[trip-web-client]: https://www.fdsd.co.uk/trip-web-client-docs/

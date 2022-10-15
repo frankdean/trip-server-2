@@ -30,6 +30,10 @@
 
 const std::string test_user_id = "test_user";
 
+//////////////////////////////////////////////////////////////////////////////
+// Tests for TrackPgDao::location_search_query_params
+//////////////////////////////////////////////////////////////////////////////
+
 const std::map<std::string, std::string> valid_test_map =
 {
   {"nickname", "fred"},
@@ -86,7 +90,7 @@ bool test_valid_test_map()
   from << std::put_time(std::localtime(&q.date_from), "%FT%T%z");
   std::ostringstream to;
   to << std::put_time(std::localtime(&q.date_to), "%FT%T%z");
-  std::cout << "From: \"" << from.str() << "\" to \"" << to.str() << "\"\n";
+  // std::cout << "From: \"" << from.str() << "\" to \"" << to.str() << "\"\n";
   const bool retval =
     q.user_id == test_user_id &&
     q.nickname == "fred" &&
@@ -166,12 +170,171 @@ bool test_example_test_map()
   return retval;
 }
 
+const std::map<std::string, std::string> tracked_loc_qp_valid_map_ISO8601 =
+{
+  {"lng", "2.294521"},
+  {"lat", "48.858222"},
+  {"altitude", "73.000001"},
+  {"time", "2022-10-13T12:50:46.321+01:00"},
+  {"hdop", "15.8"},
+  {"speed", "3.2"},
+  {"bearing", "359.56789"},
+  {"sat", "30"},
+  {"prov", "test"},
+  {"batt", "98.7"},
+  {"note", "Test note"}
+};
+
+const std::map<std::string, std::string> tracked_loc_qp_without_time_and_lon =
+{
+  {"lon", "2.294521"},
+  {"lat", "48.858222"},
+  {"altitude", "73.000001"},
+  {"hdop", "15.8"},
+  {"speed", "3.2"},
+  {"bearing", "359.56789"},
+  {"sat", "30"},
+  {"prov", "test"},
+  {"batt", "98.7"},
+  {"note", "Test note"}
+};
+
+bool test_tracked_location_query_params_constructor_01()
+{
+  TrackPgDao::tracked_location_query_params q(test_user_id, tracked_loc_qp_valid_map_ISO8601);
+  const std::string s = tracked_loc_qp_valid_map_ISO8601.at("time");
+  DateTime dt(s);
+  const bool retval =
+    q.user_id == test_user_id &&
+    q.time_point == dt.time_tp() &&
+    std::round((q.longitude - 2.294521) * 1e6) == 0 &&
+    std::round((q.latitude - 48.858222) * 1e6) == 0 &&
+    q.altitude.first && std::round((q.altitude.second - 73.000001) * 1e6) == 0 &&
+    q.hdop.first && std::round((q.hdop.second - 15.8) * 10) == 0 &&
+    q.speed.first && std::round((q.speed.second - 3.2) * 10) == 0 &&
+    q.bearing.first && std::round((q.bearing.second - 359.56789) * 1e6) == 0 &&
+    q.satellite_count.first && q.satellite_count.second == 30 &&
+    q.provider == "test" &&
+    q.battery.first && std::round((q.battery.second - 98.7) * 10) == 0 &&
+    q.note == "Test note";
+  if (!retval) {
+    std::cout
+      << "test_tracked_location_query_params_constructor_01() failed: "
+      << q << '\n';
+    if (q.user_id != test_user_id)
+      std::cout << "user_id\n";
+    if (q.time_point != dt.time_tp())
+      std::cout << "time_point\n";
+    if (std::round((q.longitude - 2.294521) * 1e6) != 0)
+      std::cout << "longitude\n";
+    if (std::round((q.latitude - 48.858222) * 1e6) != 0)
+      std::cout << "latitude\n";
+    if (q.altitude.first && std::round((q.altitude.second - 73.000001) * 1e6) != 0)
+      std::cout << "altitude.first && altitude.second\n";
+    if (q.hdop.first && std::round((q.hdop.second - 15.8) * 10) != 0)
+      std::cout << "hdop.first && hdop.second\n";
+    if (q.speed.first && std::round((q.speed.second - 3.2) * 10) != 0)
+      std::cout << "speed.first && speed.second\n";
+    if (q.bearing.first && std::round((q.bearing.second - 359.56789) * 1e6) != 0)
+      std::cout << "bearing.first && bearing.second\n";
+    if (q.satellite_count.first && q.satellite_count.second != 30)
+      std::cout << "satellite_count.first && q.satellitcount.second\n";
+    if (q.provider != "test")
+      std::cout << "provider\n";
+    if (q.battery.first && std::round((q.battery.second - 98.7) * 10) != 0)
+      std::cout << "battery.first && battery.second: "
+                << std::fixed << std::setprecision(19)
+                << q.battery.second << '\n';
+    if (q.note != "Test note")
+      std::cout << "note\n";
+  }
+  return retval;
+}
+
+// test no time parameter - should use the current time.
+// Also test using `lon` instead of `lng` for longitude.
+bool test_tracked_location_query_params_constructor_02()
+{
+  auto test_map = tracked_loc_qp_without_time_and_lon;
+  TrackPgDao::tracked_location_query_params q(test_user_id, test_map);
+  // Where no time is specified, we expect the current time to be used.
+  const DateTime now;
+  const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(
+      q.time_point - now.time_tp());
+  // std::cout << "Diff: " << std::fixed << std::setprecision(6) << diff.count() << '\n';
+  // Allow a generous tolerance between the call and the current time being
+  // captured.
+  const bool retval =
+    std::abs(diff.count()) < 2000 &&
+    std::round((q.longitude - 2.294521) * 1e6) == 0;
+  if (!retval) {
+    std::cout
+      << "test_tracked_location_query_params_constructor_01() failed: "
+      << q << '\n';
+    if (std::abs(diff.count()) != 0)
+      std::cout << "Expected time \"" << now.get_time_as_iso8601_gmt()
+                << "\" differs by " << diff.count() << "ms\n";
+    if (std::round((q.longitude - 2.294521) * 1e6) != 0)
+      std::cout << "longitude\n";
+  }
+  return retval;
+}
+
+// test mstime parameter
+bool test_tracked_location_query_params_constructor_03()
+{
+  auto test_map = tracked_loc_qp_without_time_and_lon;
+  DateTime test_date("2022-10-13T17:25:30.179+0100");
+  test_map["mstime"] = std::to_string(test_date.get_ms());
+  TrackPgDao::tracked_location_query_params q(test_user_id, test_map);
+  const bool retval = (q.time_point == test_date.time_tp());
+  if (!retval)
+    std::cout
+      << "test_tracked_location_query_params_constructor_03() failed\n";
+  return retval;
+}
+
+// test unixtime parameter
+bool test_tracked_location_query_params_constructor_04()
+{
+  auto test_map = tracked_loc_qp_without_time_and_lon;
+  const DateTime test_date("2022-10-13T17:25:30+0100");
+  test_map["unixtime"] = std::to_string(std::llround(test_date.get_ms() / 1000));
+  const TrackPgDao::tracked_location_query_params q(test_user_id, test_map);
+  const bool retval = (q.time_point == test_date.time_tp());
+  if (!retval)
+    std::cout
+      << "test_tracked_location_query_params_constructor_04() failed"
+      << q << '\n';
+  return retval;
+}
+
+// test timestamp parameter
+bool test_tracked_location_query_params_constructor_05()
+{
+  auto test_map = tracked_loc_qp_without_time_and_lon;
+  const DateTime test_date("2022-10-13T17:25:30+0100");
+  test_map["timestamp"] = std::to_string(std::llround(test_date.get_ms() / 1000));
+  const TrackPgDao::tracked_location_query_params q(test_user_id, test_map);
+  const bool retval = (q.time_point == test_date.time_tp());
+  if (!retval)
+    std::cout
+      << "test_tracked_location_query_params_constructor_05() failed"
+      << q << '\n';
+  return retval;
+}
+
 int main(void)
 {
   return !(
-      test_valid_test_map() &&
-      test_default_test_map() &&
-      test_invalid_test_map() &&
-      test_example_test_map()
+      test_valid_test_map()
+      && test_default_test_map()
+      && test_invalid_test_map()
+      && test_example_test_map()
+      && test_tracked_location_query_params_constructor_01()
+      && test_tracked_location_query_params_constructor_02()
+      && test_tracked_location_query_params_constructor_03()
+      && test_tracked_location_query_params_constructor_04()
+      && test_tracked_location_query_params_constructor_05()
     );
 }

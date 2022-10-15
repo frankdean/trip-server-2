@@ -19,56 +19,44 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef TRACKING_REQUEST_HANDLER_HPP
-#define TRACKING_REQUEST_HANDLER_HPP
+#ifndef TRACKING_DOWNLOAD_HANDLER_HPP
+#define TRACKING_DOWNLOAD_HANDLER_HPP
 
 #include "tracking_pg_dao.hpp"
 #include "trip_request_handler.hpp"
-#include "../trip-server-common/src/pagination.hpp"
 #include <string>
 
 namespace fdsd {
-namespace web {
-  class HTTPServerRequest;
-  class HTTPServerResponse;
-}
 namespace trip {
 
-class TrackingRequestHandler : public TripAuthenticatedRequestHandler {
-private:
-  void build_form(
+class TrackingDownloadHandler : public BaseRestHandler {
+  void handle_download(
       web::HTTPServerResponse& response,
-      bool first_time,
-      const fdsd::web::Pagination& pagination,
-      const TrackPgDao::location_search_query_params& query_params,
-      const TrackPgDao::nickname_result& nickname_result,
-      const TrackPgDao::tracked_locations_result& locations_result) const;
+      const TrackPgDao::tracked_locations_result &locations_result) const;
 protected:
-  virtual void do_preview_request(
-      const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) override;
+  virtual void set_content_headers(web::HTTPServerResponse& response) const override;
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) const override;
 public:
-  TrackingRequestHandler(std::shared_ptr<TripConfig> config);
-  static const std::string tracking_url;
+  TrackingDownloadHandler(std::shared_ptr<TripConfig> config);
+  static const std::string tracking_download_url;
   virtual std::string get_handler_name() const override {
-    return "TrackingRequestHandler";
+    return "TrackingDownloadHandler";
   }
   virtual bool can_handle(
       const web::HTTPServerRequest& request) const override {
-    const std::string wanted_url = get_uri_prefix() + tracking_url;
+    const std::string wanted_url = get_uri_prefix() + tracking_download_url;
     return !request.uri.empty() &&
       request.uri.compare(0, wanted_url.length(), wanted_url) == 0;
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<TrackingRequestHandler>(
-        new TrackingRequestHandler(config));
+    return std::unique_ptr<TrackingDownloadHandler>(
+        new TrackingDownloadHandler(config));
   }
 };
 
 } // namespace trip
 } // namespace fdsd
 
-#endif // TRACKING_REQUEST_HANDLER_HPP
+#endif // TRACKING_DOWNLOAD_HANDLER_HPP

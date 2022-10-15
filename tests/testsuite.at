@@ -4,6 +4,9 @@ AT_COLOR_TESTS
 AT_SETUP([generate-uuid])
 AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_uuid],,ignore,ignore)
 AT_CLEANUP
+AT_SETUP([test-dao-helper])
+AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_dao_helper],,ignore,ignore)
+AT_CLEANUP
 AT_SETUP([test-date-utils])
 AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_date_utils],,ignore,ignore)
 AT_CLEANUP

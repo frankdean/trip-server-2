@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: frank.dean@fdsd.co.uk\n"
-"POT-Creation-Date: 2022-09-21 16:52+0100\n"
+"POT-Creation-Date: 2022-10-14 14:37+0100\n"
 "PO-Revision-Date: 2022-09-17 13:53+0100\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: French <traduc@traduc.org>\n"
@@ -33,116 +33,116 @@ msgid "Bye!"
 msgstr "au revoir"
 
 #. The title of the location tracking page
-#: src/tracking_request_handler.cpp:69
+#: src/tracking_request_handler.cpp:70
 msgid "Tracks"
 msgstr "Traces"
 
 #. Message showing the location tracking search result
-#: src/tracking_request_handler.cpp:76
+#: src/tracking_request_handler.cpp:77
 msgid "{1} track point received"
 msgid_plural "{1} track points received"
 msgstr[0] "A reçu {1} point"
 msgstr[1] "A reçu {1} points"
 
 #. Message showing the date range for the location tracking search result
-#: src/tracking_request_handler.cpp:78
+#: src/tracking_request_handler.cpp:79
 msgid "Between {1} and {2}"
 msgstr "Entre {1} et {2}"
 
 #. The column heading for the database unique numeric identifier of a tracked location point
-#: src/tracking_request_handler.cpp:87
+#: src/tracking_request_handler.cpp:88
 msgid "ID"
 msgstr "Identifiant"
 
 #. The column heading for the date and time of a tracked location point
-#: src/tracking_request_handler.cpp:89
+#: src/tracking_request_handler.cpp:90
 msgid "Time"
 msgstr "Temps"
 
 #. The column heading for the latitude coordinate of a tracked location point
-#: src/tracking_request_handler.cpp:91
+#: src/tracking_request_handler.cpp:92
 msgid "Latitude"
 msgstr "Latitude"
 
 #. The column heading for the longitude coordinate of a tracked location point
-#: src/tracking_request_handler.cpp:93
+#: src/tracking_request_handler.cpp:94
 msgid "Longitude"
 msgstr "Longitude"
 
 #. The column heading for the Horizontal Dilution Of Precision (estimated accuracy in metres) of a tracked location point
 #. The column heading for the altitude of a tracked location point
-#: src/tracking_request_handler.cpp:97
+#: src/tracking_request_handler.cpp:98
 msgid "Altitude"
 msgstr "Altitude"
 
 #. The column heading for the speed of a tracked location point
-#: src/tracking_request_handler.cpp:99
+#: src/tracking_request_handler.cpp:100
 msgid "Speed"
 msgstr "Vitesse"
 
 #. The column heading for the bearing (angle of heading) of a tracked location point
-#: src/tracking_request_handler.cpp:101
+#: src/tracking_request_handler.cpp:102
 msgid "Bearing"
 msgstr "Orientement"
 
 #. The column heading of a user provided note for the tracked location point
-#: src/tracking_request_handler.cpp:103
+#: src/tracking_request_handler.cpp:104
 msgid "Note"
 msgstr "Note"
 
 #. The column heading indicating how the location point was provided, e.g. iPhone, Apple Watch, GPS, manually, mobile phone mast
-#: src/tracking_request_handler.cpp:105
+#: src/tracking_request_handler.cpp:106
 msgid "Provider"
 msgstr "Source"
 
 #. The column heading indicating how many satellites were used to determine the location
-#: src/tracking_request_handler.cpp:107
+#: src/tracking_request_handler.cpp:108
 msgid "Satellites"
 msgstr "Satellites"
 
-#. The column heading showing the remaining battery percentage recoreded at the time of the tracked location point
-#: src/tracking_request_handler.cpp:109
+#. The column heading showing the remaining battery percentage recorded at the time of the tracked location point
+#: src/tracking_request_handler.cpp:110
 msgid "Battery"
 msgstr "Pile"
 
 #. "      <div class=\"row\">\n"
 #. The input start date to search for location tracks
-#: src/tracking_request_handler.cpp:202
+#: src/tracking_request_handler.cpp:203
 msgid "Date from"
 msgstr "Date après"
 
 #. The input end date to search for location tracks
-#: src/tracking_request_handler.cpp:208
+#: src/tracking_request_handler.cpp:209
 msgid "Date to"
 msgstr "Date avant"
 
 #. The input to select another user's nickname to view their shared location tracks
-#: src/tracking_request_handler.cpp:219
+#: src/tracking_request_handler.cpp:220
 msgid "Display shared user's tracks"
 msgstr "Affiche les points partagés"
 
 #. The maximum Horizontal Dilution of Precision (accuracy in metres) to filter locations by
-#: src/tracking_request_handler.cpp:248
+#: src/tracking_request_handler.cpp:249
 msgid "Max hdop"
 msgstr "HDOP maximum"
 
 #. instructions to disable filtering locations by HDOP (accuracy in metres)
-#: src/tracking_request_handler.cpp:255
+#: src/tracking_request_handler.cpp:256
 msgid "leave blank for no maximum"
 msgstr "Laisse l'entrée vide pour pas de maximum"
 
 #. Whether the user wishes to filter the results to only include those with notes attached
-#: src/tracking_request_handler.cpp:265
+#: src/tracking_request_handler.cpp:266
 msgid "Show notes only"
 msgstr "Affiche les notes seulement"
 
 #. Label for the button to perform the search that lists the tracked locations
-#: src/tracking_request_handler.cpp:270
+#: src/tracking_request_handler.cpp:271
 msgid "List tracks"
 msgstr "Afficher une liste des points"
 
 #. Label for the button to display a map showing the tracked locations
-#: src/tracking_request_handler.cpp:272
+#: src/tracking_request_handler.cpp:273
 msgid "Show map"
 msgstr "Affiche la carte"
 
@@ -157,12 +157,12 @@ msgid "Download tracks"
 msgstr "Télécharge les points"
 
 #. Label for the button to make a copy of the tracked locations
-#: src/tracking_request_handler.cpp:280
+#: src/tracking_request_handler.cpp:281
 msgid "Copy"
 msgstr "Copie"
 
 #. Label for the button which resets the form's input criteria to that originally displayed
-#: src/tracking_request_handler.cpp:283
+#: src/tracking_request_handler.cpp:284
 msgid "Reset"
 msgstr "Remettre"
 
@@ -240,7 +240,7 @@ msgid "Example:\n"
 msgstr "Exemple:\n"
 
 #: src/trip_request_handler.cpp:75
-#: trip-server-common/src/http_request_handler.cpp:545
+#: trip-server-common/src/http_request_handler.cpp:557
 msgid "Login"
 msgstr "Login"
 
@@ -285,12 +285,12 @@ msgid "Account"
 msgstr "Compte"
 
 #. Menu item linking to the user guide
-#: src/trip_request_handler.cpp:208
+#: src/trip_request_handler.cpp:209
 msgid "Help"
 msgstr "Aide"
 
 #. Menu item for the user to logout
-#: src/trip_request_handler.cpp:211
+#: src/trip_request_handler.cpp:212
 msgid "Logout"
 msgstr "Déconnecter"
 
@@ -311,18 +311,18 @@ msgid_plural "Creating {1} workers"
 msgstr[0] "Crée {1} ouvrier"
 msgstr[1] "Crée {1} ouvriers"
 
-#: trip-server-common/src/http_request_handler.cpp:501
-#: trip-server-common/src/http_request_handler.cpp:511
+#: trip-server-common/src/http_request_handler.cpp:513
+#: trip-server-common/src/http_request_handler.cpp:523
 msgid "Username"
 msgstr "Nom d'utilisateur"
 
-#: trip-server-common/src/http_request_handler.cpp:523
-#: trip-server-common/src/http_request_handler.cpp:533
+#: trip-server-common/src/http_request_handler.cpp:535
+#: trip-server-common/src/http_request_handler.cpp:545
 msgid "Password"
 msgstr "Mot de passe"
 
 #. Message showing the server administrator the URL a browser is being redirected to
-#: trip-server-common/src/http_request_handler.cpp:692
+#: trip-server-common/src/http_request_handler.cpp:704
 msgid "Redirecting to: {1}"
 msgstr "Redirection vers: {1}"
 

@@ -106,6 +106,8 @@ void TrackingMapHandler::handle_authenticated_request(
       }
       response.content <<
         "      ];\n";
+    } else {
+      std::cerr << "Warning: no map tile providers have been configured\n";
     }
     response.content <<
       "      // -->\n"

@@ -21,6 +21,7 @@
 */
 #include "../config.h"
 #include "tracking_request_handler.hpp"
+#include "tracking_download_handler.hpp"
 #include "session_pg_dao.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <locale>
@@ -59,9 +60,9 @@ void TrackingRequestHandler::build_form(
     HTTPServerResponse& response,
     bool first_time,
     const Pagination& pagination,
-    TrackPgDao::location_search_query_params query_params,
-    TrackPgDao::nickname_result nickname_result,
-    TrackPgDao::tracked_locations_result locations_result) const
+    const TrackPgDao::location_search_query_params& query_params,
+    const TrackPgDao::nickname_result& nickname_result,
+    const TrackPgDao::tracked_locations_result& locations_result) const
 {
   response.content <<
     "<div class=\"container-fluid\">\n"
@@ -105,7 +106,7 @@ void TrackingRequestHandler::build_form(
         "<th class=\"text-start\">" << translate("Provider") << "</th>"
         // The column heading indicating how many satellites were used to determine the location
         "<th class=\"text-end\">" << translate("Satellites") << "</th>"
-        // The column heading showing the remaining battery percentage recoreded at the time of the tracked location point
+        // The column heading showing the remaining battery percentage recorded at the time of the tracked location point
         "<th class=\"text-end\">" << translate("Battery") << "</th></tr>\n"
         ;
       for (auto const& location : locations_result.locations) {
@@ -113,7 +114,7 @@ void TrackingRequestHandler::build_form(
           "      <tr>\n"
           "        <td class=\"text-end\">" << as::number << std::setprecision(0) << location.id << "</td>\n";
         response.content <<
-          "        <td>" << as::datetime << location.time << "</td>\n";
+          "        <td>" << as::datetime << std::chrono::duration_cast<std::chrono::seconds>(location.time_point.time_since_epoch()).count() << "</td>\n";
         response.content << as::posix <<
           "        <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << std::fixed << std::setprecision(6) << location.latitude << "&lng=" << location.longitude << "\">" << location.latitude << "</a></td>\n"
           "        <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << location.latitude << "&lng=" << location.longitude << "\">" << location.longitude << "</a></td>\n"
@@ -270,12 +271,12 @@ void TrackingRequestHandler::build_form(
     "        <button id=\"btn-tracks\" type=\"submit\" name=\"action\" value=\"list\" class=\"btn btn-lg btn-success\">" << translate("List tracks") << "</button>\n"
     // Label for the button to display a map showing the tracked locations
     "        <button id=\"btn-map\" type=\"submit\" formaction=\"" << get_uri_prefix() << "/map\" name=\"action\" value=\"show_map\" class=\"btn btn-lg btn-primary\">" << translate("Show map") << "</button>\n"
-    "        <!--\n"
-    "        <button id=\"btn-download\" type=\"submit\" name=\"action\" value=\"show_map\" class=\"btn btn-lg btn-success\"\n"
+    "        <button id=\"btn-download\" type=\"submit\" formaction=\"" << get_uri_prefix() << TrackingDownloadHandler::tracking_download_url << "\" name=\"action\" value=\"download\" class=\"btn btn-lg btn-success\"\n"
     // Prompt to confirm the user wished to download a data file with the tracked locations
     "         onclick=\"return confirm('" << translate("Download tracks?") << "');\">"
     // Label for the button to download the tracks as an XML data file
                    << translate("Download tracks") << "</button>\n"
+    "        <!--\n"
     // Label for the button to make a copy of the tracked locations
     "        <button id=\"btn-copy\" type=\"submit\" name=\"action\" value=\"copy\" class=\"btn btn-lg btn-primary\">" << translate("Copy") << "</button>\n"
     "        -->\n"
@@ -349,7 +350,6 @@ void TrackingRequestHandler::handle_authenticated_request(
   // }
 
   TrackPgDao dao;
-  auto nickname_result = dao.get_nicknames(get_user_id());
   TrackPgDao::tracked_locations_result locations_result;
 
   Pagination pagination(get_uri_prefix() + tracking_url,
@@ -384,5 +384,6 @@ void TrackingRequestHandler::handle_authenticated_request(
     //           << " total\n";
 
   }
+  auto nickname_result = dao.get_nicknames(get_user_id());
   build_form(response, first_time, pagination, q, nickname_result, locations_result);
 }

@@ -22,6 +22,7 @@
 #include "../config.h"
 #include "tile_pg_dao.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
+#include <chrono>
 #include <pqxx/pqxx>
 
 using namespace fdsd::trip;
@@ -58,18 +59,27 @@ void TilePgDao::prune_tile_cache(int max_age)
 void TilePgDao::save_tile(int server_id,
                           int z, int x, int y,
                           const std::vector<char> &tile,
-                          std::time_t expires)
+                          std::chrono::system_clock::time_point expires)
 {
+  // std::cout << "Saving tile"
+  //           << server_id << ' ' << z << ' ' << x << ' ' << y << "\n";
+  const DateTime expiry_time(expires);
   work tx(*connection);
   std::string sql = "INSERT INTO tile (server_id, z, x, y, expires, image) "
-    "VALUES ($1, $2, $3, $4, to_timestamp($5), $6::bytea) "
+    "VALUES ($1, $2, $3, $4, $5, $6::bytea) "
     "ON CONFLICT (server_id, z, x, y) DO UPDATE "
     "SET server_id=$1, z=$2, x=$3, y=$4, updated=now(), "
-    "expires=to_timestamp($5), image=$6::bytea";
+    "expires=$5, image=$6::bytea";
   binarystring image(tile.data(), tile.size());
+
   tx.exec_params(sql,
-                 server_id, z, x, y, double(expires), image);
+                 server_id,
+                 z, x, y,
+                 expiry_time.get_time_as_iso8601_gmt(),
+                 image);
   tx.commit();
+  // std::cout << "Saved tile"
+  //           << server_id << ' ' << z << ' ' << x << ' ' << y << "\n";
 }
 
 std::pair<bool, TilePgDao::tile_result> TilePgDao::get_tile(int server_id,
@@ -86,7 +96,7 @@ std::pair<bool, TilePgDao::tile_result> TilePgDao::get_tile(int server_id,
     tile_result t;
     DateTime expires(r[0]["expires"].as<std::string>());
     t.tile = std::vector<char>();
-    t.expires = expires.time_t();
+    t.expires = expires.time_tp();
     field image = r[0]["image"];
     binarystring bs(image);
     for (auto i = bs.cbegin(); i != bs.cend(); i++) {

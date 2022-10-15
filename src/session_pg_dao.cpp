@@ -106,7 +106,8 @@ void SessionPgDao::save_session(std::string session_id,
   tx.exec_prepared(insert_session_ps_name,
                    session_id,
                    session.get_user_id(),
-                   session.get_last_updated_time_t());
+                   std::chrono::system_clock::to_time_t(
+                       session.get_last_updated_time_point()));
   tx.commit();
 }
 
@@ -121,7 +122,8 @@ void SessionPgDao::save_sessions(const session_map sessions)
     tx.exec_prepared(insert_session_ps_name,
                      session.first,
                      session.second.get_user_id(),
-                     session.second.get_last_updated_time_t());
+                     std::chrono::system_clock::to_time_t(
+                         session.second.get_last_updated_time_point()));
   }
   const int max_session_minutes = SessionManager::get_session_manager()->
     get_max_session_minutes();
@@ -234,8 +236,8 @@ bool SessionPgDao::is_admin(std::string user_id)
 
 void SessionPgDao::upgrade()
 {
-  work tx(*connection);
   try {
+    work tx(*connection);
     tx.exec(create_session_table_sql);
     tx.exec(create_session_data_table_sql);
     // tx.exec("ALTER TABLE session_data ADD PRIMARY KEY (session_id, key)");
@@ -249,4 +251,12 @@ void SessionPgDao::upgrade()
     throw;
   }
 
+  try {
+    work tx(*connection);
+    tx.exec("CREATE EXTENSION pgcrypto");
+    tx.commit();
+  } catch (const std::exception& e) {
+    std::cerr << "Failure creating pgcrypto extension: "
+              << e.what() << '\n';
+  }
 }

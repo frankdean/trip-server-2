@@ -43,7 +43,7 @@ struct location {
            double lon,
            double lat,
            std::pair<bool, double> altitude = std::pair<bool, double>(false, 0));
-  std::string to_string() const;
+  virtual std::string to_string() const;
   inline friend std::ostream& operator<<
       (std::ostream& out, const location& rhs) {
     return out << rhs.to_string();

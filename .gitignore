@@ -48,8 +48,8 @@
 /po/remove-potcdate.sed
 /po/stamp-po
 /po/Makevars.template
-/resources/static/bootstrap-5.2.0-dist/
-/resources/static/openlayers-7.0.0-legacy/
+/resources/static/bootstrap-*
+/resources/static/openlayers-*
 /src/test_geo_utils
 /doc/Makefile.in
 /doc/texinfo.tex

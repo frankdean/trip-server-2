@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.0.0-alpha.6],[frank.dean@fdsd.co.uk])
+AC_INIT([trip],[2.0.0-alpha.8],[frank.dean@fdsd.co.uk])
 AC_COPYRIGHT([Copyright (C) 2022 Frank Dean])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign dist-xz subdir-objects info-in-builddir])
 AC_CONFIG_SRCDIR([src/trip_request_factory.cpp])
@@ -48,6 +48,7 @@ AX_BOOST_LOCALE
 AX_BOOST_BASE
 #PKG_CHECK_MODULES([LIBPQXX], [libpqxx >= 6.2.5 libpqxx < 7 libpq >= 11.14 yaml-cpp >= 0.6.2 nlohmann_json >= 3.9.1])
 PKG_CHECK_MODULES([LIBPQXX], [libpqxx >= 6.2.5 libpqxx < 7 libpq >= 11.14 yaml-cpp >= 0.6.2])
+PKG_CHECK_MODULES([LIBPUGIXML], [pugixml >= 1.11])
 
 case $host in
 *-*-linux-*)
@@ -94,9 +95,9 @@ if test "x${use_keep_alive}" == xyes; then
    AC_DEFINE([ENABLE_KEEP_ALIVE],,[Enable HTTP keep alive])
 fi
 
-CXXFLAGS="${CXXFLAGS} -Wsuggest-override -Wno-deprecated-declarations ${LIBPQXX_CFLAGS} ${LIBUUID_CFLAGS} ${BOOST_CPPFLAGS}"
+CXXFLAGS="${CXXFLAGS} -Wsuggest-override -Wno-deprecated-declarations ${LIBPQXX_CFLAGS} ${LIBUUID_CFLAGS} ${BOOST_CPPFLAGS} ${LIBPUGIXML_CFLAGS}"
 dnl CPPFLAGS="${CPPFLAGS} ${XXXXXX_CPPFLAGS}"
-LIBS="${LIBS} ${LIBPQXX_LIBS} ${LIBUUID_LIBS} ${BOOST_LDFLAGS} ${BOOST_LOCALE_LIB}"
+LIBS="${LIBS} ${LIBPQXX_LIBS} ${LIBUUID_LIBS} ${BOOST_LDFLAGS} ${BOOST_LOCALE_LIB} ${LIBPUGIXML_LIBS}"
 
 # Checks for header files.
 dnl echo "Host_os: ${host_os}"

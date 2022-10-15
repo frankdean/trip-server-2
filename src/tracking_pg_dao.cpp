@@ -21,6 +21,7 @@
 */
 #include "../config.h"
 #include "tracking_pg_dao.hpp"
+#include "../trip-server-common/src/date_utils.hpp"
 #include <iomanip>
 #include <locale>
 #include <sstream>
@@ -50,6 +51,40 @@ void from_json(const json& j, TrackPgDao::location_search_query_params& qp)
 
 } // namespace trip
 } // namespace fdsd
+
+std::string TrackPgDao::tracked_location::to_string() const
+{
+  DateTime dt(time_point);
+  std::ostringstream os;
+  os <<
+    location::to_string() << ", "
+    "time_point: \"" << dt.get_time_as_iso8601_gmt() << "\", " <<
+    std::fixed << std::setprecision(1);
+  if (hdop.first)
+    os << "hdop: " << hdop.second << ", ";
+  if (speed.first)
+    os << "speed: " << speed.second << ", ";
+  os << std::setprecision(5);
+  if (bearing.first)
+    os << "bearing: " << bearing.second << ", ";
+  os << std::setprecision(0);
+  if (satellite_count.first)
+    os << "satellite_count: " << satellite_count.second << ", ";
+  os << "provider: \"" << provider << "\", " << std::setprecision(1);
+  if (battery.first)
+    os <<"battery: " << battery.second << ", ";
+  os << "note: \"" << note << "\"";
+  return os.str();
+}
+
+std::string TrackPgDao::tracked_location_query_params::to_string() const
+{
+  std::ostringstream os;
+  os
+    << "user_id: \"" << user_id << "\", "
+    << tracked_location::to_string();
+  return os.str();
+}
 
 TrackPgDao::location_search_query_params::location_search_query_params()
 {
@@ -155,6 +190,116 @@ std::map<std::string, std::string> TrackPgDao::location_search_query_params::que
   return m;
 }
 
+/**
+ * Constructor for tracked location query parameters.
+ *
+ * There are various ways for the query to express the time the location refers
+ * to, listed in the priority order in which they are evaluated, highest
+ * priority first:
+ *
+ *  mstime - unix time milliseconds
+ *
+ *  unixtime - unix time seconds
+ *
+ *  timestamp - synonym for unixtime
+ *
+ *  time - ISO 8601 format time
+ *
+ *  offset - Offset to apply to the time value being passed in
+ *  seconds. e.g. 3600 to add one hour. This is a workaround to situations
+ *  where it is known that the time value is consistently incorrectly
+ *  reported. e.g. A bug causing the GPS time to be one hour slow. Can be a
+ *  comma separated list of the same length as the offsetprovs parameter.
+ *
+ *  offsetprovs - sed in conjunction with the prov parameter to apply offsets
+ *  per location provider. E.g. setting offset to '3600' and offsetprovs to
+ *  'gps' will only apply the offset to locations submitted with the prov
+ *  parameter matching 'gps'. To apply offset to more than one provider, use
+ *  comma separated lists of the same length. E.g. set offset to '3600,7200'
+ *  and offsetprovs to 'gps,network' to add 1 hour to gps times and 2 hours
+ *  to network times.
+ *
+ *  msoffset - Same as the offset parameter above, but in milliseconds
+ *  e.g. 1000 to add one second.
+ *
+ *  lat - decimal degrees
+ *
+ *  lng/lon - decimal degrees
+ *
+ *  altitude
+ *
+ *  hdop
+ *
+ *  speed
+ *
+ *  bearing - Bearing in decimal degrees
+ *
+ *  sat
+ *
+ *  prov
+ *
+ *  batt
+ *
+ *  note
+ *
+ * \throws std::invalid_argument if any of the parameters hold invalid values.
+ *
+ * \throws std::out_of_range if any of the parameters contain invalid values.
+ *
+ */
+TrackPgDao::tracked_location_query_params::tracked_location_query_params(
+    std::string user_id,
+    const std::map<std::string,
+    std::string> &params) : tracked_location()
+{
+  this->user_id = user_id;
+  id = 0; // not used
+  latitude = std::stod(get_value(params, "lat"));
+  if (latitude < -90 || latitude > 90)
+    throw std::invalid_argument("Invalid latitude value");
+  std::string s = get_value(params, "lng");
+  if (s.empty())
+    s = get_value(params, "lon");
+  longitude = std::stod(s);
+  if (longitude < -180 || longitude > 180)
+    throw std::invalid_argument("Invalid longitude value");
+  altitude = get_optional_double_value(params, "altitude");
+  // Default to the current time
+  time_point = std::chrono::system_clock::now();
+  // Convert the possible time parameters
+  s = get_value(params, "mstime");
+  if (!s.empty()) {
+    // std::cout << "Using mstime parameter\n";
+    const long long ms = std::stoll(s);
+    time_point = std::chrono::system_clock::time_point(
+        std::chrono::milliseconds(ms));
+  } else {
+    s = get_value(params, "unixtime");
+    if (s.empty())
+      s = get_value(params, "timestamp");
+    if (!s.empty()) {
+      std::cout << "Using unixtime/timestamp parameter \"" << s << "\"\n";
+      const long long seconds = std::stoll(s);
+      time_point = std::chrono::system_clock::time_point(
+          std::chrono::seconds(seconds));
+    } else {
+      s = get_value(params, "time");
+      if (!s.empty()) {
+        // std::cout << "Using time parameter\n";
+        DateTime dt(s);
+        time_point = dt.time_tp();
+      }
+    }
+  }
+  hdop = get_optional_float_value(params, "hdop");
+  speed = get_optional_float_value(params, "speed");
+  bearing = get_optional_double_value(params, "bearing");
+  satellite_count = get_optional_int_value(params, "sat");
+  provider = get_value(params, "prov");
+  battery = get_optional_float_value(params, "batt");
+  note = get_value(params, "note");
+}
+
 std::string TrackPgDao::nickname_result::to_string() const
 {
   std::ostringstream os;
@@ -248,7 +393,7 @@ TrackPgDao::tracked_locations_result
     i["lng"].to(loc.longitude);
     i["lat"].to(loc.latitude);
     std::string date_str;
-    loc.time = dao_helper::convert_libpq_date(i["time"].as<std::string>());
+    loc.time_point = dao_helper::convert_libpq_date_tz(i["time"].as<std::string>());
     loc.hdop.first = i["hdop"].to(loc.hdop.second);
     loc.altitude.first = i["altitude"].to(loc.altitude.second);
     loc.speed.first = i["speed"].to(loc.speed.second);
@@ -501,3 +646,39 @@ TrackPgDao::nickname_result TrackPgDao::get_nicknames(std::string user_id)
   return retval;
 }
 
+std::string TrackPgDao::get_user_id_by_uuid(std::string uuid)
+{
+  std::string user_id;
+  work tx(*connection);
+  auto r = tx.exec_params(
+      "SELECT id, nickname FROM usertable WHERE uuid = $1",
+      uuid);
+  tx.commit();
+  if (!r.empty())
+    user_id = r[0]["id"].as<std::string>();
+  return user_id;
+}
+
+void TrackPgDao::save_tracked_location(
+    const TrackPgDao::tracked_location_query_params& qp)
+{
+  work tx(*connection);
+  const DateTime dt(qp.time_point);
+  tx.exec_params(
+      "INSERT INTO location ("
+      "user_id, geog, time, hdop, altitude, speed, bearing, sat, "
+      "provider, battery, note) "
+      "VALUES($1, ST_SetSRID(ST_POINT($2, $3),4326), "
+      "$4, $5, $6, $7, $8, $9, $10, $11, $12)",
+      qp.user_id, qp.longitude, qp.latitude,
+      dt.get_time_as_iso8601_gmt(),
+      qp.hdop.first ? &qp.hdop.second : nullptr,
+      qp.altitude.first ? &qp.altitude.second : nullptr,
+      qp.speed.first ? &qp.speed.second : nullptr,
+      qp.bearing.first ? &qp.bearing.second : nullptr,
+      qp.satellite_count.first ? &qp.satellite_count.second : nullptr,
+      qp.provider,
+      qp.battery.first ? &qp.battery.second : nullptr,
+      qp.note);
+  tx.commit();
+}

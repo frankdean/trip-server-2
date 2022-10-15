@@ -19,33 +19,37 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef TILE_PG_DAO_HPP
-#define TILE_PG_DAO_HPP
+#ifndef TRACK_LOGGING_HANDLER_HPP
+#define TRACK_LOGGING_HANDLER_HPP
 
-#include "trip_pg_dao.hpp"
-#include <chrono>
+#include "../config.h"
+#include "trip_request_handler.hpp"
 #include <string>
-#include <vector>
 
 namespace fdsd {
+namespace web {
+  class HTTPServerRequest;
+  class HTTPServerResponse;
+}
 namespace trip {
 
-class TilePgDao : public TripPgDao {
+class TrackLoggingHandler : public TripRequestHandler {
 public:
-  struct tile_result {
-    std::vector<char> tile;
-    std::chrono::system_clock::time_point expires;
-  };
-  long increment_tile_counter();
-  void update_tile_count();
-  void prune_tile_cache(int max_age);
-  void save_tile(int server_id, int z, int x, int y,
-                 const std::vector<char> &tile,
-                 std::chrono::system_clock::time_point expires);
-  std::pair<bool, tile_result> get_tile(int server_id, int z, int x, int y);
+  TrackLoggingHandler(std::shared_ptr<TripConfig> config) :
+    TripRequestHandler(config) {}
+  virtual std::string get_handler_name() const override {
+    return "TrackLoggingHandler";
+  }
+  virtual std::unique_ptr<BaseRequestHandler> new_instance() const override {
+    return std::unique_ptr<TrackLoggingHandler>(new TrackLoggingHandler(config));
+  }
+  virtual bool can_handle(const web::HTTPServerRequest& request) const override;
+  virtual void handle_request(
+      const web::HTTPServerRequest& request,
+      web::HTTPServerResponse& response) override;
 };
 
 } // namespace trip
 } // namespace fdsd
 
-#endif // TILE_PG_DAO_HPP
+#endif // TRACK_LOGGING_HANDLER_HPP
