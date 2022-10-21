@@ -132,6 +132,11 @@ public:
     std::time_t to;
   };
 
+  struct triplogger_configuration {
+    std::string uuid;
+    std::string tl_settings;
+  };
+
   /**
    * Fetches a list of nicknames.
    *
@@ -160,10 +165,14 @@ public:
 
   /// \return the user_id associated with the passed UUID
   std::string get_user_id_by_uuid(std::string uuid);
+  /// \return the uuid used for logging tracked locations for the given user_id
+  std::string get_logging_uuid_by_user_id(std::string user_id);
+  /// Saves the passed logging UUID for the specified user
+  void save_logging_uuid(std::string user_id, std::string logging_uuid);
   /// Saves the passed tracked location.
   void save_tracked_location(
       const TrackPgDao::tracked_location_query_params& qp);
-
+  triplogger_configuration get_triplogger_configuration(std::string user_id);
 private:
   /// Mutex used to lock access to non-threadsafe functions
   date_range constrain_shared_location_dates(

@@ -4,6 +4,14 @@
 
 T.B.D.
 
+## Version Control
+
+1.  Update `master` branch in `trip-server-common` sub-project
+
+1.  Checkin the updated `master` branch from the `trip-server-common` sub-project
+
+1.  Tag the `master` branch of the parent project with release version number
+
 ## Build
 
 1.  Create the distribution tarballs

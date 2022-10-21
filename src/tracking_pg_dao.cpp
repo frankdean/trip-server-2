@@ -659,6 +659,29 @@ std::string TrackPgDao::get_user_id_by_uuid(std::string uuid)
   return user_id;
 }
 
+std::string TrackPgDao::get_logging_uuid_by_user_id(std::string user_id)
+{
+  std::string logging_uuid;
+  work tx(*connection);
+  auto r = tx.exec_params(
+      "SELECT uuid FROM usertable WHERE id = $1",
+      user_id);
+  tx.commit();
+  if (!r.empty())
+    logging_uuid = r[0]["uuid"].as<std::string>();
+  return logging_uuid;
+}
+
+void TrackPgDao::save_logging_uuid(std::string user_id,
+                                   std::string logging_uuid)
+{
+  work tx(*connection);
+  tx.exec_params("UPDATE usertable SET uuid=$2 WHERE id=$1",
+                 user_id,
+                 logging_uuid);
+  tx.commit();
+}
+
 void TrackPgDao::save_tracked_location(
     const TrackPgDao::tracked_location_query_params& qp)
 {
@@ -681,4 +704,32 @@ void TrackPgDao::save_tracked_location(
       qp.battery.first ? &qp.battery.second : nullptr,
       qp.note);
   tx.commit();
+}
+
+/**
+ * Gets the most recently saved configuration file used by the TripLogger iOS
+ * app.
+ */
+TrackPgDao::triplogger_configuration TrackPgDao::get_triplogger_configuration(
+    std::string user_id)
+{
+  triplogger_configuration c;
+  try {
+    work tx(*connection);
+    auto r = tx.exec_params(
+        "SELECT uuid, tl_settings FROM usertable WHERE id=$1",
+        user_id);
+    if (!r.empty()) {
+      c.uuid = r[0]["uuid"].as<std::string>();
+      const auto f = r[0]["tl_settings"];
+      if (!f.is_null())
+        c.tl_settings = f.as<std::string>();
+    }
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception fetching tracklogger configuration: "
+              << e.what() << '\n';
+    throw;
+  }
+  return c;
 }

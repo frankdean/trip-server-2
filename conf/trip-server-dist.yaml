@@ -4,8 +4,17 @@ app:
       level: 0
   gpx:
     allowInvalidXsd: false # Ignored in trip v2
-  origins:
-    - "*:*"
+  autoQuit: # Ignored in trip v2
+    timeOut: 300 # Ignored in trip v2
+    nonSystemd: # Ignored in trip 2v
+      enabled: false # Ignored in trip v2
+  token: # Ignored in trip v2
+    expiresIn: 43200 # Ignored in trip v2
+    renewWithin: 21600 # Ignored in trip v2
+  origins: # Ignored in trip v2
+    - "*:*" # Ignored in trip v2
+  resourceToken: # Ignored in trip v2
+    expiresIn: 86400 # Ignored in trip v2
   maxItinerarySearchRadius: 50000
   averageFlatSpeedKph: 4
   worker_count: 10 #For trip v2 only
@@ -13,15 +22,15 @@ app:
   prefix_url: /trip2/app  #For trip v2 only
   messages_path: /usr/local/share/locale #For trip v2 only
 jwt:
-  signingKey: secret
-  resourceSigningKey: different-secret
+  signingKey: secret # Ignored in trip v2
+  resourceSigningKey: different-secret # Ignored in trip v2
 tile:
   cache:
     maxAge: 0
   providers_READ_TILE_USAGE_POLICY_BELOW_AND_SET_USER_AGENT_AND_REFERRER_INFO_BEFORE_USING:
     - cache: true
       prune: true
-      # see http://wiki.openstreetmap.org/wiki/Tile_usage_policy"
+      # see http://wiki.openstreetmap.org/wiki/Tile_usage_policy
       userAgentInfo: (mailto:your.contact@email.address)
       refererInfo: http://link_to_deployed_application_information
       options:
@@ -43,8 +52,12 @@ tile:
           - text: CC-BY-SA
             link: http://creativecommons.org/licenses/by-sa/2.0/
 db:
+  #uri: postgresql://trip:secret@localhost/trip
   # connect via default socket under /var/run/postgresql
   uri: "postgresql://%2Fvar%2Frun%2Fpostgresql/trip"
+  poolSize: 10 # Ignored in trip v2
+  poolIdleTimeout: 10000 # Ignored in trip v2
+  connectionTimeoutMillis: 0 # Ignored in trip v2
 elevation-local-disabled:
   tileCacheMs: 60000
   datasetDir: ./elevation-data/
@@ -85,14 +98,19 @@ tripLogger:
       httpsEnabled: true
       httpPostEnabled: true
       postJson: false
-      hostname: 192.168.1.8
+      hostname: localhost
       hostPort: "8080"
       hostPath: /trip/rest/log_point
       userId: null
       noteSuggestions:
         - Parked here
-# staticFiles: # This is a compile time option in trip v2
-validation:
+staticFiles: # This is a compile time option in trip v2
+  allow: true
+debug: false # Ignored in trip v2
+log: # Ignored in trip v2
+  level: info
+  timestamp: false
+validation: # Ignored in trip v2
   headers:
     contentType:
       warn: true

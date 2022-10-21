@@ -24,6 +24,7 @@
 
 #include "../trip-server-common/src/http_client.hpp"
 #include <string>
+#include <yaml-cpp/yaml.h>
 
 namespace fdsd {
 namespace trip {
@@ -55,6 +56,7 @@ class TripConfig {
   std::vector<tile_provider> providers;
   int tile_cache_max_age;
   int tile_count_frequency;
+  YAML::Node default_triplogger_configuration;
 public:
   TripConfig(std::string filename);
   std::string get_root_directory() const {
@@ -84,6 +86,7 @@ public:
   int get_tile_count_frequency() const {
     return tile_count_frequency;
   }
+  YAML::Node create_default_triplogger_configuration();
 };
 
 } // namespace trip

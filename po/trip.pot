@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: trip 2.0.0-alpha.7\n"
+"Project-Id-Version: trip 2.0.0-alpha.9\n"
 "Report-Msgid-Bugs-To: frank.dean@fdsd.co.uk\n"
-"POT-Creation-Date: 2022-10-14 14:37+0100\n"
+"POT-Creation-Date: 2022-10-21 16:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -236,18 +236,18 @@ msgstr ""
 msgid "Example:\n"
 msgstr ""
 
-#: src/trip_request_handler.cpp:75
-#: trip-server-common/src/http_request_handler.cpp:557
+#: src/trip_request_handler.cpp:72
+#: trip-server-common/src/http_request_handler.cpp:579
 msgid "Login"
 msgstr ""
 
 #. Menu item to select the location tracking page
-#: src/trip_request_handler.cpp:177
+#: src/trip_request_handler.cpp:173
 msgid "Tracking"
 msgstr ""
 
 #. Menu item to select the tracker information page
-#: src/trip_request_handler.cpp:181
+#: src/trip_request_handler.cpp:180
 msgid "Tracker Info"
 msgstr ""
 
@@ -308,18 +308,18 @@ msgid_plural "Creating {1} workers"
 msgstr[0] ""
 msgstr[1] ""
 
-#: trip-server-common/src/http_request_handler.cpp:513
-#: trip-server-common/src/http_request_handler.cpp:523
+#: trip-server-common/src/http_request_handler.cpp:535
+#: trip-server-common/src/http_request_handler.cpp:545
 msgid "Username"
 msgstr ""
 
-#: trip-server-common/src/http_request_handler.cpp:535
-#: trip-server-common/src/http_request_handler.cpp:545
+#: trip-server-common/src/http_request_handler.cpp:557
+#: trip-server-common/src/http_request_handler.cpp:567
 msgid "Password"
 msgstr ""
 
 #. Message showing the server administrator the URL a browser is being redirected to
-#: trip-server-common/src/http_request_handler.cpp:704
+#: trip-server-common/src/http_request_handler.cpp:726
 msgid "Redirecting to: {1}"
 msgstr ""
 

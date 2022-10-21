@@ -21,11 +21,13 @@
 */
 
 #include "track_logging_handler.hpp"
+#include "trip_get_options.hpp"
 #include "tracking_pg_dao.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include "../trip-server-common/src/uuid.hpp"
 #include <map>
 #include <nlohmann/json.hpp>
+#include <regex>
 
 using namespace fdsd::trip;
 using namespace fdsd::web;
@@ -34,17 +36,13 @@ using json = nlohmann::json;
 
 bool TrackLoggingHandler::can_handle(const HTTPServerRequest& request) const
 {
-  const std::string wanted_url = get_uri_prefix() + "/rest/log_point";
-  return !request.uri.empty() &&
-    request.uri.compare(0, wanted_url.length(), wanted_url) == 0;
-  return false;
+  return compare_request_regex(request.uri, "(/rest)?/log_point(\\?.*)?");
 }
 
-void TrackLoggingHandler::handle_request(
+void TrackLoggingHandler::do_handle_request(
     const HTTPServerRequest& request,
-    HTTPServerResponse& response)
+    HTTPServerResponse& response) const
 {
-  // std::cout << "TrackLoggingHandler::handle_request()\n";
   std::string uuid_str;
   std::map<std::string, std::string> params;
   // Must handle both get and post
@@ -67,39 +65,29 @@ void TrackLoggingHandler::handle_request(
           params[el.key()] = el.value();
         uuid_str = j["uuid"];
       } catch(const std::exception& e) {
-        std::cerr << "Track log_point Error parsing JSON POST: "
-                  << e.what() << '\n';
-        response.generate_standard_response(HTTPStatus::bad_request);
-        return;
+        std::ostringstream os;
+        os << "Track log_point Error parsing JSON POST: "
+           << e.what();
+        throw BadRequestException(os.str());
       }
     } else {
-      response.generate_standard_response(HTTPStatus::bad_request);
-      return;
+      throw BadRequestException("Track log_point: empty request");
     }
   } else {
-    response.generate_standard_response(HTTPStatus::bad_request);
-    return;
+    throw BadRequestException("Unexpected HTTP request method: \""
+                              + request.method_to_str() + '"');
   }
   if (!UUID::is_valid(uuid_str)) {
-    std::cerr << "log_point, invalid UUID\n";
-    response.generate_standard_response(HTTPStatus::bad_request);
-    return;
+    throw BadRequestException("Track log_point: invalid UUID");
   }
   TrackPgDao dao;
   std::string user_id = dao.get_user_id_by_uuid(uuid_str);
   if (user_id.empty()){
-    std::cerr << "log_point, UUID not found\n";
-    response.generate_standard_response(HTTPStatus::bad_request);
-    return;
+    if (GetOptions::verbose_flag)
+      std::cerr << "UUID not found\n";
+    throw BadRequestException("Track log_point: UUID not found");
   }
-  try {
-    TrackPgDao::tracked_location_query_params qp(user_id, params);
-    qp.user_id = user_id;
-    dao.save_tracked_location(qp);
-  } catch (const std::logic_error& e) {
-    std::cerr << "Error parsing tracked location parameters: "
-              << e.what() << '\n';
-    response.generate_standard_response(HTTPStatus::bad_request);
-    return;
-  }
+  TrackPgDao::tracked_location_query_params qp(user_id, params);
+  qp.user_id = user_id;
+  dao.save_tracked_location(qp);
 }

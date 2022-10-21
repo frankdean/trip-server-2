@@ -20,10 +20,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "trip_config.hpp"
+#include "../trip-server-common/src/uuid.hpp"
 #include <iostream>
-#include <yaml-cpp/yaml.h>
 
 using namespace fdsd::trip;
+using namespace fdsd::utils;
 
 TripConfig::TripConfig(std::string filename) :
   root_directory(),
@@ -137,6 +138,9 @@ TripConfig::TripConfig(std::string filename) :
       //   std::cout << p << '\n';
       // }
     }
+    if (auto tl = yaml["tripLogger"]) {
+      default_triplogger_configuration = tl["defaultConfiguration"];
+    }
   } catch (const YAML::BadFile& e) {
     std::cerr << "Failure reading \"" << filename << "\"\n"
               << e.what() << '\n';
@@ -144,6 +148,18 @@ TripConfig::TripConfig(std::string filename) :
     std::cerr << "Failure parsing \"" << filename << "\"\n"
               << e.what() << '\n';
   }
+}
+
+YAML::Node TripConfig::create_default_triplogger_configuration()
+{
+  const std::string new_profile_uuid = UUID::generate_uuid();
+  YAML::Node retval = default_triplogger_configuration["defaultSettings"];
+  retval["currentSettingUUID"] = new_profile_uuid;
+  if (auto profile = default_triplogger_configuration["defaultProfile"]) {
+    profile["uuid"] = new_profile_uuid;
+    retval["settingProfiles"].push_back(profile);
+  }
+  return retval;
 }
 
 std::string tile_provider::to_string() const

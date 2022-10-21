@@ -187,7 +187,7 @@ void TrackingRequestHandler::build_form(
       "    <div class=\"d-flex justify-content-center pt-0 pb-0 col-12\">\n"
       "      <input id=\"goto-page\" type=\"number\" name=\"page\" value=\""
       << std::fixed << std::setprecision(0) << pagination.get_current_page()
-      << "\" min=\"1\" max=\"" << page_count << "\"/>\n"
+      << "\" min=\"1\" max=\"" << page_count << "\">\n"
       "      <button id=\"goto-page-btn\" class=\"btn btn-sm btn-primary\" type=\"submit\" name=\"action\" value=\"goto-page\">Go</button>\n"
       "    </div>\n"
       ;
@@ -201,13 +201,13 @@ void TrackingRequestHandler::build_form(
     "      <div class=\"col-lg-3\">\n"
     // The input start date to search for location tracks
     "        <label for=\"input-date-from\" class=\"form-label\">" << translate("Date from") << "</label>\n"
-    "        <input id=\"input-date-from\" class=\"form-control\"  aria-describedby=\"validationFromDate\" type=\"datetime-local\" name=\"from\" value=\"" << query_params.date_as_html_input_value(query_params.date_from) <<  "\" size=\"25\" step=\"1\" required />\n"
+    "        <input id=\"input-date-from\" class=\"form-control\"  aria-describedby=\"validationFromDate\" type=\"datetime-local\" name=\"from\" value=\"" << query_params.date_as_html_input_value(query_params.date_from) <<  "\" size=\"25\" step=\"1\" required >\n"
     "        <div id=\"validationFromDate\" class=\"invalid-feedback\">Enter the start date to fetch points from</div>\n"
     "      </div>\n"
     "      <div class=\"col-lg-3\">\n"
     // The input end date to search for location tracks
     "        <label for=\"input-date-to\" class=\"form-label\">" << translate("Date to") << "</label>\n"
-    "        <input id=\"input-date-to\" class=\"form-control\" aria-describedby=\"validationFromDate\" type=\"datetime-local\" name=\"to\" value=\"" << query_params.date_as_html_input_value(query_params.date_to) << "\" size=\"25\" step=\"1\" required />\n"
+    "        <input id=\"input-date-to\" class=\"form-control\" aria-describedby=\"validationFromDate\" type=\"datetime-local\" name=\"to\" value=\"" << query_params.date_as_html_input_value(query_params.date_to) << "\" size=\"25\" step=\"1\" required >\n"
     "        <div id=\"validationToDate\" class=\"invalid-feedback\">Enter the end date to fetch points until</div>\n"
     // "      </div>\n"
     "      </div>\n";
@@ -253,7 +253,7 @@ void TrackingRequestHandler::build_form(
   }
   response.content <<
     // instructions to disable filtering locations by HDOP (accuracy in metres)
-    "\" /> (" << translate("leave blank for no maximum") << ")\n"
+    "\"> (" << translate("leave blank for no maximum") << ")\n"
     "      </div>\n"
     "      <div class=\"col-12\">\n"
     "        <div class=\"form-check\">\n"
@@ -261,7 +261,7 @@ void TrackingRequestHandler::build_form(
   if (query_params.notes_only_flag)
     response.content << " checked";
   response.content <<
-    "/>\n"
+    ">\n"
     // Whether the user wishes to filter the results to only include those with notes attached
     "          <label for=\"input-notes-only\" class=\"form-check-label\">" << translate("Show notes only") << "</label>\n"
     "        </div>\n"

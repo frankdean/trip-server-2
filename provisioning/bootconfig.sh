@@ -25,7 +25,37 @@
 #PG_VERSION=11
 # Debian 11
 PG_VERSION=13
-PGPASSWORD='syipsixdod2'
+
+SU_CMD="su vagrant -c"
+
+if [ -x /bin/freebsd-version ]; then
+    SU_CMD="su -m vagrant -c"
+
+    egrep '^\s*:lang=en_GB.UTF-8' /home/vagrant/.login_conf
+    if [ $? -ne 0 ]; then
+	cat >> /home/vagrant/.login_conf <<"EOF"
+me:\
+	:charset=ISO8859-15:\
+	:lang=en_GB.UTF-8:
+EOF
+    fi
+fi
+
+# Create trip-server configuration file from distribution file
+# signingKey and resourceSigningKey only needed for trip v1
+SIGNING_KEY=$(apg  -m 12 -x 14 -M NC -t -n 20 | tail -n 1 | cut -d ' ' -f 1 -)
+# Cleanup old configurations - TODO remove after testing
+if [ -L /usr/local/etc/trip-server.yaml ]; then
+    rm -f /usr/local/etc/trip-server.yaml
+fi
+if [ ! -e /usr/local/etc/trip-server.yaml ]; then
+    if [ -x /bin/freebsd-version ]; then
+	# FreeBSD different location for PostgreSQL socket
+	sed "s/level: 0/level: 4/; s/signingKey.*/signingKey: ${SIGNING_KEY}/; s/resourceSigningKey.*/resourceSigningKey: ${SIGNING_KEY}/; s/uri: .*/uri: postgresql:\/\/%2Ftmp\/trip/;" /vagrant/conf/trip-server-dist.yaml >/usr/local/etc/trip-server.yaml
+    else
+	sed "s/level: 0/level: 4/; s/signingKey.*/signingKey: ${SIGNING_KEY}/; s/resourceSigningKey.*/resourceSigningKey: ${SIGNING_KEY}/; s/uri: .*/uri: postgresql:\/\/%2Fvar%2Frun%2Fpostgresql\/trip/;" /vagrant/conf/trip-server-dist.yaml >/usr/local/etc/trip-server.yaml
+    fi
+fi
 
 # Configure PostgeSQL
 su - postgres -c 'createuser -drs vagrant' 2>/dev/null
@@ -45,7 +75,7 @@ fi
 su - postgres -c 'createuser trip' >/dev/null 2>&1
 if [ $? -eq 0 ]; then
 	su - postgres -c 'dropuser trip'
-	echo "CREATE USER trip PASSWORD '${PGPASSWORD}' NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT" 2>/dev/null 2>&1 | su - postgres -c 'psql --quiet' 2>/dev/null 2>&1
+	echo "CREATE USER trip NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT" 2>/dev/null 2>&1 | su - postgres -c 'psql --quiet' 2>/dev/null 2>&1
 fi
 TEST_DATA_DIR=/vagrant/provisioning/downloads
 su - postgres -c 'createdb trip --owner=trip' 2>/dev/null
@@ -75,58 +105,60 @@ EOF
     fi
 fi
 # Setup nginx as an example
-if [ ! -e /etc/nginx/conf.d/trip.conf ]; then
+if [ -d /etc/nginx ]; then
+    if [ ! -e /etc/nginx/conf.d/trip.conf ]; then
 	cp /vagrant/provisioning/nginx/conf.d/trip.conf /etc/nginx/conf.d/
-fi
-if [ ! -e /etc/nginx/sites-available/trip ]; then
+    fi
+    if [ ! -e /etc/nginx/sites-available/trip ]; then
 	cp /vagrant/provisioning/nginx/sites-available/trip /etc/nginx/sites-available
-fi
-cd /etc/nginx/sites-enabled
-if [ -e default ]; then
+    fi
+    cd /etc/nginx/sites-enabled
+    if [ -e default ]; then
 	rm -f default
 	ln -fs ../sites-available/trip
-fi
-systemctl restart nginx
-
-## Additional configuration to support developing with Trip Server version 1 series.
-if [ -d /vagrant-trip-server ]; then
-    cd /vagrant-trip-server
-    if [ ! -e config.yaml ]; then
-	SIGNING_KEY=$(apg  -m 12 -x 14 -M NC -t -n 20 | tail -n 1 | cut -d ' ' -f 1 -)
-	UMASK=$(umask -p)
-	umask o-rwx
-	cp config-dist.yaml config.yaml
-	$UMASK
-	sed "s/level: 0/level: 4/; s/signingKey.*/signingKey: ${SIGNING_KEY},/; s/maxAge: *[0-9]\+/maxAge: 999/; s/host: *.*, */host: localhost,/; s/^        path: .*$/        path: \/DO_NOT_FETCH_TILES_IN_DEMO_UNTIL_PROPERLY_CONFIGURED\/{z}\/{x}\/{y}.png,/; s/uri: .*/uri: postgresql:\/\/%2Fvar%2Frun%2Fpostgresql\/trip/; s/allow: +.*/allow: false/; s/level: +info/level: debug/" config-dist.yaml >config.yaml
     fi
-    if [ ! -L /usr/local/etc/trip-server.yaml ]; then
-	ln -s /vagrant-trip-server/config.yaml /usr/local/etc/trip-server.yaml
-    fi
+    systemctl restart nginx
 fi
 
 # Build the application
 if [ ! -d /home/vagrant/build ]; then
-    su vagrant -c 'mkdir /home/vagrant/build'
+    $SU_CMD 'mkdir /home/vagrant/build'
 fi
+
 cd /home/vagrant/build
-su - vagrant -c 'cd /home/vagrant/build && /vagrant/configure'
-su - vagrant -c 'make -C /home/vagrant/build check'
-if [ -x /home/vagrant/build/src/trip-server ]; then
-    echo "Installing trip-server"
-    make install
-    echo "Upgrade?"
-    if [ "$CREATED_DB" == "y" ]; then
-	echo "Upgrading database"
-	su - vagrant -c 'trip-server --upgrade'
+# Don't run configure if it has already been run
+if [ ! -e /home/vagrant/build/config.status ]; then
+    if [ -r /usr/lib/fedora-release ] || [ -x /bin/freebsd-version ]; then
+    $SU_CMD "pwd && /vagrant/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0'"
+    else
+	$SU_CMD "/vagrant/configure CXXFLAGS='-g -O0'"
     fi
 fi
+if [ -e /home/vagrant/build/config.status ] && [ -e /home/vagrant/build/Makefile ]; then
+    $SU_CMD 'pwd && make -C /home/vagrant/build check'
+    if [ $? -eq 0 ] && [ -x /home/vagrant/build/src/trip-server ]; then
+	echo "Installing trip-server"
+	make install
+    fi
+fi
+
+if [ -x /home/vagrant/build/src/trip-server ]; then
+    RESULT=$($SU_CMD "echo 'SELECT count(*) AS session_table_exists FROM session' | psql trip 2>&1") >/dev/null 2>&1
+    echo $RESULT | egrep 'ERROR:\s+relation "session" does not exist' >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+	echo "Upgrading database"
+	$SU_CMD 'trip-server --upgrade'
+    fi
+fi
+
 # Vi as default editor
 egrep '^export\s+EDITOR' /home/vagrant/.profile >/dev/null 2>&1
 if [ $? -ne 0 ]; then
 	echo "export EDITOR=/usr/bin/vi" >>/home/vagrant/.profile
 fi
-# Configure systemd
-if [ ! -e /etc/systemd/system/trip-server-2.service ]; then
+
+# Configure systemd if it appears to be installed
+if [ -d /etc/systemd/system ] && [ ! -e /etc/systemd/system/trip-server-2.service ]; then
     systemctl is-active trip-server-2.service >/dev/null
     if [ $? -ne 0 ]; then
 	cp /vagrant/provisioning/systemd/trip-server-2.service /etc/systemd/system/
@@ -139,25 +171,49 @@ if [ ! -e /var/log/trip.log ]; then
 fi
 chown vagrant:vagrant /var/log/trip.log
 chmod 0640 /var/log/trip.log
-if [ ! -e /etc/logrotate.d/trip ]; then
+if [ ! -e /etc/logrotate.d/trip ] && [ -d /etclogrotate.d ]; then
     cp /vagrant/provisioning/logrotate.d/trip /etc/logrotate.d/
+fi
+
+## Additional configuration to support developing with Trip Server version 1 series.
+if [ -d /vagrant-trip-server ]; then
+    cd /vagrant-trip-server
+    if [ ! -e config.yaml ]; then
+	if [ -f /usr/local/etc/trip-server.yaml ]; then
+	    $SU_CMD 'ln -s /usr/local/etc/trip-server.yaml config.yaml'
+	else
+	    UMASK=$(umask -p)
+	    umask o-rwx
+	    cp config-dist.yaml config.yaml
+	    $UMASK
+	    sed "s/level: 0/level: 4/; s/signingKey.*/signingKey: ${SIGNING_KEY},/; s/maxAge: *[0-9]\+/maxAge: 999/; s/host: *.*, */host: localhost,/; s/^        path: .*$/        path: \/DO_NOT_FETCH_TILES_IN_DEMO_UNTIL_PROPERLY_CONFIGURED\/{z}\/{x}\/{y}.png,/; s/uri: .*/uri: postgresql:\/\/%2Fvar%2Frun%2Fpostgresql\/trip/; s/allow: +.*/allow: false/; s/level: +info/level: debug/" config-dist.yaml >config.yaml
+	fi
+    fi
 fi
 
 # Remove any existing link and then re-create
 if [ -L /vagrant-trip-server/app ]; then
 	rm /vagrant-trip-server/app
 fi
-if [ -f /vagrant-trip-web-client/package.json ]; then
+
+# Our normal setup for trip-server v1 doesn't work with the folder
+# synchronisation used for the FreeBSD box
+if [ ! -x /bin/freebsd-version ] && [ -n "$SU_CMD $(type -P yarn)" ]; then
+    if [ -f /vagrant-trip-server/package.json ] && [ ! -d /vagrant-trip-server/node_modules ]; then
+	$SU_CMD 'cd /vagrant-trip-server && yarn install'
+    fi
+    if [ -f /vagrant-trip-web-client/package.json ]; then
 	echo "Configuring web client to use shared folder under /vagrant-trip-web-client/"
 	if [ ! -d /vagrant-trip-web-client/node_modules ]; then
-		su - vagrant -c 'cd /vagrant-trip-web-client && yarn install'
+	    $SU_CMD 'cd /vagrant-trip-web-client && yarn install'
 	fi
 	if [ "$TRIP_DEV" == "y" ]; then
-		if [ -L /vagrant-trip-server/app ]; then
-			rm /vagrant-trip-server/app
-		fi
-		ln -f -s /vagrant-trip-web-client/app /vagrant-trip-server/app
+	    if [ -L /vagrant-trip-server/app ]; then
+		rm /vagrant-trip-server/app
+	    fi
+	    ln -f -s /vagrant-trip-web-client/app /vagrant-trip-server/app
 	fi
+    fi
 fi
 if [ "$TRIP_DEV" == "y" ]; then
 	egrep '^export\s+CHROME_BIN' /home/vagrant/.profile >/dev/null 2>&1

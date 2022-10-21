@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.0.0-alpha.8],[frank.dean@fdsd.co.uk])
+AC_INIT([trip],[2.0.0-alpha.9],[frank.dean@fdsd.co.uk])
 AC_COPYRIGHT([Copyright (C) 2022 Frank Dean])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign dist-xz subdir-objects info-in-builddir])
 AC_CONFIG_SRCDIR([src/trip_request_factory.cpp])
@@ -46,24 +46,25 @@ AC_SEARCH_LIBS([pthread_create], [pthread])
 AX_BOOST_BASE([1.67],[],[AC_MSG_ERROR([Please install at least version 1.67 of the Boost Locale Library])])
 AX_BOOST_LOCALE
 AX_BOOST_BASE
-#PKG_CHECK_MODULES([LIBPQXX], [libpqxx >= 6.2.5 libpqxx < 7 libpq >= 11.14 yaml-cpp >= 0.6.2 nlohmann_json >= 3.9.1])
 PKG_CHECK_MODULES([LIBPQXX], [libpqxx >= 6.2.5 libpqxx < 7 libpq >= 11.14 yaml-cpp >= 0.6.2])
 PKG_CHECK_MODULES([LIBPUGIXML], [pugixml >= 1.11])
 
+echo $host
+
 case $host in
-*-*-linux-*)
-    pkg-config --exists uuid
+*-*-freebsd* | *-*-linux-*)
+    $PKG_CONFIG --exists uuid
     if [[ $? -eq 0 ]]; then
        have_libuuid=yes
-       LIBUUID_CFLAGS=$(pkg-config --cflags uuid)
-       LIBUUID_LIBS=$(pkg-config --libs uuid)
+       LIBUUID_CFLAGS=$($PKG_CONFIG --cflags uuid)
+       LIBUUID_LIBS=$($PKG_CONFIG --libs uuid)
        dnl AC_DEFINE([HAVE_LINUX_UUID],,[Build with support for Linux libuuid implementation])
     else
-	pkg-config --exists ossp-uuid
+	$PKG_CONFIG --exists ossp-uuid
 	if [[ $? -eq 0 ]]; then
 	   have_libosspuuid=yes
-	   LIBUUID_CFLAGS=$(pkg-config --cflags ossp-uuid)
-	   LIBUUID_LIBS=$(pkg-config --libs ossp-uuid)
+	   LIBUUID_CFLAGS=$($PKG_CONFIG --cflags ossp-uuid)
+	   LIBUUID_LIBS=$($PKG_CONFIG --libs ossp-uuid)
 	fi
     fi
 ;;

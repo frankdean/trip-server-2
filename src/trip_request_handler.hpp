@@ -42,21 +42,9 @@ public:
   static const std::string default_url;
   static const std::string success_url;
   TripRequestHandler(std::shared_ptr<TripConfig> config);
-  virtual std::string get_handler_name() const override {
-    return "TripRequestHandler";
-  }
-  virtual std::unique_ptr<BaseRequestHandler> new_instance() const override;
-  virtual bool can_handle(
-      const web::HTTPServerRequest& request) const override {
-    std::string prefix = get_uri_prefix();
-    // Act as default handler for the application root URL or URLs that do not
-    // start with the root.
-    return request.uri == prefix ||
-      (prefix.length() > 1 && request.uri.find(prefix) != 0);
-  }
-  virtual void do_handle_request(
+  virtual void handle_request(
       const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) const override;
+      web::HTTPServerResponse& response) override;
 };
 
 class TripLoginRequestHandler : public fdsd::web::HTTPLoginRequestHandler {
@@ -146,6 +134,9 @@ protected:
   virtual std::string get_default_uri() const override {
     return get_uri_prefix() + TripRequestHandler::default_url;
   }
+  virtual std::string get_handler_name() const override {
+    return "TripNotFoundHandler";
+  }
 public:
   TripNotFoundHandler(std::string uri_prefix) :
     HTTPNotFoundRequestHandler(uri_prefix) {}
@@ -154,7 +145,7 @@ public:
 class TripAuthenticatedRequestHandler : public web::AuthenticatedRequestHandler {
 protected:
   std::shared_ptr<TripConfig> config;
-  enum menu_items { unknown, tracks };
+  enum menu_items { unknown, tracks, tracker_info };
 private:
     menu_items menu_item;
 protected:

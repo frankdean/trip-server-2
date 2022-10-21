@@ -45,22 +45,19 @@ TripRequestHandler::TripRequestHandler(std::shared_ptr<TripConfig> config) :
 {
 }
 
-std::unique_ptr<BaseRequestHandler> TripRequestHandler::new_instance() const
-{
-  return std::unique_ptr<TripRequestHandler>(
-      new TripRequestHandler(config));
-}
-
-void TripRequestHandler::do_handle_request(
+void TripRequestHandler::handle_request(
     const HTTPServerRequest& request,
-    HTTPServerResponse& response) const
+    HTTPServerResponse& response)
 {
-  response.content
-    <<
-    "<h1>Hello World!</h1>\n"
-    "<p>Click <a href=\""
-    << get_uri_prefix() << TripRequestHandler::success_url
-    << "\">here</a> to test authentication</p>\n";
+  try {
+    do_handle_request(request, response);
+  } catch (const BadRequestException &e) {
+    handle_bad_request(request, response);
+  } catch (const std::invalid_argument &e) {
+    handle_bad_request(request, response);
+  } catch (const std::out_of_range &e) {
+    handle_bad_request(request, response);
+  }
 }
 
 const std::string TripLoginRequestHandler::login_url =
@@ -105,8 +102,8 @@ void TripAuthenticatedRequestHandler::append_head_content(std::ostream& os) cons
   os <<
     // Bootstrap
     // "    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx\" crossorigin=\"anonymous\">\n"
-    "    <link rel=\"stylesheet\" href=\"./static/bootstrap-5.2.1-dist/css/bootstrap.min.css\"/>\n"
-    "    <link rel=\"stylesheet\" href=\"./static/css/trip.css\"/>\n";
+    "    <link rel=\"stylesheet\" href=\"./static/bootstrap-5.2.1-dist/css/bootstrap.min.css\">\n"
+    "    <link rel=\"stylesheet\" href=\"./static/css/trip.css\">\n";
 }
 
 void TripAuthenticatedRequestHandler::append_head_title_section(std::ostream& os) const
@@ -171,14 +168,17 @@ void TripAuthenticatedRequestHandler::append_body_start(std::ostream& os) const
 
   if (get_menu_item() == tracks)
     os << " active";
-
   os <<
     // Menu item to select the location tracking page
     "\" href=\"" << prefix << "/tracks\">" << translate("Tracking") << "</a></li>\n"
-    "            <!--\n"
-    "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"" << prefix << "/tracker-info\">"
+    "            <li class=\"nav-item\"><a class=\"nav-link";
+  if (get_menu_item() == tracker_info)
+    os << " active";
+  os <<
+    "\" href=\"" << prefix << "/tracker-info\">"
     // Menu item to select the tracker information page
      << translate("Tracker Info") << "</a></li>\n"
+    "            <!--\n"
     "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"" << prefix << "/sharing\">"
     // Menu item to select the track sharing page
      << translate("Tracker Sharing") << "</a></li>\n"
@@ -261,11 +261,11 @@ void BaseMapHandler::append_head_content(std::ostream& os) const
   os <<
     // Bootstrap
     // "    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx\" crossorigin=\"anonymous\">\n"
-    "    <link rel=\"stylesheet\" href=\"./static/bootstrap-5.2.1-dist/css/bootstrap.min.css\"/>\n"
+    "    <link rel=\"stylesheet\" href=\"./static/bootstrap-5.2.1-dist/css/bootstrap.min.css\">\n"
     // OpenLayers
     // "    <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.css\">\n"
-    "    <link rel=\"stylesheet\" href=\"./static/openlayers-7.0.0-legacy/ol.css\"/>\n"
-    "    <link rel=\"stylesheet\" href=\"./static/css/trip.css\"/>\n";
+    "    <link rel=\"stylesheet\" href=\"./static/openlayers-7.0.0-legacy/ol.css\">\n"
+    "    <link rel=\"stylesheet\" href=\"./static/css/trip.css\">\n";
 }
 
 void BaseMapHandler::append_pre_body_end(std::ostream& os) const

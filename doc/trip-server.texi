@@ -1019,7 +1019,7 @@ Start the Vagrant VM
 
 @example
 $ cd ~/projects/trip-server
-$ vagrant up
+$ vagrant up debian
 @end example
 
 The first time this is run, it will download a
@@ -1044,7 +1044,7 @@ source files on the host server and immediately impact the deployed
 application.  This gives you a complete working development environment.
 
 Should you need it, e.g. for running a GUI in Vagrant, the @code{vagrant}
-user's default password is @code{vagrant}.
+user's default password is usually @code{vagrant}.
 
 Rendering of map tiles is disabled by default, in order to respect
 @url{@value{osmtileusageurl},OpenStreetMap's Tile Usage Policy.}  You

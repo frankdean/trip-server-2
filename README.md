@@ -208,20 +208,62 @@ development environment using [Vagrant][].
 
 [Vagrant]: https://www.vagrantup.com "Development Environments Made Easy"
 
+### Fedora
+
+Minimal packages required to build from the source distribution tarball, for
+Fedora version 36.
+
+The application requires a version 6.x of [libpqxx][] installed, which is
+older than that in this version of Fedora.  See the 'libpqxx' section below
+for instructions on installing `libpqxx`.
+
+The application also requires the `nlohmann/json` package, which is not
+included in the Fedora distribution.  Follow the instructions in the
+'nlohmann/json' section below to install it.  Tested on Fedora with
+`nlohmann/json` version 3.11.2.
+
+- gcc
+- gawk
+- boost-devel
+- libpqxx-devel
+- libpq-devel
+- yaml-cpp-devel
+- pugixml-devel
+- libuuid-devel
+
+Optionally install the `uuidd` package which runs a daemon that `libuuid` uses
+to create secure UUIDs.
+
+To build from source other than a tarball release, e.g. a git clone, examine
+the contents of `./provisioning/bootstrap.sh` to see which packages are
+installed using `dnf`.
+
+### FreeBSD
+
+Minimal packages required to build from the source distribution tarball, for
+Fedora version 36.
+
+- boost-all
+- yaml-cpp
+- postgresql13-client
+- pugixml
+- e2fsprogs-libuuid
+- nlohmann-json
+
+The application requires a version 6.x of [libpqxx][] installed, which is
+older than that in this version of FreeBSD.  See the 'libpqxx' section below
+for instructions on installing `libpqxx`.
+
+To build from source other than a tarball release, e.g. a git clone, examine
+the contents of `./provisioning/bootstrap.sh` to see which packages are
+installed using `pkg`.
+
 ### macOS
 
-Download, build and install the latest 6.x release of libpqxx from
-<https://github.com/jtv/libpqxx/releases/tag/6.4.8>.
-
-`libpqxx` needs the `doxygen` and `xmlto` packages installed to build the
-refence documentation and tutorial.  Pass `--disable-documentation` to the
-`./configure` command if you wish to skip building the documentation.
-
-When running the `./configure` command to build this application, define
-`PKG_CONFIG_PATH` to include where `libpqxx.pc` and d`libpq.pc` are installed,
-e.g.:
-
-	./configure PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig"
+The application requires a version 6.x of [libpqxx][] installed, which is
+older than that in [MacPorts][].  See the 'libpqxx' section below for
+instructions on installing `libpqxx`.  Tested on macOS with `libpqxx` version
+6.4.8.
 
 Add `CXXFLAGS='-g -O0'` to disable compiler optimisation.
 
@@ -240,8 +282,37 @@ To build from a Git clone, install the following ports from [MacPorts][]:
 - yaml-cpp
 
 **Note:** If `make distcheck` fails on macOS, install the `texinfo` and
-`texlive` packages from [MacPorts][], as the behaviour of `/usr/bin/texi2dvi`
-differs from the GNU version.
+`texlive` packages from [MacPorts][], as the behaviour of the system isntalled
+`/usr/bin/texi2dvi` differs from the GNU version.
+
+### Dependencies
+
+This section describes how to manually download and installed required
+dependencies, should they not be available as a package.
+
+#### libpqxx
+
+Download, build and install the latest 6.x release of libpqxx from
+<https://github.com/jtv/libpqxx/releases/tag/6.4.8>.
+
+`libpqxx` needs the `doxygen` and `xmlto` packages installed to build the
+refence documentation and tutorial.  Pass `--disable-documentation` to the
+`./configure` command if you wish to skip building the documentation.
+
+When running the `./configure` command to build this application, define the
+`PKG_CONFIG_PATH` to include where `libpqxx.pc` and d`libpq.pc` are installed,
+e.g.:
+
+	./configure PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig"
+
+#### nlohmann/json
+
+Download the appropriate version of `json.hpp` from
+<https://github.com/nlohmann/json/releases>.
+
+	$ cd /usr/local/include
+	$ sudo mkdir nlohmann
+	$ sudo cp ~/Downloads/json.hpp /usr/local/include/nlohmann
 
 [AngularJS]: https://angularjs.org
 [Apache]: http://httpd.apache.org/ "an open-source HTTP server for modern operating systems including UNIX and Windows"
@@ -249,6 +320,7 @@ differs from the GNU version.
 [ECMAScript]: https://en.wikipedia.org/wiki/ECMAScript
 [GPSLogger]: http://code.mendhak.com/gpslogger/ "A battery efficient GPS logging application"
 [Git]: http://git-scm.com/ "a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency"
+[libpqxx]: http://pqxx.org/ "The official C++ client API for PostgreSQL"
 [Linux]: https://www.kernel.org/
 [MacPorts]: http://www.macports.org/ "MacPorts Home Page"
 [Markdown]: http://daringfireball.net/projects/markdown/ "A text-to-HTML conversion tool for web writers"

@@ -1,5 +1,7 @@
 bin_PROGRAMS = trip-server
 trip_server_SOURCES = \
+	download_triplogger_configuration_handler.cpp \
+	download_triplogger_configuration_handler.hpp \
 	geo_utils.cpp \
 	geo_utils.hpp \
 	main.cpp \
@@ -13,6 +15,8 @@ trip_server_SOURCES = \
 	track_logging_handler.hpp \
 	tracking_download_handler.cpp \
 	tracking_download_handler.hpp \
+	tracking_info_handler.cpp \
+	tracking_info_handler.hpp \
 	tracking_map_handler.cpp \
 	tracking_map_handler.hpp \
 	tracking_pg_dao.cpp \

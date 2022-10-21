@@ -19,38 +19,39 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef TRACK_LOGGING_HANDLER_HPP
-#define TRACK_LOGGING_HANDLER_HPP
+#ifndef DOWNLOAD_TRIPLOGGER_CONFIGURATION_HANDLER_HPP
+#define DOWNLOAD_TRIPLOGGER_CONFIGURATION_HANDLER_HPP
 
-#include "../config.h"
 #include "trip_request_handler.hpp"
 #include <string>
 
 namespace fdsd {
-namespace web {
-  class HTTPServerRequest;
-  class HTTPServerResponse;
-}
 namespace trip {
 
-class TrackLoggingHandler : public TripRequestHandler {
+class DownloadTripLoggerConfigurationHandler : public BaseRestHandler {
 protected:
-  virtual void do_handle_request(
+  virtual void set_content_headers(
+      web::HTTPServerResponse& response) const override;
+  virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) const override;
 public:
-  TrackLoggingHandler(std::shared_ptr<TripConfig> config) :
-    TripRequestHandler(config) {}
+  DownloadTripLoggerConfigurationHandler(std::shared_ptr<TripConfig> config) :
+    BaseRestHandler(config) {}
   virtual std::string get_handler_name() const override {
-    return "TrackLoggingHandler";
+    return "DownloadTripLoggerConfigurationHandler";
   }
-  virtual std::unique_ptr<BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<TrackLoggingHandler>(new TrackLoggingHandler(config));
+  virtual bool can_handle(
+      const web::HTTPServerRequest& request) const override {
+    return compare_request_url(request.uri, "/download-triplogger-config");
   }
-  virtual bool can_handle(const web::HTTPServerRequest& request) const override;
+  virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
+    return std::unique_ptr<DownloadTripLoggerConfigurationHandler>(
+        new DownloadTripLoggerConfigurationHandler(config));
+  }
 };
 
 } // namespace trip
 } // namespace fdsd
 
-#endif // TRACK_LOGGING_HANDLER_HPP
+#endif // DOWNLOAD_TRIPLOGGER_CONFIGURATION_HANDLER_HPP
