@@ -278,7 +278,7 @@ TrackPgDao::tracked_location_query_params::tracked_location_query_params(
     if (s.empty())
       s = get_value(params, "timestamp");
     if (!s.empty()) {
-      std::cout << "Using unixtime/timestamp parameter \"" << s << "\"\n";
+      // std::cout << "Using unixtime/timestamp parameter \"" << s << "\"\n";
       const long long seconds = std::stoll(s);
       time_point = std::chrono::system_clock::time_point(
           std::chrono::seconds(seconds));
@@ -424,13 +424,13 @@ TrackPgDao::tracked_locations_result
  * for the requested sharing nickname.
  */
 std::pair<bool, TrackPgDao::location_share_details>
-    TrackPgDao::get_tracked_location_share_details(
+    TrackPgDao::get_tracked_location_share_details_by_sharee(
         std::string shared_by_nickname,
         std::string shared_to_user_id) const
 {
   work tx(*connection);
   const std::string sql =
-    "SELECT recent_minutes, max_minutes, active, shared_by_id "
+    "SELECT recent_minutes, max_minutes, active, shared_by_id, shared_to_id "
     "FROM location_sharing ls "
     "JOIN usertable u1 ON u1.id=ls.shared_by_id "
     // "JOIN usertable u2 ON u2.id=ls.shared_to_id "
@@ -449,10 +449,50 @@ std::pair<bool, TrackPgDao::location_share_details>
       r[0]["max_minutes"].to(retval.second.max_minutes.second);
     retval.second.active.first =
       r[0]["active"].to(retval.second.active.second);
-      r[0]["shared_by_id"].to(retval.second.shared_by_id);
+    r[0]["shared_by_id"].to(retval.second.shared_by_id);
+    r[0]["shared_to_id"].to(retval.second.shared_to_id);
   }
   tx.commit();
   return retval;
+}
+
+std::pair<bool, TrackPgDao::location_share_details>
+    TrackPgDao::get_tracked_location_share_details_by_sharer(
+        std::string shared_to_nickname,
+        std::string shared_by_user_id) const
+{
+  try {
+    work tx(*connection);
+    const std::string sql =
+      "SELECT recent_minutes, max_minutes, active, shared_by_id, shared_to_id "
+      "FROM location_sharing ls "
+      "JOIN usertable u ON u.id=ls.shared_to_id "
+      "WHERE u.nickname=$1 AND ls.shared_by_id=$2";
+    auto r = tx.exec_params1(
+        sql,
+        shared_to_nickname,
+        shared_by_user_id);
+    location_share_details share_details;
+    auto retval = std::make_pair(false, share_details);
+    retval.first = true;
+    if (retval.first) {
+      retval.second.recent_minutes.first =
+        r["recent_minutes"].to(retval.second.recent_minutes.second);
+      retval.second.max_minutes.first =
+        r["max_minutes"].to(retval.second.max_minutes.second);
+      retval.second.active.first =
+        r["active"].to(retval.second.active.second);
+      r["shared_by_id"].to(retval.second.shared_by_id);
+      r["shared_to_id"].to(retval.second.shared_to_id);
+    }
+    tx.commit();
+    return retval;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception in "
+      "TrackPgDao::get_tracked_location_share_details_by_sharer(): "
+              << e.what() << '\n';
+    throw;
+  }
 }
 
 std::pair<bool, std::time_t>
@@ -574,7 +614,7 @@ TrackPgDao::tracked_locations_result TrackPgDao::get_shared_tracked_locations(
 
   // Information about what is being shared by nickname to user_id
   std::pair<bool, location_share_details> sharing_criteria =
-    get_tracked_location_share_details(
+    get_tracked_location_share_details_by_sharee(
         qp.nickname,
         qp.user_id);
 
@@ -672,6 +712,26 @@ std::string TrackPgDao::get_logging_uuid_by_user_id(std::string user_id)
   return logging_uuid;
 }
 
+// throws pqxx::unexpected_rows
+std::string TrackPgDao::get_user_id_by_nickname(std::string nickname)
+{
+  // try {
+    work tx(*connection);
+    auto r = tx.exec_params1(
+        "SELECT id FROM usertable WHERE nickname=$1",
+        nickname);
+    tx.commit();
+    if (!r.empty())
+      return r.front().as<std::string>();
+  // } catch (const std::exception &e) {
+  //   std::cerr << "Exception in "
+  //     "TrackPgDao::get_user_id_by_nickname(): "
+  //             << e.what() << '\n';
+  //   throw;
+  // }
+  return "";
+}
+
 void TrackPgDao::save_logging_uuid(std::string user_id,
                                    std::string logging_uuid)
 {
@@ -706,6 +766,30 @@ void TrackPgDao::save_tracked_location(
   tx.commit();
 }
 
+void TrackPgDao::save(const location_share_details& share)
+{
+  try {
+    work tx(*connection);
+    tx.exec_params(
+        "INSERT INTO location_sharing "
+        "(shared_by_id, shared_to_id, recent_minutes, max_minutes, active) "
+        "VALUES ($1, $2, $3, $4, $5) "
+        "ON CONFLICT (shared_by_id, shared_to_id) DO UPDATE "
+        "SET recent_minutes=$3, max_minutes=$4, active=$5",
+        share.shared_by_id,
+        share.shared_to_id,
+        share.recent_minutes.first ? &share.recent_minutes.second : nullptr,
+        share.max_minutes.first ? &share.max_minutes.second : nullptr,
+        share.active.first ? &share.active.second : nullptr
+      );
+    tx.commit();
+  } catch (const std::exception& e) {
+    std::cerr << "Exception saving location share: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
 /**
  * Gets the most recently saved configuration file used by the TripLogger iOS
  * app.
@@ -732,4 +816,103 @@ TrackPgDao::triplogger_configuration TrackPgDao::get_triplogger_configuration(
     throw;
   }
   return c;
+}
+
+long TrackPgDao::get_track_sharing_count_by_user_id(std::string user_id)
+{
+  try {
+    work tx(*connection);
+    auto r = tx.exec_params1("SELECT COUNT(*) FROM location_sharing WHERE shared_by_id=$1",
+                             user_id);
+    tx.commit();
+    return r.front().as<long>();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception in "
+      "TrackPgDao::get_track_sharing_count_by_user_id(): "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+std::vector<TrackPgDao::track_share> TrackPgDao::get_track_sharing_by_user_id(
+    std::string user_id,
+    std::uint32_t offset,
+    int limit)
+{
+  std::string sql =
+    "SELECT u.nickname, ls.recent_minutes, ls.max_minutes, ls.active "
+    "FROM location_sharing ls JOIN usertable u ON u.id=ls.shared_to_id "
+    "WHERE ls.shared_by_id=$1 ORDER BY u.nickname OFFSET $2 LIMIT $3";
+  // std::cout << "Offset: " << offset << ", limit: " << limit << '\n';
+  // std::cout << "sql: " << sql << '\n';
+  work tx(*connection);
+  auto r = tx.exec_params(sql,
+                          user_id,
+                          offset,
+                          limit);
+  std::vector<track_share> retval;
+  for (result::const_iterator i = r.begin(); i != r.end(); ++i) {
+    track_share ts;
+    ts.nickname = i["nickname"].as<std::string>();
+    ts.recent_minutes.first = i["recent_minutes"].to(ts.recent_minutes.second);
+    ts.max_minutes.first = i["max_minutes"].to(ts.max_minutes.second);
+    ts.active.first = i["active"].to(ts.active.second);
+    retval.push_back(ts);
+  }
+  tx.commit();
+  return retval;
+}
+
+void TrackPgDao::delete_track_shares(std::string user_id,
+                                     std::vector<std::string> nicknames)
+{
+  try {
+    const std::string ps_name = "delete-track-shares";
+    connection->prepare(
+        ps_name,
+        "DELETE FROM location_sharing "
+        "WHERE shared_by_id=$1 AND shared_to_id="
+        "(SELECT u.id FROM usertable u WHERE u.nickname=$2)");
+    work tx(*connection);
+    for (auto const& nickname : nicknames) {
+      // std::cout << "Deleting " << nickname << '\n';
+      tx.exec_prepared(
+          ps_name,
+          user_id,
+          nickname);
+    }
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception deleting track shares: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+void TrackPgDao::activate_track_shares(std::string user_id,
+                                       std::vector<std::string> nicknames,
+                                       bool activate)
+{
+  try {
+    const std::string ps_name = "activate-track-shares";
+    connection->prepare(
+        ps_name,
+        "UPDATE location_sharing SET active=$3 "
+        "WHERE shared_by_id=$1 AND shared_to_id="
+        "(SELECT u.id FROM usertable u WHERE u.nickname=$2)");
+    work tx(*connection);
+    for (auto const& nickname : nicknames) {
+      // std::cout << "Updating " << nickname << " " << activate << '\n';
+      tx.exec_prepared(
+          ps_name,
+          user_id,
+          nickname,
+          activate);
+    }
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception activating track shares: "
+              << e.what() << '\n';
+    throw;
+  }
 }

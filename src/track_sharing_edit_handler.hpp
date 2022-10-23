@@ -19,39 +19,54 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef DOWNLOAD_TRIPLOGGER_CONFIGURATION_HANDLER_HPP
-#define DOWNLOAD_TRIPLOGGER_CONFIGURATION_HANDLER_HPP
+#ifndef TRACK_SHARING_EDIT_HANDLER_HPP
+#define TRACK_SHARING_EDIT_HANDLER_HPP
 
+#include "tracking_pg_dao.hpp"
 #include "trip_request_handler.hpp"
-#include <string>
+#include <ostream>
 
 namespace fdsd {
+namespace web {
+  class HTTPServerRequest;
+  class HTTPServerResponse;
+  class Pagination;
+}
 namespace trip {
 
-class DownloadTripLoggerConfigurationHandler : public BaseRestHandler {
+class TrackSharingEditHandler : public TripAuthenticatedRequestHandler {
+  bool is_new;
+  std::string nickname;
+  int convert_dhm_to_minutes(
+      std::string days,
+      std::string hours,
+      std::string minutes) const;
+  void build_form(web::HTTPServerResponse& response,
+                  const TrackPgDao::location_share_details& share) const;
 protected:
-  virtual void set_content_headers(
-      web::HTTPServerResponse& response) const override;
+  virtual void do_preview_request(
+      const web::HTTPServerRequest& request,
+      web::HTTPServerResponse& response) override;
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  DownloadTripLoggerConfigurationHandler(std::shared_ptr<TripConfig> config) :
-    BaseRestHandler(config) {}
+  TrackSharingEditHandler(std::shared_ptr<TripConfig> config) :
+    TripAuthenticatedRequestHandler(config), is_new(false), nickname() {}
   virtual std::string get_handler_name() const override {
-    return "DownloadTripLoggerConfigurationHandler";
+    return "TrackSharingEditHandler";
   }
   virtual bool can_handle(
       const web::HTTPServerRequest& request) const override {
-    return compare_request_url(request.uri, "/download-triplogger-config");
+    return compare_request_url(request.uri, "/sharing/edit");
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<DownloadTripLoggerConfigurationHandler>(
-        new DownloadTripLoggerConfigurationHandler(config));
+    return std::unique_ptr<TrackSharingEditHandler>(
+        new TrackSharingEditHandler(config));
   }
 };
 
 } // namespace trip
 } // namespace fdsd
-
-#endif // DOWNLOAD_TRIPLOGGER_CONFIGURATION_HANDLER_HPP
+  
+#endif // TRACK_SHARING_EDIT_HANDLER_HPP

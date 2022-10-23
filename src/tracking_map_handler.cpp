@@ -25,8 +25,10 @@
 #include "session_pg_dao.hpp"
 #include "tracking_pg_dao.hpp"
 #include "../trip-server-common/src/http_response.hpp"
+#include <boost/locale.hpp>
 #include <nlohmann/json.hpp>
 
+using namespace boost::locale;
 using namespace fdsd::trip;
 using namespace fdsd::web;
 using json = nlohmann::json;
@@ -54,12 +56,12 @@ bool TrackingMapHandler::can_handle(
 void TrackingMapHandler::append_pre_body_end(std::ostream& os) const
 {
   BaseMapHandler::append_pre_body_end(os);
-  os << "    <script type=\"module\" src=\"./static/js/map.js\"></script>\n";
+  os << "    <script type=\"module\" src=\"" << get_uri_prefix() << "/static/js/map.js\"></script>\n";
 }
 
 void TrackingMapHandler::handle_authenticated_request(
     const web::HTTPServerRequest& request,
-    web::HTTPServerResponse& response) const
+    web::HTTPServerResponse& response)
 {
   // for (auto const& p : request.query_params) {
   //   std::cout << p.first << " -> " << p.second << '\n';

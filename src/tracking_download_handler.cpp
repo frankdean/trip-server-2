@@ -103,7 +103,7 @@ void TrackingDownloadHandler::handle_download(
 
 void TrackingDownloadHandler::handle_authenticated_request(
     const HTTPServerRequest& request,
-    HTTPServerResponse& response) const
+    HTTPServerResponse& response)
 {
   TrackPgDao::location_search_query_params q;
   // q.user_id = get_user_id();

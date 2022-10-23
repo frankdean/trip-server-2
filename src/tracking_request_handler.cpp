@@ -52,7 +52,8 @@ void TrackingRequestHandler::do_preview_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
-  set_page_title("Tracks");
+  // Title tor the location tracking page
+  set_page_title(translate("Tracks"));
   set_menu_item(tracks);
 }
 
@@ -142,8 +143,8 @@ void TrackingRequestHandler::build_form(
           response.content << std::fixed << std::setprecision(0) << location.bearing.second;
 
         response.content << "</td>\n"
-          "        <td class=\"text-start\">" << location.note << "</td>\n"
-          "        <td class=\"text-start\">" << location.provider << "</td>\n"
+          "        <td class=\"text-start\">" << x(location.note) << "</td>\n"
+          "        <td class=\"text-start\">" << x(location.provider) << "</td>\n"
           "        <td class=\"text-end\">";
 
         if (location.satellite_count.first)
@@ -201,13 +202,13 @@ void TrackingRequestHandler::build_form(
     "      <div class=\"col-lg-3\">\n"
     // The input start date to search for location tracks
     "        <label for=\"input-date-from\" class=\"form-label\">" << translate("Date from") << "</label>\n"
-    "        <input id=\"input-date-from\" class=\"form-control\"  aria-describedby=\"validationFromDate\" type=\"datetime-local\" name=\"from\" value=\"" << query_params.date_as_html_input_value(query_params.date_from) <<  "\" size=\"25\" step=\"1\" required >\n"
+    "        <input id=\"input-date-from\" class=\"form-control\"  aria-describedby=\"validationFromDate\" type=\"datetime-local\" name=\"from\" value=\"" << x(query_params.date_as_html_input_value(query_params.date_from)) <<  "\" size=\"25\" step=\"1\" required >\n"
     "        <div id=\"validationFromDate\" class=\"invalid-feedback\">Enter the start date to fetch points from</div>\n"
     "      </div>\n"
     "      <div class=\"col-lg-3\">\n"
     // The input end date to search for location tracks
     "        <label for=\"input-date-to\" class=\"form-label\">" << translate("Date to") << "</label>\n"
-    "        <input id=\"input-date-to\" class=\"form-control\" aria-describedby=\"validationFromDate\" type=\"datetime-local\" name=\"to\" value=\"" << query_params.date_as_html_input_value(query_params.date_to) << "\" size=\"25\" step=\"1\" required >\n"
+    "        <input id=\"input-date-to\" class=\"form-control\" aria-describedby=\"validationFromDate\" type=\"datetime-local\" name=\"to\" value=\"" << x(query_params.date_as_html_input_value(query_params.date_to)) << "\" size=\"25\" step=\"1\" required >\n"
     "        <div id=\"validationToDate\" class=\"invalid-feedback\">Enter the end date to fetch points until</div>\n"
     // "      </div>\n"
     "      </div>\n";
@@ -227,16 +228,16 @@ void TrackingRequestHandler::build_form(
       if (query_params.nickname.empty())
         response.content << " selected";
       response.content <<
-        ">" << nickname_result.nickname << "</option>\n";
+        ">" << x(nickname_result.nickname) << "</option>\n";
     }
 
     for (auto const& nickname : nickname_result.nicknames) {
       response.content <<
-        "          <option value=\"" << nickname << "\"";
+        "          <option value=\"" << x(nickname) << "\"";
       if (query_params.nickname == nickname)
         response.content << " selected";
       response.content <<
-        ">" << nickname << "</option>\n";
+        ">" << x(nickname) << "</option>\n";
     }
     response.content <<
       "        </select>\n"
@@ -291,7 +292,7 @@ void TrackingRequestHandler::build_form(
 
 void TrackingRequestHandler::handle_authenticated_request(
     const HTTPServerRequest& request,
-    HTTPServerResponse& response) const
+    HTTPServerResponse& response)
 {
   bool first_time = request.query_params.empty();
   TrackPgDao::location_search_query_params q;

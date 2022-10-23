@@ -25,6 +25,8 @@
 #include "tile_handler.hpp"
 #include "trip_config.hpp"
 #include "track_logging_handler.hpp"
+#include "track_sharing_edit_handler.hpp"
+#include "track_sharing_handler.hpp"
 #include "tracking_download_handler.hpp"
 #include "tracking_info_handler.hpp"
 #include "tracking_map_handler.hpp"
@@ -90,6 +92,12 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
   post_login_handlers.push_back(
       std::make_shared<DownloadTripLoggerConfigurationHandler>(
           DownloadTripLoggerConfigurationHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<TrackSharingHandler>(
+          TrackSharingHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<TrackSharingEditHandler>(
+          TrackSharingEditHandler(config)));
 }
 
 std::string TripRequestFactory::get_session_id_cookie_name() const

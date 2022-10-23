@@ -13,6 +13,10 @@ trip_server_SOURCES = \
 	tile_pg_dao.hpp \
 	track_logging_handler.cpp \
 	track_logging_handler.hpp \
+	track_sharing_edit_handler.cpp \
+	track_sharing_edit_handler.hpp \
+	track_sharing_handler.cpp \
+	track_sharing_handler.hpp \
 	tracking_download_handler.cpp \
 	tracking_download_handler.hpp \
 	tracking_info_handler.cpp \

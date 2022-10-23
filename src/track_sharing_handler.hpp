@@ -19,39 +19,70 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef DOWNLOAD_TRIPLOGGER_CONFIGURATION_HANDLER_HPP
-#define DOWNLOAD_TRIPLOGGER_CONFIGURATION_HANDLER_HPP
+#ifndef TRACK_SHARING_HANDLER_HPP
+#define TRACK_SHARING_HANDLER_HPP
 
+#include "tracking_pg_dao.hpp"
 #include "trip_request_handler.hpp"
-#include <string>
 
 namespace fdsd {
+namespace web {
+  class HTTPServerRequest;
+  class HTTPServerResponse;
+  class Pagination;
+}
 namespace trip {
 
-class DownloadTripLoggerConfigurationHandler : public BaseRestHandler {
+class TrackSharingHandler :  public TripAuthenticatedRequestHandler {
+  void build_form(web::HTTPServerResponse& response,
+                  const web::Pagination& pagination,
+                  const std::vector<TrackPgDao::track_share>& track_shares) const;
 protected:
-  virtual void set_content_headers(
-      web::HTTPServerResponse& response) const override;
+  virtual void do_preview_request(
+      const web::HTTPServerRequest& request,
+      web::HTTPServerResponse& response) override;
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  DownloadTripLoggerConfigurationHandler(std::shared_ptr<TripConfig> config) :
-    BaseRestHandler(config) {}
+  TrackSharingHandler(std::shared_ptr<TripConfig> config) :
+    TripAuthenticatedRequestHandler(config) {}
   virtual std::string get_handler_name() const override {
-    return "DownloadTripLoggerConfigurationHandler";
+    return "TrackSharingHandler";
   }
   virtual bool can_handle(
       const web::HTTPServerRequest& request) const override {
-    return compare_request_url(request.uri, "/download-triplogger-config");
+    return compare_request_regex(request.uri, "/sharing[^/]*");
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<DownloadTripLoggerConfigurationHandler>(
-        new DownloadTripLoggerConfigurationHandler(config));
+    return std::unique_ptr<TrackSharingHandler>(
+        new TrackSharingHandler(config));
+  }
+};
+
+struct period_dhm {
+  int days;
+  int hours;
+  int minutes;
+  period_dhm(int days, int hours, int minutes) :
+    days(days), hours(hours), minutes(minutes) {}
+  period_dhm(int minutes) {
+    hours = minutes / 60;
+    this->minutes = minutes - hours * 60;
+    days = hours / 24;
+    hours = hours - days * 24;
+  }
+  int get_total_minutes() const {
+    return minutes + (hours + days * 24) * 60;
+  }
+  std::string to_string() const {
+    return std::to_string(days) + "d "
+      + std::to_string(hours) + "h "
+      + std::to_string(minutes) + "m";
   }
 };
 
 } // namespace trip
 } // namespace fdsd
 
-#endif // DOWNLOAD_TRIPLOGGER_CONFIGURATION_HANDLER_HPP
+#endif // TRACK_SHARING_HANDLER_HPP

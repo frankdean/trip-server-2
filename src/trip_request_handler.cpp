@@ -69,6 +69,7 @@ const std::string TripLoginRequestHandler::session_id_cookie_name =
 
 std::string TripLoginRequestHandler::get_page_title() const
 {
+  // Title for the login page
   return translate("Login");
 }
 
@@ -102,8 +103,8 @@ void TripAuthenticatedRequestHandler::append_head_content(std::ostream& os) cons
   os <<
     // Bootstrap
     // "    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx\" crossorigin=\"anonymous\">\n"
-    "    <link rel=\"stylesheet\" href=\"./static/bootstrap-5.2.1-dist/css/bootstrap.min.css\">\n"
-    "    <link rel=\"stylesheet\" href=\"./static/css/trip.css\">\n";
+    "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/bootstrap-5.2.1-dist/css/bootstrap.min.css\">\n"
+    "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/css/trip.css\">\n";
 }
 
 void TripAuthenticatedRequestHandler::append_head_title_section(std::ostream& os) const
@@ -116,7 +117,7 @@ void TripAuthenticatedRequestHandler::append_head_title_section(std::ostream& os
 
 void TripAuthenticatedRequestHandler::handle_authenticated_request(
       const HTTPServerRequest& request,
-      HTTPServerResponse& response) const
+      HTTPServerResponse& response)
 {
   response.content
     << "<h1>Successfully logged in!</h1>\n"
@@ -134,7 +135,7 @@ void TripAuthenticatedRequestHandler::append_bootstrap_scripts(std::ostream& os)
   // Boostrap
   // "    <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js\" integrity=\"sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK\" crossorigin=\"anonymous\"></script>\n"
   os <<
-    "    <script type=\"module\" src=\"./static/bootstrap-5.2.1-dist/js/bootstrap.min.js\"></script>\n";
+    "    <script type=\"module\" src=\"" << get_uri_prefix() << "/static/bootstrap-5.2.1-dist/js/bootstrap.min.js\"></script>\n";
 }
 
 void TripAuthenticatedRequestHandler::append_openlayers_scripts(
@@ -142,7 +143,7 @@ void TripAuthenticatedRequestHandler::append_openlayers_scripts(
 {
   // "    <script src=\"https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.js\"></script>\n"
   os <<
-    "    <script type=\"module\" src=\"./static/openlayers-7.0.0-legacy/ol.js\"></script>\n";
+    "    <script type=\"module\" src=\"" << get_uri_prefix() << "/static/openlayers-7.0.0-legacy/ol.js\"></script>\n";
 }
 
 void TripAuthenticatedRequestHandler::append_body_start(std::ostream& os) const
@@ -178,10 +179,14 @@ void TripAuthenticatedRequestHandler::append_body_start(std::ostream& os) const
     "\" href=\"" << prefix << "/tracker-info\">"
     // Menu item to select the tracker information page
      << translate("Tracker Info") << "</a></li>\n"
-    "            <!--\n"
-    "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"" << prefix << "/sharing\">"
+    "            <li class=\"nav-item\"><a class=\"nav-link";
+  if (get_menu_item() == track_sharing)
+    os << " active";
+  os <<
+    "\" href=\"" << prefix << "/sharing\">"
     // Menu item to select the track sharing page
-     << translate("Tracker Sharing") << "</a></li>\n"
+     << translate("Track Sharing") << "</a></li>\n"
+    "            <!--\n"
     "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"" << prefix << "/itineraries\">"
     // Menu item to select the list of itineraries page
      << translate("Itineraries") << "</a></li>\n"
@@ -261,11 +266,11 @@ void BaseMapHandler::append_head_content(std::ostream& os) const
   os <<
     // Bootstrap
     // "    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx\" crossorigin=\"anonymous\">\n"
-    "    <link rel=\"stylesheet\" href=\"./static/bootstrap-5.2.1-dist/css/bootstrap.min.css\">\n"
+    "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/bootstrap-5.2.1-dist/css/bootstrap.min.css\">\n"
     // OpenLayers
     // "    <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.css\">\n"
-    "    <link rel=\"stylesheet\" href=\"./static/openlayers-7.0.0-legacy/ol.css\">\n"
-    "    <link rel=\"stylesheet\" href=\"./static/css/trip.css\">\n";
+    "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/openlayers-7.0.0-legacy/ol.css\">\n"
+    "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/css/trip.css\">\n";
 }
 
 void BaseMapHandler::append_pre_body_end(std::ostream& os) const

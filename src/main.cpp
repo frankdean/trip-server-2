@@ -113,11 +113,16 @@ int main(int argc, char *argv[])
 #ifdef ALLOW_STATIC_FILES
     logger
       << Logger::info
-      << "This application has been built to serve static files."
+      // Notice output to the terminal when the application has been built to
+      // allow serving static files.
+      << translate("This application has been built to serve static files.")
       << Logger::endl
-      << "Static files will be served from the \"" << options.doc_root
-      << "\" directory."
+      // Displays the name of the directory that static files will be served from.
+      << format(translate("Static files will be served from the {1} directory.")) %
+        options.doc_root
 #ifdef ALLOW_DIRECTORY_LISTING
+      // Notice output to the terminal when the application has been built to
+      // allow listing the contents of directories.
       << Logger::endl <<
       "Additionally, listing directory contents has also been enabled."
 #endif

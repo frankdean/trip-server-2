@@ -37,7 +37,7 @@ protected:
   virtual void set_content_headers(web::HTTPServerResponse& response) const override;
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) const override;
+      web::HTTPServerResponse& response) override;
 public:
   TrackingDownloadHandler(std::shared_ptr<TripConfig> config);
   static const std::string tracking_download_url;

@@ -160,7 +160,7 @@ TilePgDao::tile_result TileHandler::find_tile(int provider_index,
 
 void TileHandler::handle_authenticated_request(
     const HTTPServerRequest& request,
-    HTTPServerResponse& response) const
+    HTTPServerResponse& response)
 {
   std::smatch m;
   if (std::regex_match(request.uri, m, tile_url_re) && m.size() > 4) {

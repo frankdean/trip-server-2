@@ -48,7 +48,7 @@ void DownloadTripLoggerConfigurationHandler::
 
 void DownloadTripLoggerConfigurationHandler::handle_authenticated_request(
     const HTTPServerRequest& request,
-    HTTPServerResponse& response) const
+    HTTPServerResponse& response)
 {
   TrackPgDao dao;
   TrackPgDao::triplogger_configuration c =

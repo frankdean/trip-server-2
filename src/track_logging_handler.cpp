@@ -41,7 +41,7 @@ bool TrackLoggingHandler::can_handle(const HTTPServerRequest& request) const
 
 void TrackLoggingHandler::do_handle_request(
     const HTTPServerRequest& request,
-    HTTPServerResponse& response) const
+    HTTPServerResponse& response)
 {
   std::string uuid_str;
   std::map<std::string, std::string> params;

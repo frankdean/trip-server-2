@@ -121,7 +121,15 @@ public:
   };
 
   struct location_share_details {
+    std::string shared_to_id;
     std::string shared_by_id;
+    std::pair<bool, int> recent_minutes;
+    std::pair<bool, int> max_minutes;
+    std::pair<bool, bool> active;
+  };
+
+  struct track_share {
+    std::string nickname;
     std::pair<bool, int> recent_minutes;
     std::pair<bool, int> max_minutes;
     std::pair<bool, bool> active;
@@ -167,12 +175,33 @@ public:
   std::string get_user_id_by_uuid(std::string uuid);
   /// \return the uuid used for logging tracked locations for the given user_id
   std::string get_logging_uuid_by_user_id(std::string user_id);
+  std::string get_user_id_by_nickname(std::string nickname);
   /// Saves the passed logging UUID for the specified user
   void save_logging_uuid(std::string user_id, std::string logging_uuid);
   /// Saves the passed tracked location.
   void save_tracked_location(
       const TrackPgDao::tracked_location_query_params& qp);
+  /// Saves the passed location_share_details
+  void save(const location_share_details& share);
   triplogger_configuration get_triplogger_configuration(std::string user_id);
+  long get_track_sharing_count_by_user_id(std::string user_id);
+  std::vector<track_share> get_track_sharing_by_user_id(
+      std::string user_id,
+      std::uint32_t offset,
+      int limit);
+  void delete_track_shares(std::string user_id,
+                           std::vector<std::string> nicknames);
+  void activate_track_shares(std::string user_id,
+                             std::vector<std::string> nicknames,
+                             bool activate = true);
+  void deactivate_track_shares(std::string user_id,
+                               std::vector<std::string> nicknames) {
+    activate_track_shares(user_id, nicknames, false);
+  }
+  std::pair<bool, location_share_details>
+      get_tracked_location_share_details_by_sharer(
+          std::string shared_to_nickname,
+          std::string shared_by_user_id) const;
 private:
   /// Mutex used to lock access to non-threadsafe functions
   date_range constrain_shared_location_dates(
@@ -192,7 +221,7 @@ private:
       const pqxx::work& tx,
       const location_search_query_params& qp) const;
   std::pair<bool, location_share_details>
-      get_tracked_location_share_details(
+      get_tracked_location_share_details_by_sharee(
           std::string shared_by_nickname,
           std::string shared_to_user_id) const;
 };

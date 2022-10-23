@@ -37,7 +37,7 @@ class TrackLoggingHandler : public TripRequestHandler {
 protected:
   virtual void do_handle_request(
       const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) const override;
+      web::HTTPServerResponse& response) override;
 public:
   TrackLoggingHandler(std::shared_ptr<TripConfig> config) :
     TripRequestHandler(config) {}

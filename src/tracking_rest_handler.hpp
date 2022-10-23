@@ -40,7 +40,7 @@ class TrackingRestHandler : public fdsd::trip::BaseRestHandler {
 protected:
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) const override;
+      web::HTTPServerResponse& response) override;
 public:
   TrackingRestHandler(std::shared_ptr<TripConfig> config);
   virtual std::string get_handler_name() const override {

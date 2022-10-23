@@ -49,7 +49,7 @@ protected:
       web::HTTPServerResponse& response) override;
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) const override;
+      web::HTTPServerResponse& response) override;
 public:
   TrackingRequestHandler(std::shared_ptr<TripConfig> config);
   static const std::string tracking_url;

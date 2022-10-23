@@ -54,7 +54,7 @@ class TileHandler : public fdsd::trip::BaseRestHandler {
 protected:
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) const override;
+      web::HTTPServerResponse& response) override;
 public:
   TileHandler(std::shared_ptr<TripConfig> config);
 

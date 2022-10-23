@@ -37,7 +37,7 @@ void TrackingInfoHandler::do_preview_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
-  set_page_title("Tracker URL");
+  set_page_title("Tracker Info");
   set_menu_item(tracker_info);
 }
 
@@ -258,7 +258,7 @@ void TrackingInfoHandler::build_form(
 
 void TrackingInfoHandler::handle_authenticated_request(
     const HTTPServerRequest& request,
-    HTTPServerResponse& response) const
+    HTTPServerResponse& response)
 {
   bool new_uuid_flag = false;
   const std::string user_id = get_user_id();

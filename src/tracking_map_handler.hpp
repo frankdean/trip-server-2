@@ -39,7 +39,7 @@ protected:
   virtual std::string get_page_title() const override;
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) const override;
+      web::HTTPServerResponse& response) override;
   virtual void append_pre_body_end(std::ostream& os) const override;
 public:
   TrackingMapHandler(std::shared_ptr<TripConfig> config);

@@ -42,7 +42,7 @@ TrackingRestHandler::TrackingRestHandler(std::shared_ptr<TripConfig> config) :
 
 void TrackingRestHandler::handle_authenticated_request(
     const web::HTTPServerRequest& request,
-    web::HTTPServerResponse& response) const
+    web::HTTPServerResponse& response)
 {
   // std::cout << "TrackingRestHandler::handle_authenticated_request()\n";
 

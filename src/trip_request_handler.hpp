@@ -35,9 +35,6 @@ class TripConfig;
 class TripRequestHandler : public web::HTTPRequestHandler {
 protected:
   std::shared_ptr<TripConfig> config;
-  virtual std::string get_page_title() const override {
-    return "Hello World!";
-  }
 public:
   static const std::string default_url;
   static const std::string success_url;
@@ -137,6 +134,15 @@ protected:
   virtual std::string get_handler_name() const override {
     return "TripNotFoundHandler";
   }
+  virtual void do_handle_request(
+      const web::HTTPServerRequest& request,
+      web::HTTPServerResponse& response) override {
+    // If the url is effectively a root url for the application, redirect.
+    if (compare_request_regex(request.uri, "($|/$)"))
+      redirect(request, response, get_default_uri());
+    else
+      HTTPNotFoundRequestHandler::do_handle_request(request, response);
+  }
 public:
   TripNotFoundHandler(std::string uri_prefix) :
     HTTPNotFoundRequestHandler(uri_prefix) {}
@@ -145,13 +151,10 @@ public:
 class TripAuthenticatedRequestHandler : public web::AuthenticatedRequestHandler {
 protected:
   std::shared_ptr<TripConfig> config;
-  enum menu_items { unknown, tracks, tracker_info };
+  enum menu_items { unknown, tracks, tracker_info, track_sharing };
 private:
     menu_items menu_item;
 protected:
-  virtual std::string get_page_title() const override {
-    return "Login Success!";
-  }
   virtual std::string get_login_uri() const override {
     return get_uri_prefix() + TripLoginRequestHandler::login_url;
   }
@@ -176,7 +179,7 @@ protected:
       web::HTTPServerResponse& response) override {}
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) const override;
+      web::HTTPServerResponse& response) override;
   virtual void append_bootstrap_scripts(std::ostream& os) const;
   virtual void append_openlayers_scripts(std::ostream& os) const;
   virtual void append_footer_content(std::ostream& os) const override;
