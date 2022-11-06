@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: trip 2.0.0-alpha.10\n"
+"Project-Id-Version: trip 2.0.0-alpha.12\n"
 "Report-Msgid-Bugs-To: frank.dean@fdsd.co.uk\n"
-"POT-Creation-Date: 2022-10-23 18:00+0100\n"
+"POT-Creation-Date: 2022-11-06 15:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -118,64 +118,69 @@ msgstr ""
 msgid "Battery"
 msgstr ""
 
+#. Title of button which goes to a specified page number
+#: src/tracking_request_handler.cpp:197
+msgid "Go"
+msgstr ""
+
 #. "      <div class=\"row\">\n"
 #. The input start date to search for location tracks
-#: src/tracking_request_handler.cpp:204
+#: src/tracking_request_handler.cpp:209
 msgid "Date from"
 msgstr ""
 
 #. The input end date to search for location tracks
-#: src/tracking_request_handler.cpp:210
+#: src/tracking_request_handler.cpp:215
 msgid "Date to"
 msgstr ""
 
 #. The input to select another user's nickname to view their shared location tracks
-#: src/tracking_request_handler.cpp:221
+#: src/tracking_request_handler.cpp:226
 msgid "Display shared user's tracks"
 msgstr ""
 
 #. The maximum Horizontal Dilution of Precision (accuracy in metres) to filter locations by
-#: src/tracking_request_handler.cpp:250
+#: src/tracking_request_handler.cpp:255
 msgid "Max hdop"
 msgstr ""
 
 #. instructions to disable filtering locations by HDOP (accuracy in metres)
-#: src/tracking_request_handler.cpp:257
+#: src/tracking_request_handler.cpp:262
 msgid "leave blank for no maximum"
 msgstr ""
 
 #. Whether the user wishes to filter the results to only include those with notes attached
-#: src/tracking_request_handler.cpp:267
+#: src/tracking_request_handler.cpp:272
 msgid "Show notes only"
 msgstr ""
 
 #. Label for the button to perform the search that lists the tracked locations
-#: src/tracking_request_handler.cpp:272
+#: src/tracking_request_handler.cpp:277
 msgid "List tracks"
 msgstr ""
 
 #. Label for the button to display a map showing the tracked locations
-#: src/tracking_request_handler.cpp:274
+#: src/tracking_request_handler.cpp:279
 msgid "Show map"
 msgstr ""
 
 #. Prompt to confirm the user wished to download a data file with the tracked locations
-#: src/tracking_request_handler.cpp:277
+#: src/tracking_request_handler.cpp:282
 msgid "Download tracks?"
 msgstr ""
 
 #. Label for the button to download the tracks as an XML data file
-#: src/tracking_request_handler.cpp:279
+#: src/tracking_request_handler.cpp:284
 msgid "Download tracks"
 msgstr ""
 
 #. Label for the button to make a copy of the tracked locations
-#: src/tracking_request_handler.cpp:282
+#: src/tracking_request_handler.cpp:287
 msgid "Copy"
 msgstr ""
 
 #. Label for the button which resets the form's input criteria to that originally displayed
-#: src/tracking_request_handler.cpp:285
+#: src/tracking_request_handler.cpp:290
 msgid "Reset"
 msgstr ""
 
@@ -250,7 +255,7 @@ msgstr ""
 
 #. Title for the login page
 #: src/trip_request_handler.cpp:73
-#: trip-server-common/src/http_request_handler.cpp:630
+#: trip-server-common/src/http_request_handler.cpp:669
 msgid "Login"
 msgstr ""
 
@@ -270,37 +275,41 @@ msgid "Track Sharing"
 msgstr ""
 
 #. Menu item to select the list of itineraries page
-#: src/trip_request_handler.cpp:192
+#: src/trip_request_handler.cpp:195
 msgid "Itineraries"
 msgstr ""
 
+#. href=\"" << prefix << "/location\">"
 #. Menu item to select the page potentially showing or recording the user's current location
-#: src/trip_request_handler.cpp:195
+#: src/trip_request_handler.cpp:198
 msgid "Location"
 msgstr ""
 
+#. href=\"" << prefix << "/users\">"
 #. Menu item for an admin user to administer user accounts, create, delete, reset password
-#: src/trip_request_handler.cpp:201
+#: src/trip_request_handler.cpp:204
 msgid "Users"
 msgstr ""
 
+#. href=\"" << prefix << "/status\">"
 #. Menu item for an admin user to view the system status report
-#: src/trip_request_handler.cpp:204
+#: src/trip_request_handler.cpp:207
 msgid "Status"
 msgstr ""
 
+#. href=\"" << prefix << "/account\">"
 #. Menu item for a user to administer their own account
-#: src/trip_request_handler.cpp:209
+#: src/trip_request_handler.cpp:212
 msgid "Account"
 msgstr ""
 
 #. Menu item linking to the user guide
-#: src/trip_request_handler.cpp:214
+#: src/trip_request_handler.cpp:216
 msgid "Help"
 msgstr ""
 
 #. Menu item for the user to logout
-#: src/trip_request_handler.cpp:217
+#: src/trip_request_handler.cpp:219
 msgid "Logout"
 msgstr ""
 
@@ -321,18 +330,18 @@ msgid_plural "Creating {1} workers"
 msgstr[0] ""
 msgstr[1] ""
 
-#: trip-server-common/src/http_request_handler.cpp:586
-#: trip-server-common/src/http_request_handler.cpp:596
+#: trip-server-common/src/http_request_handler.cpp:625
+#: trip-server-common/src/http_request_handler.cpp:635
 msgid "Username"
 msgstr ""
 
-#: trip-server-common/src/http_request_handler.cpp:608
-#: trip-server-common/src/http_request_handler.cpp:618
+#: trip-server-common/src/http_request_handler.cpp:647
+#: trip-server-common/src/http_request_handler.cpp:657
 msgid "Password"
 msgstr ""
 
 #. Message showing the server administrator the URL a browser is being redirected to
-#: trip-server-common/src/http_request_handler.cpp:777
+#: trip-server-common/src/http_request_handler.cpp:833
 msgid "Redirecting to: {1}"
 msgstr ""
 
