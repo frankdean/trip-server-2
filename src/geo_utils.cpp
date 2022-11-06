@@ -26,7 +26,7 @@
 using namespace fdsd::trip;
 using json = nlohmann::basic_json<nlohmann::ordered_map>;
 
-location::location(long long id,
+location::location(long id,
                    double lon,
                    double lat,
                    std::pair<bool, double> altitude)

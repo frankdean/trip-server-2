@@ -54,10 +54,10 @@ void TrackSharingHandler::build_form(
     "  <form name=\"form\" method=\"post\">\n";
   if (track_shares.empty()) {
     response.content
-      << "<p>"
+      << "<div class=\"alert alert-info\"><p>"
       // Message displayed when there are no track sharing records to show
-      << translate("You are not currently sharing your location with anyone else.")
-      << "</p>\n";
+      << translate("You are not currently sharing your location with anyone else")
+      << "</p></div>\n";
   } else {
     response.content
       <<
@@ -107,7 +107,7 @@ void TrackSharingHandler::build_form(
       <<
       "    </table>\n"
       "  </div>\n";
-    if (pagination.get_page_count() > 0) {
+    if (pagination.get_page_count() > 1) {
       response.content
         <<
         "  <div id=\"div-paging\" class=\"pb-0\">\n"
@@ -119,28 +119,29 @@ void TrackSharingHandler::build_form(
 
   response.content
     <<
-    "      <div id=\"div-buttons\" class=\"py-1\">\n";
+    "    <div id=\"div-buttons\" class=\"py-1\">\n";
   if (!track_shares.empty()) {
     response.content
       <<
       // Name of button to activate track sharing with selected users
-      "        <button id=\"btn-activate\" name=\"action\" value=\"activate\" class=\"my-1 btn btn-lg btn-success\">" << translate("Activate") << "</button>\n"
+      "      <button id=\"btn-activate\" name=\"action\" value=\"activate\" accesskey=\"a\" class=\"my-1 btn btn-lg btn-success\">" << translate("Activate") << "</button>\n"
       // Name of button to de-activate track sharing with selected users
-      "        <button id=\"btn-deactivate\" name=\"action\" value=\"de-activate\" class=\"my-1 btn btn-lg btn-primary\">" << translate("Deactivate") << "</button>\n"
+      "      <button id=\"btn-deactivate\" name=\"action\" value=\"de-activate\" accesskey=\"d\" class=\"my-1 btn btn-lg btn-primary\">" << translate("Deactivate") << "</button>\n"
       // Prompt to confirm the user wishes to delete track sharing for the selected users.
-      "        <button id=\"btn-delete\" name=\"action\" value=\"delete\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected location shares?") << "');\">"
+      "      <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"x\"class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected location shares?") << "');\">"
       // Name of button to delete track sharing with selected users
       << translate("Delete selected") << "</button>\n"
       // Name of button to edit the track sharing criteria of a selected user
-      "        <button id=\"btn-edit\" name=\"action\" value=\"edit\" class=\"my-1 btn btn-lg btn-info\">" << translate("Edit selected") << "</button>\n";
+      "      <button id=\"btn-edit\" name=\"action\" value=\"edit\" accesskey=\"e\" class=\"my-1 btn btn-lg btn-info\">" << translate("Edit selected") << "</button>\n";
   }
   response.content
     <<
     // Name of button to create a new track sharing record
-    "    <button id=\"btn-new\" formaction=\"" << get_uri_prefix() << "/sharing/edit?new=true\" class=\"my-1 btn btn-lg btn-warning\">" << translate("New") << "</button>\n"
+    "      <button id=\"btn-new\" formaction=\"" << get_uri_prefix() << "/sharing/edit?new=true\" class=\"my-1 btn btn-lg btn-warning\">" << translate("New") << "</button>\n"
+      "  </div>\n"
     "  </form>\n"
     "</div>\n"
-    "<script type=\"text/javascript\">\n"
+    "<script>\n"
     "<!--\n"
     "function select_all(cb) {\n"
     "  const div = document.getElementById('shares');\n"
@@ -169,12 +170,13 @@ void TrackSharingHandler::handle_authenticated_request(
     // for (auto const &p : pp) {
     //   std::cout << "param: \"" << p.first << "\" -> \"" << p.second << "\"\n";
     // }
+
+    std::map<long, std::string> nickname_map =
+      request.extract_array_param_map("nickname");
     std::vector<std::string> nicknames;
-    for (int i = 0; i < max_page_size; ++i) {
-      const std::string nickname =
-        request.get_post_param("nickname[" + std::to_string(i) + "]");
-      if (!nickname.empty())
-        nicknames.push_back(nickname);
+    for (const auto &m : nickname_map) {
+      // std::cout << "nickname: " << m.first << " -> \"" << m.second << "\"\n";
+      nicknames.push_back(m.second);
     }
     if (!nicknames.empty()) {
       if (action == "delete") {

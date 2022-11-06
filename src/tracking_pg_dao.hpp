@@ -75,9 +75,9 @@ public:
     std::pair<bool, float> speed;
     std::pair<bool, double> bearing;
     std::pair<bool, int> satellite_count;
-    std::string provider;
+    std::pair<bool, std::string> provider;
     std::pair<bool, float> battery;
-    std::string note;
+    std::pair<bool, std::string> note;
     virtual std::string to_string() const override;
     inline friend std::ostream& operator<<
         (std::ostream& out, const tracked_location& rhs) {

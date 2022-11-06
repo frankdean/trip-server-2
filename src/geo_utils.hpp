@@ -32,14 +32,17 @@
 namespace fdsd {
 namespace trip {
 
+const double kms_per_mile = 1.609344;
+const double feet_per_meter = 0.3048;
+
 struct location {
-  long long id;
+  long id;
   double longitude;
   double latitude;
   // std::optional<double> altitude;
   std::pair<bool, double> altitude;
   location() {}
-  location(long long id,
+  location(long id,
            double lon,
            double lat,
            std::pair<bool, double> altitude = std::pair<bool, double>(false, 0));

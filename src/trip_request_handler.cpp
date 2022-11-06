@@ -103,7 +103,7 @@ void TripAuthenticatedRequestHandler::append_head_content(std::ostream& os) cons
   os <<
     // Bootstrap
     // "    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx\" crossorigin=\"anonymous\">\n"
-    "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/bootstrap-5.2.1-dist/css/bootstrap.min.css\">\n"
+    "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/bootstrap-5.2.2-dist/css/bootstrap.min.css\">\n"
     "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/css/trip.css\">\n";
 }
 
@@ -135,7 +135,7 @@ void TripAuthenticatedRequestHandler::append_bootstrap_scripts(std::ostream& os)
   // Boostrap
   // "    <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js\" integrity=\"sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK\" crossorigin=\"anonymous\"></script>\n"
   os <<
-    "    <script type=\"module\" src=\"" << get_uri_prefix() << "/static/bootstrap-5.2.1-dist/js/bootstrap.min.js\"></script>\n";
+    "    <script type=\"module\" src=\"" << get_uri_prefix() << "/static/bootstrap-5.2.2-dist/js/bootstrap.bundle.min.js\"></script>\n";
 }
 
 void TripAuthenticatedRequestHandler::append_openlayers_scripts(
@@ -186,28 +186,30 @@ void TripAuthenticatedRequestHandler::append_body_start(std::ostream& os) const
     "\" href=\"" << prefix << "/sharing\">"
     // Menu item to select the track sharing page
      << translate("Track Sharing") << "</a></li>\n"
-    "            <!--\n"
-    "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"" << prefix << "/itineraries\">"
+    "            <li class=\"nav-item\"><a class=\"nav-link";
+  if (get_menu_item() == itineraries)
+    os << " active";
+  os <<
+    "\" href=\"" << prefix << "/itineraries\">"
     // Menu item to select the list of itineraries page
      << translate("Itineraries") << "</a></li>\n"
-    "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"" << prefix << "/location\">"
+    "            <li class=\"nav-item opacity-50\"><a class=\"nav-link\">" // href=\"" << prefix << "/location\">"
     // Menu item to select the page potentially showing or recording the user's current location
      << translate("Location") << "</a></li>\n";
 
   if (is_admin) {
     os <<
-      "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"" << prefix << "/users\">" <<
+      "            <li class=\"nav-item opacity-50\"><a class=\"nav-link\">" // href=\"" << prefix << "/users\">"
       // Menu item for an admin user to administer user accounts, create, delete, reset password
-      translate("Users") << "</a></li>\n"
-      "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"" << prefix << "/status\">" <<
+       << translate("Users") << "</a></li>\n"
+      "            <li class=\"nav-item opacity-50\"><a class=\"nav-link\">" // href=\"" << prefix << "/status\">"
       // Menu item for an admin user to view the system status report
-      translate("Status") << "</a></li>\n";
+       << translate("Status") << "</a></li>\n";
   }
   os <<
-    "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"" << prefix << "/account\">" <<
+    "            <li class=\"nav-item\"><a class=\"nav-link opacity-50\">" // href=\"" << prefix << "/account\">"
     // Menu item for a user to administer their own account
-    translate("Account") << "</a></li>\n"
-    "            -->\n"
+     << translate("Account") << "</a></li>\n"
     "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"https://www.fdsd.co.uk/trip-server-2/"
     PACKAGE_NAME "-" PACKAGE_VERSION "/docs/user-guide/\" target=\"_blank\">" <<
     // Menu item linking to the user guide
@@ -266,7 +268,7 @@ void BaseMapHandler::append_head_content(std::ostream& os) const
   os <<
     // Bootstrap
     // "    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx\" crossorigin=\"anonymous\">\n"
-    "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/bootstrap-5.2.1-dist/css/bootstrap.min.css\">\n"
+    "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/bootstrap-5.2.2-dist/css/bootstrap.min.css\">\n"
     // OpenLayers
     // "    <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.css\">\n"
     "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/openlayers-7.0.0-legacy/ol.css\">\n"

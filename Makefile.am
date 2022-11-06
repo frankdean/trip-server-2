@@ -30,17 +30,17 @@ dist_css_DATA = resources/static/css/trip.css
 jsdir = $(pkgdatadir)/resources/static/js
 dist_js_DATA = resources/static/js/map.js
 
-bsver = bootstrap-5.2.1-dist
+bsver = bootstrap-5.2.2-dist
 nobase_dist_pkgdata_DATA = resources/static/$(bsver)/LICENSE
 
-bscssdir = $(pkgdatadir)/resources/static/bootstrap-5.2.1-dist/css
+bscssdir = $(pkgdatadir)/resources/static/bootstrap-5.2.2-dist/css
 dist_bscss_DATA = \
-	resources/static/bootstrap-5.2.1-dist/css/bootstrap.min.css \
-	resources/static/bootstrap-5.2.1-dist/css/bootstrap.min.css.map
+	resources/static/bootstrap-5.2.2-dist/css/bootstrap.min.css \
+	resources/static/bootstrap-5.2.2-dist/css/bootstrap.min.css.map
 
-bsjsdir = $(pkgdatadir)/resources/static/bootstrap-5.2.1-dist/js
-dist_bsjs_DATA = resources/static/bootstrap-5.2.1-dist/js/bootstrap.min.js \
-	resources/static/bootstrap-5.2.1-dist/js/bootstrap.min.js.map
+bsjsdir = $(pkgdatadir)/resources/static/bootstrap-5.2.2-dist/js
+dist_bsjs_DATA = resources/static/bootstrap-5.2.2-dist/js/bootstrap.bundle.min.js \
+	resources/static/bootstrap-5.2.2-dist/js/bootstrap.bundle.min.js.map
 
 oldir = $(pkgdatadir)/resources/static/openlayers-7.0.0-legacy
 dist_ol_DATA = \

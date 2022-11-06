@@ -1,0 +1,17 @@
+{
+   boost::locale/icu leak
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:_ZN6icu_6713UnicodeString8allocateEi
+   fun:_ZN6icu_6713UnicodeString18cloneArrayIfNeededEiiaPPia
+   fun:_ZN6icu_6713UnicodeString8doAppendEPKDsii
+   fun:_ZN6icu_6715SimpleFormatter6formatEPKDsiPKPKNS_13UnicodeStringERS3_S5_aPiiR10UErrorCode
+   fun:_ZNK6icu_6715SimpleFormatter15formatAndAppendEPKPKNS_13UnicodeStringEiRS1_PiiR10UErrorCode
+   fun:_ZNK6icu_6715SimpleFormatter6formatERKNS_13UnicodeStringES3_RS1_R10UErrorCode
+   fun:_ZN6icu_6716SimpleDateFormat9constructENS_10DateFormat6EStyleES2_RKNS_6LocaleER10UErrorCode
+   fun:_ZN6icu_6716SimpleDateFormatC1ENS_10DateFormat6EStyleES2_RKNS_6LocaleER10UErrorCode
+   fun:_ZN6icu_6710DateFormat6createENS0_6EStyleES1_RKNS_6LocaleE
+   obj:/usr/lib/x86_64-linux-gnu/libboost_locale.so.1.74.0
+   obj:/usr/lib/x86_64-linux-gnu/libboost_locale.so.1.74.0
+}

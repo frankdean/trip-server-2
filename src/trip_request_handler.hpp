@@ -138,10 +138,13 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override {
     // If the url is effectively a root url for the application, redirect.
-    if (compare_request_regex(request.uri, "($|/$)"))
+    if (compare_request_regex(request.uri, "($|/$)") ||
+        request.uri.empty() ||
+        request.uri == "/") {
       redirect(request, response, get_default_uri());
-    else
+    } else {
       HTTPNotFoundRequestHandler::do_handle_request(request, response);
+    }
   }
 public:
   TripNotFoundHandler(std::string uri_prefix) :
@@ -151,7 +154,14 @@ public:
 class TripAuthenticatedRequestHandler : public web::AuthenticatedRequestHandler {
 protected:
   std::shared_ptr<TripConfig> config;
-  enum menu_items { unknown, tracks, tracker_info, track_sharing };
+  enum menu_items {
+    unknown,
+    itineraries,
+    itinerary,
+    tracks,
+    tracker_info,
+    track_sharing
+  };
 private:
     menu_items menu_item;
 protected:

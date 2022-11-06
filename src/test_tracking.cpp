@@ -214,9 +214,9 @@ bool test_tracked_location_query_params_constructor_01()
     q.speed.first && std::round((q.speed.second - 3.2) * 10) == 0 &&
     q.bearing.first && std::round((q.bearing.second - 359.56789) * 1e6) == 0 &&
     q.satellite_count.first && q.satellite_count.second == 30 &&
-    q.provider == "test" &&
+    q.provider.first && q.provider.second == "test" &&
     q.battery.first && std::round((q.battery.second - 98.7) * 10) == 0 &&
-    q.note == "Test note";
+    q.note.first && q.note.second == "Test note";
   if (!retval) {
     std::cout
       << "test_tracked_location_query_params_constructor_01() failed: "
@@ -239,13 +239,13 @@ bool test_tracked_location_query_params_constructor_01()
       std::cout << "bearing.first && bearing.second\n";
     if (q.satellite_count.first && q.satellite_count.second != 30)
       std::cout << "satellite_count.first && q.satellitcount.second\n";
-    if (q.provider != "test")
+    if (!q.provider.first || q.provider.second != "test")
       std::cout << "provider\n";
     if (q.battery.first && std::round((q.battery.second - 98.7) * 10) != 0)
       std::cout << "battery.first && battery.second: "
                 << std::fixed << std::setprecision(19)
                 << q.battery.second << '\n';
-    if (q.note != "Test note")
+    if (!q.note.first || q.note.second != "Test note")
       std::cout << "note\n";
   }
   return retval;

@@ -198,14 +198,14 @@ fi
 
 # Our normal setup for trip-server v1 doesn't work with the folder
 # synchronisation used for the FreeBSD box
-if [ ! -x /bin/freebsd-version ] && [ -n "$SU_CMD $(type -P yarn)" ]; then
+if [ ! -x /bin/freebsd-version ]; then
     if [ -f /vagrant-trip-server/package.json ] && [ ! -d /vagrant-trip-server/node_modules ]; then
-	$SU_CMD 'cd /vagrant-trip-server && yarn install'
+	$SU_CMD 'cd /vagrant-trip-server && PATH=/usr/local/lib/nodejs/node-current/bin:$PATH yarn install'
     fi
     if [ -f /vagrant-trip-web-client/package.json ]; then
 	echo "Configuring web client to use shared folder under /vagrant-trip-web-client/"
 	if [ ! -d /vagrant-trip-web-client/node_modules ]; then
-	    $SU_CMD 'cd /vagrant-trip-web-client && yarn install'
+	    $SU_CMD 'cd /vagrant-trip-web-client && PATH=/usr/local/lib/nodejs/node-current/bin:$PATH yarn install'
 	fi
 	if [ "$TRIP_DEV" == "y" ]; then
 	    if [ -L /vagrant-trip-server/app ]; then

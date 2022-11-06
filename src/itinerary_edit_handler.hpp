@@ -19,42 +19,52 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef TRACK_LOGGING_HANDLER_HPP
-#define TRACK_LOGGING_HANDLER_HPP
+#ifndef ITINERARY_EDIT_HANDLER_HPP
+#define ITINERARY_EDIT_HANDLER_HPP
 
-#include "../config.h"
 #include "trip_request_handler.hpp"
-#include <string>
+#include "itinerary_pg_dao.hpp"
 
 namespace fdsd {
 namespace web {
   class HTTPServerRequest;
   class HTTPServerResponse;
+  class Pagination;
 }
 namespace trip {
 
-/**
- * Handle logging tracked locations from a remote client application,
- * e.g. [TripLogger](https://www.fdsd.co.uk/triplogger/)
- */
-class TrackLoggingHandler : public TripRequestHandler {
+class ItineraryEditHandler : public TripAuthenticatedRequestHandler {
+  bool is_new;
+  bool no_title_error;
+  std::pair<bool, long> itinerary_id;
+  void build_form(web::HTTPServerResponse& response,
+                  const ItineraryPgDao::itinerary_description& itinerary);
 protected:
-  virtual void do_handle_request(
+  virtual void do_preview_request(
+      const web::HTTPServerRequest& request,
+      web::HTTPServerResponse& response) override;
+  virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  TrackLoggingHandler(std::shared_ptr<TripConfig> config) :
-    TripRequestHandler(config) {}
+  ItineraryEditHandler(std::shared_ptr<TripConfig> config) :
+    TripAuthenticatedRequestHandler(config),
+    is_new(false),
+    no_title_error(false) { itinerary_id = std::make_pair(false, 0); }
   virtual std::string get_handler_name() const override {
-    return "TrackLoggingHandler";
+    return "ItineraryEditHandler";
   }
-  virtual std::unique_ptr<BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<TrackLoggingHandler>(new TrackLoggingHandler(config));
+  virtual bool can_handle(
+      const web::HTTPServerRequest& request) const override {
+    return compare_request_regex(request.uri, "/itinerary/edit($|\\?.*)");
   }
-  virtual bool can_handle(const web::HTTPServerRequest& request) const override;
+  virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
+    return std::unique_ptr<ItineraryEditHandler>(
+        new ItineraryEditHandler(config));
+  }
 };
 
 } // namespace trip
 } // namespace fdsd
 
-#endif // TRACK_LOGGING_HANDLER_HPP
+#endif // ITINERARY_EDIT_HANDLER_HPP

@@ -114,8 +114,12 @@ void TrackingRequestHandler::build_form(
         response.content <<
           "      <tr>\n"
           "        <td class=\"text-end\">" << as::number << std::setprecision(0) << location.id << "</td>\n";
+        const auto date = std::chrono::duration_cast<std::chrono::seconds>(
+            location.time_point.time_since_epoch()
+          ).count();
         response.content <<
-          "        <td>" << as::datetime << std::chrono::duration_cast<std::chrono::seconds>(location.time_point.time_since_epoch()).count() << "</td>\n";
+          "        <td>" << as::ftime("%a") << date << " "
+                         << as::date_medium << as::datetime << date << "</td>\n";
         response.content << as::posix <<
           "        <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << std::fixed << std::setprecision(6) << location.latitude << "&lng=" << location.longitude << "\">" << location.latitude << "</a></td>\n"
           "        <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << location.latitude << "&lng=" << location.longitude << "\">" << location.longitude << "</a></td>\n"
@@ -143,8 +147,8 @@ void TrackingRequestHandler::build_form(
           response.content << std::fixed << std::setprecision(0) << location.bearing.second;
 
         response.content << "</td>\n"
-          "        <td class=\"text-start\">" << x(location.note) << "</td>\n"
-          "        <td class=\"text-start\">" << x(location.provider) << "</td>\n"
+          "        <td class=\"text-start\">" << (location.note.first ? x(location.note.second) : "") << "</td>\n"
+          "        <td class=\"text-start\">" << (location.provider.first ? x(location.provider.second) : "") << "</td>\n"
           "        <td class=\"text-end\">";
 
         if (location.satellite_count.first)
@@ -165,7 +169,7 @@ void TrackingRequestHandler::build_form(
         "    </table>\n"
         "  </div>\n";
 
-      if (pagination.get_page_count() > 0) {
+      if (pagination.get_page_count() > 1) {
         response.content
           <<
           "  <div id=\"div-paging\" class=\"pb-0\">\n"
@@ -182,14 +186,15 @@ void TrackingRequestHandler::build_form(
   // Inside the form, but not the card div, so it benefits from the form
   // submission but renders more associatively with the pagination div.
   const auto page_count = pagination.get_page_count();
-  if (!first_time && page_count > 0) {
+  if (!first_time && page_count > 1) {
     response.content
       <<
       "    <div class=\"d-flex justify-content-center pt-0 pb-0 col-12\">\n"
       "      <input id=\"goto-page\" type=\"number\" name=\"page\" value=\""
       << std::fixed << std::setprecision(0) << pagination.get_current_page()
       << "\" min=\"1\" max=\"" << page_count << "\">\n"
-      "      <button id=\"goto-page-btn\" class=\"btn btn-sm btn-primary\" type=\"submit\" name=\"action\" value=\"goto-page\">Go</button>\n"
+      // Title of button which goes to a specified page number
+      "      <button id=\"goto-page-btn\" class=\"btn btn-sm btn-primary\" type=\"submit\" name=\"action\" accesskey=\"g\" value=\"goto-page\">" << translate("Go") << "</button>\n"
       "    </div>\n"
       ;
   }
@@ -202,13 +207,13 @@ void TrackingRequestHandler::build_form(
     "      <div class=\"col-lg-3\">\n"
     // The input start date to search for location tracks
     "        <label for=\"input-date-from\" class=\"form-label\">" << translate("Date from") << "</label>\n"
-    "        <input id=\"input-date-from\" class=\"form-control\"  aria-describedby=\"validationFromDate\" type=\"datetime-local\" name=\"from\" value=\"" << x(query_params.date_as_html_input_value(query_params.date_from)) <<  "\" size=\"25\" step=\"1\" required >\n"
+    "        <input id=\"input-date-from\" class=\"form-control\"  aria-describedby=\"validationFromDate\" type=\"datetime-local\" name=\"from\" value=\"" << x(query_params.datetime_as_html_input_value(query_params.date_from)) <<  "\" size=\"25\" step=\"1\" required >\n"
     "        <div id=\"validationFromDate\" class=\"invalid-feedback\">Enter the start date to fetch points from</div>\n"
     "      </div>\n"
     "      <div class=\"col-lg-3\">\n"
     // The input end date to search for location tracks
     "        <label for=\"input-date-to\" class=\"form-label\">" << translate("Date to") << "</label>\n"
-    "        <input id=\"input-date-to\" class=\"form-control\" aria-describedby=\"validationFromDate\" type=\"datetime-local\" name=\"to\" value=\"" << x(query_params.date_as_html_input_value(query_params.date_to)) << "\" size=\"25\" step=\"1\" required >\n"
+    "        <input id=\"input-date-to\" class=\"form-control\" aria-describedby=\"validationFromDate\" type=\"datetime-local\" name=\"to\" value=\"" << x(query_params.datetime_as_html_input_value(query_params.date_to)) << "\" size=\"25\" step=\"1\" required >\n"
     "        <div id=\"validationToDate\" class=\"invalid-feedback\">Enter the end date to fetch points until</div>\n"
     // "      </div>\n"
     "      </div>\n";
@@ -269,20 +274,20 @@ void TrackingRequestHandler::build_form(
     "      </div>\n"
     "      <div class=\"col-12 pt-3\" aria-label=\"Form buttons\">"
     // Label for the button to perform the search that lists the tracked locations
-    "        <button id=\"btn-tracks\" type=\"submit\" name=\"action\" value=\"list\" class=\"btn btn-lg btn-success\">" << translate("List tracks") << "</button>\n"
+    "        <button id=\"btn-tracks\" type=\"submit\" name=\"action\" value=\"list\" accesskey=\"l\" class=\"btn btn-lg btn-success\">" << translate("List tracks") << "</button>\n"
     // Label for the button to display a map showing the tracked locations
-    "        <button id=\"btn-map\" type=\"submit\" formaction=\"" << get_uri_prefix() << "/map\" name=\"action\" value=\"show_map\" class=\"btn btn-lg btn-primary\">" << translate("Show map") << "</button>\n"
-    "        <button id=\"btn-download\" type=\"submit\" formaction=\"" << get_uri_prefix() << TrackingDownloadHandler::tracking_download_url << "\" name=\"action\" value=\"download\" class=\"btn btn-lg btn-success\"\n"
+    "        <button id=\"btn-map\" type=\"submit\" formaction=\"" << get_uri_prefix() << "/map\" name=\"action\" value=\"show_map\" accesskey=\"m\" class=\"btn btn-lg btn-primary\">" << translate("Show map") << "</button>\n"
+    "        <button id=\"btn-download\" type=\"submit\" formaction=\"" << get_uri_prefix() << TrackingDownloadHandler::tracking_download_url << "\" name=\"action\" value=\"download\" accesskey=\"d\" class=\"btn btn-lg btn-success\"\n"
     // Prompt to confirm the user wished to download a data file with the tracked locations
     "         onclick=\"return confirm('" << translate("Download tracks?") << "');\">"
     // Label for the button to download the tracks as an XML data file
                    << translate("Download tracks") << "</button>\n"
     "        <!--\n"
     // Label for the button to make a copy of the tracked locations
-    "        <button id=\"btn-copy\" type=\"submit\" name=\"action\" value=\"copy\" class=\"btn btn-lg btn-primary\">" << translate("Copy") << "</button>\n"
+    "        <button id=\"btn-copy\" type=\"submit\" name=\"action\" value=\"copy\" accesskey=\"c\" class=\"btn btn-lg btn-primary\">" << translate("Copy") << "</button>\n"
     "        -->\n"
     // Label for the button which resets the form's input criteria to that originally displayed
-    "        <button id=\"btn-reset\" type=\"submit\" name=\"action\" value=\"reset\" class=\"btn btn-lg btn-danger\">" << translate("Reset") << "</button>\n"
+    "        <button id=\"btn-reset\" type=\"submit\" name=\"action\" value=\"reset\" accesskey=\"r\" class=\"btn btn-lg btn-danger\">" << translate("Reset") << "</button>\n"
     "      </div>\n"
     "    </div><!-- container -->\n"
     "  </form>\n"

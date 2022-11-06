@@ -70,10 +70,10 @@ std::string TrackPgDao::tracked_location::to_string() const
   os << std::setprecision(0);
   if (satellite_count.first)
     os << "satellite_count: " << satellite_count.second << ", ";
-  os << "provider: \"" << provider << "\", " << std::setprecision(1);
+  os << "provider: " << (provider.first ? '"' + provider.second + '"' : "null") << ", " << std::setprecision(1);
   if (battery.first)
     os <<"battery: " << battery.second << ", ";
-  os << "note: \"" << note << "\"";
+  os << "note: \"" << (note.first ? '"' + note.second + '"' : "null") << "\"";
   return os.str();
 }
 
@@ -295,9 +295,9 @@ TrackPgDao::tracked_location_query_params::tracked_location_query_params(
   speed = get_optional_float_value(params, "speed");
   bearing = get_optional_double_value(params, "bearing");
   satellite_count = get_optional_int_value(params, "sat");
-  provider = get_value(params, "prov");
+  provider = get_optional_value(params, "prov");
   battery = get_optional_float_value(params, "batt");
-  note = get_value(params, "note");
+  note = get_optional_value(params, "note");
 }
 
 std::string TrackPgDao::nickname_result::to_string() const
@@ -402,9 +402,9 @@ TrackPgDao::tracked_locations_result
     // This fails to compile with C++17, with a not-assignable message, but I
     // don't see why it isn't assignable.
     // <std::optional<int>> satellite_count  = satellite.as<std::optional<int>>();
-    i["provider"].to(loc.provider);
+    loc.provider.first = i["provider"].to(loc.provider.second);
     loc.battery.first = i["battery"].to(loc.battery.second);
-    i["note"].to(loc.note);
+    loc.note.first = i["note"].to(loc.note.second);
     retval.locations.push_back(loc);
   }
   tx.commit();
@@ -760,9 +760,9 @@ void TrackPgDao::save_tracked_location(
       qp.speed.first ? &qp.speed.second : nullptr,
       qp.bearing.first ? &qp.bearing.second : nullptr,
       qp.satellite_count.first ? &qp.satellite_count.second : nullptr,
-      qp.provider,
+      qp.provider.first ? &qp.provider.second : nullptr,
       qp.battery.first ? &qp.battery.second : nullptr,
-      qp.note);
+      qp.note.first ? &qp.note.second : nullptr);
   tx.commit();
 }
 

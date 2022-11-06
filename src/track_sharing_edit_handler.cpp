@@ -42,7 +42,7 @@ void TrackSharingEditHandler::do_preview_request(
     // Title of the page when editing the sharing of tracked locations with another user
     set_page_title(translate("Track Sharing&mdash;Edit"));
   }
-  
+
   set_menu_item(unknown);
 }
 
@@ -76,7 +76,7 @@ void TrackSharingEditHandler::build_form(
     // Prompt when entering recent tracking criteria when sharing locations
     "        " << translate("Share locations within last") << "\n"
     "        <input id=\"input-days\" name=\"recentDays\" type=\"number\" min=\"0\"\n"
-    "               size=\"4\" max=\"99999\" class=\"days\" ";
+    "               max=\"99999\" class=\"days\" ";
   if (recent_dhm.first)
     response.content << " value=\"" << recent_dhm.second.days << '"';
   response.content
@@ -85,7 +85,7 @@ void TrackSharingEditHandler::build_form(
     // Label for input of days
     "        <label for=\"input-days\">" << translate("days") << "</label>\n"
     "        <input id=\"input-hours\" name=\"recentHours\" type=\"number\" min=\"0\"\n"
-    "               max=\"23\" size=\"3\" maxlength=\"2\" class=\"hours\"";
+    "               max=\"23\" class=\"hours\"";
   if (recent_dhm.first)
     response.content << " value=\"" << recent_dhm.second.hours << '"';
   response.content
@@ -94,7 +94,7 @@ void TrackSharingEditHandler::build_form(
     // Label for input of hours
     "        <label for=\"input-hours\">" << translate("hours") << "</label> and\n"
     "        <input id=\"input-minutes\" name=\"recentMinutes\" type=\"number\" min=\"0\"\n"
-    "               max=\"59\" size=\"2\" maxlength=\"2\" class=\"minutes\"";
+    "               max=\"59\" class=\"minutes\"";
   if (recent_dhm.first)
     response.content << " value=\"" << recent_dhm.second.minutes << '"';
   response.content
@@ -109,7 +109,7 @@ void TrackSharingEditHandler::build_form(
     // Prompt when entering maximum recent tracking criteria when sharing locations
     "        " << translate("Limit sharing to a maximum period of") << "\n"
     "        <input id=\"input-max-days\" name=\"maxDays\" type=\"number\" min=\"0\"\n"
-    "               size=\"4\" max=\"99999\" class=\"days\"";
+    "               max=\"99999\" class=\"days\"";
   if (max_dhm.first)
     response.content << " value=\"" << max_dhm.second.days << '"';
   response.content
@@ -118,7 +118,7 @@ void TrackSharingEditHandler::build_form(
     // Label for input of days
     "        <label for=\"input-max-days\">" << translate("days") << "</label>\n"
     "        <input id=\"input-max-hours\" name=\"maxHours\" type=\"number\" min=\"0\"\n"
-    "               max=\"23\" size=\"3\" maxlength=\"2\" class=\"hours\"";
+    "               max=\"23\" class=\"hours\"";
   if (max_dhm.first)
     response.content << " value=\"" << max_dhm.second.hours << '"';
   response.content
@@ -127,7 +127,7 @@ void TrackSharingEditHandler::build_form(
     // Label for input of hours
     "        <label for=\"input-max-hours\">" << translate("hours") << "</label> and\n"
     "        <input id=\"input-max-minutes\" name=\"maxMinutes\" type=\"number\" min=\"0\"\n"
-    "               max=\"59\" size=\"2\" maxlength=\"2\" class=\"minutes\"";
+    "               max=\"59\" class=\"minutes\"";
   if (max_dhm.first)
     response.content << " value=\"" << max_dhm.second.minutes << '"';
   response.content
@@ -150,11 +150,11 @@ void TrackSharingEditHandler::build_form(
     "      <div id=\"div-form-buttons\" class=\"py-3 my-3\">\n"
     "        <input type=\"hidden\" name=\"new\" value=\"" << (is_new ? "true" : "false") << "\">\n"
     // Label for a save button
-        "        <button id=\"btn-save\" type=\"submit\" name=\"action\" value=\"save\" class=\"btn btn-lg btn-primary\">" << translate("Save") << "</button>\n"
+        "        <button id=\"btn-save\" type=\"submit\" name=\"action\" value=\"save\" accesskey=\"s\" class=\"btn btn-lg btn-primary\">" << translate("Save") << "</button>\n"
     // Label for a cancel button
-        "        <button id=\"btn-cancel\" type=\"submit\" name=\"action\" value=\"cancel\" class=\"btn btn-lg btn-danger\">" << translate("Cancel") << "</button>\n"
+        "        <button id=\"btn-cancel\" type=\"submit\" name=\"action\" value=\"cancel\" accesskey=\"c\" class=\"btn btn-lg btn-danger\">" << translate("Cancel") << "</button>\n"
     // Label for a reset button
-    "        <button id=\"btn-reset\" type=\"reset\" class=\"btn btn-lg btn-danger\">Reset</button>\n"
+    "        <button id=\"btn-reset\" type=\"reset\" accesskey=\"r\" class=\"btn btn-lg btn-danger\">Reset</button>\n"
     "      </div>\n"
     "    </form>\n"
     "  </div>\n";

@@ -34,7 +34,9 @@ TripConfig::TripConfig(std::string filename) :
   pg_pool_size(24),
   providers(),
   tile_cache_max_age(),
-  tile_count_frequency()
+  tile_count_frequency(),
+  allow_invalid_xsd(false),
+  default_average_kmh_hiking_speed(4)
 {
   try {
     // std::cout << "Reading config from \"" << config_filename << "\"\n";
@@ -47,6 +49,13 @@ TripConfig::TripConfig(std::string filename) :
         worker_count = app["worker_count"].as<int>();
       if (app["pg_pool_size"])
         pg_pool_size = app["pg_pool_size"].as<int>();
+      if (auto gpx = app["gpx"]) {
+        if (gpx["allowInvalidXsd"])
+          allow_invalid_xsd = gpx["allowInvalidXsd"].as<bool>();
+      }
+      if (app["averageFlatSpeedKph"])
+        default_average_kmh_hiking_speed =
+          app["averageFlatSpeedKph"].as<double>();
 
       std::string prefix_url;
       if (app["prefix_url"])

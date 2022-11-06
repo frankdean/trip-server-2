@@ -19,42 +19,43 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef TRACK_LOGGING_HANDLER_HPP
-#define TRACK_LOGGING_HANDLER_HPP
+#ifndef ITINERARY_DOWNLOAD_HANDLER_HPP
+#define ITINERARY_DOWNLOAD_HANDLER_HPP
 
-#include "../config.h"
+#include "itinerary_pg_dao.hpp"
 #include "trip_request_handler.hpp"
 #include <string>
 
 namespace fdsd {
-namespace web {
-  class HTTPServerRequest;
-  class HTTPServerResponse;
-}
 namespace trip {
 
-/**
- * Handle logging tracked locations from a remote client application,
- * e.g. [TripLogger](https://www.fdsd.co.uk/triplogger/)
- */
-class TrackLoggingHandler : public TripRequestHandler {
+class ItineraryDownloadHandler : public BaseRestHandler {
+  long itinerary_id;
+  void handle_gpx_download(
+      const web::HTTPServerRequest& request,
+      web::HTTPServerResponse& response);
 protected:
-  virtual void do_handle_request(
+  virtual void set_content_headers(web::HTTPServerResponse& response) const override;
+  virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  TrackLoggingHandler(std::shared_ptr<TripConfig> config) :
-    TripRequestHandler(config) {}
+  ItineraryDownloadHandler(std::shared_ptr<TripConfig> config) :
+    BaseRestHandler(config), itinerary_id() {}
   virtual std::string get_handler_name() const override {
-    return "TrackLoggingHandler";
+    return "ItineraryDownloadHandler";
   }
-  virtual std::unique_ptr<BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<TrackLoggingHandler>(new TrackLoggingHandler(config));
+  virtual bool can_handle(
+      const web::HTTPServerRequest& request) const override {
+    return compare_request_regex(request.uri, "/itinerary/download($|\\?.*)");
   }
-  virtual bool can_handle(const web::HTTPServerRequest& request) const override;
+  virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
+    return std::unique_ptr<ItineraryDownloadHandler>(
+        new ItineraryDownloadHandler(config));
+  }
 };
 
 } // namespace trip
 } // namespace fdsd
 
-#endif // TRACK_LOGGING_HANDLER_HPP
+#endif // ITINERARY_DOWNLOAD_HANDLER_HPP

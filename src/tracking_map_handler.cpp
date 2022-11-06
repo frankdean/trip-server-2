@@ -67,34 +67,40 @@ void TrackingMapHandler::handle_authenticated_request(
   //   std::cout << p.first << " -> " << p.second << '\n';
   // }
 
-  // Save the query parameters
-  SessionPgDao session_dao;
-  TrackPgDao::location_search_query_params q(get_user_id(),
-                                             request.query_params);
-  json j = q;
-  // This is user supplied data, so serialization could fail
-  try {
-    // std::cout << "Saving JSON: " << j.dump(4) << '\n';
-    session_dao.save_value(get_session_id(),
-                           SessionPgDao::tracks_query_key,
-                           j.dump());
-  } catch (const std::exception& e) {
-    // TODO create an error message for the user
-    std::cerr << "Failed to save query parameters in session\n"
-              << e.what() << '\n';
+  const std::string latitude = request.get_query_param("lat");
+  const std::string longitude = request.get_query_param("lng");
+  const bool is_map_point_query = !(latitude.empty() || longitude.empty());
+  if (!is_map_point_query) {
+    // Save the query parameters
+    SessionPgDao session_dao;
+    TrackPgDao::location_search_query_params q(get_user_id(),
+                                               request.query_params);
+    json j = q;
+    // This is user supplied data, so serialization could fail
+    try {
+      // std::cout << "Saving JSON: " << j.dump(4) << '\n';
+      session_dao.save_value(get_session_id(),
+                             SessionPgDao::tracks_query_key,
+                             j.dump());
+    } catch (const std::exception& e) {
+      // TODO create an error message for the user
+      std::cerr << "Failed to save query parameters in session\n"
+                << e.what() << '\n';
+    }
   }
   response.content <<
     "    <div id=\"map\"></div>\n"
     "    <div id=\"popup\" class=\"ol-popup\">\n"
     "      <a href=\"#\" id=\"popup-closer\" class=\"ol-popup-closer\"></a>\n"
     "      <div id=\"popup-content\"></div>\n"
-    "    </div>\n"
-    "    <div id=\"track-info\"></div>\n"
-    "    <script type=\"text/javascript\">\n"
+    "    </div>\n";
+  // The #track-info div is used to display metrics for the track
+  if (!is_map_point_query)
+    response.content << "    <div id=\"track-info\"></div>\n";
+  response.content <<
+    "    <script>\n"
     "      <!--\n"
-    "      const server_prefix = '" << get_uri_prefix() << "'\n"
-                   <<
-    "      const query_params = JSON.parse('" << j.dump() << "');\n";
+    "      const server_prefix = '" << get_uri_prefix() << "'\n";
   if (config->get_providers().size() > 0) {
     response.content <<
       "      const providers = [\n";

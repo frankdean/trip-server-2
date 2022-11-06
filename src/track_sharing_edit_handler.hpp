@@ -68,5 +68,5 @@ public:
 
 } // namespace trip
 } // namespace fdsd
-  
+
 #endif // TRACK_SHARING_EDIT_HANDLER_HPP

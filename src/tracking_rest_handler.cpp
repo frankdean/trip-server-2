@@ -88,8 +88,8 @@ void TrackingRestHandler::handle_authenticated_request(
       },
       {"time", time.str()}
     };
-    if (!most_recent.note.empty()) {
-      marker.push_back({"note", x(most_recent.note)});
+    if (most_recent.note.first && !most_recent.note.second.empty()) {
+      marker.push_back({"note", x(most_recent.note.second)});
     }
     j.push_back({"most_recent", marker});
 

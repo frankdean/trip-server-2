@@ -210,7 +210,7 @@ void TrackingInfoHandler::build_form(
   os <<
     "  <form name=\"form\" method=\"post\">\n"
     // Text displayed on the button to generate a new tracking ID
-    "    <button id=\"btn-generate\" type=\"submit\" name=\"action\" value=\"generate\" class=\"btn btn-lg btn-success\">" << translate("Generate new tracking ID") << "</button>\n"
+    "    <button id=\"btn-generate\" type=\"submit\" name=\"action\" value=\"generate\" accesskey=\"g\" class=\"btn btn-lg btn-success\">" << translate("Generate new tracking ID") << "</button>\n"
     "\n"
     "    <div class=\"mt-2\">\n"
     "      <p>"
@@ -242,7 +242,7 @@ void TrackingInfoHandler::build_form(
     "\n"
     "    </div>\n"
     // Text shown on the button used to download the file containing the TripLogger configuration settings
-    "    <button id=\"btn-download\" formaction=\"" << get_uri_prefix() << "/download-triplogger-config\" class=\"btn btn-lg btn-primary\">" << translate("Download TripLogger Settings") << "</button>\n"
+    "    <button id=\"btn-download\" formaction=\"" << get_uri_prefix() << "/download-triplogger-config\" accesskey=\"d\" class=\"btn btn-lg btn-primary\">" << translate("Download TripLogger Settings") << "</button>\n"
     "  </form>\n"
     "  <div class=\"mt-3 pb-2\">\n"
     // Message shown above text showing configuration for the GPSLogger Android app

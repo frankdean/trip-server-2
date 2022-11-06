@@ -3,7 +3,11 @@ app:
     indent:
       level: 0
   gpx:
-    allowInvalidXsd: false # Ignored in trip v2
+    # This option allows the waypoint color attribute used by OsmAnd to be
+    # included in the downloaded GPX file.  When it is included, the GPX file
+    # will fail XSD validation, which *might* be required by some
+    # applications.
+    allowInvalidXsd: false
   autoQuit: # Ignored in trip v2
     timeOut: 300 # Ignored in trip v2
     nonSystemd: # Ignored in trip 2v

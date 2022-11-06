@@ -56,6 +56,20 @@ class TripConfig {
   std::vector<tile_provider> providers;
   int tile_cache_max_age;
   int tile_count_frequency;
+  /**
+   * The waypoint color attribute used by OsmAnd is not valid according to the
+   * GPX XSD.  Setting this attribute to true allows the waypoint color
+   * attribute to be included in the GPX download, otherwise it is ignored and
+   * not included.  This should only matter if usage of the GPX download must
+   * pass XSD validation, perhaps because of the requirements of another
+   * application.
+   */
+  bool allow_invalid_xsd;
+  /**
+   * This value is used to estimate the time required to hike a route, using the
+   * Scarf's Equivalence algorithm.
+   */
+  double default_average_kmh_hiking_speed;
   YAML::Node default_triplogger_configuration;
 public:
   TripConfig(std::string filename);
@@ -85,6 +99,12 @@ public:
   }
   int get_tile_count_frequency() const {
     return tile_count_frequency;
+  }
+  bool get_allow_invalid_xsd() const {
+    return allow_invalid_xsd;
+  }
+  double get_default_average_kmh_hiking_speed() const {
+    return default_average_kmh_hiking_speed;
   }
   YAML::Node create_default_triplogger_configuration();
 };

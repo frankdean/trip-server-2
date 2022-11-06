@@ -25,6 +25,7 @@ const fromLonLat = ol.proj.fromLonLat;
 const CircleStyle = ol.style.Circle;
 const Control = ol.control.Control;
 const defaultControls = ol.control.defaults.defaults;
+const Feature = ol.Feature;
 const Fill = ol.style.Fill;
 const GeoJSON = ol.format.GeoJSON;
 const Icon = ol.style.Icon;
@@ -378,44 +379,110 @@ class SelectMapModal {
   }
 }
 
-// console.log('query:', query_params);
+class MapPointViewer {
+  constructor(mapLayerManager, lng, lat) {
+    // this.mapLayerManager = mapLayerManager;
+    // this.lng = lng;
+    // this.lat = lat;
+    const overlayPosition = fromLonLat([lng, lat]);
+    let trackSource = new VectorSource({
+      features: [new Feature({
+        geometry: new Point(overlayPosition),
+      })],
+    });
+    let pointStyle = new Style({
+      image: new CircleStyle({
+        radius: 5,
+        fill: new Fill({
+          color: 'red'
+        }),
+        stroke: new Stroke({color: 'red', width: 4})
+      }),
+    });
+    let trackLayer = new VectorLayer({
+      source: trackSource,
+      style: pointStyle,
+    });
+    mapLayerManager.setTrackLayer(trackLayer);
+    // mapLayerManager.map.getView().fit(trackLayer.getSource().getExtent());
+    let view = mapLayerManager.map.getView();
+    view.setCenter(overlayPosition);
+    view.setZoom(17);
+    const container = document.getElementById('popup');
+    const content = document.getElementById('popup-content');
+    const closer = document.getElementById('popup-closer');
+    const overlay = new ol.Overlay({
+      element: container,
+      autoPan: true,
+      autoPanAnimation: {
+        duration: 250
+      }
+    });
+    mapLayerManager.map.addOverlay(overlay);
+    closer.onclick = function() {
+      overlay.setPosition(undefined);
+      closer.blur();
+      return false;
+    };
+    let markerContent = `${lat},${lng}`;
+    content.innerHTML = markerContent;
+    overlay.setPosition(overlayPosition);
+    mapLayerManager.map.on('singleclick', function(event) {
+      if (mapLayerManager.map.hasFeatureAtPixel(event.pixel) === true) {
+        content.innerHTML = markerContent;
+        overlay.setPosition(overlayPosition);
+      } else {
+        overlay.setPosition(undefined);
+        closer.blur();
+      }
+    });
+  }
+}
 
-const myHeaders = new Headers();
+const query_params = (new URL(document.location)).searchParams;
 
-const myRequest = new Request(
-  server_prefix + '/rest/locations?' +
-    new URLSearchParams({
-      nickname: query_params.nickname,
-      from: query_params.date_from,
-      to: query_params.date_to,
-      max_hdop: query_params.max_hdop,
-      notes_only_flag: query_params.notes_only_flag,
-      order: 'ASC',
-      offset: -1,
-      page_size: -1,
-    }),
-  {
-    method: 'GET',
-    headers: myHeaders,
-    mode: 'same-origin',
-    cache: 'no-store',
-    referrerPolicy: 'no-referrer',
-  });
+const lat = query_params.get('lat');
+const lng = query_params.get('lng');
 
-fetch(myRequest)
-  .then((response) => {
-    if (!response.ok) {
-      throw new Error('Request failed');
-    }
-    // console.log('Status:', response.status);
-    return response.json();
-  })
-  .then((data) => {
-    // console.log(data);
-    let mapLayerManager = new MapLayerManager(providers);
-    const trackLayerManager = new TrackLayerManager(mapLayerManager, data);
-    mapLayerManager.setTrackLayer(trackLayerManager.trackLayer);
-  })
-  .catch((error) => {
-    console.error('Error fetching from Trip:', error);
-  });
+if (lat && lng) {
+  new MapPointViewer(new MapLayerManager(providers), lng, lat);
+} else {
+  const myHeaders = new Headers();
+  const myRequest = new Request(
+    server_prefix + '/rest/locations?' +
+      new URLSearchParams({
+        nickname: query_params.get('nickname'),
+        from: query_params.get('from'),
+        to: query_params.get('to'),
+        max_hdop: query_params.get('max_hdop'),
+        notes_only_flag: query_params.get('notes_only_flag'),
+        order: 'ASC',
+        offset: -1,
+        page_size: -1,
+      }),
+    {
+      method: 'GET',
+      headers: myHeaders,
+      mode: 'same-origin',
+      cache: 'no-store',
+      referrerPolicy: 'no-referrer',
+    });
+
+  fetch(myRequest)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Request failed');
+      }
+      // console.log('Status:', response.status);
+      return response.json();
+    })
+    .then((data) => {
+      // console.log(data);
+      let mapLayerManager = new MapLayerManager(providers);
+      const trackLayerManager = new TrackLayerManager(mapLayerManager, data);
+      mapLayerManager.setTrackLayer(trackLayerManager.trackLayer);
+    })
+    .catch((error) => {
+      console.error('Error fetching from Trip:', error);
+    });
+}

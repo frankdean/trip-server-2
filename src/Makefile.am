@@ -4,6 +4,16 @@ trip_server_SOURCES = \
 	download_triplogger_configuration_handler.hpp \
 	geo_utils.cpp \
 	geo_utils.hpp \
+	itinerary_download_handler.cpp \
+	itinerary_download_handler.hpp \
+	itineraries_handler.cpp \
+	itineraries_handler.hpp \
+	itinerary_edit_handler.cpp \
+	itinerary_edit_handler.hpp \
+	itinerary_handler.cpp \
+	itinerary_handler.hpp \
+	itinerary_pg_dao.cpp \
+	itinerary_pg_dao.hpp \
 	main.cpp \
 	session_pg_dao.cpp \
 	session_pg_dao.hpp \
@@ -88,7 +98,7 @@ trip_server_SOURCES = \
 
 check_PROGRAMS = test_uuid test_dao_helper test_date_utils test_file_utils \
 	test_uri_utils test_debug_utils test_pagination test_pool \
-	test_tracking test_geo_utils
+	test_tracking test_geo_utils test_http_request
 test_uuid_SOURCES = ../trip-server-common/src/test_uuid.cpp
 test_dao_helper_SOURCES = ../trip-server-common/src/test_dao_helper.cpp \
 	../trip-server-common/src/date_utils.cpp \
@@ -116,5 +126,10 @@ test_tracking_SOURCES = test_tracking.cpp \
 	../trip-server-common/src/logger.cpp \
 	../trip-server-common/src/logger.hpp
 test_geo_utils_SOURCES = test_geo_utils.cpp
+test_http_request_SOURCES = ../trip-server-common/src/test_http_request.cpp \
+	../trip-server-common/src/uri_utils.cpp \
+	../trip-server-common/src/uri_utils.hpp \
+	../trip-server-common/src/debug_utils.cpp \
+	../trip-server-common/src/debug_utils.hpp
 
 AM_CPPFLAGS = -DDATADIR='"$(datadir)"' -DSYSCONFDIR='"$(sysconfdir)"'

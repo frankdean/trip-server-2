@@ -21,6 +21,11 @@ body {
   z-index: -1;
 }
 
+.raw-markdown {
+  width: 100%;
+  height: 600px;
+}
+
 .ol-popup {
   position: absolute;
   background-color: white;
