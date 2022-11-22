@@ -47,6 +47,7 @@ public:
                   std::string port,
                   std::string config_filename,
                   std::string locale = "");
+  virtual ~TripApplication();
   std::string get_config_filename() const override;
   std::string get_db_connect_string() const;
   int get_worker_count() const;
@@ -54,6 +55,9 @@ public:
   std::string get_application_prefix_url() const;
   void set_root_directory(std::string directory);
   void initialize_user_sessions(bool expire_sessions);
+  std::shared_ptr<TripConfig> get_config() {
+    return config;
+  }
 };
 
 } // namespace trip

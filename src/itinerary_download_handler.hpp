@@ -42,6 +42,7 @@ protected:
 public:
   ItineraryDownloadHandler(std::shared_ptr<TripConfig> config) :
     BaseRestHandler(config), itinerary_id() {}
+  virtual ~ItineraryDownloadHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItineraryDownloadHandler";
   }

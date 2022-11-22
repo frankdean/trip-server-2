@@ -52,6 +52,7 @@ protected:
       web::HTTPServerResponse& response) override;
 public:
   TrackingRequestHandler(std::shared_ptr<TripConfig> config);
+  virtual ~TrackingRequestHandler() {}
   static const std::string tracking_url;
   virtual std::string get_handler_name() const override {
     return "TrackingRequestHandler";

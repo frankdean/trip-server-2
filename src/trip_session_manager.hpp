@@ -41,6 +41,7 @@ protected:
   void create_session_table(bool overwrite = false);
 public:
   TripSessionManager() : SessionManager() {}
+  virtual ~TripSessionManager() {}
   static const std::string session_id_cookie_name;
   virtual void persist_sessions() override;
   virtual void load_sessions() override;

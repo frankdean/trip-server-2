@@ -253,7 +253,7 @@ TrackPgDao::tracked_location_query_params::tracked_location_query_params(
     std::string> &params) : tracked_location()
 {
   this->user_id = user_id;
-  id = 0; // not used
+  id.first = false;
   latitude = std::stod(get_value(params, "lat"));
   if (latitude < -90 || latitude > 90)
     throw std::invalid_argument("Invalid latitude value");
@@ -389,7 +389,7 @@ TrackPgDao::tracked_locations_result
   r = tx.exec(os.str());
   for (result::const_iterator i = r.begin(); i != r.end(); ++i) {
     tracked_location loc;
-    i["id"].to(loc.id);
+    loc.id.first = i["id"].to(loc.id.second);
     i["lng"].to(loc.longitude);
     i["lat"].to(loc.latitude);
     std::string date_str;

@@ -45,6 +45,7 @@ protected:
 public:
   TrackLoggingHandler(std::shared_ptr<TripConfig> config) :
     TripRequestHandler(config) {}
+  virtual ~TrackLoggingHandler() {}
   virtual std::string get_handler_name() const override {
     return "TrackLoggingHandler";
   }

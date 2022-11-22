@@ -126,6 +126,7 @@ Minimal packages required to build from the source distribution tarball:
 - g++
 - gawk
 - libboost-locale-dev
+- libgdal-dev (optional)
 - libpqxx-dev
 - libpugixml-dev
 - libyaml-cpp-dev
@@ -147,6 +148,11 @@ link against the Boost Locale library:
 
 See <http://www.randspringer.de/boost/ucl-sbs.html> for help with the Boost
 library arguments.
+
+GDAL is only required for extracting elevation data from elevation tile
+datasets.  If you don't need this feature, disable GDAL.
+
+	$ ./configure --disable-gdal
 
 The version of [nlohmann-json] in Debian 10 (Buster) is too old for this
 application.  Uninstall the package and download version `v3.11.2` or later of
@@ -225,6 +231,7 @@ included in the Fedora distribution.  Follow the instructions in the
 - gcc
 - gawk
 - boost-devel
+- gdal-devel (optional)
 - libpqxx-devel
 - libpq-devel
 - yaml-cpp-devel
@@ -233,6 +240,11 @@ included in the Fedora distribution.  Follow the instructions in the
 
 Optionally install the `uuidd` package which runs a daemon that `libuuid` uses
 to create secure UUIDs.
+
+GDAL is only required for extracting elevation data from elevation tile
+datasets.  If you don't need this feature, disable GDAL.
+
+	$ ./configure --disable-gdal
 
 To build from source other than a tarball release, e.g. a git clone, examine
 the contents of `./provisioning/bootstrap.sh` to see which packages are
@@ -244,6 +256,7 @@ Minimal packages required to build from the source distribution tarball, for
 Fedora version 36.
 
 - boost-all
+- gdal (optional)
 - yaml-cpp
 - postgresql13-client
 - pugixml
@@ -253,6 +266,11 @@ Fedora version 36.
 The application requires a version 6.x of [libpqxx][] installed, which is
 older than that in this version of FreeBSD.  See the 'libpqxx' section below
 for instructions on installing `libpqxx`.
+
+GDAL is only required for extracting elevation data from elevation tile
+datasets.  If you don't need this feature, disable GDAL.
+
+	$ ./configure --disable-gdal
 
 To build from source other than a tarball release, e.g. a git clone, examine
 the contents of `./provisioning/bootstrap.sh` to see which packages are
@@ -274,6 +292,7 @@ To build from a Git clone, install the following ports from [MacPorts][]:
 - autoconf-archive
 - boost
 - gawk
+- gdal (optional)
 - intltool
 - nlohmann-json
 - pkgconfig
@@ -289,6 +308,13 @@ To build from a Git clone, install the following ports from [MacPorts][]:
 
 This section describes how to manually download and installed required
 dependencies, should they not be available as a package.
+
+#### GDAL
+
+GDAL is only required for extracting elevation data from elevation tile
+datasets.  If you don't need this feature, disable GDAL.
+
+	$ ./configure --disable-gdal
 
 #### libpqxx
 

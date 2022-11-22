@@ -23,6 +23,7 @@
 #define TRIP_PG_DAO_HPP
 
 #include "../trip-server-common/src/pg_pool.hpp"
+#include <exception>
 #include <string>
 #include <pqxx/pqxx>
 
@@ -37,7 +38,18 @@ protected:
                     std::string create_table_sql, bool overwrite);
 public:
   TripPgDao();
-  ~TripPgDao();
+  virtual ~TripPgDao();
+
+  /// Exception thrown when a user attempts to perform an unauthorised action,
+  /// e.g. access an itinerary they do not own.
+  class NotAuthorized : public std::exception {
+    std::string message;
+  public:
+    virtual const char* what() const throw() override {
+      return "User not authorized to perform the requested action";
+    }
+  };
+
   static void set_pool_manager(fdsd::utils::PgPoolManager* pool_manager);
 };
 

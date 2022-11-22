@@ -63,6 +63,7 @@ public:
     }
     std::map<std::string, std::string> query_params();
   private:
+    /// Mutex used to lock access to non-threadsafe functions
     static std::mutex mutex;
   };
 
@@ -70,6 +71,7 @@ public:
   /// a boolean specifying whether the value is not null.  i.e. true == is not
   /// null.
   struct tracked_location : public location {
+    virtual ~tracked_location() {}
     std::chrono::system_clock::time_point time_point;
     std::pair<bool, float> hdop;
     std::pair<bool, float> speed;
@@ -100,6 +102,7 @@ public:
     tracked_location_query_params(std::string user_id,
                                   const std::map<std::string,
                                   std::string> &params);
+    virtual ~tracked_location_query_params() {}
     std::string user_id;
     virtual std::string to_string() const override;
     inline friend std::ostream& operator<<
@@ -203,7 +206,6 @@ public:
           std::string shared_to_nickname,
           std::string shared_by_user_id) const;
 private:
-  /// Mutex used to lock access to non-threadsafe functions
   date_range constrain_shared_location_dates(
       std::string shared_by_id,
       std::time_t date_from,

@@ -57,7 +57,7 @@ protected:
       web::HTTPServerResponse& response) override;
 public:
   TileHandler(std::shared_ptr<TripConfig> config);
-
+  virtual ~TileHandler() {}
 
   class tile_not_found_exception : public std::exception {
   private:

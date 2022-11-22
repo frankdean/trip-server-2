@@ -40,6 +40,7 @@ protected:
       web::HTTPServerResponse& response) override;
 public:
   TrackingDownloadHandler(std::shared_ptr<TripConfig> config);
+  virtual ~TrackingDownloadHandler() {}
   static const std::string tracking_download_url;
   virtual std::string get_handler_name() const override {
     return "TrackingDownloadHandler";

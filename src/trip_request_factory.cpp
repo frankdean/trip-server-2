@@ -24,6 +24,7 @@
 #include "download_triplogger_configuration_handler.hpp"
 #include "itineraries_handler.hpp"
 #include "itinerary_download_handler.hpp"
+#include "itinerary_upload_handler.hpp"
 #include "itinerary_edit_handler.hpp"
 #include "itinerary_handler.hpp"
 #include "tile_handler.hpp"
@@ -114,6 +115,9 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
   post_login_handlers.push_back(
       std::make_shared<ItineraryDownloadHandler>(
           ItineraryDownloadHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<ItineraryUploadHandler>(
+          ItineraryUploadHandler(config)));
 }
 
 std::string TripRequestFactory::get_session_id_cookie_name() const

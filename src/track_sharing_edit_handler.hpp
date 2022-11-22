@@ -53,6 +53,7 @@ protected:
 public:
   TrackSharingEditHandler(std::shared_ptr<TripConfig> config) :
     TripAuthenticatedRequestHandler(config), is_new(false), nickname() {}
+  virtual ~TrackSharingEditHandler() {}
   virtual std::string get_handler_name() const override {
     return "TrackSharingEditHandler";
   }

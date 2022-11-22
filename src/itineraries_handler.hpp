@@ -49,6 +49,7 @@ protected:
 public:
   ItinerariesHandler(std::shared_ptr<TripConfig> config) :
     TripAuthenticatedRequestHandler(config) {}
+  virtual ~ItinerariesHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItinerariesHandler";
   }

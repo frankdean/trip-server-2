@@ -326,15 +326,20 @@ bool test_tracked_location_query_params_constructor_05()
 
 int main(void)
 {
-  return !(
-      test_valid_test_map()
-      && test_default_test_map()
-      && test_invalid_test_map()
-      && test_example_test_map()
-      && test_tracked_location_query_params_constructor_01()
-      && test_tracked_location_query_params_constructor_02()
-      && test_tracked_location_query_params_constructor_03()
-      && test_tracked_location_query_params_constructor_04()
-      && test_tracked_location_query_params_constructor_05()
-    );
+  try {
+    return !(
+        test_valid_test_map()
+        && test_default_test_map()
+        && test_invalid_test_map()
+        && test_example_test_map()
+        && test_tracked_location_query_params_constructor_01()
+        && test_tracked_location_query_params_constructor_02()
+        && test_tracked_location_query_params_constructor_03()
+        && test_tracked_location_query_params_constructor_04()
+        && test_tracked_location_query_params_constructor_05()
+      );
+  } catch (const std::exception &e) {
+    std::cerr << "Tests failed with: " << e.what() << '\n';
+    return 1;
+  }
 }

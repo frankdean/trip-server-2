@@ -118,43 +118,43 @@ void ItineraryHandler::append_itinerary_content(
  */
 void ItineraryHandler::append_path(
     std::ostream &os,
-    ItineraryPgDao::path_summary path,
+    std::shared_ptr<ItineraryPgDao::path_summary> path,
     std::string path_type,
     bool estimate_time)
 {
   os
     <<
     "                        <tr>\n"
-    "                        <td><input type=\"checkbox\" name=\"" << path_type << "[" << path.id << "]\"></td>\n"
+    "                        <td><input type=\"checkbox\" name=\"" << path_type << "[" << path->id.second << "]\"></td>\n"
     "                          <td>";
-  if (path.name.first) {
-    os << x(path.name.second);
+  if (path->name.first) {
+    os << x(path->name.second);
   } else {
     // Database ID or an item, typically a route, track or waypoint
-    os << format(translate("ID:&nbsp;{1,number=left}")) % path.id;
+    os << format(translate("ID:&nbsp;{1,number=left}")) % path->id.second;
   }
   os
     << "</td>\n"
-    "                          <td>" << (path.color.first ? x(path.color.second) : "") << "</td>\n"
+    "                          <td>" << (path->color.first ? x(path->color.second) : "") << "</td>\n"
     "                          <td>";
-  if (path.distance.first) {
+  if (path->distance.first) {
     os <<
       // Shows distance in kilometers
-      format(translate("{1,num=fixed,precision=2}&nbsp;km")) % path.distance.second;
+      format(translate("{1,num=fixed,precision=2}&nbsp;km")) % path->distance.second;
   }
   os
     <<
     "<td>\n"
     "                          <td>";
-  if (path.distance.first) {
+  if (path->distance.first) {
     os <<
       // Shows distance in miles
-      format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (path.distance.second / kms_per_mile);
+      format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (path->distance.second / kms_per_mile);
   }
   os << "<td>\n";
   if (estimate_time) {
-    const double distance =  path.distance.first ? path.distance.second : 0;
-    const double ascent = path.ascent.first ? path.ascent.second : 0;
+    const double distance =  path->distance.first ? path->distance.second : 0;
+    const double ascent = path->ascent.first ? path->ascent.second : 0;
     double estimated_hiking_time =
       calculate_scarfs_equivalence_kilometers(distance, ascent);
     os << "                          <td>";
@@ -169,9 +169,9 @@ void ItineraryHandler::append_path(
     os
       << "</td>\n";
   }
-  if (path.ascent.first || path.descent.first) {
-    const double ascent = path.ascent.first ? path.ascent.second : 0;
-    const double descent = path.descent.first ? path.descent.second : 0;
+  if (path->ascent.first || path->descent.first) {
+    const double ascent = path->ascent.first ? path->ascent.second : 0;
+    const double descent = path->descent.first ? path->descent.second : 0;
     os
       <<
       "                          <td>"
@@ -186,9 +186,9 @@ void ItineraryHandler::append_path(
   } else {
     os << "                          <td></td><td></td>\n";
   }
-  if (path.highest.first || path.lowest.first) {
-    const double highest = path.highest.first ? path.highest.second : 0;
-    const double lowest = path.lowest.first ? path.lowest.second : 0;
+  if (path->highest.first || path->lowest.first) {
+    const double highest = path->highest.first ? path->highest.second : 0;
+    const double lowest = path->lowest.first ? path->lowest.second : 0;
     os
       <<
       "                          <td>"
@@ -210,36 +210,37 @@ void ItineraryHandler::append_path(
 }
 
 void ItineraryHandler::append_waypoint(
-    std::ostream &os, ItineraryPgDao::waypoint_summary waypoint)
+    std::ostream &os,
+    std::shared_ptr<ItineraryPgDao::waypoint_summary> waypoint)
 {
   os
     <<
     "                      <tr>\n"
-    "                        <td><input type=\"checkbox\" name=\"waypoint[" << waypoint.id << "]\"></td>\n"
+    "                        <td><input type=\"checkbox\" name=\"waypoint[" << waypoint->id << "]\"></td>\n"
     "                        <td>";
-  if (waypoint.name.first) {
-    os << x(waypoint.name.second);
+  if (waypoint->name.first) {
+    os << x(waypoint->name.second);
   } else {
     // Database ID or an item, typically a route, track or waypoint
-    os << format(translate("ID:&nbsp;{1,number=left}")) % waypoint.id;
+    os << format(translate("ID:&nbsp;{1,number=left}")) % waypoint->id;
   }
   os <<
     "</td>\n"
     "                        <td>";
-  if (waypoint.symbol.first) {
-    os << x(waypoint.symbol.second);
+  if (waypoint->symbol.first) {
+    os << x(waypoint->symbol.second);
   }
   os <<
     "</td>\n"
     "                        <td>";
-  if (waypoint.comment.first) {
-    os << x(waypoint.comment.second);
+  if (waypoint->comment.first) {
+    os << x(waypoint->comment.second);
   }
   os <<
     "</td>\n"
     "                        <td>";
-  if (waypoint.type.first) {
-    os << x(waypoint.type.second);
+  if (waypoint->type.first) {
+    os << x(waypoint->type.second);
   }
   os <<
     "</td>\n"
@@ -520,7 +521,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
     response.content
       <<
       // Label for menu item to upload a GPX (GPS data) file containing routes, tracks and waypoints
-      "                <li><a class=\"dropdown-item opacity-50\">" << translate("Upload GPX") << "</a></li> <!-- writable version -->\n"
+      "                <li><button class=\"dropdown-item\" accesskey=\"u\" formmethod=\"post\" formaction=\"" << get_uri_prefix() << "/itinerary/upload\">" << translate("Upload GPX") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n";
   }
   response.content
@@ -569,6 +570,9 @@ void ItineraryHandler::do_preview_request(
   set_page_title(translate("Itinerary"));
   set_menu_item(itinerary);
   itinerary_id = std::stol(request.get_query_param("id"));
+  if (request.get_param("active-tab") == "features") {
+    active_tab = features_tab;
+  }
 }
 
 void ItineraryHandler::handle_authenticated_request(

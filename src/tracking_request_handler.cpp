@@ -113,7 +113,7 @@ void TrackingRequestHandler::build_form(
       for (auto const& location : locations_result.locations) {
         response.content <<
           "      <tr>\n"
-          "        <td class=\"text-end\">" << as::number << std::setprecision(0) << location.id << "</td>\n";
+          "        <td class=\"text-end\">" << as::number << std::setprecision(0) << location.id.second << "</td>\n";
         const auto date = std::chrono::duration_cast<std::chrono::seconds>(
             location.time_point.time_since_epoch()
           ).count();

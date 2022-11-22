@@ -38,6 +38,7 @@ protected:
 public:
   DownloadTripLoggerConfigurationHandler(std::shared_ptr<TripConfig> config) :
     BaseRestHandler(config) {}
+  virtual ~DownloadTripLoggerConfigurationHandler() {}
   virtual std::string get_handler_name() const override {
     return "DownloadTripLoggerConfigurationHandler";
   }

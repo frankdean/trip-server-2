@@ -50,11 +50,12 @@ class ItineraryHandler : public TripAuthenticatedRequestHandler {
       const ItineraryPgDao::itinerary& itinerary);
   void append_path(
       std::ostream &os,
-      ItineraryPgDao::path_summary path,
+      std::shared_ptr<ItineraryPgDao::path_summary> path,
       std::string path_type,
       bool estimate_time);
   void append_waypoint(
-      std::ostream &os, ItineraryPgDao::waypoint_summary waypoint);
+      std::ostream &os,
+      std::shared_ptr<ItineraryPgDao::waypoint_summary> waypoint);
   void append_features_content(
       web::HTTPServerResponse& response,
       const ItineraryPgDao::itinerary& itinerary);
@@ -84,6 +85,7 @@ public:
     read_only(true),
     itinerary_id(),
     active_tab(itinerary_tab) {}
+  virtual ~ItineraryHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItineraryHandler";
   }

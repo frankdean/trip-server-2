@@ -41,6 +41,7 @@ using namespace fdsd::trip;
 
 int main(int argc, char *argv[])
 {
+  const auto start = std::chrono::system_clock::now();
   generator gen;
   // Section 11.2.3 of GNU gettext states this is the default location for the
   // GNU library and also for packages adhering to its conventions.
@@ -128,6 +129,12 @@ int main(int argc, char *argv[])
 #endif
       << Logger::endl;
 #endif
+    const auto finish = std::chrono::system_clock::now();
+    const std::chrono::duration<double, std::milli> diff = finish - start;
+    logger << Logger::info
+           << format(translate("Started application in {1} ms"))
+      % diff.count() << Logger::endl;
+    auto config = application.get_config();
     application.run();
   } catch (const std::exception& e) {
     logger << Logger::alert

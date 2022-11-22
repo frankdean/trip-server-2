@@ -47,6 +47,7 @@ protected:
 public:
   TrackSharingHandler(std::shared_ptr<TripConfig> config) :
     TripAuthenticatedRequestHandler(config) {}
+  virtual ~TrackSharingHandler() {}
   virtual std::string get_handler_name() const override {
     return "TrackSharingHandler";
   }

@@ -36,6 +36,7 @@ private:
   static fdsd::utils::Logger logger;
 public:
   TripRequestFactory(std::shared_ptr<TripConfig> config);
+  virtual ~TripRequestFactory() {}
 protected:
   virtual std::string get_session_id_cookie_name() const override;
   virtual std::string get_user_id(std::string session_id) const override;

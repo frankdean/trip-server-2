@@ -31,9 +31,9 @@ SU_CMD="su vagrant -c"
 if [ -x /bin/freebsd-version ]; then
     SU_CMD="su -m vagrant -c"
 
-    egrep '^\s*:lang=en_GB.UTF-8' /home/vagrant/.login_conf
+    egrep '^\s*:lang=en_GB.UTF-8' /home/vagrant/.login_conf >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-	cat >> /home/vagrant/.login_conf <<"EOF"
+	cat >> /home/vagrant/.login_conf <<"EOF" >/dev/null >2&1
 me:\
 	:charset=ISO8859-15:\
 	:lang=en_GB.UTF-8:
@@ -80,7 +80,7 @@ fi
 TEST_DATA_DIR=/vagrant/provisioning/downloads
 su - postgres -c 'createdb trip --owner=trip' 2>/dev/null
 if [ $? -eq 0 ]; then
-	su - postgres -c 'psql trip' >/dev/null 2>&1 <<EOF
+	su - postgres -c 'psql trip' <<EOF >/dev/null 2>&1
 CREATE ROLE trip_role;
 GRANT trip_role TO trip;
 EOF
@@ -96,7 +96,7 @@ EOF
 fi
 if [ "$CREATED_DB" == "y" ]; then
     DB_TEST_DATA="${TEST_DATA_DIR}/90_test-data.sql"
-    su - postgres -c 'psql trip' >/dev/null <<EOF
+    su - postgres -c 'psql trip' <<EOF >/dev/null 2>&1
 CREATE EXTENSION pgcrypto;
 EOF
     # Create Test Data
@@ -129,9 +129,9 @@ cd /home/vagrant/build
 # Don't run configure if it has already been run
 if [ ! -e /home/vagrant/build/config.status ]; then
     if [ -r /usr/lib/fedora-release ] || [ -x /bin/freebsd-version ]; then
-    $SU_CMD "pwd && /vagrant/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0'"
+	$SU_CMD "pwd && /vagrant/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
     else
-	$SU_CMD "/vagrant/configure CXXFLAGS='-g -O0'"
+	$SU_CMD "/vagrant/configure CXXFLAGS='-g -O0' --disable-gdal"
     fi
 fi
 if [ -e /home/vagrant/build/config.status ] && [ -e /home/vagrant/build/Makefile ]; then

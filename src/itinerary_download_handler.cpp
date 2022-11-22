@@ -114,7 +114,7 @@ void ItineraryDownloadHandler::handle_gpx_download(
         .set_value(wpt->name.second.c_str());
     } else {
       wpt_node.append_child("name").append_child(node_pcdata)
-        .set_value(("WPT: " + std::to_string(wpt->id)).c_str());
+        .set_value(("WPT: " + std::to_string(wpt->id.second)).c_str());
     }
     if (wpt->comment.first)
       wpt_node.append_child("cmt").append_child(node_pcdata)
@@ -150,7 +150,7 @@ void ItineraryDownloadHandler::handle_gpx_download(
         .set_value(rte->name.second.c_str());
     } else {
       rte_node.append_child("name").append_child(node_pcdata)
-        .set_value(("RTE: " + std::to_string(rte->id)).c_str());
+        .set_value(("RTE: " + std::to_string(rte->id.second)).c_str());
     }
     if (rte->color.first) {
       xml_node rt_ext_node = rte_node.append_child("extensions")
@@ -198,7 +198,7 @@ void ItineraryDownloadHandler::handle_gpx_download(
         .set_value(trk->name.second.c_str());
     } else {
       trk_node.append_child("name").append_child(node_pcdata)
-        .set_value(("TRK: " + std::to_string(trk->id)).c_str());
+        .set_value(("TRK: " + std::to_string(trk->id.second)).c_str());
     }
     if (trk->color.first) {
       xml_node ext_node = trk_node.append_child("extensions")
@@ -229,8 +229,15 @@ void ItineraryDownloadHandler::handle_gpx_download(
       }
     }
   }
-  // doc.save(response.content, "  "); // pretty
-  doc.save(response.content, "", format_raw);
+  if (config->get_gpx_pretty()) {
+    std::string indent;
+    int level = config->get_gpx_indent();
+    while (level-- > 0)
+      indent.append(" ");
+    doc.save(response.content, indent.c_str());
+  } else {
+    doc.save(response.content, "", format_raw);
+  }
 }
 
 void ItineraryDownloadHandler::set_content_headers(HTTPServerResponse& response) const

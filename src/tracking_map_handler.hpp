@@ -43,6 +43,7 @@ protected:
   virtual void append_pre_body_end(std::ostream& os) const override;
 public:
   TrackingMapHandler(std::shared_ptr<TripConfig> config);
+  virtual ~TrackingMapHandler() {}
   virtual std::string get_handler_name() const override {
     return "TrackingMapHandler";
   }

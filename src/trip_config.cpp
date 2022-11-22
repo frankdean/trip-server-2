@@ -36,7 +36,12 @@ TripConfig::TripConfig(std::string filename) :
   tile_cache_max_age(),
   tile_count_frequency(),
   allow_invalid_xsd(false),
-  default_average_kmh_hiking_speed(4)
+  gpx_pretty(false),
+  gpx_indent(2),
+  default_average_kmh_hiking_speed(4),
+  elevation_tile_cache_ms(),
+  elevation_tile_path(),
+  default_triplogger_configuration()
 {
   try {
     // std::cout << "Reading config from \"" << config_filename << "\"\n";
@@ -52,6 +57,10 @@ TripConfig::TripConfig(std::string filename) :
       if (auto gpx = app["gpx"]) {
         if (gpx["allowInvalidXsd"])
           allow_invalid_xsd = gpx["allowInvalidXsd"].as<bool>();
+        if (gpx["pretty"])
+          gpx_pretty = gpx["pretty"].as<bool>();
+        if (gpx["indent"])
+          gpx_indent = gpx["indent"].as<int>();
       }
       if (app["averageFlatSpeedKph"])
         default_average_kmh_hiking_speed =
@@ -149,6 +158,12 @@ TripConfig::TripConfig(std::string filename) :
     }
     if (auto tl = yaml["tripLogger"]) {
       default_triplogger_configuration = tl["defaultConfiguration"];
+    }
+    if (auto elevation_tiles = yaml["elevation"]) {
+      if (elevation_tiles["tileCacheMs"])
+        elevation_tile_cache_ms = elevation_tiles["tileCacheMs"].as<int>();
+      if (elevation_tiles["datasetDir"])
+        elevation_tile_path = elevation_tiles["datasetDir"].as<std::string>();
     }
   } catch (const YAML::BadFile& e) {
     std::cerr << "Failure reading \"" << filename << "\"\n"

@@ -95,7 +95,7 @@ void ItineraryEditHandler::build_form(
     "</textarea>\n"
     "                  </div>\n"
     "                </div>\n"
-    "                <div class=\"col-12 pt-3\" arial-label=\"Form buttons\">"
+    "                <div class=\"col-12 pt-3\" arial-label=\"Form buttons\">\n"
     // Label for the save itinerary button
     "                  <button type=\"submit\" class=\"py-3 btn btn-lg btn-success\" name=\"action\" value=\"save\" accesskey=\"s\">" << translate("Save") << "</button>\n";
   if (!is_new) {
@@ -189,7 +189,7 @@ void ItineraryEditHandler::handle_authenticated_request(
     }
   } else if (action == "cancel") {
     redirect(request, response,
-             get_uri_prefix() + "/itineraries");
+             get_uri_prefix() + "/itinerary?id=" + std::to_string(itinerary_id.second));
     return;
   } else {
     if (!is_new) {

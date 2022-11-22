@@ -46,6 +46,7 @@ struct TripGetOptions : public utils::GetOptions {
   virtual const char* get_short_options() const override;
 #endif // HAVE_GETOPT_H
   TripGetOptions();
+  virtual ~TripGetOptions() {}
 };
 
 } // namespace trip

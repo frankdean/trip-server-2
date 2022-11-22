@@ -30,6 +30,7 @@ namespace fdsd {
 namespace trip {
 
 struct tile_provider : public fdsd::web::HttpOptions {
+  virtual ~tile_provider() {}
   bool cache = true;
   bool prune = true;
   std::string help;
@@ -65,11 +66,17 @@ class TripConfig {
    * application.
    */
   bool allow_invalid_xsd;
+  /// Pretty output of XML
+  bool gpx_pretty;
+  /// How many spaces to indent GPX file's XML when gpx_pretty is true
+  int gpx_indent;
   /**
    * This value is used to estimate the time required to hike a route, using the
    * Scarf's Equivalence algorithm.
    */
   double default_average_kmh_hiking_speed;
+  int elevation_tile_cache_ms;
+  std::string elevation_tile_path;
   YAML::Node default_triplogger_configuration;
 public:
   TripConfig(std::string filename);
@@ -103,8 +110,20 @@ public:
   bool get_allow_invalid_xsd() const {
     return allow_invalid_xsd;
   }
+  bool get_gpx_pretty() const {
+    return gpx_pretty;
+  }
+  int get_gpx_indent() const {
+    return gpx_indent;
+  }
   double get_default_average_kmh_hiking_speed() const {
     return default_average_kmh_hiking_speed;
+  }
+  int get_elevation_tile_cache_ms() {
+    return elevation_tile_cache_ms;
+  }
+  std::string get_elevation_tile_path() {
+    return elevation_tile_path;
   }
   YAML::Node create_default_triplogger_configuration();
 };

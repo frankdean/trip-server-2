@@ -150,8 +150,8 @@ function install_nodejs_14
 if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
     DNF_OPTIONS="--assumeyes"
     dnf $DNF_OPTIONS install gcc gawk boost-devel libpq-devel \
-	libpq-devel yaml-cpp-devel pugixml-devel libuuid-devel curl \
-	postgresql-server postgresql-contrib \
+	libpq-devel yaml-cpp-devel pugixml-devel libuuid-devel gdal-devel \
+	curl postgresql-server postgresql-contrib \
 	screen vim autoconf automake info libtool \
 	intltool gdb valgrind git apg \
 	nodejs

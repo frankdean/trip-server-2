@@ -51,6 +51,7 @@ public:
     TripAuthenticatedRequestHandler(config),
     is_new(false),
     no_title_error(false) { itinerary_id = std::make_pair(false, 0); }
+  virtual ~ItineraryEditHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItineraryEditHandler";
   }

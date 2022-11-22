@@ -87,7 +87,11 @@ void ItinerariesHandler::build_page(
     response.content
       <<
       "      </tr>\n"
-      "    </table>\n";
+      "    </table>\n"
+      "  </div>\n" // #itineraries div
+      "  <div id=\"div-buttons\">\n"
+      "    <form name=\"form\" class=\"css-form\">\n";
+
     const auto page_count = pagination.get_page_count();
     if (page_count > 1) {
       response.content
@@ -105,14 +109,12 @@ void ItinerariesHandler::build_page(
         "    </div>\n"
         ;
     }
+
     response.content
       <<
-      "  </div>\n" // #itineraries div
-      "  <div id=\"div-buttons\">\n"
-      "    <form name=\"form\" class=\"css-form\">\n"
       "      <div id=\"itineraries-div-form-buttons\">\n"
       // Button title for creating something new
-      "        <button id=\"btn-new\" formaction=\"" << get_uri_prefix() << "/itinerary/edit\" type=\"submit\" accesskey=\"n\" class=\"btn btn-lg btn-warning\">" << translate("New") << "</button>\n"
+      "        <button id=\"btn-new\" formaction=\"" << get_uri_prefix() << "/itinerary/edit\" type=\"submit\" accesskey=\"w\" class=\"btn btn-lg btn-warning\">" << translate("New") << "</button>\n"
       // Button title for importing something
       "        <button id=\"btn-import\" accesskey=\"i\" class=\"btn btn-lg btn-success\" disabled>" << translate("Import") << "</button>\n"
       "      </div>\n"
@@ -154,7 +156,7 @@ void ItinerariesHandler::handle_authenticated_request(
     Pagination pagination(get_uri_prefix() + "/itineraries",
                           dummy_map,
                           total_count);
-    std::string page = request.get_query_param("page");
+    std::string page = request.get_param("page");
     SessionPgDao session_dao;
     if (page.empty()) {
       // Use JSON object so we can easily extend in the future,

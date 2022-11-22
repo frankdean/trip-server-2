@@ -39,6 +39,7 @@ public:
   static const std::string default_url;
   static const std::string success_url;
   TripRequestHandler(std::shared_ptr<TripConfig> config);
+  virtual ~TripRequestHandler() {}
   virtual void handle_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
@@ -76,6 +77,7 @@ public:
   TripLoginRequestHandler(std::string uri_prefix) :
     fdsd::web::HTTPLoginRequestHandler(uri_prefix) {
   }
+  virtual ~TripLoginRequestHandler() {}
   virtual std::unique_ptr<BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<TripLoginRequestHandler>(
         new TripLoginRequestHandler(get_uri_prefix()));
@@ -124,6 +126,7 @@ public:
   static const std::string logout_url;
   TripLogoutRequestHandler(std::string uri_prefix) :
     fdsd::web::HTTPLogoutRequestHandler(uri_prefix) {}
+  virtual ~TripLogoutRequestHandler() {}
 };
 
 class TripNotFoundHandler : public web::HTTPNotFoundRequestHandler {
@@ -149,6 +152,7 @@ protected:
 public:
   TripNotFoundHandler(std::string uri_prefix) :
     HTTPNotFoundRequestHandler(uri_prefix) {}
+  virtual ~TripNotFoundHandler() {}
 };
 
 class TripAuthenticatedRequestHandler : public web::AuthenticatedRequestHandler {
@@ -201,6 +205,7 @@ protected:
   }
 public:
   TripAuthenticatedRequestHandler(std::shared_ptr<TripConfig> config);
+  virtual ~TripAuthenticatedRequestHandler() {}
   virtual std::string get_handler_name() const override {
     return "TripAuthenticatedRequestHandler";
   }
@@ -234,6 +239,7 @@ protected:
   virtual void set_content_headers(web::HTTPServerResponse& response) const override;
 public:
   BaseRestHandler(std::shared_ptr<TripConfig> config);
+  virtual ~BaseRestHandler() {}
 };
 
 class BaseMapHandler : public TripAuthenticatedRequestHandler {

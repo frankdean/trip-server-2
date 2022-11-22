@@ -56,7 +56,7 @@ void TrackingRestHandler::handle_authenticated_request(
   TrackPgDao::tracked_locations_result locations_result = dao.get_tracked_locations(q);
 
   if (!locations_result.locations.empty()) {
-    GeoUtils geoUtils;
+    GeoMapUtils geoUtils;
     geoUtils.add_path(locations_result.locations.begin(), locations_result.locations.end());
     json feature {
       {"type", "Feature"},

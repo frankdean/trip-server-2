@@ -38,6 +38,7 @@ protected:
 public:
   static const std::string trip_css_url;
   TripCssHandler(std::string uri_prefix) : CssRequestHandler(uri_prefix) {}
+  virtual ~TripCssHandler() {}
   virtual std::string get_handler_name() const override {
     return "TripCssHandler";
   }

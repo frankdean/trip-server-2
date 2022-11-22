@@ -47,6 +47,7 @@ protected:
 public:
   TrackingInfoHandler(std::shared_ptr<TripConfig> config) :
     TripAuthenticatedRequestHandler(config) {}
+  virtual ~TrackingInfoHandler() {}
   virtual std::string get_handler_name() const override {
     return "TrackingInfoHandler";
   }

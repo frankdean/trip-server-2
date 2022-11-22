@@ -34,3 +34,6 @@ AT_CLEANUP
 AT_SETUP([test-http-request])
 AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_http_request],,ignore, ignore)
 AT_CLEANUP
+AT_SETUP([test-elevation-tile])
+AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_elevation_tile],,ignore, ignore)
+AT_CLEANUP

@@ -21,6 +21,9 @@
 */
 #include "../config.h"
 #include "trip_application.hpp"
+#ifdef HAVE_GDAL
+#include "elevation_tile.hpp"
+#endif
 #include "trip_config.hpp"
 #include "trip_request_factory.hpp"
 #include "session_pg_dao.hpp"
@@ -30,6 +33,10 @@
 using namespace fdsd::utils;
 using namespace fdsd::web;
 using namespace fdsd::trip;
+
+#ifdef HAVE_GDAL
+ElevationService *elevation_service;
+#endif
 
 TripApplication::TripApplication(std::string listen_address,
                                  std::string port,
@@ -43,6 +50,21 @@ TripApplication::TripApplication(std::string listen_address,
   this->config_filename = config_filename.empty() ?
     SYSCONFDIR "/trip-server.yaml" : config_filename;
   config = std::make_shared<TripConfig>(TripConfig(this->config_filename));
+#ifdef HAVE_GDAL
+  if (!config->get_elevation_tile_path().empty()) {
+    elevation_service = new ElevationService(
+        config->get_elevation_tile_path(),
+        config->get_elevation_tile_cache_ms());
+  }
+#endif
+}
+
+TripApplication::~TripApplication()
+{
+#ifdef HAVE_GDAL
+  if (elevation_service != nullptr)
+    delete elevation_service;
+#endif
 }
 
 std::string TripApplication::get_config_filename() const

@@ -20,30 +20,20 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "geo_utils.hpp"
+#include <cmath>
 #include <iomanip>
 #include <iostream>
 
 using namespace fdsd::trip;
 using json = nlohmann::basic_json<nlohmann::ordered_map>;
 
-location::location(long id,
-                   double lon,
-                   double lat,
-                   std::pair<bool, double> altitude)
-{
-  this->id = id;
-  this->longitude = lon;
-  this->latitude = lat;
-  this->altitude = altitude;
-}
-
-GeoUtils::GeoUtils() :
+GeoMapUtils::GeoMapUtils() :
   paths(),
   min_height(std::make_pair<bool, double>(false, 0)),
   max_height(std::make_pair<bool, double>(false, 0)),
   ascent(std::make_pair<bool, double>(false, 0)),
   descent(std::make_pair<bool, double>(false, 0)),
-  last_height(std::make_pair<bool, double>(false, 0))
+  last_altitude(std::make_pair<bool, double>(false, 0))
 {
 }
 
@@ -51,12 +41,56 @@ std::string location::to_string() const
 {
   std::ostringstream os;
   os <<
-    "id: " << id << ", "
+    "id: ";
+  if (id.first)
+    os << id.second;
+  else
+    os << "[null]";
+  os << ", "
     "longitude: " << std::fixed << std::setprecision(6) << longitude << ", "
     "latitude: " << latitude;
   if (altitude.first) {
     os << ", "
        << "altitude: " << std::setprecision(1) << altitude.second;
+  }
+  return os.str();
+}
+
+std::string path_statistics::to_string() const
+{
+  bool first = true;
+  std::ostringstream os;
+  if (distance.first) {
+    os << "distance: " << distance.second;
+    first = false;
+  }
+  if (ascent.first) {
+    if (first)
+      first = false;
+    else
+      os << ", ";
+    os << "ascent: " << ascent.second;
+  }
+  if (descent.first) {
+    if (first)
+      first = false;
+    else
+      os << ", ";
+    os << "descent: " << descent.second;
+  }
+  if (lowest.first) {
+    if (first)
+      first = false;
+    else
+      os << ", ";
+    os << "lowest: " << lowest.second;
+  }
+  if (highest.first) {
+    if (first)
+      first = false;
+    else
+      os << ", ";
+    os << "highest: " << highest.second;
   }
   return os.str();
 }
@@ -67,10 +101,12 @@ std::string location::to_string() const
  *
  * \param the location to update details for.
  */
-void GeoUtils::update_altitude_info(const location& loc)
+void GeoMapUtils::update_altitude_info(const location& loc)
 {
-  if (last_height.first) {
-    double diff = loc.altitude.second - last_height.second;
+  if (last_altitude.first) {
+    // TODO handle where loc.altitude.first is false
+    // See the GeoStatistics::upudate_statistics method
+    double diff = loc.altitude.second - last_altitude.second;
     // std::cout << std::fixed << std::setprecision(1) << "Diff: " << diff << '\n';
     if (diff > 0) {
       if (ascent.first) {
@@ -80,6 +116,7 @@ void GeoUtils::update_altitude_info(const location& loc)
         ascent.second = diff;
       }
     } else {
+      // TODO Shouldn't descent be a positive number
       if (descent.first) {
         descent.second -= diff;
       } else {
@@ -87,11 +124,11 @@ void GeoUtils::update_altitude_info(const location& loc)
         descent.second = -diff;
       }
     }
-    last_height.second = loc.altitude.second;
+    last_altitude.second = loc.altitude.second;
   } else {
-    last_height = loc.altitude;
+    last_altitude = loc.altitude;
   }
-  // std::cout << "Last height: " << (last_height.first ? last_height.second : 0) << '\n'
+  // std::cout << "Last height: " << (last_altitude.first ? last_altitude.second : 0) << '\n'
   //           << "Ascent:  " << (ascent.first ? ascent.second : 0) << '\n'
   //           << "Descent: " << (descent.first ? descent.second : 0) << '\n';
 
@@ -119,7 +156,7 @@ void GeoUtils::update_altitude_info(const location& loc)
  *
  * \param the current location being analyzed.
  */
-void GeoUtils::add_location(std::pair<bool, location> &last,
+void GeoMapUtils::add_location(std::pair<bool, location> &last,
                             std::vector<location> &new_path,
                             const location& loc)
 {
@@ -164,7 +201,7 @@ void GeoUtils::add_location(std::pair<bool, location> &last,
  * path, a LineString is returned.  For each path that contains only one
  * point, a Point is returned.
  */
-nlohmann::basic_json<nlohmann::ordered_map> GeoUtils::as_geojson(const int indent,
+nlohmann::basic_json<nlohmann::ordered_map> GeoMapUtils::as_geojson(const int indent,
   const char indent_char) const
 {
   if (paths.size() > 1) {
@@ -211,4 +248,151 @@ nlohmann::basic_json<nlohmann::ordered_map> GeoUtils::as_geojson(const int inden
     }
     return geometry;
   }
+}
+
+double GeoUtils::degrees_to_radians(double d)
+{
+    return d * pi / 180;
+}
+
+double GeoUtils::haversine(double angle)
+{
+  // Two possible implementations
+  return std::pow(std::sin(angle / 2), 2);
+  // return (1 - std::cos(angle)) / 2;
+}
+
+//// Calculates the distance between two lat/lng points using the Haversine
+//// Formula.  The units for the return value will be the same as that used
+//// within the calculation for the Earth's mean radius, which should be in
+//// kilometers.
+double GeoUtils::distance(double lng1, double lat1, double lng2, double lat2)
+{
+  // std::cout
+  //   << "Calculating distance between lat: " << lat1 << " lng: " << lng1
+  //   << " and lat: " << lat2 << " lng: " << lng2 << '\n';
+
+  double x1 = degrees_to_radians(lng1);
+  double y1 = degrees_to_radians(lat1);
+  double x2 = degrees_to_radians(lng2);
+  double y2 = degrees_to_radians(lat2);
+
+  // https://en.wikipedia.org/wiki/Haversine_formula
+  return std::asin(
+      std::sqrt(
+          haversine(y2 - y1)
+          + (1 - haversine(y1 - y2) - haversine(y1 + y2))
+          * haversine(x2 - x1)
+        )
+    )
+    * 2 * earth_mean_radius_kms;
+
+  // An alternative implementation
+  // return std::asin(std::sqrt(haversine(y2 - y1)
+  //                            + std::cos(y1)
+  //                            * std::cos(y2)
+  //                            * haversine((x2 - x1))))
+  //   * 2 * earth_mean_radius_kms;
+
+}
+
+double GeoUtils::distance(location p1, location p2)
+{
+  return distance(p1.longitude, p1.latitude, p2.longitude, p2.latitude);
+}
+
+/**
+ *
+ * \param local_stats statistics to update separately.  These will typically be
+ * used to get separate figures for each segment, which will have it's set of
+ * statistics, separate to the parent's cumulative statistics.
+ * \param location the location to be included in the statistcis.
+ */
+void GeoStatistics::add_location(
+    path_statistics &local_stats,
+    std::shared_ptr<location> &local_last_location,
+    std::pair<bool, double> &local_last_altitude,
+    std::shared_ptr<location> &loc)
+{
+  update_statistics(local_stats, local_last_location, local_last_altitude, loc);
+  // std::cout << "After add_location: ";
+  // if (local_last_altitude.first)
+  //   std::cout << " last altitude: " << local_last_altitude.second;
+  // std::cout << '\n';
+  update_statistics(*this, last_location, last_altitude, loc);
+}
+
+void GeoStatistics::update_statistics(
+    path_statistics &statistics,
+    std::shared_ptr<location> &local_last_location,
+    std::pair<bool, double> &local_last_altitude,
+    std::shared_ptr<location> &loc)
+{
+  // std::cout << "Location: " << *loc << '\n';
+  if (local_last_location) {
+    // std::cout << "Last location: " << *local_last_location << '\n';
+    const double leg_distance = GeoUtils::distance(*local_last_location, *loc);
+    if (statistics.distance.first) {
+      statistics.distance.second += leg_distance;
+      // std::cout << "Added leg distance: " << leg_distance << '\n';
+    } else {
+      statistics.distance.first = true;
+      // std::cout << "Set leg distance: " << leg_distance << '\n';
+      statistics.distance.second = leg_distance;
+    }
+  // } else {
+  //   std::cout << "Fresh leg\n";
+  }
+  // if (statistics.distance.first)
+  //   std::cout << "sub total: " << statistics.distance.second << '\n';
+  // else {
+  //   std::cout << "No distance value\n";
+  // }
+  local_last_location = loc;
+
+  if (loc->altitude.first) {
+    if (local_last_altitude.first) {
+      // std::cout << "Previous last altitude: " << local_last_altitude.second << '\n';
+      const double altitude_change =
+        loc->altitude.second - local_last_altitude.second;
+      // std::cout << "Altitude change: " << altitude_change << '\n';
+
+      if (altitude_change > 0) {
+        if (statistics.ascent.first) {
+          // std::cout << "Updating ascent to " << altitude_change << '\n';
+          statistics.ascent.second += altitude_change;
+        } else {
+          // std::cout << "Setting first ascent to " << altitude_change << '\n';
+          statistics.ascent.first = true;
+          statistics.ascent.second = altitude_change;
+        }
+      } else if (altitude_change < 0) {
+        if (statistics.descent.first) {
+          statistics.descent.second += std::abs(altitude_change);
+        } else {
+          statistics.descent.first = true;
+          statistics.descent.second = std::abs(altitude_change);
+        }
+      }
+    }
+    local_last_altitude = loc->altitude;
+    // if (loc->altitude.first)
+    //   std::cout << "Saving last altitude as: " << loc->altitude.second << '\n';
+
+    if (statistics.lowest.first) {
+      statistics.lowest.second =
+        std::min(statistics.lowest.second, loc->altitude.second);
+    } else {
+      statistics.lowest = loc->altitude;
+    }
+    if (statistics.highest.first) {
+      statistics.highest.second =
+        std::max(statistics.highest.second, loc->altitude.second);
+    } else {
+      statistics.highest = loc->altitude;
+    }
+  // } else {
+  //   std::cout << "Altitude not set\n";
+  }
+  
 }
