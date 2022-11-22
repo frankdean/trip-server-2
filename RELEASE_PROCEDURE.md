@@ -10,9 +10,9 @@ T.B.D.
 
 1.  Checkin the updated `master` branch from the `trip-server-common` sub-project
 
-1.  Tag the `master` branch of the parent project with release version number
-
 ## Build
+
+1.  Update version number in `configure.ac`
 
 1.  Create the distribution tarballs
 
@@ -28,7 +28,11 @@ T.B.D.
 
 		$ make html pdf
 
+1.  Checkin changed files, including the updated `po` language files
+
 ## Release
+
+1.  Tag the `master` branch of the parent project with release version number
 
 1.  Copy the builds, SHA256 sums, HTML and PDF docs to the Trip Server 2
     website

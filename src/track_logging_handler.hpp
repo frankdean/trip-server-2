@@ -22,7 +22,6 @@
 #ifndef TRACK_LOGGING_HANDLER_HPP
 #define TRACK_LOGGING_HANDLER_HPP
 
-#include "../config.h"
 #include "trip_request_handler.hpp"
 #include <string>
 

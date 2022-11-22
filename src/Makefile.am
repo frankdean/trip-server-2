@@ -140,8 +140,7 @@ test_http_request_SOURCES = ../trip-server-common/src/test_http_request.cpp \
 
 test_elevation_tile_SOURCES = test_elevation_tile.cpp
 if USE_GDAL
-test_elevation_tile_SOURCES += elevation_tile.cpp \
-	geo_utils.cpp \
+test_elevation_tile_SOURCES += geo_utils.cpp \
 	../trip-server-common/src/file_utils.cpp \
 	../trip-server-common/src/date_utils.cpp \
 	../trip-server-common/src/logger.cpp

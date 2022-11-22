@@ -20,11 +20,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "../config.h"
+#ifdef HAVE_GDAL
 #include "elevation_tile.hpp"
 #include <iostream>
 #include <boost/locale.hpp>
 #include <gdal_priv.h>
-
 #include "../trip-server-common/src/file_utils.hpp"
 
 using namespace boost::locale;
@@ -287,3 +287,5 @@ std::pair<bool, double>
   update_tile_cache();
   return retval;
 }
+
+#endif // HAVE_GDAL

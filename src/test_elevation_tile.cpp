@@ -19,8 +19,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#include "../config.h"
-#include "elevation_tile.hpp"
+#include "elevation_tile.cpp"
 #include "geo_utils.hpp"
 #include "../trip-server-common/src/file_utils.hpp"
 #include <iostream>

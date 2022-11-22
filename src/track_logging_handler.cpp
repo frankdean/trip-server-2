@@ -20,6 +20,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "../config.h"
 #include "track_logging_handler.hpp"
 #include "trip_get_options.hpp"
 #include "tracking_pg_dao.hpp"
