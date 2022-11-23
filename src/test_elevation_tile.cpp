@@ -39,7 +39,8 @@ using namespace fdsd::trip;
 // Don't use a relative directory as the working directory is different when
 // being run by `make check` than when run as a standalone executable.
 
-const std::string elevation_tile_dir = "/usr/local/share/trip/resources/elevation_tiles";
+std::string elevation_tile_dir;
+std::unique_ptr<ElevationService> service;
 
 location p1(-0.134583, 51.500194);
 location p2(-0.491638, 51.493355);
@@ -62,13 +63,10 @@ std::vector<std::shared_ptr<location>> test_points_1 = {
   std::make_shared<location>(p8),
 };
 
-ElevationService service(elevation_tile_dir, 0);
-
 bool test_single_point()
 {
   try {
-    // fdsd::trip::ElevationService service(elevation_tile_dir, 0);
-    auto result = service.get_elevation(p1.longitude, p1.latitude);
+    auto result = service->get_elevation(p1.longitude, p1.latitude);
     const bool retval = result.first && std::lround(result.second) == 14;
     if (!retval) {
       std::cerr << "test_single_point() failed, expected 14 but was ";
@@ -118,7 +116,7 @@ void list_points(const std::vector<std::shared_ptr<location>> &points)
 bool test_passing_set_of_points()
 {
   clear_points(test_points_1);
-  service.fill_elevations(test_points_1.begin(),
+  service->fill_elevations(test_points_1.begin(),
                           test_points_1.end());
   auto i = test_points_1.begin();
   bool retval = (*i)->altitude.first && (*i)->altitude.second == 14 &&
@@ -139,7 +137,7 @@ bool test_fill_only_empty_values_skip_false()
   // This will be the second item in the vector
   p->altitude.first = false;
   // list_points(test_points_1);
-  service.fill_elevations(test_points_1.begin(),
+  service->fill_elevations(test_points_1.begin(),
                           test_points_1.end());
   i = test_points_1.begin();
   bool retval = (*i)->altitude.first && (*i)->altitude.second == 9999 &&
@@ -160,7 +158,7 @@ bool test_fill_only_empty_values_skip_true()
   // This will be the second item in the vector
   p->altitude.first = false;
   // list_points(test_points_1);
-  service.fill_elevations(test_points_1.begin(),
+  service->fill_elevations(test_points_1.begin(),
                           test_points_1.end(),
                           false,
                           true);
@@ -183,7 +181,7 @@ bool test_fill_all_values_skip_false()
   // This will be the second item in the vector
   p->altitude.first = false;
   // list_points(test_points_1);
-  service.fill_elevations(test_points_1.begin(),
+  service->fill_elevations(test_points_1.begin(),
                           test_points_1.end(),
                           true,
                           false);
@@ -206,7 +204,7 @@ bool test_fill_all_values_skip_true()
   // This will be the second item in the vector
   p->altitude.first = false;
   // list_points(test_points_1);
-  service.fill_elevations(test_points_1.begin(),
+  service->fill_elevations(test_points_1.begin(),
                           test_points_1.end(),
                           true,
                           true);
@@ -229,7 +227,7 @@ bool test_fill_all_values_skip_true_all_empty()
   // This will be the second item in the vector
   p->altitude.first = false;
   // list_points(test_points_1);
-  service.fill_elevations(test_points_1.begin(),
+  service->fill_elevations(test_points_1.begin(),
                           test_points_1.end(),
                           true,
                           true);
@@ -257,6 +255,13 @@ int main(void)
   std::cerr << "GDAL disabled.  Skipping elevation tile tests\n";
   return 0;
 #else
+  if (const char* dir = std::getenv("TRIP_ELEVATION_TILE_PATH"))
+    elevation_tile_dir = std::string(dir);
+  if (elevation_tile_dir.empty()) {
+    std::cerr << "TRIP_ELEVATION_TILE_PATH not set.  Skipping elevation tile tests\n";
+    return 0;
+  }
+  service = std::unique_ptr<ElevationService>(new ElevationService(elevation_tile_dir, 0));
   try {
     return !(
         test_single_point() &&
