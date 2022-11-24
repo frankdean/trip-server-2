@@ -43,7 +43,6 @@ public:
   /// Exception thrown when a user attempts to perform an unauthorised action,
   /// e.g. access an itinerary they do not own.
   class NotAuthorized : public std::exception {
-    std::string message;
   public:
     virtual const char* what() const throw() override {
       return "User not authorized to perform the requested action";

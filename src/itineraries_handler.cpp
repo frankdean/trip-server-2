@@ -33,6 +33,33 @@ using namespace fdsd::trip;
 using namespace fdsd::web;
 using json = nlohmann::json;
 
+ItineraryPgDao::selected_feature_ids
+    ItinerariesHandler::get_selected_feature_ids(
+        const web::HTTPServerRequest& request)
+{
+  std::map<long, std::string> route_map =
+    request.extract_array_param_map("route");
+  std::map<long, std::string> waypoint_map =
+    request.extract_array_param_map("waypoint");
+  std::map<long, std::string> track_map =
+    request.extract_array_param_map("track");
+  ItineraryPgDao::selected_feature_ids features;
+  for (const auto &m : route_map) {
+    if (m.second == "on")
+      features.routes.push_back(m.first);
+  }
+  for (const auto &m : waypoint_map) {
+    if (m.second == "on")
+      features.waypoints.push_back(m.first);
+  }
+  std::vector<long> track_ids;
+  for (const auto &m : track_map) {
+    if (m.second == "on")
+      features.tracks.push_back(m.first);
+  }
+  return features;
+}
+
 void ItinerariesHandler::build_page(
     HTTPServerResponse& response,
     const Pagination& pagination,

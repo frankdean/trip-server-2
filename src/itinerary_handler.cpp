@@ -21,6 +21,7 @@
 */
 #include "../config.h"
 #include "itinerary_handler.hpp"
+#include "itineraries_handler.hpp"
 #include "geo_utils.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <boost/locale.hpp>
@@ -504,7 +505,9 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       "                <li><a class=\"dropdown-item opacity-50\">" << translate("Simplify track") << "</a></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n"
       // Label for menu item to permanently delete the selected items
-      "                <li><a class=\"dropdown-item opacity-50\">" << translate("Delete selected items") << "</a></li> <!-- writable version -->\n"
+      "                <li><button class=\"dropdown-item\" accesskey=\"d\" formmethod=\"post\" name=\"action\" value=\"delete_features\" "
+      // Confirmation dialog text when deleting a one or more selected itinerary featues
+      "onclick=\"return confirm('Delete the selected waypoints, routes and tracks?');\"\">" << translate("Delete selected items") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li>\n";
   }
   response.content
@@ -586,6 +589,11 @@ void ItineraryHandler::handle_authenticated_request(
   //   std::cout << "param: \"" << p.first << "\" -> \"" << p.second << "\"\n";
   // }
   ItineraryPgDao dao;
+  if (action == "delete_features") {
+    auto features = ItinerariesHandler::get_selected_feature_ids(request);
+    dao.delete_features(get_user_id(), itinerary_id, features);
+    active_tab = features_tab;
+  }
   auto itinerary = dao.get_itinerary_details(get_user_id(), itinerary_id);
   if (!itinerary.first)
     throw BadRequestException("Itinerary ID not found");

@@ -33,7 +33,6 @@ namespace web {
 }
 namespace trip {
 
-
 class ItinerariesHandler : public TripAuthenticatedRequestHandler {
 void build_page(
     web::HTTPServerResponse& response,
@@ -61,6 +60,8 @@ public:
     return std::unique_ptr<ItinerariesHandler>(
         new ItinerariesHandler(config));
   }
+  static ItineraryPgDao::selected_feature_ids get_selected_feature_ids(
+      const web::HTTPServerRequest& request);
 };
 
 } // namespace trip

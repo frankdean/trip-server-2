@@ -102,7 +102,7 @@ void ItineraryEditHandler::build_form(
     response.content
       <<
       // Confirmation dialog text when deleting an itinerary
-      "                  <button type=\"submit\" class=\"py-3 btn btn-lg btn-danger\" name=\"action\" value=\"delete\" accesskey=\"x\" onclick=\"return confirm('" << translate("Delete this itinerary and ALL uploaded GPX items?") << "');\">"
+      "                  <button type=\"submit\" class=\"py-3 btn btn-lg btn-danger\" name=\"action\" value=\"delete\" accesskey=\"d\" onclick=\"return confirm('" << translate("Delete this itinerary and ALL uploaded GPX items?") << "');\">"
       // Label for the delete itinerary button
       << translate("Delete") << "</button>";
   }

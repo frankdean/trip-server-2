@@ -163,6 +163,11 @@ public:
                   tracks(),
                   waypoints() {}
   };
+  struct selected_feature_ids {
+    std::vector<long> routes;
+    std::vector<long> tracks;
+    std::vector<long> waypoints;
+  };
   long get_itineraries_count(
       std::string user_id);
   std::vector<itinerary_summary> get_itineraries(
@@ -197,6 +202,12 @@ public:
       get_waypoints(std::string user_id,
                     long itinerary_id,
                     std::vector<long> ids);
+  void validate_user_itinerary_modification_access(std::string user_id,
+                                                   long itinerary_id);
+  void delete_features(
+      std::string user_id,
+      long itinerary_id,
+      const selected_feature_ids &features);
 protected:
   void create_waypoints(
       pqxx::work &tx,
@@ -219,7 +230,10 @@ protected:
       pqxx::work &tx,
       long itinerary_id,
       std::vector<std::shared_ptr<track>> tracks);
-};
+  void validate_user_itinerary_modification_access(pqxx::work &tx,
+                                                   std::string user_id,
+                                                   long itinerary_id);
+  };
 
 } // namespace trip
 } // namespace fdsd

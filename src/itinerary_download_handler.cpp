@@ -21,6 +21,7 @@
 */
 #include "../config.h"
 #include "itinerary_download_handler.hpp"
+#include "itineraries_handler.hpp"
 #include "trip_config.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
 #include "../trip-server-common/src/http_response.hpp"
@@ -37,32 +38,15 @@ void ItineraryDownloadHandler::handle_gpx_download(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
-  DateTime now;
-  std::map<long, std::string> route_map =
-    request.extract_array_param_map("route");
-  std::map<long, std::string> waypoint_map =
-    request.extract_array_param_map("waypoint");
-  std::map<long, std::string> track_map =
-    request.extract_array_param_map("track");
-  std::vector<long> route_ids;
-  for (const auto &m : route_map) {
-    if (m.second == "on")
-      route_ids.push_back(m.first);
-  }
-  std::vector<long> waypoint_ids;
-  for (const auto &m : waypoint_map) {
-    if (m.second == "on")
-      waypoint_ids.push_back(m.first);
-  }
-  std::vector<long> track_ids;
-  for (const auto &m : track_map) {
-    if (m.second == "on")
-      track_ids.push_back(m.first);
-  }
+  const DateTime now;
+  auto features = ItinerariesHandler::get_selected_feature_ids(request);
   ItineraryPgDao dao;
-  const auto routes = dao.get_routes(get_user_id(), itinerary_id, route_ids);
-  const auto waypoints = dao.get_waypoints(get_user_id(), itinerary_id, waypoint_ids);
-  const auto tracks = dao.get_tracks(get_user_id(), itinerary_id, track_ids);
+  const auto routes = dao.get_routes(get_user_id(),
+                                     itinerary_id, features.routes);
+  const auto waypoints = dao.get_waypoints(get_user_id(),
+                                           itinerary_id, features.waypoints);
+  const auto tracks = dao.get_tracks(get_user_id(),
+                                     itinerary_id, features.tracks);
   // std::cout << "Finished reading from database\n";
   // std::cout << "Tracks:\n";
   // for (const auto &t : tracks) {

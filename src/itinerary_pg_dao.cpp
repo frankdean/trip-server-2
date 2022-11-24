@@ -297,7 +297,7 @@ std::vector<std::unique_ptr<ItineraryPgDao::route>>
   if (route_ids.empty())
     return routes;
   work tx(*connection);
-  std::string route_ids_sql = dao_helper::to_sql_array(route_ids);
+  const std::string route_ids_sql = dao_helper::to_sql_array(route_ids);
   auto result = tx.exec_params(
       "SELECT r.id AS route_id, r.name AS route_name, r.color AS path_color, "
       "r.distance, r.ascent, r.descent, r.lowest, r.highest, "
@@ -359,7 +359,7 @@ std::vector<std::unique_ptr<ItineraryPgDao::track>>
   if (ids.empty())
     return tracks;
   work tx(*connection);
-  std::string ids_sql = dao_helper::to_sql_array(ids);
+  const std::string ids_sql = dao_helper::to_sql_array(ids);
   const std::string sql =
     "SELECT t.id AS track_id, t.name AS track_name, t.color AS path_color, "
     "t.distance, t.ascent, t.descent, t.lowest, t.highest, "
@@ -447,7 +447,7 @@ std::vector<std::unique_ptr<ItineraryPgDao::waypoint>>
   if (ids.empty())
     return waypoints;
   work tx(*connection);
-  std::string ids_sql = dao_helper::to_sql_array(ids);
+  const std::string ids_sql = dao_helper::to_sql_array(ids);
   auto result = tx.exec_params(
       "SELECT w.id, w.name, "
       "ST_X(geog::geometry) as lng, ST_Y(geog::geometry) as lat, "
@@ -654,17 +654,99 @@ void ItineraryPgDao::create_itinerary_features(
 {
   work tx(*connection);
   try {
-    auto r = tx.exec_params(
-        "SELECT COUNT(*) FROM itinerary "
-        "WHERE user_id=$1 AND id=$2", user_id, itinerary_id);
-    if (r[0][0].as<long>() < 1)
-      throw NotAuthorized();
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
     create_waypoints(tx, itinerary_id, features.waypoints);
     create_routes(tx, itinerary_id, features.routes);
     create_tracks(tx, itinerary_id, features.tracks);
     tx.commit();
   } catch (const std::exception &e) {
     std::cerr << "Exception whilst saving itinerary featues: "
+              << e.what();
+    throw;
+  }
+}
+
+/**
+ * Validates that the specified user_id has write/update/delete access to the
+ * specified itinerary.
+ *
+ * \param existing transaction context.  This method does not commit the transaction.
+ * \param user_id the ID of the user to validate.
+ * \param itinerary_id the ID of the itinerary to check.
+ *
+ * \throws ItineraryPgDao::not_authorized if the user is not authorized.
+ */
+void ItineraryPgDao::validate_user_itinerary_modification_access(work &tx,
+                                                           std::string user_id,
+                                                           long itinerary_id)
+{
+  auto r = tx.exec_params1(
+      "SELECT COUNT(*) FROM itinerary WHERE user_id=$1 AND id=$2",
+      user_id,
+      itinerary_id
+    );
+  if (r[0].as<long>() != 1)
+    throw NotAuthorized();
+}
+
+/**
+ * Validates that the specified user_id has write/update/delete access to the
+ * specified itinerary.
+ *
+ * \param user_id the ID of the user to validate.
+ * \param itinerary_id the ID of the itinerary to check.
+ *
+ * \throws ItineraryPgDao::not_authorized if the user is not authorized.
+ */
+void ItineraryPgDao::validate_user_itinerary_modification_access(std::string user_id,
+                                                           long itinerary_id)
+{
+  work tx(*connection);
+  validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+  tx.commit();
+}
+
+void ItineraryPgDao::delete_features(
+    std::string user_id,
+    long itinerary_id,
+    const selected_feature_ids &features)
+{
+  if (features.routes.empty() &&
+      features.tracks.empty() &&
+      features.waypoints.empty())
+    return;
+
+  work tx(*connection);
+  try {
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    if (!features.routes.empty()) {
+      const std::string route_ids = dao_helper::to_sql_array(features.routes);
+      tx.exec_params0(
+          "DELETE FROM itinerary_route WHERE itinerary_id=$1 AND id=ANY($2)",
+          itinerary_id,
+          route_ids
+        );
+    }
+    if (!features.tracks.empty()) {
+      const std::string track_ids = dao_helper::to_sql_array(features.tracks);
+      tx.exec_params0(
+          "DELETE FROM itinerary_track WHERE itinerary_id=$1 AND id=ANY($2)",
+          itinerary_id,
+          track_ids
+        );
+    }
+    if (!features.waypoints.empty()) {
+      const std::string waypoint_ids =
+        dao_helper::to_sql_array(features.waypoints);
+      tx.exec_params0(
+          "DELETE FROM itinerary_waypoint WHERE itinerary_id=$1 AND id=ANY($2)",
+          itinerary_id,
+          waypoint_ids
+        );
+    }
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception whilst deleting itinerary featues: "
               << e.what();
     throw;
   }
