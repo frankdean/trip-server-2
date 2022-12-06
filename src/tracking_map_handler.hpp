@@ -34,7 +34,7 @@ namespace trip {
 
 class TrackingMapHandler : public BaseMapHandler {
   static const std::string tracking_map_url;
-  std::shared_ptr<TripConfig> config;
+  // std::shared_ptr<TripConfig> config;
 protected:
   virtual std::string get_page_title() const override;
   virtual void handle_authenticated_request(

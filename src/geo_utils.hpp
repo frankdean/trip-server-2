@@ -93,9 +93,9 @@ struct path_statistics {
 };
 
 /**
- * Used to build a list of related paths, that may consitute a single path, or
+ * Used to build a list of related paths, that may constitute a single path, or
  * multiple sections of a path.  It handles paths that cross the anti-meridian
- * by splitting the path into seperate paths such that they join at the
+ * by splitting the path into separate paths such that they join at the
  * anti-meridian, but do not cross it.  \see GeoMapUtils#add_path method for more
  * detail.
  *
@@ -109,10 +109,10 @@ class GeoMapUtils {
   std::pair<bool, double> descent;
   /// The height of the last coordinate containing an altitude value
   std::pair<bool, double> last_altitude;
-  void update_altitude_info(const location& loc);
-  void add_location(std::pair<bool, location> &last,
+  void update_altitude_info(const location *loc);
+  void add_location(std::unique_ptr<location> &previous,
                     std::vector<location> &new_path,
-                    const location& loc);
+                    location *loc);
 public:
   GeoMapUtils();
   nlohmann::basic_json<nlohmann::ordered_map> as_geojson(const int indent = -1,
@@ -134,11 +134,11 @@ public:
    */
   template <typename Iterator>
   void add_path(Iterator begin, Iterator end){
-    std::pair<bool, location> last = std::make_pair(false, location());
+    std::unique_ptr<location> previous;
     std::vector<location> new_path;
     while (begin != end) {
-      location &loc = *begin;
-      add_location(last, new_path, loc);
+      location *loc = begin->get();
+      add_location(previous, new_path, loc);
       ++begin;
     }
     if (!new_path.empty())

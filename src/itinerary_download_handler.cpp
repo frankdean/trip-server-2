@@ -21,7 +21,7 @@
 */
 #include "../config.h"
 #include "itinerary_download_handler.hpp"
-#include "itineraries_handler.hpp"
+#include "itinerary_handler.hpp"
 #include "trip_config.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
 #include "../trip-server-common/src/http_response.hpp"
@@ -39,7 +39,7 @@ void ItineraryDownloadHandler::handle_gpx_download(
     web::HTTPServerResponse& response)
 {
   const DateTime now;
-  auto features = ItinerariesHandler::get_selected_feature_ids(request);
+  auto features = ItineraryHandler::get_selected_feature_ids(request);
   ItineraryPgDao dao;
   const auto routes = dao.get_routes(get_user_id(),
                                      itinerary_id, features.routes);

@@ -388,24 +388,24 @@ TrackPgDao::tracked_locations_result
 
   r = tx.exec(os.str());
   for (result::const_iterator i = r.begin(); i != r.end(); ++i) {
-    tracked_location loc;
-    loc.id.first = i["id"].to(loc.id.second);
-    i["lng"].to(loc.longitude);
-    i["lat"].to(loc.latitude);
+    std::unique_ptr<tracked_location> loc(new tracked_location);
+    loc->id.first = i["id"].to(loc->id.second);
+    i["lng"].to(loc->longitude);
+    i["lat"].to(loc->latitude);
     std::string date_str;
-    loc.time_point = dao_helper::convert_libpq_date_tz(i["time"].as<std::string>());
-    loc.hdop.first = i["hdop"].to(loc.hdop.second);
-    loc.altitude.first = i["altitude"].to(loc.altitude.second);
-    loc.speed.first = i["speed"].to(loc.speed.second);
-    loc.bearing.first = i["bearing"].to(loc.bearing.second);
-    loc.satellite_count.first = i["sat"].to(loc.satellite_count.second);
+    loc->time_point = dao_helper::convert_libpq_date_tz(i["time"].as<std::string>());
+    loc->hdop.first = i["hdop"].to(loc->hdop.second);
+    loc->altitude.first = i["altitude"].to(loc->altitude.second);
+    loc->speed.first = i["speed"].to(loc->speed.second);
+    loc->bearing.first = i["bearing"].to(loc->bearing.second);
+    loc->satellite_count.first = i["sat"].to(loc->satellite_count.second);
     // This fails to compile with C++17, with a not-assignable message, but I
     // don't see why it isn't assignable.
     // <std::optional<int>> satellite_count  = satellite.as<std::optional<int>>();
-    loc.provider.first = i["provider"].to(loc.provider.second);
-    loc.battery.first = i["battery"].to(loc.battery.second);
-    loc.note.first = i["note"].to(loc.note.second);
-    retval.locations.push_back(loc);
+    loc->provider.first = i["provider"].to(loc->provider.second);
+    loc->battery.first = i["battery"].to(loc->battery.second);
+    loc->note.first = i["note"].to(loc->note.second);
+    retval.locations.push_back(std::move(loc));
   }
   tx.commit();
   return retval;
@@ -491,6 +491,65 @@ std::pair<bool, TrackPgDao::location_share_details>
     std::cerr << "Exception in "
       "TrackPgDao::get_tracked_location_share_details_by_sharer(): "
               << e.what() << '\n';
+    throw;
+  }
+}
+
+/**
+ * Returns whether locations have been recorded since the specified
+ * `min_id_threshold`.  The ID is the database unique identifier for a tracked
+ * location.
+ *
+ * This is intended to be used to check whether there are further updates and
+ * the caller can then choose to fetch the additional updates etc.
+ *
+ * \param user_id of the current user.
+ *
+ * \param nickname the nickname of the user whose locations are being checked.
+ *
+ * \param min_id_threshold the database ID of the tracked location to be
+ * excluded as well as those of a lower value.
+ *
+ * \return true if there are any tracked locations with an ID higher than the
+ * specified threshold and belonging to the passed nickname.
+ */
+bool TrackPgDao::check_new_locations_available(
+    std::string user_id,
+    std::string nickname,
+    long min_id_threshold)
+{
+  bool retval = false;
+  work tx(*connection);
+  try {
+    std::ostringstream sql;
+    if (nickname.empty()) {
+      sql <<
+        "SELECT COUNT(*) FROM location loc "
+        "WHERE loc.user_id=$1 AND loc.id > $2";
+      auto r = tx.exec_params1(
+          sql.str(),
+          user_id,
+          min_id_threshold);
+      retval = r[0].as<long>() > 0;
+    } else {
+      sql <<
+        "SELECT COUNT(*) FROM location loc "
+        "JOIN location_sharing sh ON loc.user_id=sh.shared_by_id "
+        "WHERE user_id=(SELECT id FROM usertable WHERE nickname = $2) "
+        "AND sh.shared_to_id=$1 AND loc.id > $3";
+      auto r = tx.exec_params1(
+          sql.str(),
+          user_id,
+          nickname,
+          min_id_threshold);
+      retval = r[0].as<long>() > 0;
+    }
+    // std::cout << "SQL: " << sql.str() << '\n';
+    tx.commit();
+    return retval;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception whilst deleting itinerary featues: "
+              << e.what();
     throw;
   }
 }

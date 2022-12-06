@@ -28,7 +28,7 @@ dist_doc_DATA = README.md
 cssdir = $(pkgdatadir)/resources/static/css
 dist_css_DATA = resources/static/css/trip.css
 jsdir = $(pkgdatadir)/resources/static/js
-dist_js_DATA = resources/static/js/map.js
+dist_js_DATA = resources/static/js/map.js resources/static/js/itinerary-map.js
 
 bsver = bootstrap-5.2.2-dist
 nobase_dist_pkgdata_DATA = resources/static/$(bsver)/LICENSE

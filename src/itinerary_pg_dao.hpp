@@ -28,6 +28,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 namespace fdsd {
 namespace trip {
@@ -43,6 +44,7 @@ public:
   struct path_summary : public path_base {
     std::pair<bool, std::string> name;
     std::pair<bool, std::string> color;
+    std::pair<bool, std::string> html_code;
     path_summary() :
       path_base(),
       name(),
@@ -167,6 +169,9 @@ public:
     std::vector<long> routes;
     std::vector<long> tracks;
     std::vector<long> waypoints;
+    selected_feature_ids() : routes(), tracks(), waypoints() {}
+    static void to_json(nlohmann::json& j, const selected_feature_ids& ids);
+    static void from_json(const nlohmann::json& j, selected_feature_ids& ids);
   };
   long get_itineraries_count(
       std::string user_id);
@@ -180,7 +185,7 @@ public:
   std::pair<bool, ItineraryPgDao::itinerary_description>
       get_itinerary_description(
           std::string user_id, long itinerary_id);
-  void save_itinerary(
+  long save_itinerary(
       std::string user_id,
       ItineraryPgDao::itinerary_description itinerary);
   void delete_itinerary(
@@ -233,7 +238,12 @@ protected:
   void validate_user_itinerary_modification_access(pqxx::work &tx,
                                                    std::string user_id,
                                                    long itinerary_id);
-  };
+};
+
+/// Allows Argument-depenedent lookup for the nlohmann/json library to find this method
+void to_json(nlohmann::json& j, const ItineraryPgDao::selected_feature_ids& ids);
+/// Allows Argument-depenedent lookup for the nlohmann/json library to find this method
+void from_json(const nlohmann::json& j,  ItineraryPgDao::selected_feature_ids& ids);
 
 } // namespace trip
 } // namespace fdsd

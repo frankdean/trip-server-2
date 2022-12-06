@@ -22,11 +22,8 @@
 #ifndef TRACKING_REST_HANDLER_HPP
 #define TRACKING_REST_HANDLER_HPP
 
-// #include "tracking_pg_dao.hpp"
 #include "trip_request_handler.hpp"
 #include <string>
-
-// class TripAuthenticatedRequestHandler;
 
 namespace fdsd {
 namespace web {
@@ -36,7 +33,6 @@ namespace web {
 namespace trip {
 
 class TrackingRestHandler : public fdsd::trip::BaseRestHandler {
-  static const std::string handled_url;
 protected:
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
@@ -49,11 +45,13 @@ public:
   }
   virtual bool can_handle(
       const web::HTTPServerRequest& request) const override {
-    const std::string wanted_url = get_uri_prefix() + handled_url;
-    return !request.uri.empty() &&
-      request.uri.compare(0, wanted_url.length(), wanted_url) == 0;
+
+    return compare_request_regex(request.uri,
+                                 "/rest/locations(/is-updates)?($|\\?.*)");
   }
-  virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
+  virtual std::unique_ptr<web::BaseRequestHandler>
+      new_instance() const override {
+
     return std::unique_ptr<TrackingRestHandler>(
         new TrackingRestHandler(config));
   }

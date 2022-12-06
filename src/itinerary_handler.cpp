@@ -31,6 +31,33 @@ using namespace fdsd::trip;
 using namespace fdsd::web;
 using namespace fdsd::utils;
 
+ItineraryPgDao::selected_feature_ids
+    ItineraryHandler::get_selected_feature_ids(
+        const web::HTTPServerRequest& request)
+{
+  std::map<long, std::string> route_map =
+    request.extract_array_param_map("route");
+  std::map<long, std::string> waypoint_map =
+    request.extract_array_param_map("waypoint");
+  std::map<long, std::string> track_map =
+    request.extract_array_param_map("track");
+  ItineraryPgDao::selected_feature_ids features;
+  for (const auto &m : route_map) {
+    if (m.second == "on")
+      features.routes.push_back(m.first);
+  }
+  for (const auto &m : waypoint_map) {
+    if (m.second == "on")
+      features.waypoints.push_back(m.first);
+  }
+  std::vector<long> track_ids;
+  for (const auto &m : track_map) {
+    if (m.second == "on")
+      features.tracks.push_back(m.first);
+  }
+  return features;
+}
+
 void ItineraryHandler::append_heading_content(
     web::HTTPServerResponse& response,
     const ItineraryPgDao::itinerary& itinerary)
@@ -464,10 +491,10 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
   response.content
     <<
     // Label for menu item to re-fetch the page with updated data
-    "                <li><a class=\"dropdown-item opacity-50\">" << translate("Refresh") << "</a></li>\n"
+    "                <li><button class=\"dropdown-item\" accesskey=\"v\" name=\"action\" value=\"refresh\">" << translate("Refresh") << "</button></li>\n"
     "                <li><hr class=\"dropdown-divider\"></li>\n"
     // Label for menu item to display the map page showing the selected routes, tracks and waypoints
-    "                <li><a class=\"dropdown-item opacity-50\">" << translate("Show map") << "</a></li>\n"
+    "                <li><button class=\"dropdown-item\" accesskey=\"m\" formmethod=\"post\" formaction=\"" << get_uri_prefix() << "/itinerary-map?id=" << itinerary_id << "\">" << translate("Show map") << "</a></li>\n"
     "              </ul>\n"
     "            </li>\n"
     "            <li class=\"nav-item dropdown\">\n"
@@ -590,8 +617,10 @@ void ItineraryHandler::handle_authenticated_request(
   // }
   ItineraryPgDao dao;
   if (action == "delete_features") {
-    auto features = ItinerariesHandler::get_selected_feature_ids(request);
+    auto features = get_selected_feature_ids(request);
     dao.delete_features(get_user_id(), itinerary_id, features);
+    active_tab = features_tab;
+  } else if (action == "refresh") {
     active_tab = features_tab;
   }
   auto itinerary = dao.get_itinerary_details(get_user_id(), itinerary_id);

@@ -71,6 +71,10 @@ body {
   top: 4em;
   left: .5em;
 }
+.exit-map-layer {
+  top: .5em;
+  right: .5em;
+}
 .ol-touch .select-map-layer {
   top: 80px;
 }
@@ -78,6 +82,11 @@ body {
   position: absolute;
   top: 0;
   padding: 10px;
+  background: white;
+}
+.exit-map-modal {
+  position: absolute;
+  top: 0;
   background: white;
 }
 label.map-provider {

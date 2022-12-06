@@ -19,50 +19,43 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef ITINERARIES_HANDLER_HPP
-#define ITINERARIES_HANDLER_HPP
+#ifndef ITINERARY_MAP_HANDLER_HPP
+#define ITINERARY_MAP_HANDLER_HPP
 
 #include "trip_request_handler.hpp"
-#include "itinerary_pg_dao.hpp"
+#include <string>
 
 namespace fdsd {
 namespace web {
   class HTTPServerRequest;
   class HTTPServerResponse;
-  class Pagination;
 }
 namespace trip {
 
-class ItinerariesHandler : public TripAuthenticatedRequestHandler {
-void build_page(
-    web::HTTPServerResponse& response,
-    const web::Pagination& pagination,
-    const std::vector<ItineraryPgDao::itinerary_summary> itineraries);
+class ItineraryMapHandler : public BaseMapHandler {
+  long itinerary_id;
 protected:
-  virtual void do_preview_request(
-      const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) override;
+  virtual std::string get_page_title() const override;
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
+  virtual void append_pre_body_end(std::ostream& os) const override;
 public:
-  ItinerariesHandler(std::shared_ptr<TripConfig> config) :
-    TripAuthenticatedRequestHandler(config) {}
-  virtual ~ItinerariesHandler() {}
+  ItineraryMapHandler(std::shared_ptr<TripConfig> config) :
+    BaseMapHandler(config), itinerary_id() {}
+  virtual ~ItineraryMapHandler() {}
   virtual std::string get_handler_name() const override {
-    return "ItinerariesHandler";
+    return "ItineraryMapHandler";
   }
   virtual bool can_handle(
-      const web::HTTPServerRequest& request) const override {
-    return compare_request_regex(request.uri, "/itineraries($|\\?.*)");
-  }
+      const web::HTTPServerRequest& request) const override;
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<ItinerariesHandler>(
-        new ItinerariesHandler(config));
+    return std::unique_ptr<ItineraryMapHandler>(
+        new ItineraryMapHandler(config));
   }
 };
 
 } // namespace trip
 } // namespace fdsd
 
-#endif // ITINERARIES_HANDLER_HPP
+#endif // ITINERARY_MAP_HANDLER_HPP

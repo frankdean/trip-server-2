@@ -134,7 +134,8 @@ if [ ! -e /home/vagrant/build/config.status ]; then
 	$SU_CMD "/vagrant/configure CXXFLAGS='-g -O0' --disable-gdal"
     fi
 fi
-if [ -e /home/vagrant/build/config.status ] && [ -e /home/vagrant/build/Makefile ]; then
+# Don't build if we appear to already have an installed version of trip-server
+if [ -e /home/vagrant/build/config.status ] && [ -e /home/vagrant/build/Makefile ] && [ ! -x /usr/local/bin/trip-server ]; then
     $SU_CMD 'pwd && make -C /home/vagrant/build check'
     if [ $? -eq 0 ] && [ -x /home/vagrant/build/src/trip-server ]; then
 	echo "Installing trip-server"

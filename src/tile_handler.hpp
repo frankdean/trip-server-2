@@ -55,6 +55,8 @@ protected:
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
+  virtual void set_content_headers(
+      web::HTTPServerResponse& response) const override;
 public:
   TileHandler(std::shared_ptr<TripConfig> config);
   virtual ~TileHandler() {}

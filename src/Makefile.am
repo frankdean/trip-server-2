@@ -12,8 +12,12 @@ trip_server_SOURCES = \
 	itinerary_edit_handler.hpp \
 	itinerary_handler.cpp \
 	itinerary_handler.hpp \
+	itinerary_map_handler.cpp \
+	itinerary_map_handler.hpp \
 	itinerary_pg_dao.cpp \
 	itinerary_pg_dao.hpp \
+	itinerary_rest_handler.cpp \
+	itinerary_rest_handler.hpp \
 	itinerary_upload_handler.cpp \
 	itinerary_upload_handler.hpp \
 	main.cpp \

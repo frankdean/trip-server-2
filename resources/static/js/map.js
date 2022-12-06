@@ -46,8 +46,15 @@ const XYZ = ol.source.XYZ;
 class TrackLayerManager {
 
   constructor(mapLayerManager, data, options) {
+    this.markerVisible = true;
     this.mapLayerManager = mapLayerManager;
     this.options = options || {color: 'red'};
+    this.updateLayerData(data);
+    this.log_range_begin = Math.log(150);
+    this.log_range_end = Math.log(12800);
+  }
+
+  updateLayerData(data) {
     if (!data.geojsonObject) {
       return;
     }
@@ -86,17 +93,22 @@ class TrackLayerManager {
     infoDiv.innerHTML = `<p>${metric}</br>${imperial}`;
     infoDiv.style.background = '#e6e6e6'; //'rgb(233, 237, 242)'; // 'rgb(248, 249, 250)';
     mapDiv.style.bottom = `${infoDiv.offsetHeight + footerDiv.offsetHeight}px`;
-    const trackSource = new VectorSource({
+    this.trackSource = new VectorSource({
       features: trackFeatures,
     });
 
     const self = this;
+    let layerExisted = this.trackLayer !== undefined;
+    if (this.trackLayer !== undefined)
+      this.mapLayerManager.map.removeLayer(this.trackLayer);
+
     this.trackLayer = new VectorLayer({
-      source: trackSource,
+      source: self.trackSource,
       style: this.styleFunction.bind(self),
     });
 
-    this.mapLayerManager.map.getView().fit(this.trackLayer.getSource().getExtent());
+    if (!layerExisted)
+      this.mapLayerManager.map.getView().fit(this.trackLayer.getSource().getExtent());
     this.mapLayerManager.map.addLayer(this.trackLayer);
 
     if (data.most_recent) {
@@ -105,47 +117,77 @@ class TrackLayerManager {
       const closer = document.getElementById('popup-closer');
 
       const overlayPosition = fromLonLat(data.most_recent.position);
+      const markerExists = this.markerFeature !== undefined;
 
-      trackSource.addFeatures([
-        new ol.Feature({
-          geometry: new Point(overlayPosition)
-        })
+      this.markerFeature = new ol.Feature({
+        geometry: new Point(overlayPosition)
+      });
+
+      this.trackSource.addFeatures([
+        this.markerFeature,
       ]);
 
-      const overlay = new ol.Overlay({
+      if (this.markerOverlay !== undefined) {
+        this.mapLayerManager.map.removeOverlay(this.markerOverlay);
+        this.markerOverlay = undefined;
+      }
+
+      this.markerOverlay = new ol.Overlay({
         element: container,
         autoPan: true,
         autoPanAnimation: {
           duration: 250
         }
       });
-      this.mapLayerManager.map.addOverlay(overlay);
+      this.mapLayerManager.map.addOverlay(this.markerOverlay);
       closer.onclick = function() {
-        overlay.setPosition(undefined);
+        self.markerOverlay.setPosition(undefined);
         closer.blur();
+        self.markerVisible = false;
         return false;
       };
-      let markerContent;
       if (data.most_recent.note) {
-        markerContent = `${data.most_recent.time}</br>${data.most_recent.note}`;
+        this.markerContent = `${data.most_recent.time}</br>${data.most_recent.note}`;
+        this.markerVisible = true;
       } else {
-        markerContent = data.most_recent.time;
+        this.markerContent = data.most_recent.time;
       }
-      content.innerHTML = markerContent;
-      overlay.setPosition(overlayPosition);
-      const self = this;
+      content.innerHTML = this.markerContent;
+
+      if (this.markerVisible) {
+        this.markerOverlay.setPosition(overlayPosition);
+      } else {
+        this.markerOverlay.setPosition(undefined);
+        closer.blur();
+        const mapSize = this.mapLayerManager.map.getSize();
+        const extent = this.mapLayerManager.map.getView().calculateExtent(mapSize);
+        const view = this.mapLayerManager.map.getView();
+        const zoom = view.getZoom();
+        // Calculate logarithmic scale for different zoom levels to provide a
+        // buffer to the map extent, otherwise points can go off the map.
+        const log_step = (this.log_range_end - this.log_range_begin) / 6;
+        const margin = zoom > 15 ? 0 : Math.exp(this.log_range_begin + (16 - zoom) * log_step);
+        // console.log('zoom:', zoom, 'margin:', margin);
+        const bufferedExtent = ol.extent.buffer(extent, -margin);
+        if (!ol.extent.containsCoordinate(bufferedExtent, overlayPosition)) {
+          view.animate({center: overlayPosition});
+        }
+      }
+
       this.mapLayerManager.map.on('singleclick', function(event) {
         if (self.mapLayerManager.map.hasFeatureAtPixel(event.pixel) === true) {
           // const coordinate = event.coordinate;
-          content.innerHTML = markerContent;
-          overlay.setPosition(overlayPosition);
+          content.innerHTML = self.markerContent;
+          self.markerOverlay.setPosition(overlayPosition);
+          self.markerVisible = true;
         } else {
-          overlay.setPosition(undefined);
+          self.markerOverlay.setPosition(undefined);
           closer.blur();
+          self.markerVisible = false;
         }
       });
       setTimeout(function() {
-        overlay.panIntoView({
+        self.markerOverlay.panIntoView({
           autoPanAnimation: {
             duration: 250
           },
@@ -270,8 +312,8 @@ class MapLayerManager {
 
   changeLayer(providerIndex) {
     this.currentProviderIndex = providerIndex;
-    const newLayer = this.createMapLayer(providerIndex);
-    this.map.setLayers([newLayer]);
+    const newTileLayer = this.createMapLayer(providerIndex);
+    this.map.setLayers([newTileLayer]);
     if (this.trackLayer) {
       this.map.addLayer(this.trackLayer);
     }
@@ -279,7 +321,6 @@ class MapLayerManager {
 
   setTrackLayer(trackLayer) {
     this.trackLayer = trackLayer;
-    this.changeLayer(this.currentProviderIndex);
   }
 }
 
@@ -404,6 +445,13 @@ class MapPointViewer {
       style: pointStyle,
     });
     mapLayerManager.setTrackLayer(trackLayer);
+
+    const mapSize = mapLayerManager.map.getSize();
+    const extent = mapLayerManager.map.getView().calculateExtent(mapSize);
+    if (!ol.extent.containsCoordinate(extent, overlayPosition)) {
+      this.mapLayerManager.map.getView().setCenter(overlayPosition);
+    }
+
     // mapLayerManager.map.getView().fit(trackLayer.getSource().getExtent());
     let view = mapLayerManager.map.getView();
     view.setCenter(overlayPosition);
@@ -439,50 +487,150 @@ class MapPointViewer {
   }
 }
 
-const query_params = (new URL(document.location)).searchParams;
+class UpdateHandler {
 
-const lat = query_params.get('lat');
-const lng = query_params.get('lng');
+  constructor(providers, url, isUpdatesUrl) {
+    this.url = url;
+    this.isUpdatesUrl = isUpdatesUrl;
+    this.providers = providers;
+    this.query_params = (new URL(document.location)).searchParams;
+    this.stop = false;
+    this.haveInitialResult = false;
+    this.lat = this.query_params.get('lat');
+    this.lng = this.query_params.get('lng');
+    this.fetchDataUpdate();
+    // this.start_id = 15501;
+    // this.end_id = 15504;
+    this.update();
+  }
 
-if (lat && lng) {
-  new MapPointViewer(new MapLayerManager(providers), lng, lat);
-} else {
-  const myHeaders = new Headers();
-  const myRequest = new Request(
-    server_prefix + '/rest/locations?' +
-      new URLSearchParams({
-        nickname: query_params.get('nickname'),
-        from: query_params.get('from'),
-        to: query_params.get('to'),
-        max_hdop: query_params.get('max_hdop'),
-        notes_only_flag: query_params.get('notes_only_flag'),
-        order: 'ASC',
-        offset: -1,
-        page_size: -1,
-      }),
-    {
-      method: 'GET',
-      headers: myHeaders,
-      mode: 'same-origin',
-      cache: 'no-store',
-      referrerPolicy: 'no-referrer',
-    });
+  fetchDataUpdate() {
+    const self = this;
+    this.nickname = this.query_params.get('nickname');
+    this.endDate = new Date(this.query_params.get('to'));
+    // console.log('To:', this.endDate);
+    if (self.lat && self.lng) {
+      // User chose to view single point on the map
+      new MapPointViewer(new MapLayerManager(self.providers), self.lng, self.lat);
+      self.stop = true;
+    } else {
+      // console.log("URL:", self.url);
+      const myHeaders = new Headers();
+      const myRequest = new Request(
+        self.url + '?' +
+          new URLSearchParams({
+            nickname: self.query_params.get('nickname'),
+            from: self.query_params.get('from'),
+            to: self.query_params.get('to'),
+            max_hdop: self.query_params.get('max_hdop'),
+            notes_only_flag: self.query_params.get('notes_only_flag'),
+            order: 'ASC',
+            offset: -1,
+            page_size: -1,
+          }),
+        {
+          method: 'GET',
+          headers: myHeaders,
+          mode: 'same-origin',
+          cache: 'no-store',
+          referrerPolicy: 'no-referrer',
+        });
 
-  fetch(myRequest)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Request failed');
-      }
-      // console.log('Status:', response.status);
-      return response.json();
-    })
-    .then((data) => {
-      // console.log(data);
-      let mapLayerManager = new MapLayerManager(providers);
-      const trackLayerManager = new TrackLayerManager(mapLayerManager, data);
-      mapLayerManager.setTrackLayer(trackLayerManager.trackLayer);
-    })
-    .catch((error) => {
-      console.error('Error fetching from Trip:', error);
-    });
-}
+      fetch(myRequest)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Request failed');
+          }
+          // console.log('Status:', response.status);
+          return response.json();
+        })
+        .then((data) => {
+          // console.log('data:', data);
+          self.min_id_threshold = data.last_location_id !== undefined ? data.last_location_id : 0;
+          if (self.trackLayerManager === undefined) {
+            self.mapLayerManager = new MapLayerManager(self.providers);
+            self.trackLayerManager = new TrackLayerManager(self.mapLayerManager, data);
+            self.mapLayerManager.setTrackLayer(self.trackLayerManager.trackLayer);
+          } else {
+            self.trackLayerManager.updateLayerData(data);
+            self.mapLayerManager.setTrackLayer(self.trackLayerManager.trackLayer);
+          }
+          self.haveInitialResult = true;
+        })
+        .catch((error) => {
+          console.error('Error fetching from Trip:', error);
+          self.stop = true;
+        });
+    } // else
+  } // fetchDataUpdate()
+
+  check_for_updates() {
+    const self = this;
+    if (this.min_id_threshold !== undefined) {
+      // console.log("URL:", self.isUpdatesUrl);
+      // console.log("Nickname:", self.nickname);
+      const myHeaders = new Headers();
+      const myRequest = new Request(
+        self.isUpdatesUrl + '?' +
+          new URLSearchParams({
+            nickname: self.nickname,
+            min_id_threshold: self.min_id_threshold,
+          }),
+        {
+          method: 'GET',
+          headers: myHeaders,
+          mode: 'same-origin',
+          cache: 'no-store',
+          referrerPolicy: 'no-referrer',
+        });
+
+      fetch(myRequest)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Check for updates request failed');
+          }
+          // console.log('Status:', response.status);
+          // console.log('Response body:', response.json());
+          return response.json();
+        })
+        .then((data) => {
+          // console.log('check for updates data:', data);
+          if (data.available) {
+            // console.log('Fetching updates');
+            self.fetchDataUpdate();
+          // } else {
+            // console.log('No more updates');
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching from Trip:', error);
+          // self.stop = true;
+        });
+    // } else {
+      // console.log('min_id_threshold not defined');
+    }
+  }
+
+  update() {
+    const self = this;
+    const date = new Date();
+    if (date <= this.endDate) {
+      setTimeout(function() {
+        if (self.haveInitialResult && !self.stop) {
+          // console.log('Timeout:', date.toLocaleTimeString());
+          self.check_for_updates();
+        }
+        if (!self.stop)
+          self.update();
+      }, 60000);
+    // } else {
+      // console.log('Date range preceeds the current date, live updates disabled');
+    }
+  }
+
+} // class UpdateHandler
+
+const updateHandler = new UpdateHandler(providers,
+                                        server_prefix + '/rest/locations',
+                                        server_prefix + '/rest/locations/is-updates'
+                                       );

@@ -101,12 +101,12 @@ std::string path_statistics::to_string() const
  *
  * \param the location to update details for.
  */
-void GeoMapUtils::update_altitude_info(const location& loc)
+void GeoMapUtils::update_altitude_info(const location *loc)
 {
   if (last_altitude.first) {
     // TODO handle where loc.altitude.first is false
     // See the GeoStatistics::upudate_statistics method
-    double diff = loc.altitude.second - last_altitude.second;
+    double diff = loc->altitude.second - last_altitude.second;
     // std::cout << std::fixed << std::setprecision(1) << "Diff: " << diff << '\n';
     if (diff > 0) {
       if (ascent.first) {
@@ -124,23 +124,23 @@ void GeoMapUtils::update_altitude_info(const location& loc)
         descent.second = -diff;
       }
     }
-    last_altitude.second = loc.altitude.second;
+    last_altitude.second = loc->altitude.second;
   } else {
-    last_altitude = loc.altitude;
+    last_altitude = loc->altitude;
   }
   // std::cout << "Last height: " << (last_altitude.first ? last_altitude.second : 0) << '\n'
   //           << "Ascent:  " << (ascent.first ? ascent.second : 0) << '\n'
   //           << "Descent: " << (descent.first ? descent.second : 0) << '\n';
 
   if (max_height.first) {
-    max_height.second = std::max(max_height.second, loc.altitude.second);
+    max_height.second = std::max(max_height.second, loc->altitude.second);
   } else {
-    max_height = loc.altitude;
+    max_height = loc->altitude;
   }
   if (min_height.first) {
-    min_height.second = std::min(min_height.second, loc.altitude.second);
+    min_height.second = std::min(min_height.second, loc->altitude.second);
   } else {
-    min_height = loc.altitude;
+    min_height = loc->altitude;
   }
 }
 
@@ -148,28 +148,31 @@ void GeoMapUtils::update_altitude_info(const location& loc)
  * Adds the passed location to the passed path.  If the path needs splitting,
  * the first section of the split path is added to the internal list of paths.
  *
- * \param last a std:pair, updated to hold the last location processed.  The
- * first element of the pair is true after the value has been updated.
+ * \param previous a std:pair, updated to hold the previous location processed.
+ * The first element of the pair is true after the value has been updated.
  *
  * \param a temporary list of locations which will eventually be added to the
  * internal list.
  *
  * \param the current location being analyzed.
  */
-void GeoMapUtils::add_location(std::pair<bool, location> &last,
-                            std::vector<location> &new_path,
-                            const location& loc)
+void GeoMapUtils::add_location(std::unique_ptr<location> &previous,
+                               std::vector<location> &new_path,
+                               location *loc)
 {
+  // TODO calculate actual position line intersects the anti-meridian It is not
+  // as simple as breaking the line at longitude 180° and copying the same
+  // latitude values, which only works with a line parallel to a latitude.
   update_altitude_info(loc);
-  if (last.first) {
-    if (last.second.longitude > 90 && loc.longitude < -90 ||
-        last.second.longitude < -90 && loc.longitude > 90) {
+  if (previous) {
+    if (previous->longitude > 90 && loc->longitude < -90 ||
+        previous->longitude < -90 && loc->longitude > 90) {
       // std::cout << "Path from location id "
-      //           << last.second.id << " to location id "
+      //           << previous->id << " to location id "
       //           << loc.id
       //           << " crosses the anti-meridian\n";
-      auto t1 = loc;
-      auto t2 = loc;
+      location t1(*loc);
+      location t2(*loc);
       // std::cout << "First: " << t1 << '\n';
       // std::cout << "Second: " << t2 << '\n';
       if (t2.longitude < t1.longitude) {
@@ -183,15 +186,16 @@ void GeoMapUtils::add_location(std::pair<bool, location> &last,
       paths.push_back(new_path);
       new_path = std::vector<location>();
       new_path.push_back(t2);
-      new_path.push_back(loc);
-      last = std::make_pair(true, t2);
+      new_path.push_back(*loc);
+      previous = std::unique_ptr<location>(new location(t2));
     } else {
-      new_path.push_back(loc);
-      last = std::make_pair(true, loc);
+      new_path.push_back(location(*loc));
+      previous = std::unique_ptr<location>(new location(*loc));
     }
   } else {
-    new_path.push_back(loc);
-    last = std::make_pair(true, loc);
+    location t(*loc);
+    new_path.push_back(t);
+    previous = std::unique_ptr<location>(new location(t));
   }
 }
 

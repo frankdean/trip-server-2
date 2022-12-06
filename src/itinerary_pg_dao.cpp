@@ -29,7 +29,43 @@
 using namespace fdsd::trip;
 using namespace fdsd::utils;
 using namespace pqxx;
+using json = nlohmann::json;
 
+namespace fdsd {
+namespace trip {
+
+void to_json(nlohmann::json& j, const ItineraryPgDao::selected_feature_ids& ids)
+{
+  ItineraryPgDao::selected_feature_ids::to_json(j, ids);
+}
+
+void from_json(const nlohmann::json& j,  ItineraryPgDao::selected_feature_ids& ids)
+{
+  ItineraryPgDao::selected_feature_ids::from_json(j, ids);
+}
+
+} // namespace trip
+} // namespace fdsd
+
+void ItineraryPgDao::selected_feature_ids::to_json(
+    nlohmann::json& j,
+    const ItineraryPgDao::selected_feature_ids& ids)
+{
+  j = json{
+    {"routes", ids.routes},
+    {"tracks", ids.tracks},
+    {"waypoints", ids.waypoints}
+  };
+}
+
+void ItineraryPgDao::selected_feature_ids::from_json(
+    const nlohmann::json& j,
+    ItineraryPgDao::selected_feature_ids& ids)
+{
+  j.at("routes").get_to(ids.routes);
+  j.at("tracks").get_to(ids.tracks);
+  j.at("waypoints").get_to(ids.waypoints);
+}
 
 long ItineraryPgDao::get_itineraries_count(
     std::string user_id)
@@ -232,7 +268,7 @@ std::pair<bool, ItineraryPgDao::itinerary_description>
   }
 }
 
-void ItineraryPgDao::save_itinerary(
+long ItineraryPgDao::save_itinerary(
     std::string user_id,
     ItineraryPgDao::itinerary_description itinerary)
 {
@@ -245,7 +281,9 @@ void ItineraryPgDao::save_itinerary(
     if (itinerary.finish.first)
       finish = DateTime(itinerary.finish.second).get_time_as_iso8601_gmt();
     std::string sql;
+    long id;
     if (itinerary.id.first) {
+      id = itinerary.id.second;
       tx.exec_params(
           "UPDATE itinerary "
           "SET title=$3, start=$4, finish=$5, description=$6 "
@@ -258,18 +296,20 @@ void ItineraryPgDao::save_itinerary(
           itinerary.description.first ? &itinerary.description.second : nullptr
         );
     } else {
-      tx.exec_params(
+      auto r = tx.exec_params1(
           "INSERT INTO itinerary "
           "(user_id, title, start, finish, description) "
-          "VALUES ($1, $2, $3, $4, $5)",
+          "VALUES ($1, $2, $3, $4, $5) RETURNING id",
           user_id,
           itinerary.title,
           itinerary.start.first ? &start : nullptr,
           itinerary.finish.first ? &finish : nullptr,
           itinerary.description.first ? &itinerary.description.second : nullptr
         );
+      r["id"].to(id);
     }
     tx.commit();
+    return id;
   } catch (const std::exception &e) {
     std::cerr << "Exception saving itinerary description: "
               << e.what() << '\n';
@@ -300,7 +340,7 @@ std::vector<std::unique_ptr<ItineraryPgDao::route>>
   const std::string route_ids_sql = dao_helper::to_sql_array(route_ids);
   auto result = tx.exec_params(
       "SELECT r.id AS route_id, r.name AS route_name, r.color AS path_color, "
-      "r.distance, r.ascent, r.descent, r.lowest, r.highest, "
+      "rc.html_code, r.distance, r.ascent, r.descent, r.lowest, r.highest, "
       "p.id AS point_id, "
       "ST_X(p.geog::geometry) as lng, ST_Y(p.geog::geometry) as lat, "
       "p.name AS point_name, p.comment, p.description, p.symbol, p.altitude "
@@ -325,6 +365,7 @@ std::vector<std::unique_ptr<ItineraryPgDao::route>>
       rt->id.second = route_id;
       rt->name.first = r["route_name"].to(rt->name.second);
       rt->color.first = r["path_color"].to(rt->color.second);
+      rt->html_code.first = r["html_code"].to(rt->html_code.second);
       rt->distance.first = r["distance"].to(rt->distance.second);
       rt->ascent.first = r["ascent"].to(rt->ascent.second);
       rt->descent.first = r["descent"].to(rt->descent.second);
@@ -362,12 +403,13 @@ std::vector<std::unique_ptr<ItineraryPgDao::track>>
   const std::string ids_sql = dao_helper::to_sql_array(ids);
   const std::string sql =
     "SELECT t.id AS track_id, t.name AS track_name, t.color AS path_color, "
-    "t.distance, t.ascent, t.descent, t.lowest, t.highest, "
+    "rc.html_code, t.distance, t.ascent, t.descent, t.lowest, t.highest, "
     "ts.id AS segment_id, p.id AS point_id, "
     "ST_X(p.geog::geometry) as lng, ST_Y(p.geog::geometry) as lat, "
     "p.time, p.hdop, p.altitude "
     "FROM itinerary_track t "
     "JOIN itinerary i ON i.id=t.itinerary_id "
+    "LEFT JOIN path_color rc ON t.color=rc.key "
     "LEFT JOIN itinerary_track_segment ts ON t.id=ts.itinerary_track_id "
     "LEFT JOIN itinerary_track_point p ON ts.id=p.itinerary_track_segment_id "
     "WHERE i.user_id=$1 AND t.itinerary_id=$2 AND t.id=ANY($3) ORDER BY t.id, ts.id, p.id";
@@ -399,6 +441,7 @@ std::vector<std::unique_ptr<ItineraryPgDao::track>>
       trk->lowest.first = r["lowest"].to(trk->lowest.second);
       trk->highest.first = r["highest"].to(trk->highest.second);
       trk->color.first = r["path_color"].to(trk->color.second);
+      trk->html_code.first = r["html_code"].to(trk->html_code.second);
     }
     if (!r["segment_id"].is_null()) {
       long segment_id = r["segment_id"].as<long>();
@@ -647,6 +690,14 @@ void ItineraryPgDao::create_tracks(
   }
 }
 
+/**
+ * Saves the passed itinerary features (routes, tracks & waypoints).
+ *
+ * \param user_id the ID of the user to validate.
+ * \param itinerary_id the ID of the itinerary to check.
+ * \param features object containing the features to be saved.
+ * \throws ItineraryPgDao::not_authorized if the user is not authorized.
+ */
 void ItineraryPgDao::create_itinerary_features(
     std::string user_id,
     long itinerary_id,

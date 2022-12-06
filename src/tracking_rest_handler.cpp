@@ -23,6 +23,7 @@
 #include "tracking_rest_handler.hpp"
 #include "tracking_pg_dao.hpp"
 #include "../trip-server-common/src/http_response.hpp"
+#include <algorithm>
 #include <limits>
 #include <boost/locale.hpp>
 #include <nlohmann/json.hpp>
@@ -33,8 +34,6 @@ using namespace fdsd::utils;
 using namespace boost::locale;
 using json = nlohmann::basic_json<nlohmann::ordered_map>;
 
-const std::string TrackingRestHandler::handled_url = "/rest/locations";
-
 TrackingRestHandler::TrackingRestHandler(std::shared_ptr<TripConfig> config) :
     BaseRestHandler(config)
 {
@@ -44,76 +43,114 @@ void TrackingRestHandler::handle_authenticated_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
-  // std::cout << "TrackingRestHandler::handle_authenticated_request()\n";
-
   TrackPgDao dao;
-  TrackPgDao::location_search_query_params q(get_user_id(),
-                                             request.query_params);
-  q.order = dao_helper::ascending;
-  q.page_offset = -1;
-  const int max_result_count = 1000;
-  q.page_size = max_result_count;
-  TrackPgDao::tracked_locations_result locations_result = dao.get_tracked_locations(q);
-
-  if (!locations_result.locations.empty()) {
-    GeoMapUtils geoUtils;
-    geoUtils.add_path(locations_result.locations.begin(), locations_result.locations.end());
-    json feature {
-      {"type", "Feature"},
-      {"geometry", geoUtils.as_geojson()}
-    };
-    json features;
-    features.push_back(feature);
-    json j{
-      {"totalCount", locations_result.total_count},
-      {"maxCount", max_result_count}};
-    if (geoUtils.get_max_height().first)
-      j.push_back({"maxHeight", std::round(geoUtils.get_max_height().second)});
-    if (geoUtils.get_min_height().first)
-      j.push_back({"minHeight", std::round(geoUtils.get_min_height().second)});
-    if (geoUtils.get_ascent().first)
-      j.push_back({"ascent", std::round(geoUtils.get_ascent().second)});
-    if (geoUtils.get_descent().first)
-      j.push_back({"descent", std::round(geoUtils.get_descent().second)});
-
-    auto most_recent = locations_result.locations.back();
-    std::ostringstream time;
-    time << as::datetime <<
-      std::chrono::duration_cast<std::chrono::seconds>(
-          most_recent.time_point.time_since_epoch()).count();
-    json marker {
-      {"position",
-       { std::round(most_recent.longitude * 1e6) / 1e6,
-         std::round(most_recent.latitude * 1e6) / 1e6 }
-      },
-      {"time", time.str()}
-    };
-    if (most_recent.note.first && !most_recent.note.second.empty()) {
-      marker.push_back({"note", x(most_recent.note.second)});
-    }
-    j.push_back({"most_recent", marker});
-
-    j.push_back(
-        {"geojsonObject", {
-            {"type", "FeatureCollection"},
-            {"features", features}
-          }
-        });
-    if (locations_result.total_count > max_result_count) {
-      std::ostringstream message;
-      message << as::number <<
-        format(
-            translate(
-                // Message displayed to the user when they attempt to exceed the
-                // maxium amount of locations that can be displayed on the map
-                "The {1} locations have been truncated to the first {2}"
-              )) % locations_result.total_count % max_result_count;
-      j["message"] = message.str();
-    }
+  // std::cout << "TrackingRestHandler::handle_authenticated_request()\n";
+  if (compare_request_regex(request.uri, "/rest/locations/is-updates($|\\?.*)")) {
+    const std::string nickname = request.get_query_param("nickname");
+    const long min_id_threshold = std::stol(request.get_query_param("min_id_threshold"));
+    // std::cout << "min_id: " << min_id_threshold << ", nickname: \"" << nickname << "\"\n";
+    const bool have_updates =  (dao.check_new_locations_available(
+                                    get_user_id(),
+                                    nickname,
+                                    min_id_threshold));
+    // json j;
+    // j["available"] = have_updates;
+    json j = {{"available", have_updates}};
     // std::cout << j.dump(4) << std::endl;
     response.content << j.dump();
   } else {
-    response.content << "{}";
+    TrackPgDao::location_search_query_params q(get_user_id(),
+                                               request.query_params);
+    q.order = dao_helper::ascending;
+    q.page_offset = -1;
+    const int max_result_count = 1000;
+    q.page_size = max_result_count;
+    TrackPgDao::tracked_locations_result locations_result =
+      dao.get_tracked_locations(q);
+
+    if (!locations_result.locations.empty()) {
+      GeoMapUtils geoUtils;
+      geoUtils.add_path(locations_result.locations.begin(),
+                        locations_result.locations.end());
+      // The last location can be used by the caller to request only updates more
+      // recent than this last one.
+      const TrackPgDao::tracked_location *last_location =
+        (locations_result.locations.cend() -1)->get();
+      long last_location_id = last_location->id.first ?
+        last_location->id.second : 0;
+
+      // Locations are ordered by time, not ID and are not necessarily received
+      // and inserted into the database in time order.  Therefore last item may
+      // not have the highest ID.
+      for (
+          std::vector<std::unique_ptr<TrackPgDao::tracked_location>>::
+            reverse_iterator i = locations_result.locations.rbegin();
+          i != locations_result.locations.rend(); ++i) {
+
+        if (i->get()->id.first)
+          last_location_id = std::max(last_location_id, i->get()->id.second);
+      }
+      // std::cout << "Max ID: " << last_location_id << '\n';
+
+      json feature {
+        {"type", "Feature"},
+        {"geometry", geoUtils.as_geojson()}
+      };
+      json features;
+      features.push_back(feature);
+      json j{
+        {"last_location_id", last_location_id},
+        {"totalCount", locations_result.total_count},
+        {"maxCount", max_result_count}};
+      if (geoUtils.get_max_height().first)
+        j.push_back({"maxHeight", std::round(geoUtils.get_max_height().second)});
+      if (geoUtils.get_min_height().first)
+        j.push_back({"minHeight", std::round(geoUtils.get_min_height().second)});
+      if (geoUtils.get_ascent().first)
+        j.push_back({"ascent", std::round(geoUtils.get_ascent().second)});
+      if (geoUtils.get_descent().first)
+        j.push_back({"descent", std::round(geoUtils.get_descent().second)});
+
+      TrackPgDao::tracked_location *most_recent =
+        locations_result.locations.back().get();
+      std::ostringstream time;
+      time << as::datetime <<
+        std::chrono::duration_cast<std::chrono::seconds>(
+            most_recent->time_point.time_since_epoch()).count();
+      json marker {
+        {"position",
+         { std::round(most_recent->longitude * 1e6) / 1e6,
+           std::round(most_recent->latitude * 1e6) / 1e6 }
+        },
+        {"time", time.str()}
+      };
+      if (most_recent->note.first && !most_recent->note.second.empty()) {
+        marker.push_back({"note", x(most_recent->note.second)});
+      }
+      j.push_back({"most_recent", marker});
+
+      j.push_back(
+          {"geojsonObject", {
+              {"type", "FeatureCollection"},
+              {"features", features}
+            }
+          });
+      if (locations_result.total_count > max_result_count) {
+        std::ostringstream message;
+        message << as::number <<
+          format(
+              translate(
+                  // Message displayed to the user when they attempt to exceed the
+                  // maxmium amount of locations that can be displayed on the map
+                  "The {1} locations have been truncated to the first {2}"
+                )) % locations_result.total_count % max_result_count;
+        j["message"] = message.str();
+      }
+      // std::cout << j.dump(4) << std::endl;
+      response.content << j.dump();
+    } else {
+      response.content << "{}";
+    }
   }
   response.set_header("Content-Type", get_mime_type("json"));
 }

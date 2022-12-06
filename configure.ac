@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.0.0-alpha.15],[frank.dean@fdsd.co.uk])
+AC_INIT([trip],[2.0.0-alpha.16],[frank.dean@fdsd.co.uk])
 AC_COPYRIGHT([Copyright (C) 2022 Frank Dean])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign dist-xz subdir-objects info-in-builddir])
 AC_CONFIG_SRCDIR([src/trip_request_factory.cpp])

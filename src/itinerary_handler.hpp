@@ -97,6 +97,8 @@ public:
     return std::unique_ptr<ItineraryHandler>(
         new ItineraryHandler(config));
   }
+  static ItineraryPgDao::selected_feature_ids get_selected_feature_ids(
+      const web::HTTPServerRequest& request);
 };
 
 } // namespace trip

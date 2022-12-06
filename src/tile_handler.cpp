@@ -40,6 +40,13 @@ TileHandler::TileHandler(std::shared_ptr<TripConfig> config)
 {
 }
 
+void TileHandler::set_content_headers(HTTPServerResponse& response) const
+{
+  response.set_header("Content-Length", std::to_string(response.content.str().length()));
+  response.set_header("Content-Type", get_mime_type("png"));
+  response.set_header("Cache-Control", "no-cache");
+}
+
 bool TileHandler::can_handle(
     const HTTPServerRequest& request) const
 {

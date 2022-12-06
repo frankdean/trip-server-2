@@ -19,50 +19,68 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef ITINERARIES_HANDLER_HPP
-#define ITINERARIES_HANDLER_HPP
+#ifndef ITINERARY_REST_HANDLER_HPP
+#define ITINERARY_REST_HANDLER_HPP
 
-#include "trip_request_handler.hpp"
 #include "itinerary_pg_dao.hpp"
+#include "trip_request_handler.hpp"
+#include <nlohmann/json.hpp>
+#include <string>
 
 namespace fdsd {
 namespace web {
   class HTTPServerRequest;
   class HTTPServerResponse;
-  class Pagination;
 }
 namespace trip {
 
-class ItinerariesHandler : public TripAuthenticatedRequestHandler {
-void build_page(
-    web::HTTPServerResponse& response,
-    const web::Pagination& pagination,
-    const std::vector<ItineraryPgDao::itinerary_summary> itineraries);
+class ItineraryRestHandler : public BaseRestHandler {
+
+  nlohmann::basic_json<nlohmann::ordered_map>
+      get_routes_as_geojson(
+          const std::vector<std::unique_ptr<ItineraryPgDao::route>> &routes
+        ) const;
+
+  nlohmann::basic_json<nlohmann::ordered_map>
+      get_tracks_as_geojson(
+          const std::vector<std::unique_ptr<ItineraryPgDao::track>> &tracks
+        ) const;
+
+  nlohmann::basic_json<nlohmann::ordered_map>
+      get_waypoints_as_geojson(
+          const std::vector<std::unique_ptr<ItineraryPgDao::waypoint>>
+          &waypoints) const;
+
+  void fetch_itinerary_features(
+      long itinerary_id,
+      ItineraryPgDao::selected_feature_ids features,
+      web::HTTPServerResponse &response) const;
+
 protected:
-  virtual void do_preview_request(
-      const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) override;
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  ItinerariesHandler(std::shared_ptr<TripConfig> config) :
-    TripAuthenticatedRequestHandler(config) {}
-  virtual ~ItinerariesHandler() {}
+  ItineraryRestHandler(std::shared_ptr<TripConfig> config) :
+    BaseRestHandler(config) {}
+  virtual ~ItineraryRestHandler() {}
   virtual std::string get_handler_name() const override {
-    return "ItinerariesHandler";
+    return "ItineraryRestHandler";
   }
   virtual bool can_handle(
       const web::HTTPServerRequest& request) const override {
-    return compare_request_regex(request.uri, "/itineraries($|\\?.*)");
+
+    return compare_request_regex(request.uri,
+                                 "/rest/itinerary/features($|\\?.*)");
   }
-  virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<ItinerariesHandler>(
-        new ItinerariesHandler(config));
+  virtual std::unique_ptr<web::BaseRequestHandler>
+      new_instance() const override {
+    return std::unique_ptr<ItineraryRestHandler>(
+        new ItineraryRestHandler(config));
   }
 };
 
 } // namespace trip
 } // namespace fdsd
 
-#endif // ITINERARIES_HANDLER_HPP
+#endif // ITINERARY_REST_HANDLER_HPP

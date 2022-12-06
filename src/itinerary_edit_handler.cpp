@@ -144,6 +144,7 @@ void ItineraryEditHandler::handle_authenticated_request(
 {
   // std::cout << request.content << '\n';
   const std::string action=request.get_post_param("action");
+  // std::cout << "action: \"" << action << "\"\n";
   if (action == "save") {
     ItineraryPgDao dao;
     ItineraryPgDao::itinerary_description itinerary;
@@ -174,7 +175,10 @@ void ItineraryEditHandler::handle_authenticated_request(
       itinerary.description.second = s;
     }
     if (!no_title_error) {
-      dao.save_itinerary(get_user_id(), itinerary);
+      long id = dao.save_itinerary(get_user_id(), itinerary);
+      // Set the itinerary ID after creating a new one
+      if (!itinerary_id.first)
+        itinerary_id = std::make_pair(true, id);
     } else {
       build_form(response, itinerary);
       return;
@@ -188,9 +192,7 @@ void ItineraryEditHandler::handle_authenticated_request(
       return;
     }
   } else if (action == "cancel") {
-    redirect(request, response,
-             get_uri_prefix() + "/itinerary?id=" + std::to_string(itinerary_id.second));
-    return;
+    // drop through to redirect based on whether itinerary_id is set
   } else {
     if (!is_new) {
       ItineraryPgDao dao;

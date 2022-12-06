@@ -113,52 +113,52 @@ void TrackingRequestHandler::build_form(
       for (auto const& location : locations_result.locations) {
         response.content <<
           "      <tr>\n"
-          "        <td class=\"text-end\">" << as::number << std::setprecision(0) << location.id.second << "</td>\n";
+          "        <td class=\"text-end\">" << as::number << std::setprecision(0) << location->id.second << "</td>\n";
         const auto date = std::chrono::duration_cast<std::chrono::seconds>(
-            location.time_point.time_since_epoch()
+            location->time_point.time_since_epoch()
           ).count();
         response.content <<
           "        <td>" << as::ftime("%a") << date << " "
                          << as::date_medium << as::datetime << date << "</td>\n";
         response.content << as::posix <<
-          "        <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << std::fixed << std::setprecision(6) << location.latitude << "&lng=" << location.longitude << "\">" << location.latitude << "</a></td>\n"
-          "        <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << location.latitude << "&lng=" << location.longitude << "\">" << location.longitude << "</a></td>\n"
+          "        <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << std::fixed << std::setprecision(6) << location->latitude << "&lng=" << location->longitude << "\">" << location->latitude << "</a></td>\n"
+          "        <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << location->latitude << "&lng=" << location->longitude << "\">" << location->longitude << "</a></td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.hdop.first)
-          response.content << as::number << std::fixed << std::setprecision(1) << location.hdop.second;
+        if (location->hdop.first)
+          response.content << as::number << std::fixed << std::setprecision(1) << location->hdop.second;
 
         response.content << "</td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.altitude.first)
-          response.content << std::fixed << std::setprecision(0) << location.altitude.second;
+        if (location->altitude.first)
+          response.content << std::fixed << std::setprecision(0) << location->altitude.second;
 
         response.content << "</td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.speed.first)
-          response.content << std::fixed << std::setprecision(1) << location.speed.second;
+        if (location->speed.first)
+          response.content << std::fixed << std::setprecision(1) << location->speed.second;
 
         response.content << "</td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.bearing.first)
-          response.content << std::fixed << std::setprecision(0) << location.bearing.second;
+        if (location->bearing.first)
+          response.content << std::fixed << std::setprecision(0) << location->bearing.second;
 
         response.content << "</td>\n"
-          "        <td class=\"text-start\">" << (location.note.first ? x(location.note.second) : "") << "</td>\n"
-          "        <td class=\"text-start\">" << (location.provider.first ? x(location.provider.second) : "") << "</td>\n"
+          "        <td class=\"text-start\">" << (location->note.first ? x(location->note.second) : "") << "</td>\n"
+          "        <td class=\"text-start\">" << (location->provider.first ? x(location->provider.second) : "") << "</td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.satellite_count.first)
-          response.content << std::fixed << std::setprecision(0) << location.satellite_count.second;
+        if (location->satellite_count.first)
+          response.content << std::fixed << std::setprecision(0) << location->satellite_count.second;
 
         response.content << "</td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.battery.first)
-          response.content << std::fixed << std::setprecision(1) << location.battery.second;
+        if (location->battery.first)
+          response.content << std::fixed << std::setprecision(1) << location->battery.second;
 
         response.content << "</td>\n"
           "      </tr>\n";

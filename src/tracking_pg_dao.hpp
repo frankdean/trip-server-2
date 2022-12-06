@@ -92,7 +92,7 @@ public:
     long total_count;
     std::time_t date_from;
     std::time_t date_to;
-    std::vector<tracked_location> locations;
+    std::vector<std::unique_ptr<tracked_location>> locations;
   };
 
   struct tracked_location_query_params :
@@ -205,6 +205,10 @@ public:
       get_tracked_location_share_details_by_sharer(
           std::string shared_to_nickname,
           std::string shared_by_user_id) const;
+  bool check_new_locations_available(
+      std::string user_id,
+      std::string nickname,
+      long min_id_threshold);
 private:
   date_range constrain_shared_location_dates(
       std::string shared_by_id,

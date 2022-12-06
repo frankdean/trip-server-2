@@ -36,7 +36,7 @@ using json = nlohmann::json;
 const std::string TrackingMapHandler::tracking_map_url = "/map";
 
 TrackingMapHandler::TrackingMapHandler(std::shared_ptr<TripConfig> config) :
-  BaseMapHandler(config), config(config)
+  BaseMapHandler(config)
 {
 }
 
@@ -101,7 +101,7 @@ void TrackingMapHandler::handle_authenticated_request(
     "    <script>\n"
     "      <!--\n"
     "      const server_prefix = '" << get_uri_prefix() << "'\n";
-  if (config->get_providers().size() > 0) {
+  if (!config->get_providers().empty()) {
     response.content <<
       "      const providers = [\n";
     int index = 0;

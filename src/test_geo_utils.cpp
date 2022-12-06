@@ -63,11 +63,11 @@ std::vector<std::shared_ptr<location>> test_points_2 = {
 // Tests the example for anti-meridian cutting from the RFC.
 bool test_rfc7946_example()
 {
-  std::vector<location> test_path;
-  location p1(1, 170.0, 45.0);
-  location p2(2, -170.0, 45.0);
-  test_path.push_back(p1);
-  test_path.push_back(p2);
+  std::vector<std::unique_ptr<location>> test_path;
+  std::unique_ptr<location> p1(new location(1, 170.0, 45.0));
+  std::unique_ptr<location> p2(new location(2, -170.0, 45.0));
+  test_path.push_back(std::move(p1));
+  test_path.push_back(std::move(p2));
   GeoMapUtils g;
   g.add_path(test_path.begin(), test_path.end());
   const auto result = g.as_geojson();
@@ -83,10 +83,10 @@ bool test_rfc7946_example()
 // Simple test for a LineString
 bool test_linestring()
 {
-  std::vector<location> test_path;
-  test_path.push_back(location(1, 10.0, 45.0));
-  test_path.push_back(location(1, 20.0, 43.0));
-  test_path.push_back(location(1, 25.0, 61.0));
+  std::vector<std::unique_ptr<location>> test_path;
+  test_path.push_back(std::unique_ptr<location>(new location(1, 10.0, 45.0)));
+  test_path.push_back(std::unique_ptr<location>(new location(1, 20.0, 43.0)));
+  test_path.push_back(std::unique_ptr<location>(new location(1, 25.0, 61.0)));
   GeoMapUtils g;
   g.add_path(test_path.begin(), test_path.end());
   const auto result = g.as_geojson();
@@ -96,8 +96,8 @@ bool test_linestring()
 // Simple test for a Point
 bool test_point()
 {
-  std::vector<location> test_path;
-  test_path.push_back(location(1, 10.0, 45.0));
+  std::vector<std::unique_ptr<location>> test_path;
+  test_path.push_back(std::unique_ptr<location>(new location(1, 10.0, 45.0)));
   GeoMapUtils g;
   g.add_path(test_path.begin(), test_path.end());
   const auto result = g.as_geojson();
@@ -106,7 +106,7 @@ bool test_point()
 
 bool test_empty_path()
 {
-  std::vector<location> test_path;
+  std::vector<std::unique_ptr<location>> test_path;
   GeoMapUtils g;
   g.add_path(test_path.begin(), test_path.end());
   const auto result = g.as_geojson();
