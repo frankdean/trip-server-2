@@ -164,13 +164,13 @@ void ItineraryUploadHandler::build_form(
     // Instructions for uploading a GPX (XML) file containing routes, waypoints and tracks
     "        <p>" << translate("Select the GPX file to be uploaded, then click the upload button.") << "</p>\n"
     "        <input type=\"hidden\" name=\"id\" value=\"" << itinerary_id << "\">\n"
-    "        <input id=\"btn-file-upload\" type=\"file\" name=\"file\" class=\"btn btn-lg btn-primary\">\n"
+    "        <input id=\"btn-file-upload\" type=\"file\" accesskey=\"f\" name=\"file\" class=\"btn btn-lg btn-primary\">\n"
     "      </div>\n"
     "      <div class=\"col-12 pt-3\" arial-label=\"Form buttons\">\n"
     // Label for button to upload a GPX (XML) file containing routes, waypoints and tracks
-    "        <button id=\"btn-upload\" type=\"submit\" name=\"action\" value=\"upload\" class=\"btn btn-lg btn-success\">" << translate("Upload") << "</button>\n"
+    "        <button id=\"btn-upload\" type=\"submit\" accesskey=\"u\" name=\"action\" value=\"upload\" class=\"btn btn-lg btn-success\">" << translate("Upload") << "</button>\n"
     // Label for button to cancel uploading a GPX (XML) file containing routes, waypoints and tracks
-    "        <button id=\"btn-cancel\" type=\"submit\" name=\"action\" value=\"cancel\" class=\"btn btn-lg btn-danger\">" << translate("Cancel") << "</button>\n"
+    "        <button id=\"btn-cancel\" type=\"submit\" accesskey=\"c\" name=\"action\" value=\"cancel\" class=\"btn btn-lg btn-danger\">" << translate("Cancel") << "</button>\n"
     "      </div>\n"
     "    </form>\n"
     "  </div>\n";

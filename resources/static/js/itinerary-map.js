@@ -148,6 +148,7 @@ class ExitMapLayerControl extends Control {
 
     const button = document.createElement('button');
     button.innerHTML = 'X';
+    button.setAttribute('accesskey', 'x');
 
     const element = document.createElement('div');
     element.id = 'exit-map-control';
@@ -161,6 +162,10 @@ class ExitMapLayerControl extends Control {
     this.mapLayerManager = mapLayerManager;
 
     button.addEventListener('mouseover', this.handleSelectModal.bind(this), false);
+    button.addEventListener('click',
+                            function() {
+                              new MapExitModal(this.mapLayerManager).handleExit();
+                            }, false);
     element.addEventListener('mouseleave', this.handleHideModal.bind(this), false);
   }
 
@@ -189,7 +194,7 @@ class MapExitModal {
     const button = document.createElement('button');
     button.innerHTML = click_to_exit_text;
     button.style.width = '8em';
-    button.style.height = '4em';
+    button.style.height = '2em';
     button.className = 'map-exit-confirm';
     button.addEventListener('click', this.handleExit.bind(this), false);
     formElement.appendChild(button);
@@ -220,7 +225,11 @@ class MapExitModal {
 
 class ItineraryMap {
 
-  constructor(providers, url) {
+  constructor(providers, url, opt_options) {
+    this.options = opt_options || {
+      trackArrowFrequency: 25,
+      routeArrowFrequency: 10,
+    };
     this.providers = providers;
     this.url = url;
     this.currentProviderIndex = 0;
@@ -386,7 +395,7 @@ class ItineraryMap {
     const featureType = feature.get('type');
     if (!featureColor)
       featureColor = featureType == 'track' ? 'red' : 'magenta';
-    const width = feature.get('type') == 'track' ? 2 : 5;
+    const width = feature.get('type') == 'track' ? 2 : 4;
     const styles = [
       // linestring
       new Style({
@@ -396,24 +405,32 @@ class ItineraryMap {
         })
       })
     ];
-    const arrowRadius = featureType == 'track' ? 5 : 10;
-    geometry.forEachSegment(function(start, end) {
-      const dx = end[0] - start[0];
-      const dy = end[1] - start[1];
-      const rotation = Math.atan2(dy, dx);
-      // arrows
-      styles.push(new Style({
-        geometry: new Point(ol.extent.getCenter([start[0], start[1], end[0], end[1]])),
-        image: new RegularShape({
-          fill: new Fill({color: featureColor}),
-          points: 3,
-          radius: arrowRadius,
-          rotation: -rotation,
-          rotateWithView: true,
-          angle: Math.PI / 2 // rotate 90°
-        })
-      }));
-    });
+    const isTrack = featureType == 'track';
+    const frequency = isTrack ? self.options.trackArrowFrequency : self.options.routeArrowFrequency;
+    if (frequency > 0) {
+      let n = 0;
+      const arrowRadius = isTrack ? 5 : 8;
+      geometry.forEachSegment(function(start, end) {
+        if (n % frequency == 0) {
+          const dx = end[0] - start[0];
+          const dy = end[1] - start[1];
+          const rotation = Math.atan2(dy, dx);
+          // arrows
+          styles.push(new Style({
+            geometry: new Point(ol.extent.getCenter([start[0], start[1], end[0], end[1]])),
+            image: new RegularShape({
+              fill: new Fill({color: featureColor}),
+              points: 3,
+              radius: arrowRadius,
+              rotation: -rotation,
+              rotateWithView: true,
+              angle: Math.PI / 2 // rotate 90°
+            })
+          }));
+        }
+        n++;
+      });
+    }
     return styles;
   }
 

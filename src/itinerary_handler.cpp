@@ -153,8 +153,9 @@ void ItineraryHandler::append_path(
   os
     <<
     "                        <tr>\n"
-    "                        <td><input type=\"checkbox\" name=\"" << path_type << "[" << path->id.second << "]\"></td>\n"
-    "                          <td>";
+    "                          <td>\n"
+    "                            <input id=\"input-" << path_type << "-" << path->id.second << "\" type=\"checkbox\" name=\"" << path_type << "[" << path->id.second << "]\">\n"
+    "                            <label for=\"input-" << path_type << "-" << path->id.second << "\">";
   if (path->name.first) {
     os << x(path->name.second);
   } else {
@@ -162,7 +163,9 @@ void ItineraryHandler::append_path(
     os << format(translate("ID:&nbsp;{1,number=left}")) % path->id.second;
   }
   os
-    << "</td>\n"
+    <<
+    "</label>\n"
+    "                          </td>\n"
     "                          <td>" << (path->color.first ? x(path->color.second) : "") << "</td>\n"
     "                          <td>";
   if (path->distance.first) {
@@ -244,8 +247,9 @@ void ItineraryHandler::append_waypoint(
   os
     <<
     "                      <tr>\n"
-    "                        <td><input type=\"checkbox\" name=\"waypoint[" << waypoint->id << "]\"></td>\n"
-    "                        <td>";
+    "                        <td>\n"
+    "                          <input id=\"input-waypoint-" << waypoint->id << "\" type=\"checkbox\" name=\"waypoint[" << waypoint->id << "]\">\n"
+    "                          <label for=\"input-waypoint-" << waypoint->id << "\">";
   if (waypoint->name.first) {
     os << x(waypoint->name.second);
   } else {
@@ -253,7 +257,8 @@ void ItineraryHandler::append_waypoint(
     os << format(translate("ID:&nbsp;{1,number=left}")) % waypoint->id;
   }
   os <<
-    "</td>\n"
+    "</label>\n"
+    "                        </td>\n"
     "                        <td>";
   if (waypoint->symbol.first) {
     os << x(waypoint->symbol.second);
@@ -315,7 +320,7 @@ void ItineraryHandler::append_features_content(
         "                    <div class=\"table-responsive\">\n"
         "                      <table class=\"table table-striped\">\n"
         "                        <tr>\n"
-        "                          <td colspan=\"12\">\n"
+        "                          <td colspan=\"11\">\n"
         "                            <input id=\"input-select-all-routes\" type=\"checkbox\" accesskey=\"r\" onclick=\"select_all(this, 'collapseRoutes')\">\n"
         // Checkbox label shown to select all routes on the itinerary page
         "                            <label for=\"input-select-all-routes\" class=\"text-danger\">" << translate("Select all routes") << "</label>\n"
@@ -349,7 +354,7 @@ void ItineraryHandler::append_features_content(
         "                  <div class=\"table-responsive\">\n"
         "                    <table class=\"table table-striped\">\n"
         "                      <tr>\n"
-        "                        <td colspan=\"5\">\n"
+        "                        <td colspan=\"4\">\n"
         "                         <input id=\"input-select-all-waypoints\" type=\"checkbox\" accesskey=\"w\" onclick=\"select_all(this, 'collapseWaypoints')\">\n"
         // Checkbox label shown to select all waypoints on the itinerary page
         "                         <label for=\"input-select-all-waypoints\" class=\"text-danger\">" << translate("Select all waypoints") << "</label>\n"
@@ -383,7 +388,7 @@ void ItineraryHandler::append_features_content(
         "                    <div class=\"table-responsive\">\n"
         "                      <table class=\"table table-striped\">\n"
         "                        <tr>\n"
-        "                          <td colspan=\"11\">\n"
+        "                          <td colspan=\"10\">\n"
         "                            <input id=\"input-select-all-tracks\" type=\"checkbox\" accesskey=\"t\" onclick=\"select_all(this, 'collapseTracks')\">\n"
         // Checkbox label shown to select all tracks on the itinerary page
         "                            <label for=\"input-select-all-tracks\" class=\"text-danger\">" << translate("Select all tracks") << "</label>\n"
@@ -494,7 +499,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
     "                <li><button class=\"dropdown-item\" accesskey=\"v\" name=\"action\" value=\"refresh\">" << translate("Refresh") << "</button></li>\n"
     "                <li><hr class=\"dropdown-divider\"></li>\n"
     // Label for menu item to display the map page showing the selected routes, tracks and waypoints
-    "                <li><button class=\"dropdown-item\" accesskey=\"m\" formmethod=\"post\" formaction=\"" << get_uri_prefix() << "/itinerary-map?id=" << itinerary_id << "\">" << translate("Show map") << "</a></li>\n"
+    "                <li><button class=\"dropdown-item\" accesskey=\"m\" formmethod=\"post\" formaction=\"" << get_uri_prefix() << "/itinerary-map?id=" << itinerary_id << "\">" << translate("Show map") << "</button></li>\n"
     "              </ul>\n"
     "            </li>\n"
     "            <li class=\"nav-item dropdown\">\n"
@@ -534,7 +539,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       // Label for menu item to permanently delete the selected items
       "                <li><button class=\"dropdown-item\" accesskey=\"d\" formmethod=\"post\" name=\"action\" value=\"delete_features\" "
       // Confirmation dialog text when deleting a one or more selected itinerary featues
-      "onclick=\"return confirm('Delete the selected waypoints, routes and tracks?');\"\">" << translate("Delete selected items") << "</button></li> <!-- writable version -->\n"
+      "onclick=\"return confirm('Delete the selected waypoints, routes and tracks?');\">" << translate("Delete selected items") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li>\n";
   }
   response.content
