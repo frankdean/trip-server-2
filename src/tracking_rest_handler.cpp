@@ -74,28 +74,30 @@ void TrackingRestHandler::handle_authenticated_request(
                         locations_result.locations.end());
       // The last location can be used by the caller to request only updates more
       // recent than this last one.
-      const TrackPgDao::tracked_location *last_location =
-        (locations_result.locations.cend() -1)->get();
-      long last_location_id = last_location->id.first ?
-        last_location->id.second : 0;
+      const TrackPgDao::tracked_location last_location = *(locations_result.locations.cend() -1);
+      long last_location_id = last_location.id.first ?
+        last_location.id.second : 0;
 
       // Locations are ordered by time, not ID and are not necessarily received
       // and inserted into the database in time order.  Therefore last item may
       // not have the highest ID.
       for (
-          std::vector<std::unique_ptr<TrackPgDao::tracked_location>>::
+          std::vector<TrackPgDao::tracked_location>::
             reverse_iterator i = locations_result.locations.rbegin();
           i != locations_result.locations.rend(); ++i) {
 
-        if (i->get()->id.first)
-          last_location_id = std::max(last_location_id, i->get()->id.second);
+        if (i->id.first)
+          last_location_id = std::max(last_location_id, i->id.second);
       }
       // std::cout << "Max ID: " << last_location_id << '\n';
 
+      json properties;
       json feature {
         {"type", "Feature"},
         {"geometry", geoUtils.as_geojson()}
       };
+      properties["type"] = "track";
+      feature["properties"] = properties;
       json features;
       features.push_back(feature);
       json j{
@@ -111,21 +113,21 @@ void TrackingRestHandler::handle_authenticated_request(
       if (geoUtils.get_descent().first)
         j.push_back({"descent", std::round(geoUtils.get_descent().second)});
 
-      TrackPgDao::tracked_location *most_recent =
-        locations_result.locations.back().get();
+      const TrackPgDao::tracked_location most_recent =
+        locations_result.locations.back();
       std::ostringstream time;
       time << as::datetime <<
         std::chrono::duration_cast<std::chrono::seconds>(
-            most_recent->time_point.time_since_epoch()).count();
+            most_recent.time_point.time_since_epoch()).count();
       json marker {
         {"position",
-         { std::round(most_recent->longitude * 1e6) / 1e6,
-           std::round(most_recent->latitude * 1e6) / 1e6 }
+         { std::round(most_recent.longitude * 1e6) / 1e6,
+           std::round(most_recent.latitude * 1e6) / 1e6 }
         },
         {"time", time.str()}
       };
-      if (most_recent->note.first && !most_recent->note.second.empty()) {
-        marker.push_back({"note", x(most_recent->note.second)});
+      if (most_recent.note.first && !most_recent.note.second.empty()) {
+        marker.push_back({"note", x(most_recent.note.second)});
       }
       j.push_back({"most_recent", marker});
 

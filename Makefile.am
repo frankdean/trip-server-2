@@ -28,25 +28,35 @@ dist_doc_DATA = README.md
 cssdir = $(pkgdatadir)/resources/static/css
 dist_css_DATA = resources/static/css/trip.css
 jsdir = $(pkgdatadir)/resources/static/js
-dist_js_DATA = resources/static/js/map.js resources/static/js/itinerary-map.js
+dist_js_DATA = resources/static/js/tracking-map.js resources/static/js/itinerary-map.js \
+	resources/static/js/simplify-path.js
+jsmoddir = $(pkgdatadir)/resources/static/js/modules
+dist_jsmod_DATA = resources/static/js/modules/map.js
 
-bsver = bootstrap-5.2.2-dist
+bsver = bootstrap-$(BOOTSTRAP_VERSION)-dist
 nobase_dist_pkgdata_DATA = resources/static/$(bsver)/LICENSE
 
-bscssdir = $(pkgdatadir)/resources/static/bootstrap-5.2.2-dist/css
+bscssdir = $(pkgdatadir)/resources/static/bootstrap-$(BOOTSTRAP_VERSION)-dist/css
 dist_bscss_DATA = \
-	resources/static/bootstrap-5.2.2-dist/css/bootstrap.min.css \
-	resources/static/bootstrap-5.2.2-dist/css/bootstrap.min.css.map
+	resources/static/bootstrap-$(BOOTSTRAP_VERSION)-dist/css/bootstrap.min.css \
+	resources/static/bootstrap-$(BOOTSTRAP_VERSION)-dist/css/bootstrap.min.css.map
 
-bsjsdir = $(pkgdatadir)/resources/static/bootstrap-5.2.2-dist/js
-dist_bsjs_DATA = resources/static/bootstrap-5.2.2-dist/js/bootstrap.bundle.min.js \
-	resources/static/bootstrap-5.2.2-dist/js/bootstrap.bundle.min.js.map
+bsjsdir = $(pkgdatadir)/resources/static/bootstrap-$(BOOTSTRAP_VERSION)-dist/js
+dist_bsjs_DATA = resources/static/bootstrap-$(BOOTSTRAP_VERSION)-dist/js/bootstrap.bundle.min.js \
+	resources/static/bootstrap-$(BOOTSTRAP_VERSION)-dist/js/bootstrap.bundle.min.js.map
 
-oldir = $(pkgdatadir)/resources/static/openlayers-7.0.0-legacy
+oldir = $(pkgdatadir)/resources/static/openlayers-$(OPENLAYERS_VERSION)
 dist_ol_DATA = \
-	resources/static/openlayers-7.0.0-legacy/LICENSE.md \
-	resources/static/openlayers-7.0.0-legacy/ol.css \
-	resources/static/openlayers-7.0.0-legacy/ol.js.LICENSE.txt \
-	resources/static/openlayers-7.0.0-legacy/ol.css.map \
-	resources/static/openlayers-7.0.0-legacy/ol.js.map \
-	resources/static/openlayers-7.0.0-legacy/ol.js
+	resources/static/openlayers-$(OPENLAYERS_VERSION)/LICENSE.md \
+	resources/static/openlayers-$(OPENLAYERS_VERSION)/ol.css \
+	resources/static/openlayers-$(OPENLAYERS_VERSION)/ol.js.LICENSE.txt \
+	resources/static/openlayers-$(OPENLAYERS_VERSION)/ol.js.map \
+	resources/static/openlayers-$(OPENLAYERS_VERSION)/ol.js
+
+uninstall-hook:
+	-rmdir -p $(DESTDIR)/$(bscssdir)
+	-rmdir -p $(DESTDIR)/$(bsjsdir)
+	-rmdir -p $(DESTDIR)/$(oldir)
+	-rmdir -p $(DESTDIR)/$(cssdir)
+	-rmdir -p $(DESTDIR)/$(jsdir)
+	-rmdir -p $(DESTDIR)/$(jsmoddir)

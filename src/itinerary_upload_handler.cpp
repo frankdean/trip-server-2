@@ -24,11 +24,13 @@
 #ifdef HAVE_GDAL
 #include "elevation_tile.hpp"
 #endif
+#include "../trip-server-common/src/get_options.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <boost/locale.hpp>
 
 using namespace fdsd::trip;
 using namespace fdsd::web;
+using namespace fdsd::utils;
 using namespace boost::locale;
 using namespace pugi;
 
@@ -210,7 +212,7 @@ void ItineraryUploadHandler::add_waypoint(
     if (ext.type() != node_null)
       wpt.avg_samples = child_node_as_long(ext, "wptx1:Samples");
   }
-  features.waypoints.push_back(std::make_shared<ItineraryPgDao::waypoint>(wpt));
+  features.waypoints.push_back(wpt);
 }
 
 void ItineraryUploadHandler::add_route_point(
@@ -225,7 +227,7 @@ void ItineraryUploadHandler::add_route_point(
   p.comment = child_node_as_string(node, "cmt");
   p.description = child_node_as_string(node, "desc");
   p.symbol = child_node_as_string(node, "sym");
-  route.points.push_back(std::make_shared<ItineraryPgDao::route_point>(p));
+  route.points.push_back(p);
 }
 
 void ItineraryUploadHandler::add_route(
@@ -246,7 +248,7 @@ void ItineraryUploadHandler::add_route(
     if (name == "rtept")
       add_route_point(rt, n);
   }
-  features.routes.push_back(std::make_shared<ItineraryPgDao::route>(rt));
+  features.routes.push_back(rt);
 }
 
 void ItineraryUploadHandler::add_track_point(
@@ -259,8 +261,7 @@ void ItineraryUploadHandler::add_track_point(
   p.altitude = child_node_as_double(node, "ele");
   p.time = child_node_as_time_point(node, "time");
   p.hdop = child_node_as_float(node, "hdop");
-  track_segment.points.push_back(
-      std::make_shared<ItineraryPgDao::track_point>(p));
+  track_segment.points.push_back(p);
 }
 
 void ItineraryUploadHandler::add_track_segment(
@@ -274,8 +275,7 @@ void ItineraryUploadHandler::add_track_segment(
     if (name == "trkpt")
       add_track_point(trkseg, n);
   }
-  track.segments.push_back(
-      std::make_shared<ItineraryPgDao::track_segment>(trkseg));
+  track.segments.push_back(trkseg);
 }
 
 void ItineraryUploadHandler::add_track(
@@ -296,7 +296,7 @@ void ItineraryUploadHandler::add_track(
     if (name == "trkseg")
       add_track_segment(trk, n);
   }
-  features.tracks.push_back(std::make_shared<ItineraryPgDao::track>(trk));
+  features.tracks.push_back(trk);
 }
 
 void ItineraryUploadHandler::save(const xml_document &doc)
@@ -322,38 +322,19 @@ void ItineraryUploadHandler::save(const xml_document &doc)
         features.routes.end());
 
     for (auto &i : features.tracks) {
-      auto track = *i;
       elevation_service->fill_elevations_for_paths(
-          track.segments.begin(),
-          track.segments.end());
+          i.segments.begin(),
+          i.segments.end());
     }
     elevation_service->fill_elevations(
         features.waypoints.begin(),
         features.waypoints.end());
-  } else {
+  } else if (GetOptions::verbose_flag) {
     std::cerr << "Elevation service is not available\n";
   }
 #endif // HAVE_GDAL
-  for (auto &route : features.routes) {
-    GeoStatistics geo_stats;
-    geo_stats.add_path(route->points.begin(), route->points.end());
-    route->lowest = geo_stats.get_lowest();
-    route->highest = geo_stats.get_highest();
-    route->ascent = geo_stats.get_ascent();
-    route->descent = geo_stats.get_descent();
-    route->distance = geo_stats.get_distance();
-  }
-  for (auto &track : features.tracks) {
-    GeoStatistics geo_stats;
-    for (auto & segment : track->segments) {
-      geo_stats.add_path(segment->points.begin(), segment->points.end());
-    }
-    track->lowest = geo_stats.get_lowest();
-    track->highest = geo_stats.get_highest();
-    track->ascent = geo_stats.get_ascent();
-    track->descent = geo_stats.get_descent();
-    track->distance = geo_stats.get_distance();
-  }
+  ItineraryPgDao::route::calculate_statistics(features.routes);
+  ItineraryPgDao::track::calculate_statistics(features.tracks);
   ItineraryPgDao dao;
   dao.create_itinerary_features(get_user_id(), itinerary_id, features);
 }

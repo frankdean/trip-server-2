@@ -31,6 +31,10 @@ using namespace boost::locale;
 using namespace fdsd::trip;
 using namespace fdsd::utils;
 
+#ifdef HAVE_GDAL
+ElevationService *elevation_service;
+#endif
+
 bool ElevationTile::drivers_registered = false;
 const int ElevationTile::no_data = -32768;
 

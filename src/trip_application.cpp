@@ -35,7 +35,7 @@ using namespace fdsd::web;
 using namespace fdsd::trip;
 
 #ifdef HAVE_GDAL
-ElevationService *elevation_service;
+extern ElevationService *elevation_service;
 #endif
 
 TripApplication::TripApplication(std::string listen_address,

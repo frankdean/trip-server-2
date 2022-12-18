@@ -25,7 +25,6 @@
 #include "trip_pg_dao.hpp"
 #include "geo_utils.hpp"
 #include <chrono>
-#include <memory>
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
@@ -48,7 +47,11 @@ public:
     path_summary() :
       path_base(),
       name(),
-      color() {}
+      color(),
+      html_code() {}
+    static void from_geojson_properties(
+        const nlohmann::json& properties,
+        ItineraryPgDao::path_summary &path);
   };
   struct path_info {
     std::pair<bool, double> minimum_speed;
@@ -75,23 +78,47 @@ public:
       comment(),
       description(),
       symbol() {}
+    route_point(location loc) :
+      location(loc),
+      name(),
+      comment(),
+      description(),
+      symbol() {}
   };
+  struct track;
   struct route : public path_summary {
-    std::vector<std::shared_ptr<route_point>> points;
+    std::vector<route_point> points;
     route() : path_summary(), points() {}
+    route(const track &t);
+    void calculate_statistics();
+    static void calculate_statistics(std::vector<route> &routes) {
+      for (auto &route : routes)
+        route.calculate_statistics();
+    }
   };
   struct track_point : public location {
     std::pair<bool, std::chrono::system_clock::time_point> time;
     std::pair<bool, float> hdop;
     track_point() : location(), time(), hdop() {}
+    track_point(location loc) : location(loc), time(), hdop() {}
   };
   struct track_segment : public path_base {
-    std::vector<std::shared_ptr<track_point>> points;
+    std::vector<track_point> points;
     track_segment() : path_base(), points() {}
+    track_segment(std::vector<track_point> points)
+      : path_base(), points(std::move(points)) {}
   };
   struct track : public path_summary {
-    std::vector<std::shared_ptr<track_segment>> segments;
+    std::vector<track_segment> segments;
     track() : path_summary(), segments() {}
+    track(std::vector<track_segment> segments)
+      : path_summary(), segments(std::move(segments)) {}
+    track(const route &r);
+    void calculate_statistics();
+    static void calculate_statistics(std::vector<track> &tracks) {
+      for (auto &track : tracks)
+        track.calculate_statistics();
+    }
   };
   struct waypoint_base {
     std::pair<bool, std::string> name;
@@ -123,9 +150,9 @@ public:
                  avg_samples() {}
   };
   struct itinerary_features {
-    std::vector<std::shared_ptr<route>> routes;
-    std::vector<std::shared_ptr<track>> tracks;
-    std::vector<std::shared_ptr<waypoint>> waypoints;
+    std::vector<route> routes;
+    std::vector<track> tracks;
+    std::vector<waypoint> waypoints;
     itinerary_features() : routes(),
                            tracks(),
                            waypoints() {}
@@ -156,9 +183,9 @@ public:
   };
   struct itinerary : public itinerary_detail {
     std::pair<bool, std::string> description;
-    std::vector<std::shared_ptr<path_summary>> routes;
-    std::vector<std::shared_ptr<path_summary>> tracks;
-    std::vector<std::shared_ptr<waypoint_summary>> waypoints;
+    std::vector<path_summary> routes;
+    std::vector<path_summary> tracks;
+    std::vector<waypoint_summary> waypoints;
     itinerary() : itinerary_detail(),
                   description(),
                   routes(),
@@ -194,16 +221,16 @@ public:
   void create_itinerary_features(
       std::string user_id,
       long itinerary_id,
-      const ItineraryPgDao::itinerary_features &features);
-  std::vector<std::unique_ptr<route>>
+      ItineraryPgDao::itinerary_features &features);
+  std::vector<route>
       get_routes(std::string user_id,
                  long itinerary_id,
                  std::vector<long> route_ids);
-  std::vector<std::unique_ptr<ItineraryPgDao::track>>
+  std::vector<track>
       get_tracks(std::string user_id,
                  long itinerary_id,
                  std::vector<long> ids);
-  std::vector<std::unique_ptr<ItineraryPgDao::waypoint>>
+  std::vector<ItineraryPgDao::waypoint>
       get_waypoints(std::string user_id,
                     long itinerary_id,
                     std::vector<long> ids);
@@ -217,24 +244,24 @@ protected:
   void create_waypoints(
       pqxx::work &tx,
       long itinerary_id,
-      std::vector<std::shared_ptr<ItineraryPgDao::waypoint>> waypoints);
+      const std::vector<ItineraryPgDao::waypoint> &waypoints);
   void create_route_points(
       pqxx::work &tx,
-      std::shared_ptr<route> route);
+      route &route);
   void create_routes(
       pqxx::work &tx,
       long itinerary_id,
-      std::vector<std::shared_ptr<route>> routes);
+      std::vector<route> &routes);
   void create_track_points(
       pqxx::work &tx,
-      std::shared_ptr<track_segment> segment);
+      track_segment &segment);
   void create_track_segments(
       pqxx::work &tx,
-      std::shared_ptr<track> track);
+      track &track);
   void create_tracks(
       pqxx::work &tx,
       long itinerary_id,
-      std::vector<std::shared_ptr<track>> tracks);
+      std::vector<track> &tracks);
   void validate_user_itinerary_modification_access(pqxx::work &tx,
                                                    std::string user_id,
                                                    long itinerary_id);

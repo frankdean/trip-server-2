@@ -50,12 +50,12 @@ class ItineraryHandler : public TripAuthenticatedRequestHandler {
       const ItineraryPgDao::itinerary& itinerary);
   void append_path(
       std::ostream &os,
-      std::shared_ptr<ItineraryPgDao::path_summary> path,
+      const ItineraryPgDao::path_summary &path,
       std::string path_type,
       bool estimate_time);
   void append_waypoint(
       std::ostream &os,
-      std::shared_ptr<ItineraryPgDao::waypoint_summary> waypoint);
+      const ItineraryPgDao::waypoint_summary &waypoint);
   void append_features_content(
       web::HTTPServerResponse& response,
       const ItineraryPgDao::itinerary& itinerary);
@@ -72,6 +72,7 @@ class ItineraryHandler : public TripAuthenticatedRequestHandler {
     //           << distance << " kms distance and " << ascent << "m ascent\n";
     return retval;
   }
+  void convertTracksToRoutes(const web::HTTPServerRequest& request);
 protected:
   virtual void do_preview_request(
       const web::HTTPServerRequest& request,

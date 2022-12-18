@@ -110,8 +110,10 @@ void ItineraryEditHandler::build_form(
     <<
     // Confirmation dialog text when cancelling editing an itinerary
     "                  <button type=\"submit\" class=\"py-3 btn btn-lg btn-danger\" name=\"action\" value=\"cancel\" accesskey=\"c\" formnovalidate onclick=\"return confirm('"
-    // Label for cancelling itinerary edit
-    << translate("Cancel?") << "'); \">" << translate("Cancel") << "</button>\n"
+    // Text to confirm when cancelling editing an itinerary
+    << translate("Cancel?") << "'); \">"
+    // Button label to cancel editing and itinerary description
+    << translate("Cancel") << "</button>\n"
     // Confirmation dialog text when performing a form reset whilst editing an itinerary
     "                  <button type=\"reset\" class=\"py-3 btn btn-lg btn-danger\" name=\"action\" value=\"reset\" onclick=\"return confirm('" << translate("Reset form to original state, losing all your changes") << "'); \">"
     // Form reset label

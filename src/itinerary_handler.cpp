@@ -146,7 +146,7 @@ void ItineraryHandler::append_itinerary_content(
  */
 void ItineraryHandler::append_path(
     std::ostream &os,
-    std::shared_ptr<ItineraryPgDao::path_summary> path,
+    const ItineraryPgDao::path_summary &path,
     std::string path_type,
     bool estimate_time)
 {
@@ -154,38 +154,38 @@ void ItineraryHandler::append_path(
     <<
     "                        <tr>\n"
     "                          <td>\n"
-    "                            <input id=\"input-" << path_type << "-" << path->id.second << "\" type=\"checkbox\" name=\"" << path_type << "[" << path->id.second << "]\">\n"
-    "                            <label for=\"input-" << path_type << "-" << path->id.second << "\">";
-  if (path->name.first) {
-    os << x(path->name.second);
+    "                            <input id=\"input-" << path_type << "-" << path.id.second << "\" type=\"checkbox\" name=\"" << path_type << "[" << path.id.second << "]\">\n"
+    "                            <label for=\"input-" << path_type << "-" << path.id.second << "\">";
+  if (path.name.first) {
+    os << x(path.name.second);
   } else {
     // Database ID or an item, typically a route, track or waypoint
-    os << format(translate("ID:&nbsp;{1,number=left}")) % path->id.second;
+    os << format(translate("ID:&nbsp;{1,number=left}")) % path.id.second;
   }
   os
     <<
     "</label>\n"
     "                          </td>\n"
-    "                          <td>" << (path->color.first ? x(path->color.second) : "") << "</td>\n"
+    "                          <td>" << (path.color.first ? x(path.color.second) : "") << "</td>\n"
     "                          <td>";
-  if (path->distance.first) {
+  if (path.distance.first) {
     os <<
       // Shows distance in kilometers
-      format(translate("{1,num=fixed,precision=2}&nbsp;km")) % path->distance.second;
+      format(translate("{1,num=fixed,precision=2}&nbsp;km")) % path.distance.second;
   }
   os
     <<
     "<td>\n"
     "                          <td>";
-  if (path->distance.first) {
+  if (path.distance.first) {
     os <<
       // Shows distance in miles
-      format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (path->distance.second / kms_per_mile);
+      format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (path.distance.second / kms_per_mile);
   }
   os << "<td>\n";
   if (estimate_time) {
-    const double distance =  path->distance.first ? path->distance.second : 0;
-    const double ascent = path->ascent.first ? path->ascent.second : 0;
+    const double distance =  path.distance.first ? path.distance.second : 0;
+    const double ascent = path.ascent.first ? path.ascent.second : 0;
     double estimated_hiking_time =
       calculate_scarfs_equivalence_kilometers(distance, ascent);
     os << "                          <td>";
@@ -200,9 +200,9 @@ void ItineraryHandler::append_path(
     os
       << "</td>\n";
   }
-  if (path->ascent.first || path->descent.first) {
-    const double ascent = path->ascent.first ? path->ascent.second : 0;
-    const double descent = path->descent.first ? path->descent.second : 0;
+  if (path.ascent.first || path.descent.first) {
+    const double ascent = path.ascent.first ? path.ascent.second : 0;
+    const double descent = path.descent.first ? path.descent.second : 0;
     os
       <<
       "                          <td>"
@@ -217,9 +217,9 @@ void ItineraryHandler::append_path(
   } else {
     os << "                          <td></td><td></td>\n";
   }
-  if (path->highest.first || path->lowest.first) {
-    const double highest = path->highest.first ? path->highest.second : 0;
-    const double lowest = path->lowest.first ? path->lowest.second : 0;
+  if (path.highest.first || path.lowest.first) {
+    const double highest = path.highest.first ? path.highest.second : 0;
+    const double lowest = path.lowest.first ? path.lowest.second : 0;
     os
       <<
       "                          <td>"
@@ -242,38 +242,38 @@ void ItineraryHandler::append_path(
 
 void ItineraryHandler::append_waypoint(
     std::ostream &os,
-    std::shared_ptr<ItineraryPgDao::waypoint_summary> waypoint)
+    const ItineraryPgDao::waypoint_summary &waypoint)
 {
   os
     <<
     "                      <tr>\n"
     "                        <td>\n"
-    "                          <input id=\"input-waypoint-" << waypoint->id << "\" type=\"checkbox\" name=\"waypoint[" << waypoint->id << "]\">\n"
-    "                          <label for=\"input-waypoint-" << waypoint->id << "\">";
-  if (waypoint->name.first) {
-    os << x(waypoint->name.second);
+    "                          <input id=\"input-waypoint-" << waypoint.id << "\" type=\"checkbox\" name=\"waypoint[" << waypoint.id << "]\">\n"
+    "                          <label for=\"input-waypoint-" << waypoint.id << "\">";
+  if (waypoint.name.first) {
+    os << x(waypoint.name.second);
   } else {
     // Database ID or an item, typically a route, track or waypoint
-    os << format(translate("ID:&nbsp;{1,number=left}")) % waypoint->id;
+    os << format(translate("ID:&nbsp;{1,number=left}")) % waypoint.id;
   }
   os <<
     "</label>\n"
     "                        </td>\n"
     "                        <td>";
-  if (waypoint->symbol.first) {
-    os << x(waypoint->symbol.second);
+  if (waypoint.symbol.first) {
+    os << x(waypoint.symbol.second);
   }
   os <<
     "</td>\n"
     "                        <td>";
-  if (waypoint->comment.first) {
-    os << x(waypoint->comment.second);
+  if (waypoint.comment.first) {
+    os << x(waypoint.comment.second);
   }
   os <<
     "</td>\n"
     "                        <td>";
-  if (waypoint->type.first) {
-    os << x(waypoint->type.second);
+  if (waypoint.type.first) {
+    os << x(waypoint.type.second);
   }
   os <<
     "</td>\n"
@@ -496,7 +496,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
   response.content
     <<
     // Label for menu item to re-fetch the page with updated data
-    "                <li><button class=\"dropdown-item\" accesskey=\"v\" name=\"action\" value=\"refresh\">" << translate("Refresh") << "</button></li>\n"
+    "                <li><button class=\"dropdown-item\" name=\"action\" value=\"refresh\">" << translate("Refresh") << "</button></li>\n"
     "                <li><hr class=\"dropdown-divider\"></li>\n"
     // Label for menu item to display the map page showing the selected routes, tracks and waypoints
     "                <li><button class=\"dropdown-item\" accesskey=\"m\" formmethod=\"post\" formaction=\"" << get_uri_prefix() << "/itinerary-map?id=" << itinerary_id << "\">" << translate("Show map") << "</button></li>\n"
@@ -531,15 +531,18 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       <<
       // Label for menu item to set a sequence of colors to the selected routes and tracks
       "                <li><a class=\"dropdown-item opacity-50\">" << translate("Assign colors to routes and tracks") << "</a></li> <!-- writable version -->\n"
+      "                <li><button class=\"dropdown-item\" accesskey=\"v\" formmethod=\"post\" name=\"action\" value=\"convert\" "
+      // Confirmation dialog text when converting one or more tracks to routes or vice-versa
+      "onclick=\"return confirm('" << translate("Convert selected tracks and routes?") << "');\">"
       // Label for menu item to convert the selected tracks to routes
-      "                <li><a class=\"dropdown-item opacity-50\">" << translate("Convert tracks to routes") << "</a></li> <!-- writable version -->\n"
+      << translate("Convert tracks and routes") << "</button></li> <!-- writable version -->\n"
       // Label for menu item to reduce the number of points in a track using a simplification algorithm
-      "                <li><a class=\"dropdown-item opacity-50\">" << translate("Simplify track") << "</a></li> <!-- writable version -->\n"
+      "                <li><button class=\"dropdown-item\" accesskey=\"s\" formmethod=\"post\" formaction=\"" << get_uri_prefix() << "/itinerary/simplify/path?id=" << itinerary_id << "\">" << translate("Simplify track") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n"
       // Label for menu item to permanently delete the selected items
       "                <li><button class=\"dropdown-item\" accesskey=\"d\" formmethod=\"post\" name=\"action\" value=\"delete_features\" "
       // Confirmation dialog text when deleting a one or more selected itinerary featues
-      "onclick=\"return confirm('Delete the selected waypoints, routes and tracks?');\">" << translate("Delete selected items") << "</button></li> <!-- writable version -->\n"
+      "onclick=\"return confirm('" << translate("Delete the selected waypoints, routes and tracks?") << "');\">" << translate("Delete selected items") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li>\n";
   }
   response.content
@@ -610,6 +613,31 @@ void ItineraryHandler::do_preview_request(
   }
 }
 
+void ItineraryHandler::convertTracksToRoutes(
+    const web::HTTPServerRequest& request)
+{
+  auto selected_features = get_selected_feature_ids(request);
+  ItineraryPgDao::itinerary_features features;
+  ItineraryPgDao dao;
+  if (!selected_features.tracks.empty()) {
+    auto tracks = dao.get_tracks(get_user_id(),
+                                 itinerary_id,
+                                 selected_features.tracks);
+    for (const auto &t : tracks)
+      features.routes.push_back(ItineraryPgDao::route(t));
+  }
+  if (!selected_features.routes.empty()) {
+    auto routes = dao.get_routes(get_user_id(),
+                                 itinerary_id,
+                                 selected_features.routes);
+    for (const auto &r : routes)
+      features.tracks.push_back(ItineraryPgDao::track(r));
+  }
+  dao.create_itinerary_features(get_user_id(),
+                                itinerary_id,
+                                features);
+}
+
 void ItineraryHandler::handle_authenticated_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
@@ -627,6 +655,9 @@ void ItineraryHandler::handle_authenticated_request(
     active_tab = features_tab;
   } else if (action == "refresh") {
     active_tab = features_tab;
+  } else if (action == "convert") {
+    active_tab = features_tab;
+    convertTracksToRoutes(request);
   }
   auto itinerary = dao.get_itinerary_details(get_user_id(), itinerary_id);
   if (!itinerary.first)

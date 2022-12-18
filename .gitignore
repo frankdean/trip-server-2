@@ -67,3 +67,6 @@
 /doc/trip-user-guide.t2p/
 /doc/stamp-1
 /doc/version-ug.texi
+/src/test_dao_helper
+/src/test_elevation_tile
+/src/test_http_request

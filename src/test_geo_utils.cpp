@@ -41,33 +41,33 @@ location p12(2.365150, 48.872732, std::make_pair<bool, double>(true, 42));
 location p13(2.363091, 48.855793, std::make_pair<bool, double>(true, 41));
 location p14(2.314854, 48.858052, std::make_pair<bool, double>(true, 38));
 
-std::vector<std::shared_ptr<location>> test_points_1 = {
-  std::make_shared<location>(p1),
-  std::make_shared<location>(p2),
-  std::make_shared<location>(p3),
-  std::make_shared<location>(p4),
-  std::make_shared<location>(p5),
-  std::make_shared<location>(p6),
-  std::make_shared<location>(p7),
-  std::make_shared<location>(p8),
+std::vector<location> test_points_1 = {
+  p1,
+  p2,
+  p3,
+  p4,
+  p5,
+  p6,
+  p7,
+  p8,
 };
 
-std::vector<std::shared_ptr<location>> test_points_2 = {
-  std::make_shared<location>(p10),
-  std::make_shared<location>(p11),
-  std::make_shared<location>(p12),
-  std::make_shared<location>(p13),
-  std::make_shared<location>(p14),
+std::vector<location> test_points_2 = {
+  p10,
+  p11,
+  p12,
+  p13,
+  p14,
 };
 
 // Tests the example for anti-meridian cutting from the RFC.
 bool test_rfc7946_example()
 {
-  std::vector<std::unique_ptr<location>> test_path;
-  std::unique_ptr<location> p1(new location(1, 170.0, 45.0));
-  std::unique_ptr<location> p2(new location(2, -170.0, 45.0));
-  test_path.push_back(std::move(p1));
-  test_path.push_back(std::move(p2));
+  std::vector<location> test_path;
+  location p1(1, 170.0, 45.0);
+  location p2(2, -170.0, 45.0);
+  test_path.push_back(p1);
+  test_path.push_back(p2);
   GeoMapUtils g;
   g.add_path(test_path.begin(), test_path.end());
   const auto result = g.as_geojson();
@@ -83,10 +83,10 @@ bool test_rfc7946_example()
 // Simple test for a LineString
 bool test_linestring()
 {
-  std::vector<std::unique_ptr<location>> test_path;
-  test_path.push_back(std::unique_ptr<location>(new location(1, 10.0, 45.0)));
-  test_path.push_back(std::unique_ptr<location>(new location(1, 20.0, 43.0)));
-  test_path.push_back(std::unique_ptr<location>(new location(1, 25.0, 61.0)));
+  std::vector<location> test_path;
+  test_path.push_back(location(1, 10.0, 45.0));
+  test_path.push_back(location(1, 20.0, 43.0));
+  test_path.push_back(location(1, 25.0, 61.0));
   GeoMapUtils g;
   g.add_path(test_path.begin(), test_path.end());
   const auto result = g.as_geojson();
@@ -96,8 +96,8 @@ bool test_linestring()
 // Simple test for a Point
 bool test_point()
 {
-  std::vector<std::unique_ptr<location>> test_path;
-  test_path.push_back(std::unique_ptr<location>(new location(1, 10.0, 45.0)));
+  std::vector<location> test_path;
+  test_path.push_back(location(1, 10.0, 45.0));
   GeoMapUtils g;
   g.add_path(test_path.begin(), test_path.end());
   const auto result = g.as_geojson();
@@ -106,7 +106,7 @@ bool test_point()
 
 bool test_empty_path()
 {
-  std::vector<std::unique_ptr<location>> test_path;
+  std::vector<location> test_path;
   GeoMapUtils g;
   g.add_path(test_path.begin(), test_path.end());
   const auto result = g.as_geojson();
@@ -165,9 +165,9 @@ bool test_distance()
 
 bool test_stats_single_leg_ascent()
 {
-  std::vector<std::shared_ptr<location>> points = {
-    std::make_shared<location>(p1),
-    std::make_shared<location>(p2)
+  std::vector<location> points = {
+    p1,
+    p2
   };
   GeoStatistics geo;
   auto stats = geo.add_path(points.begin(), points.end());
@@ -183,9 +183,9 @@ bool test_stats_single_leg_ascent()
 
 bool test_stats_single_leg_descent()
 {
-  std::vector<std::shared_ptr<location>> points = {
-    std::make_shared<location>(p2),
-    std::make_shared<location>(p1)
+  std::vector<location> points = {
+    p2,
+    p1,
   };
   GeoStatistics geo;
   auto stats = geo.add_path(points.begin(), points.end());
@@ -241,8 +241,8 @@ bool test_stats_distance()
 bool test_stats_distance_multi_path()
 {
   GeoStatistics geo;
-  std::vector<std::shared_ptr<location>> part1;
-  std::vector<std::shared_ptr<location>> part2;
+  std::vector<location> part1;
+  std::vector<location> part2;
   auto i = test_points_2.begin();
   part1.push_back(*i++);
   part1.push_back(*i++);

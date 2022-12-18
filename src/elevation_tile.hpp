@@ -123,20 +123,17 @@ public:
       Iterator end,
       bool force = false,
       bool skip_all_if_any_exist = false) {
-    path_statistics statistics;
     int elevation_count = 0;
     int points_count = 0;
     for (auto i = begin; i != end; ++i) {
-      auto point = *i;
-      if (point->altitude.first)
+      if (i->altitude.first)
         elevation_count++;
       points_count++;
     }
     // std::cout << "Total of " << points_count << " points with, "
     //           << elevation_count << " values already populated\n";
 
-    for (auto i = begin; i != end; ++i) {
-      auto point = *i;
+    for (auto point = begin; point != end; ++point) {
       if ((!skip_all_if_any_exist || elevation_count == 0) &&
           (elevation_count < points_count)) {
         // std::cout << "Trying " << point->longitude << ", "
@@ -175,10 +172,10 @@ public:
     path_statistics path_statistics;
     for (auto i = begin; i != end; ++i) {
       auto path = *i;
-      auto points = path->points;
+      auto points = path.points;
       fill_elevations(
-          path->points.begin(),
-          path->points.end(),
+          path.points.begin(),
+          path.points.end(),
           force,
           skip_all_if_any_exist);
     }

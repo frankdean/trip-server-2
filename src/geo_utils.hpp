@@ -112,7 +112,7 @@ class GeoMapUtils {
   void update_altitude_info(const location *loc);
   void add_location(std::unique_ptr<location> &previous,
                     std::vector<location> &new_path,
-                    location *loc);
+                    location &loc);
 public:
   GeoMapUtils();
   nlohmann::basic_json<nlohmann::ordered_map> as_geojson(const int indent = -1,
@@ -137,7 +137,7 @@ public:
     std::unique_ptr<location> previous;
     std::vector<location> new_path;
     while (begin != end) {
-      location *loc = begin->get();
+      location loc = *begin;
       add_location(previous, new_path, loc);
       ++begin;
     }
@@ -168,7 +168,7 @@ public:
 };
 
 class GeoStatistics : path_statistics {
-  std::shared_ptr<location> last_location;
+  std::unique_ptr<location> last_location;
   std::pair<bool, double> last_altitude;
 public:
   GeoStatistics() : path_statistics(),
@@ -178,24 +178,25 @@ public:
   }
 
   static void update_statistics(path_statistics &statistics,
-                                std::shared_ptr<location> &local_last_location,
+                                std::unique_ptr<location> &local_last_location,
                                 std::pair<bool, double> &local_last_altitude,
-                                std::shared_ptr<location> &loc);
+                                location &loc);
 
   void add_location(
       path_statistics &local_stats,
-      std::shared_ptr<location> &local_last_location,
+      std::unique_ptr<location> &local_last_location,
       std::pair<bool, double> &local_last_altitude,
-      std::shared_ptr<location> &loc);
+      location &loc);
 
   template <typename Iterator>
   path_statistics add_path(Iterator begin, Iterator end) {
     path_statistics retval;
-    std::shared_ptr<location> local_last_location = nullptr;
+    std::unique_ptr<location> local_last_location = nullptr;
     std::pair<bool, double> local_last_altitude;
     for (auto i = begin; i != end; ++i) {
-      std::shared_ptr<location> location = *i;
+      location location = *i;
       add_location(retval, local_last_location, local_last_altitude, location);
+
       // std::cout << "Add path, after add_location: ";
       // if (local_last_altitude.first)
       //   std::cout << " last altitude: " << local_last_altitude.second;

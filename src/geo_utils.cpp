@@ -19,12 +19,14 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#include "../config.h"
 #include "geo_utils.hpp"
-#include <cmath>
+#include "../trip-server-common/src/get_options.hpp"
 #include <iomanip>
 #include <iostream>
 
 using namespace fdsd::trip;
+using namespace fdsd::utils;
 using json = nlohmann::basic_json<nlohmann::ordered_map>;
 
 GeoMapUtils::GeoMapUtils() :
@@ -158,21 +160,28 @@ void GeoMapUtils::update_altitude_info(const location *loc)
  */
 void GeoMapUtils::add_location(std::unique_ptr<location> &previous,
                                std::vector<location> &new_path,
-                               location *loc)
+                               location &loc)
 {
   // TODO calculate actual position line intersects the anti-meridian It is not
   // as simple as breaking the line at longitude 180° and copying the same
   // latitude values, which only works with a line parallel to a latitude.
-  update_altitude_info(loc);
+  update_altitude_info(&loc);
   if (previous) {
-    if (previous->longitude > 90 && loc->longitude < -90 ||
-        previous->longitude < -90 && loc->longitude > 90) {
-      // std::cout << "Path from location id "
-      //           << previous->id << " to location id "
-      //           << loc.id
-      //           << " crosses the anti-meridian\n";
-      location t1(*loc);
-      location t2(*loc);
+    if (previous->longitude > 90 && loc.longitude < -90 ||
+        previous->longitude < -90 && loc.longitude > 90) {
+      // std::cout << "Path from location id ";
+      // if (previous->id.first)
+      //   std::cout << previous->id.second;
+      // else
+      //   std::cout << "null";
+      // std::cout << " to location id ";
+      // if (loc.id.first)
+      //   std::cout << loc.id.second;
+      // else
+      //   std::cout << "null"
+      //             << " crosses the anti-meridian\n";
+      location t1(loc);
+      location t2(loc);
       // std::cout << "First: " << t1 << '\n';
       // std::cout << "Second: " << t2 << '\n';
       if (t2.longitude < t1.longitude) {
@@ -186,16 +195,15 @@ void GeoMapUtils::add_location(std::unique_ptr<location> &previous,
       paths.push_back(new_path);
       new_path = std::vector<location>();
       new_path.push_back(t2);
-      new_path.push_back(*loc);
+      new_path.push_back(loc);
       previous = std::unique_ptr<location>(new location(t2));
     } else {
-      new_path.push_back(location(*loc));
-      previous = std::unique_ptr<location>(new location(*loc));
+      new_path.push_back(location(loc));
+      previous = std::unique_ptr<location>(new location(loc));
     }
   } else {
-    location t(*loc);
-    new_path.push_back(t);
-    previous = std::unique_ptr<location>(new location(t));
+    new_path.push_back(loc);
+    previous = std::unique_ptr<location>(new location(loc));
   }
 }
 
@@ -209,15 +217,17 @@ nlohmann::basic_json<nlohmann::ordered_map> GeoMapUtils::as_geojson(const int in
   const char indent_char) const
 {
   if (paths.size() > 1) {
+    if (GetOptions::verbose_flag)
+      std::cerr << "WARNING: Created a MultiLineString GeoJSON feature which this application doesn't currently handle\n";
     json json_paths = json::array();
     for (const auto &path : paths) {
       json coords = json::array();
       for (const auto &loc : path) {
         json coord;
-        coord.push_back(std::round(loc.longitude * 1e+06) / 1e+06);
-        coord.push_back(std::round(loc.latitude * 1e+06) / 1e+06);
+        coord.push_back(loc.longitude);
+        coord.push_back(loc.latitude);
         if (loc.altitude.first)
-          coord.push_back(std::round(loc.altitude.second * 10) / 10);
+          coord.push_back(loc.altitude.second);
         coords.push_back(coord);
       }
       json_paths.push_back(coords);
@@ -234,10 +244,10 @@ nlohmann::basic_json<nlohmann::ordered_map> GeoMapUtils::as_geojson(const int in
     json coords = json::array();
     for (const auto &loc : path) {
       json coord;
-      coord.push_back(std::round(loc.longitude * 1e+06) / 1e+06);
-      coord.push_back(std::round(loc.latitude * 1e+06) / 1e+06);
+      coord.push_back(loc.longitude);
+      coord.push_back(loc.latitude);
       if (loc.altitude.first)
-        coord.push_back(std::round(loc.altitude.second * 10) / 10);
+        coord.push_back(loc.altitude.second);
       coords.push_back(coord);
     }
     json geometry;
@@ -314,9 +324,9 @@ double GeoUtils::distance(location p1, location p2)
  */
 void GeoStatistics::add_location(
     path_statistics &local_stats,
-    std::shared_ptr<location> &local_last_location,
+    std::unique_ptr<location> &local_last_location,
     std::pair<bool, double> &local_last_altitude,
-    std::shared_ptr<location> &loc)
+    location &loc)
 {
   update_statistics(local_stats, local_last_location, local_last_altitude, loc);
   // std::cout << "After add_location: ";
@@ -328,14 +338,14 @@ void GeoStatistics::add_location(
 
 void GeoStatistics::update_statistics(
     path_statistics &statistics,
-    std::shared_ptr<location> &local_last_location,
+    std::unique_ptr<location> &local_last_location,
     std::pair<bool, double> &local_last_altitude,
-    std::shared_ptr<location> &loc)
+    location &loc)
 {
   // std::cout << "Location: " << *loc << '\n';
   if (local_last_location) {
     // std::cout << "Last location: " << *local_last_location << '\n';
-    const double leg_distance = GeoUtils::distance(*local_last_location, *loc);
+    const double leg_distance = GeoUtils::distance(*local_last_location, loc);
     if (statistics.distance.first) {
       statistics.distance.second += leg_distance;
       // std::cout << "Added leg distance: " << leg_distance << '\n';
@@ -352,13 +362,13 @@ void GeoStatistics::update_statistics(
   // else {
   //   std::cout << "No distance value\n";
   // }
-  local_last_location = loc;
+  local_last_location = std::unique_ptr<location>(new location(loc));
 
-  if (loc->altitude.first) {
+  if (loc.altitude.first) {
     if (local_last_altitude.first) {
       // std::cout << "Previous last altitude: " << local_last_altitude.second << '\n';
       const double altitude_change =
-        loc->altitude.second - local_last_altitude.second;
+        loc.altitude.second - local_last_altitude.second;
       // std::cout << "Altitude change: " << altitude_change << '\n';
 
       if (altitude_change > 0) {
@@ -379,21 +389,21 @@ void GeoStatistics::update_statistics(
         }
       }
     }
-    local_last_altitude = loc->altitude;
-    // if (loc->altitude.first)
-    //   std::cout << "Saving last altitude as: " << loc->altitude.second << '\n';
+    local_last_altitude = loc.altitude;
+    // if (loc.altitude.first)
+    //   std::cout << "Saving last altitude as: " << loc.altitude.second << '\n';
 
     if (statistics.lowest.first) {
       statistics.lowest.second =
-        std::min(statistics.lowest.second, loc->altitude.second);
+        std::min(statistics.lowest.second, loc.altitude.second);
     } else {
-      statistics.lowest = loc->altitude;
+      statistics.lowest = loc.altitude;
     }
     if (statistics.highest.first) {
       statistics.highest.second =
-        std::max(statistics.highest.second, loc->altitude.second);
+        std::max(statistics.highest.second, loc.altitude.second);
     } else {
-      statistics.highest = loc->altitude;
+      statistics.highest = loc.altitude;
     }
   // } else {
   //   std::cout << "Altitude not set\n";

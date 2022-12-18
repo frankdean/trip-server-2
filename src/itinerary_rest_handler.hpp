@@ -24,8 +24,26 @@
 
 #include "itinerary_pg_dao.hpp"
 #include "trip_request_handler.hpp"
+// #define USE_BOOST_SIMPLIFY
+#ifdef USE_BOOST_SIMPLIFY
+#include <boost/geometry.hpp>
+#include <boost/range.hpp>
+#include <boost/geometry/geometries/register/linestring.hpp>
+#include <boost/geometry/geometries/register/point.hpp>
+#include <boost/geometry/algorithms/simplify.hpp>
+#endif
 #include <nlohmann/json.hpp>
 #include <string>
+#include <vector>
+
+#ifdef USE_BOOST_SIMPLIFY
+BOOST_GEOMETRY_REGISTER_POINT_2D(fdsd::trip::ItineraryPgDao::track_point,
+                                 double,
+                                 boost::geometry::cs::cartesian,
+                                 longitude,
+                                 latitude );
+BOOST_GEOMETRY_REGISTER_LINESTRING_TEMPLATED(std::vector);
+#endif
 
 namespace fdsd {
 namespace web {
@@ -36,19 +54,21 @@ namespace trip {
 
 class ItineraryRestHandler : public BaseRestHandler {
 
+  long itinerary_id;
+
   nlohmann::basic_json<nlohmann::ordered_map>
       get_routes_as_geojson(
-          const std::vector<std::unique_ptr<ItineraryPgDao::route>> &routes
+          const std::vector<ItineraryPgDao::route> &routes
         ) const;
 
   nlohmann::basic_json<nlohmann::ordered_map>
       get_tracks_as_geojson(
-          const std::vector<std::unique_ptr<ItineraryPgDao::track>> &tracks
+          const std::vector<ItineraryPgDao::track> &tracks
         ) const;
 
   nlohmann::basic_json<nlohmann::ordered_map>
       get_waypoints_as_geojson(
-          const std::vector<std::unique_ptr<ItineraryPgDao::waypoint>>
+          const std::vector<ItineraryPgDao::waypoint>
           &waypoints) const;
 
   void fetch_itinerary_features(
@@ -56,13 +76,26 @@ class ItineraryRestHandler : public BaseRestHandler {
       ItineraryPgDao::selected_feature_ids features,
       web::HTTPServerResponse &response) const;
 
+  static std::string create_track_point_key(
+      const location &point);
+
+  void save_simplified_track(
+      std::vector<location> &locations,
+      double tolerance,
+      const nlohmann::basic_json<nlohmann::ordered_map> &properties);
+
+  std::vector<location> get_coordinates(
+      const nlohmann::basic_json<nlohmann::ordered_map> &coordinates);
+
+  void save_simplified_feature(const nlohmann::basic_json<nlohmann::ordered_map> &j);
+
 protected:
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
   ItineraryRestHandler(std::shared_ptr<TripConfig> config) :
-    BaseRestHandler(config) {}
+    BaseRestHandler(config), itinerary_id() {}
   virtual ~ItineraryRestHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItineraryRestHandler";

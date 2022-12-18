@@ -23,6 +23,7 @@
 #include "tracking_download_handler.hpp"
 #include "session_pg_dao.hpp"
 #include "tracking_request_handler.hpp"
+#include "trip_config.hpp"
 #include "../trip-server-common/src/dao_helper.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
 #include "../trip-server-common/src/http_response.hpp"
@@ -82,23 +83,25 @@ void TrackingDownloadHandler::handle_download(
   xml_node trkseg = trk.append_child("trkseg");
   for (auto const &loc : locations_result.locations) {
     xml_node trkpt = trkseg.append_child("trkpt");
-    trkpt.append_attribute("lat").set_value(std::to_string(loc->latitude).c_str());
-    trkpt.append_attribute("lon").set_value(std::to_string(loc->longitude).c_str());
-    if (loc->altitude.first) {
-      trkpt.append_child("ele").append_child(node_pcdata).set_value(
-          std::to_string(loc->altitude.second).c_str());
-    }
-    DateTime tm(loc->time_point);
+    trkpt.append_attribute("lat").set_value(loc.latitude);
+    trkpt.append_attribute("lon").set_value(loc.longitude);
+    if (loc.altitude.first)
+      trkpt.append_child("ele").text() = loc.altitude.second;
+    DateTime tm(loc.time_point);
     trkpt.append_child("time").append_child(node_pcdata).
       set_value(tm.get_time_as_iso8601_gmt().c_str());
-    if (loc->hdop.first) {
-     trkpt.append_child("hdop").
-       append_child(node_pcdata).set_value(
-           std::to_string(loc->hdop.second).c_str());
-    }
+    if (loc.hdop.first)
+      trkpt.append_child("hdop").text() = loc.hdop.second;
   }
-  // doc.save(response.content, "  "); // pretty
-  doc.save(response.content, "", format_raw);
+  if (config->get_gpx_pretty()) {
+    std::string indent;
+    int level = config->get_gpx_indent();
+    while (level-- > 0)
+      indent.append(" ");
+    doc.save(response.content, indent.c_str());
+  } else {
+    doc.save(response.content, "", format_raw);
+  }
 }
 
 void TrackingDownloadHandler::handle_authenticated_request(

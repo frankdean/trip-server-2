@@ -56,7 +56,7 @@ bool TrackingMapHandler::can_handle(
 void TrackingMapHandler::append_pre_body_end(std::ostream& os) const
 {
   BaseMapHandler::append_pre_body_end(os);
-  os << "    <script type=\"module\" src=\"" << get_uri_prefix() << "/static/js/map.js\"></script>\n";
+  os << "    <script type=\"module\" src=\"" << get_uri_prefix() << "/static/js/tracking-map.js\"></script>\n";
 }
 
 void TrackingMapHandler::handle_authenticated_request(
@@ -100,7 +100,9 @@ void TrackingMapHandler::handle_authenticated_request(
   response.content <<
     "    <script>\n"
     "      <!--\n"
-    "      const server_prefix = '" << get_uri_prefix() << "'\n";
+    "      const server_prefix = '" << get_uri_prefix() << "'\n"
+    // Text displayed to user after clicking on map exit button to exit map
+    "      const click_to_exit_text = '" << translate("Click to exit") << "';\n";
   if (!config->get_providers().empty()) {
     response.content <<
       "      const providers = [\n";

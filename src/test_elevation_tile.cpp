@@ -52,15 +52,15 @@ location p7(-7.108154296875, 62.1757596207084);
 location p8(-2.296142578125, 63.3816786930298);
 location no_data_expected_for_point(-5.45608520507813, 56.5950344674725);
 
-std::vector<std::shared_ptr<location>> test_points_1 = {
-  std::make_shared<location>(p1),
-  std::make_shared<location>(p2),
-  std::make_shared<location>(p3),
-  std::make_shared<location>(p4),
-  std::make_shared<location>(p5),
-  std::make_shared<location>(p6),
-  std::make_shared<location>(p7),
-  std::make_shared<location>(p8),
+std::vector<location> test_points_1 = {
+  p1,
+  p2,
+  p3,
+  p4,
+  p5,
+  p6,
+  p7,
+  p8,
 };
 
 bool test_single_point()
@@ -91,24 +91,24 @@ bool test_single_point()
 }
 
 void set_points(
-    const std::vector<std::shared_ptr<location>> &points,
+    std::vector<location> &points,
     std::pair<bool, double> value)
 {
-  for (const auto &i : points)
-    i->altitude = value;
+  for (auto &i : points)
+    i.altitude = value;
 }
 
-void clear_points(const std::vector<std::shared_ptr<location>> &points)
+void clear_points(std::vector<location> &points)
 {
   set_points(points, std::pair<bool, double>());
 }
 
-void list_points(const std::vector<std::shared_ptr<location>> &points)
+void list_points(const std::vector<location> &points)
 {
   for (const auto &i : points) {
-    std::cerr << "point: " << i->longitude << ", " << i->latitude;
-    if (i->altitude.first)
-      std::cerr << ", altitude: " << i->altitude.second;
+    std::cerr << "point: " << i.longitude << ", " << i.latitude;
+    if (i.altitude.first)
+      std::cerr << ", altitude: " << i.altitude.second;
     std::cerr << '\n';
   }
 }
@@ -119,9 +119,9 @@ bool test_passing_set_of_points()
   service->fill_elevations(test_points_1.begin(),
                           test_points_1.end());
   auto i = test_points_1.begin();
-  bool retval = (*i)->altitude.first && (*i)->altitude.second == 14 &&
-    (*++i)->altitude.first && (*i)->altitude.second == 35 &&
-    (*++i)->altitude.first && (*i)->altitude.second == 117;
+  bool retval = i->altitude.first && i->altitude.second == 14 &&
+    (*++i).altitude.first && i->altitude.second == 35 &&
+    (*++i).altitude.first && i->altitude.second == 117;
   if (!retval) {
     std::cerr << "test_passing_set_of_points() failed:\n";
     list_points(test_points_1);
@@ -133,16 +133,16 @@ bool test_fill_only_empty_values_skip_false()
 {
   set_points(test_points_1, std::make_pair<bool, double>(true, 9999));
   auto i = test_points_1.begin();
-  auto p = (*++i);
-  // This will be the second item in the vector
-  p->altitude.first = false;
+  ++i;
+  // This is now the second item in the vector
+  i->altitude.first = false;
   // list_points(test_points_1);
   service->fill_elevations(test_points_1.begin(),
                           test_points_1.end());
   i = test_points_1.begin();
-  bool retval = (*i)->altitude.first && (*i)->altitude.second == 9999 &&
-    (*++i)->altitude.first && (*i)->altitude.second == 35 &&
-    (*++i)->altitude.first && (*i)->altitude.second == 9999;
+  bool retval = i->altitude.first && i->altitude.second == 9999 &&
+    (*++i).altitude.first && i->altitude.second == 35 &&
+    (*++i).altitude.first && i->altitude.second == 9999;
   if (!retval) {
     std::cerr << "test_fill_only_empty_values_skip_false() failed:\n";
     list_points(test_points_1);
@@ -154,18 +154,18 @@ bool test_fill_only_empty_values_skip_true()
 {
   set_points(test_points_1, std::make_pair<bool, double>(true, 9999));
   auto i = test_points_1.begin();
-  auto p = (*++i);
+  ++i;
   // This will be the second item in the vector
-  p->altitude.first = false;
+  i->altitude.first = false;
   // list_points(test_points_1);
   service->fill_elevations(test_points_1.begin(),
                           test_points_1.end(),
                           false,
                           true);
   i = test_points_1.begin();
-  bool retval = (*i)->altitude.first && (*i)->altitude.second == 9999 &&
-    !(*++i)->altitude.first &&
-    (*++i)->altitude.first && (*i)->altitude.second == 9999;
+  bool retval = i->altitude.first && i->altitude.second == 9999 &&
+    !(*++i).altitude.first &&
+    (*++i).altitude.first && i->altitude.second == 9999;
   if (!retval) {
     std::cerr << "test_fill_only_empty_values_skip_false() failed:\n";
     list_points(test_points_1);
@@ -177,18 +177,18 @@ bool test_fill_all_values_skip_false()
 {
   set_points(test_points_1, std::make_pair<bool, double>(true, 9999));
   auto i = test_points_1.begin();
-  auto p = (*++i);
+  ++i;
   // This will be the second item in the vector
-  p->altitude.first = false;
+  i->altitude.first = false;
   // list_points(test_points_1);
   service->fill_elevations(test_points_1.begin(),
                           test_points_1.end(),
                           true,
                           false);
   i = test_points_1.begin();
-  bool retval = (*i)->altitude.first && (*i)->altitude.second == 14 &&
-    (*++i)->altitude.first && (*i)->altitude.second == 35 &&
-    (*++i)->altitude.first && (*i)->altitude.second == 117;
+  bool retval = i->altitude.first && i->altitude.second == 14 &&
+    (*++i).altitude.first && i->altitude.second == 35 &&
+    (*++i).altitude.first && i->altitude.second == 117;
   if (!retval) {
     std::cerr << "test_fill_only_empty_values_skip_false() failed:\n";
     list_points(test_points_1);
@@ -200,18 +200,18 @@ bool test_fill_all_values_skip_true()
 {
   set_points(test_points_1, std::make_pair<bool, double>(true, 9999));
   auto i = test_points_1.begin();
-  auto p = (*++i);
+  ++i;
   // This will be the second item in the vector
-  p->altitude.first = false;
+  i->altitude.first = false;
   // list_points(test_points_1);
   service->fill_elevations(test_points_1.begin(),
                           test_points_1.end(),
                           true,
                           true);
   i = test_points_1.begin();
-  bool retval = (*i)->altitude.first && (*i)->altitude.second == 9999 &&
-    !(*++i)->altitude.first &&
-    (*++i)->altitude.first && (*i)->altitude.second == 9999;
+  bool retval = i->altitude.first && i->altitude.second == 9999 &&
+    !(*++i).altitude.first &&
+    (*++i).altitude.first && i->altitude.second == 9999;
   if (!retval) {
     std::cerr << "test_fill_only_empty_values_skip_false() failed:\n";
     list_points(test_points_1);
@@ -223,18 +223,18 @@ bool test_fill_all_values_skip_true_all_empty()
 {
   clear_points(test_points_1);
   auto i = test_points_1.begin();
-  auto p = (*++i);
+  ++i;
   // This will be the second item in the vector
-  p->altitude.first = false;
+  i->altitude.first = false;
   // list_points(test_points_1);
   service->fill_elevations(test_points_1.begin(),
                           test_points_1.end(),
                           true,
                           true);
   i = test_points_1.begin();
-  bool retval = (*i)->altitude.first && (*i)->altitude.second == 14 &&
-    (*++i)->altitude.first && (*i)->altitude.second == 35 &&
-    (*++i)->altitude.first && (*i)->altitude.second == 117;
+  bool retval = i->altitude.first && i->altitude.second == 14 &&
+    (*++i).altitude.first && i->altitude.second == 35 &&
+    (*++i).altitude.first && i->altitude.second == 117;
   if (!retval) {
     std::cerr << "test_fill_only_empty_values_skip_false() failed:\n";
     list_points(test_points_1);

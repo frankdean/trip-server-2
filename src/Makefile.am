@@ -18,6 +18,8 @@ trip_server_SOURCES = \
 	itinerary_pg_dao.hpp \
 	itinerary_rest_handler.cpp \
 	itinerary_rest_handler.hpp \
+	itinerary_simplify_handler.cpp \
+	itinerary_simplify_handler.hpp \
 	itinerary_upload_handler.cpp \
 	itinerary_upload_handler.hpp \
 	main.cpp \
@@ -135,9 +137,18 @@ test_pagination_SOURCES = ../trip-server-common/src/test_pagination.cpp \
 test_pool_SOURCES = ../trip-server-common/src/test_pool.cpp
 test_tracking_SOURCES = test_tracking.cpp \
 	geo_utils.cpp \
+	../trip-server-common/src/get_options.cpp \
 	../trip-server-common/src/logger.cpp \
 	../trip-server-common/src/logger.hpp
-test_geo_utils_SOURCES = test_geo_utils.cpp
+
+if USE_GDAL
+test_tracking_SOURCES += elevation_tile.cpp \
+	../trip-server-common/src/file_utils.cpp
+endif
+
+test_geo_utils_SOURCES = test_geo_utils.cpp \
+	../trip-server-common/src/get_options.cpp
+
 test_http_request_SOURCES = ../trip-server-common/src/test_http_request.cpp \
 	../trip-server-common/src/uri_utils.cpp \
 	../trip-server-common/src/debug_utils.cpp
@@ -145,6 +156,7 @@ test_http_request_SOURCES = ../trip-server-common/src/test_http_request.cpp \
 test_elevation_tile_SOURCES = test_elevation_tile.cpp
 if USE_GDAL
 test_elevation_tile_SOURCES += geo_utils.cpp \
+	../trip-server-common/src/get_options.cpp \
 	../trip-server-common/src/file_utils.cpp \
 	../trip-server-common/src/date_utils.cpp \
 	../trip-server-common/src/logger.cpp

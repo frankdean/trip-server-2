@@ -75,6 +75,7 @@ void ItineraryMapHandler::handle_authenticated_request(
       // "      const pageInfo = JSON.parse('" << j << "');\n"
       "      const pageInfoJSON = '" << j << "';\n"
       "      const server_prefix = '" << get_uri_prefix() << "';\n"
+      // Text displayed to user after clicking on map exit button to exit map
       "      const click_to_exit_text = '" << translate("Click to exit") << "';\n";
     if (!config->get_providers().empty()) {
       response.content <<

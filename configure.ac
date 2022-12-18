@@ -2,7 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.0.0-alpha.17],[frank.dean@fdsd.co.uk])
+AC_INIT([trip],[2.0.0-alpha.18],[frank.dean@fdsd.co.uk])
+BOOTSTRAP_VERSION='5.2.3'
+OPENLAYERS_VERSION='7.1.0'
 AC_COPYRIGHT([Copyright (C) 2022 Frank Dean])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign dist-xz subdir-objects info-in-builddir])
 AC_CONFIG_SRCDIR([src/trip_request_factory.cpp])
@@ -50,7 +52,6 @@ AC_CANONICAL_HOST
 AC_SEARCH_LIBS([pthread_create], [pthread])
 AX_BOOST_BASE([1.67],[],[AC_MSG_ERROR([Please install at least version 1.67 of the Boost Locale Library])])
 AX_BOOST_LOCALE
-AX_BOOST_BASE
 PKG_CHECK_MODULES([LIBPQXX], [libpqxx >= 6.2.5 libpqxx < 7 libpq >= 11.14 yaml-cpp >= 0.6.2])
 PKG_CHECK_MODULES([LIBPUGIXML], [pugixml >= 1.11])
 if test "x${use_gdal}" = xyes; then
@@ -169,6 +170,11 @@ AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.21])
 
 AM_ICONV
+
+AC_SUBST([BOOTSTRAP_VERSION])
+AC_DEFINE_UNQUOTED([BOOTSTRAP_VERSION], ["${BOOTSTRAP_VERSION}"], [The version of Bootstrap])
+AC_SUBST([OPENLAYERS_VERSION])
+AC_DEFINE_UNQUOTED([OPENLAYERS_VERSION], ["${OPENLAYERS_VERSION}"], [The version of OpenLayers])
 
 AC_CONFIG_FILES([Makefile po/Makefile.in
 	         doc/Makefile

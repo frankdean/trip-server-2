@@ -23,7 +23,6 @@
 #include "itinerary_pg_dao.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
 #include "../trip-server-common/src/dao_helper.hpp"
-#include <memory>
 #include <vector>
 
 using namespace fdsd::trip;
@@ -65,6 +64,90 @@ void ItineraryPgDao::selected_feature_ids::from_json(
   j.at("routes").get_to(ids.routes);
   j.at("tracks").get_to(ids.tracks);
   j.at("waypoints").get_to(ids.waypoints);
+}
+
+void ItineraryPgDao::path_summary::from_geojson_properties(
+    const nlohmann::json& properties,
+    ItineraryPgDao::path_summary &path)
+{
+  const auto name_iter = properties.find("name");
+  if ((path.name.first = name_iter != properties.cend()))
+    name_iter->get_to(path.name.second);
+  const auto html_color_iter = properties.find("html_color_code");
+  if ((path.html_code.first = html_color_iter != properties.cend()))
+    html_color_iter->get_to(path.html_code.second);
+  const auto color_iter = properties.find("color_code");
+  if ((path.color.first = color_iter != properties.cend()))
+    color_iter->get_to(path.color.second);
+}
+
+ItineraryPgDao::route::route(const track &t) : path_summary(t), points()
+{
+  id.first = false;
+  // We lose separate segments from the track
+  for (const auto &ts : t.segments) {
+    for (const auto &tp : ts.points) {
+      // We lose time and hdop from the track point
+      route_point rp(tp);
+      rp.id.first = false;
+      points.push_back(rp);
+    }
+  }
+  calculate_statistics();
+}
+
+void ItineraryPgDao::route::calculate_statistics()
+{
+  GeoStatistics geo_stats;
+  geo_stats.add_path(points.begin(), points.end());
+  lowest = geo_stats.get_lowest();
+  highest = geo_stats.get_highest();
+  ascent = geo_stats.get_ascent();
+  descent = geo_stats.get_descent();
+  distance = geo_stats.get_distance();
+}
+
+ItineraryPgDao::track::track(const route &r) : path_summary(r), segments()
+{
+  // Some applications expect track points to have a time value, so start from
+  // 1901-12-13T20:45:52Z (earliest timestamp avoiding any issues with systems
+  // still running 32-bit integers for Unix time)
+  auto time = std::chrono::system_clock::from_time_t(-2147483648);
+  // One second intervals between points
+  const auto interval = std::chrono::seconds(1);
+  id.first = false;
+  // Single segment for the track
+  track_segment ts;
+  for (const auto &rp : r.points) {
+    // We lose name, comment, description and symbol from the route point
+    track_point tp(rp);
+    tp.id.first = false;
+    tp.time = std::make_pair(true, time);
+    time += interval;
+    ts.points.push_back(tp);
+  }
+  segments.push_back(ts);
+  calculate_statistics();
+}
+
+void ItineraryPgDao::track::calculate_statistics()
+{
+  GeoStatistics geo_stats;
+  for (auto & segment : segments) {
+    geo_stats.add_path(segment.points.begin(), segment.points.end());
+    GeoStatistics segment_stats;
+    segment_stats.add_path(segment.points.begin(), segment.points.end());
+    segment.lowest = segment_stats.get_lowest();
+    segment.highest = segment_stats.get_highest();
+    segment.ascent = segment_stats.get_ascent();
+    segment.descent = segment_stats.get_descent();
+    segment.distance = segment_stats.get_distance();
+  }
+  lowest = geo_stats.get_lowest();
+  highest = geo_stats.get_highest();
+  ascent = geo_stats.get_ascent();
+  descent = geo_stats.get_descent();
+  distance = geo_stats.get_distance();
 }
 
 long ItineraryPgDao::get_itineraries_count(
@@ -183,7 +266,7 @@ std::pair<bool, ItineraryPgDao::itinerary> ItineraryPgDao::get_itinerary_details
       route.descent.first = rt["descent"].to(route.descent.second);
       route.lowest.first = rt["lowest"].to(route.lowest.second);
       route.highest.first = rt["highest"].to(route.highest.second);
-      it.routes.push_back(std::make_shared<path_summary>(route));
+      it.routes.push_back(route);
     }
     auto track_result = tx.exec_params(
         "SELECT id, name, color, distance, ascent, descent, lowest, highest "
@@ -199,7 +282,7 @@ std::pair<bool, ItineraryPgDao::itinerary> ItineraryPgDao::get_itinerary_details
       track.descent.first = tk["descent"].to(track.descent.second);
       track.lowest.first = tk["lowest"].to(track.lowest.second);
       track.highest.first = tk["highest"].to(track.highest.second);
-      it.tracks.push_back(std::make_shared<path_summary>(track));
+      it.tracks.push_back(track);
     }
     auto waypoint_result = tx.exec_params(
         "SELECT id, name, "
@@ -218,7 +301,7 @@ std::pair<bool, ItineraryPgDao::itinerary> ItineraryPgDao::get_itinerary_details
       waypoint.symbol.first = wpt["symbol_text"].to(waypoint.symbol.second);
       if (!waypoint.symbol.first)
         waypoint.symbol.first = wpt["symbol"].to(waypoint.symbol.second);
-      it.waypoints.push_back(std::make_shared<waypoint_summary>(waypoint));
+      it.waypoints.push_back(waypoint);
     }
 
     tx.commit();
@@ -328,12 +411,12 @@ void ItineraryPgDao::delete_itinerary(
   tx.commit();
 }
 
-std::vector<std::unique_ptr<ItineraryPgDao::route>>
+std::vector<ItineraryPgDao::route>
     ItineraryPgDao::get_routes(std::string user_id,
                                long itinerary_id,
                                std::vector<long> route_ids)
 {
-  std::vector<std::unique_ptr<route>> routes;
+  std::vector<route> routes;
   if (route_ids.empty())
     return routes;
   work tx(*connection);
@@ -354,49 +437,50 @@ std::vector<std::unique_ptr<ItineraryPgDao::route>>
       itinerary_id,
       route_ids_sql
     );
-  std::unique_ptr<route> rt;
+  route rt;
   for (const auto &r : result) {
     long route_id = r["route_id"].as<long>();
-    if (!rt || rt->id.second != route_id) {
-      if (rt)
-        routes.push_back(std::move(rt));
-      rt = std::unique_ptr<route>(new route);
-      rt->id.first = true;
-      rt->id.second = route_id;
-      rt->name.first = r["route_name"].to(rt->name.second);
-      rt->color.first = r["path_color"].to(rt->color.second);
-      rt->html_code.first = r["html_code"].to(rt->html_code.second);
-      rt->distance.first = r["distance"].to(rt->distance.second);
-      rt->ascent.first = r["ascent"].to(rt->ascent.second);
-      rt->descent.first = r["descent"].to(rt->descent.second);
-      rt->lowest.first = r["lowest"].to(rt->lowest.second);
-      rt->highest.first = r["highest"].to(rt->highest.second);
+    if (!rt.id.first || rt.id.second != route_id) {
+      if (rt.id.first) {
+        routes.push_back(rt);
+      }
+      rt = route();
+      rt.id.first = true;
+      rt.id.second = route_id;
+      rt.name.first = r["route_name"].to(rt.name.second);
+      rt.color.first = r["path_color"].to(rt.color.second);
+      rt.html_code.first = r["html_code"].to(rt.html_code.second);
+      rt.distance.first = r["distance"].to(rt.distance.second);
+      rt.ascent.first = r["ascent"].to(rt.ascent.second);
+      rt.descent.first = r["descent"].to(rt.descent.second);
+      rt.lowest.first = r["lowest"].to(rt.lowest.second);
+      rt.highest.first = r["highest"].to(rt.highest.second);
     }
     if (!r["point_id"].is_null()) {
-      std::unique_ptr<route_point> p(new route_point);
-      p->id.first = r["point_id"].to(p->id.second);
-      r["lng"].to(p->longitude);
-      r["lat"].to(p->latitude);
-      p->name.first = r["point_name"].to(p->name.second);
-      p->comment.first = r["comment"].to(p->comment.second);
-      p->description.first = r["description"].to(p->description.second);
-      p->symbol.first = r["symbol"].to(p->symbol.second);
-      p->altitude.first = r["altitude"].to(p->altitude.second);
-      rt->points.push_back(std::move(p));
+      route_point p;
+      p.id.first = r["point_id"].to(p.id.second);
+      r["lng"].to(p.longitude);
+      r["lat"].to(p.latitude);
+      p.name.first = r["point_name"].to(p.name.second);
+      p.comment.first = r["comment"].to(p.comment.second);
+      p.description.first = r["description"].to(p.description.second);
+      p.symbol.first = r["symbol"].to(p.symbol.second);
+      p.altitude.first = r["altitude"].to(p.altitude.second);
+      rt.points.push_back(p);
     }
   }
-  if (rt)
-    routes.push_back(std::move(rt));
+  if (rt.id.first)
+    routes.push_back(rt);
   tx.commit();
   return routes;
 }
 
-std::vector<std::unique_ptr<ItineraryPgDao::track>>
+std::vector<ItineraryPgDao::track>
     ItineraryPgDao::get_tracks(std::string user_id,
                                long itinerary_id,
                                std::vector<long> ids)
 {
-  std::vector<std::unique_ptr<track>> tracks;
+  std::vector<track> tracks;
   if (ids.empty())
     return tracks;
   work tx(*connection);
@@ -421,72 +505,76 @@ std::vector<std::unique_ptr<ItineraryPgDao::track>>
       ids_sql
     );
   // std::cout << "Got " << result.size() << " track points for itinerary " << itinerary_id << "\n";
-  std::unique_ptr<track> trk;
-  std::unique_ptr<track_segment> trkseg;
+  track trk;
+  track_segment trkseg;
   for (const auto &r : result) {
     long track_id = r["track_id"].as<long>();
-    if (!trk || trk->id.second != track_id) {
-      if (trk) {
-        if (trkseg)
-          trk->segments.push_back(std::move(trkseg));
-        tracks.push_back(std::move(trk));
+    if (!trk.id.first || trk.id.second != track_id) {
+      if (trk.id.first) {
+        if (trkseg.id.first) {
+          trk.segments.push_back(trkseg);
+          trkseg = track_segment();
+        }
+        tracks.push_back(trk);
       }
-      trk = std::unique_ptr<track>(new track);
-      trk->id.first = true;
-      trk->id.second = track_id;
-      trk->name.first = r["track_name"].to(trk->name.second);
-      trk->distance.first = r["distance"].to(trk->distance.second);
-      trk->ascent.first = r["ascent"].to(trk->ascent.second);
-      trk->descent.first = r["descent"].to(trk->descent.second);
-      trk->lowest.first = r["lowest"].to(trk->lowest.second);
-      trk->highest.first = r["highest"].to(trk->highest.second);
-      trk->color.first = r["path_color"].to(trk->color.second);
-      trk->html_code.first = r["html_code"].to(trk->html_code.second);
+      trk = track();
+      trk.id.first = true;
+      trk.id.second = track_id;
+      trk.name.first = r["track_name"].to(trk.name.second);
+      trk.distance.first = r["distance"].to(trk.distance.second);
+      trk.ascent.first = r["ascent"].to(trk.ascent.second);
+      trk.descent.first = r["descent"].to(trk.descent.second);
+      trk.lowest.first = r["lowest"].to(trk.lowest.second);
+      trk.highest.first = r["highest"].to(trk.highest.second);
+      trk.color.first = r["path_color"].to(trk.color.second);
+      trk.html_code.first = r["html_code"].to(trk.html_code.second);
     }
     if (!r["segment_id"].is_null()) {
       long segment_id = r["segment_id"].as<long>();
-      if (!trkseg || trkseg->id.second != segment_id) {
-        if (trkseg)
-          trk->segments.push_back(std::move(trkseg));
-        trkseg = std::unique_ptr<track_segment>(new track_segment);
-        trkseg->id.first = true;
-        trkseg->id.second = segment_id;
-        trkseg->distance.first = r["distance"].to(trkseg->distance.second);
-        trkseg->ascent.first = r["ascent"].to(trkseg->ascent.second);
-        trkseg->descent.first = r["descent"].to(trkseg->descent.second);
-        trkseg->lowest.first = r["lowest"].to(trkseg->lowest.second);
-        trkseg->highest.first = r["highest"].to(trkseg->highest.second);
+      if (!trkseg.id.first || trkseg.id.second != segment_id) {
+        if (trkseg.id.first) {
+          trk.segments.push_back(trkseg);
+          trkseg = track_segment();
+        }
+        trkseg.id.first = true;
+        trkseg.id.second = segment_id;
+        trkseg.distance.first = r["distance"].to(trkseg.distance.second);
+        trkseg.ascent.first = r["ascent"].to(trkseg.ascent.second);
+        trkseg.descent.first = r["descent"].to(trkseg.descent.second);
+        trkseg.lowest.first = r["lowest"].to(trkseg.lowest.second);
+        trkseg.highest.first = r["highest"].to(trkseg.highest.second);
       }
       if (!r["point_id"].is_null()) {
-        std::unique_ptr<track_point> p(new track_point);
-        p->id.first = r["point_id"].to(p->id.second);
-        r["lng"].to(p->longitude);
-        r["lat"].to(p->latitude);
+        track_point p;
+        p.id.first = r["point_id"].to(p.id.second);
+        r["lng"].to(p.longitude);
+        r["lat"].to(p.latitude);
         std::string s;
-        if ((p->time.first = r["time"].to(s))) {
+        if ((p.time.first = r["time"].to(s))) {
           DateTime time(s);
-          p->time.second = time.time_tp();
+          p.time.second = time.time_tp();
         }
-        p->hdop.first = r["hdop"].to(p->hdop.second);
-        p->altitude.first = r["altitude"].to(p->altitude.second);
-        trkseg->points.push_back(std::move(p));
+        p.hdop.first = r["hdop"].to(p.hdop.second);
+        p.altitude.first = r["altitude"].to(p.altitude.second);
+        trkseg.points.push_back(p);
       }
     }
   }
-  if (trk && trkseg)
-    trk->segments.push_back(std::move(trkseg));
-  if (trk)
-    tracks.push_back(std::move(trk));
+  if (trk.id.first) {
+    if (trkseg.id.first)
+      trk.segments.push_back(trkseg);
+    tracks.push_back(trk);
+  }
   tx.commit();
   return tracks;
 }
 
-std::vector<std::unique_ptr<ItineraryPgDao::waypoint>>
+std::vector<ItineraryPgDao::waypoint>
     ItineraryPgDao::get_waypoints(std::string user_id,
                                   long itinerary_id,
                                   std::vector<long> ids)
 {
-  std::vector<std::unique_ptr<waypoint>> waypoints;
+  std::vector<waypoint> waypoints;
   if (ids.empty())
     return waypoints;
   work tx(*connection);
@@ -504,24 +592,24 @@ std::vector<std::unique_ptr<ItineraryPgDao::waypoint>>
       itinerary_id,
       ids_sql);
   for (const auto &r : result) {
-    std::unique_ptr<waypoint> wpt(new waypoint);
-    wpt->id.first = r["id"].to(wpt->id.second);
-    wpt->name.first = r["name"].to(wpt->name.second);
-    r["lng"].to(wpt->longitude);
-    r["lat"].to(wpt->latitude);
+    waypoint wpt;
+    wpt.id.first = r["id"].to(wpt.id.second);
+    wpt.name.first = r["name"].to(wpt.name.second);
+    r["lng"].to(wpt.longitude);
+    r["lat"].to(wpt.latitude);
     std::string s;
-    if ((wpt->time.first = r["time"].to(s))) {
+    if ((wpt.time.first = r["time"].to(s))) {
       DateTime time(s);
-      wpt->time.second = time.time_tp();
+      wpt.time.second = time.time_tp();
     }
-    wpt->altitude.first = r["altitude"].to(wpt->altitude.second);
-    wpt->symbol.first = r["symbol"].to(wpt->symbol.second);
-    wpt->comment.first = r["comment"].to(wpt->comment.second);
-    wpt->description.first = r["description"].to(wpt->description.second);
-    wpt->color.first = r["color"].to(wpt->color.second);
-    wpt->type.first = r["type"].to(wpt->type.second);
-    wpt->avg_samples.first = r["avg_samples"].to(wpt->avg_samples.second);
-    waypoints.push_back(std::move(wpt));
+    wpt.altitude.first = r["altitude"].to(wpt.altitude.second);
+    wpt.symbol.first = r["symbol"].to(wpt.symbol.second);
+    wpt.comment.first = r["comment"].to(wpt.comment.second);
+    wpt.description.first = r["description"].to(wpt.description.second);
+    wpt.color.first = r["color"].to(wpt.color.second);
+    wpt.type.first = r["type"].to(wpt.type.second);
+    wpt.avg_samples.first = r["avg_samples"].to(wpt.avg_samples.second);
+    waypoints.push_back(wpt);
   }
   tx.commit();
   return waypoints;
@@ -530,8 +618,10 @@ std::vector<std::unique_ptr<ItineraryPgDao::waypoint>>
 void ItineraryPgDao::create_waypoints(
     work &tx,
     long itinerary_id,
-    std::vector<std::shared_ptr<waypoint>> waypoints)
+    const std::vector<waypoint> &waypoints)
 {
+  if (waypoints.empty())
+    return;
   const std::string ps_name = "create-waypoints";
   const std::string sql =
     "INSERT INTO itinerary_waypoint ("
@@ -544,29 +634,31 @@ void ItineraryPgDao::create_waypoints(
       sql);
   for (const auto &w : waypoints) {
     std::string timestr;
-    if (w->time.first)
-      timestr = DateTime(w->time.second).get_time_as_iso8601_gmt();
+    if (w.time.first)
+      timestr = DateTime(w.time.second).get_time_as_iso8601_gmt();
     tx.exec_prepared(
         ps_name,
         itinerary_id,
-        w->name.first ? &w->name.second : nullptr,
-        w->longitude,
-        w->latitude,
-        w->altitude.first ? &w->altitude.second : nullptr,
-        w->time.first ? &timestr : nullptr,
-        w->comment.first ? &w->comment.second : nullptr,
-        w->description.first ? &w->description.second : nullptr,
-        w->symbol.first ? &w->symbol.second : nullptr,
-        w->color.first ? &w->color.second : nullptr,
-        w->type.first ? &w->type.second : nullptr,
-        w->avg_samples.first ? &w->avg_samples.second : nullptr);
+        w.name.first ? &w.name.second : nullptr,
+        w.longitude,
+        w.latitude,
+        w.altitude.first ? &w.altitude.second : nullptr,
+        w.time.first ? &timestr : nullptr,
+        w.comment.first ? &w.comment.second : nullptr,
+        w.description.first ? &w.description.second : nullptr,
+        w.symbol.first ? &w.symbol.second : nullptr,
+        w.color.first ? &w.color.second : nullptr,
+        w.type.first ? &w.type.second : nullptr,
+        w.avg_samples.first ? &w.avg_samples.second : nullptr);
   }
 }
 
 void ItineraryPgDao::create_route_points(
     work &tx,
-    std::shared_ptr<route> route)
+    route &route)
 {
+  if (route.points.empty())
+    return;
   const std::string ps_name = "create-route-points";
   const std::string sql =
     "INSERT INTO itinerary_route_point "
@@ -574,92 +666,98 @@ void ItineraryPgDao::create_route_points(
     "comment, description, symbol) "
     "VALUES ($1, ST_SetSRID(ST_POINT($2, $3),4326), $4, $5, $6, $7, $8) "
     "RETURNING id";
-  for (const auto &p : route->points) {
+  for (auto &p : route.points) {
     auto r = tx.exec_params1(
         sql,
-        route->id.first ? &route->id.second : nullptr,
-        p->longitude,
-        p->latitude,
-        p->altitude.first ? &p->altitude.second : nullptr,
-        p->name.first ? &p->name.second : nullptr,
-        p->comment.first ? &p->comment.second : nullptr,
-        p->description.first ? &p->description.second : nullptr,
-        p->symbol.first ? &p->symbol.second : nullptr);
-    p->id.first = r["id"].to(p->id.second);
+        route.id.first ? &route.id.second : nullptr,
+        p.longitude,
+        p.latitude,
+        p.altitude.first ? &p.altitude.second : nullptr,
+        p.name.first ? &p.name.second : nullptr,
+        p.comment.first ? &p.comment.second : nullptr,
+        p.description.first ? &p.description.second : nullptr,
+        p.symbol.first ? &p.symbol.second : nullptr);
+    p.id.first = r["id"].to(p.id.second);
   }
 }
 
 void ItineraryPgDao::create_routes(
     work &tx,
     long itinerary_id,
-    std::vector<std::shared_ptr<route>> routes)
+    std::vector<route> &routes)
 {
+  if (routes.empty())
+    return;
   const std::string ps_name = "create-routes";
   const std::string sql =
     "INSERT INTO itinerary_route "
     "(itinerary_id, name, color, distance, ascent, descent, lowest, highest) "
     "VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id";
-  for (const auto &r : routes) {
+  for (auto &r : routes) {
     auto result = tx.exec_params1(
         sql,
         itinerary_id,
-        r->name.first ? &r->name.second : nullptr,
-        r->color.first ? &r->color.second : nullptr,
-        r->distance.first ? &r->distance.second : nullptr,
-        r->ascent.first ? &r->ascent.second : nullptr,
-        r->descent.first ? &r->descent.second : nullptr,
-        r->lowest.first ? &r->lowest.second : nullptr,
-        r->highest.first ? &r->highest.second : nullptr);
-    r->id.first = result["id"].to(r->id.second);
+        r.name.first ? &r.name.second : nullptr,
+        r.color.first ? &r.color.second : nullptr,
+        r.distance.first ? &r.distance.second : nullptr,
+        r.ascent.first ? &r.ascent.second : nullptr,
+        r.descent.first ? &r.descent.second : nullptr,
+        r.lowest.first ? &r.lowest.second : nullptr,
+        r.highest.first ? &r.highest.second : nullptr);
+    r.id.first = result["id"].to(r.id.second);
     create_route_points(tx, r);
   }
 }
 
 void ItineraryPgDao::create_track_points(
     work &tx,
-    std::shared_ptr<track_segment> segment)
+    track_segment &segment)
 {
+  if (segment.points.empty())
+    return;
   const std::string ps_name = "create-track-points";
   const std::string sql =
     "INSERT INTO itinerary_track_point "
     "(itinerary_track_segment_id, geog, time, hdop, altitude) "
     "VALUES ($1, ST_SetSRID(ST_POINT($2, $3),4326), $4, $5, $6) "
     "RETURNING id";
-  for (const auto &p : segment->points) {
+  for (auto &p : segment.points) {
     std::string timestr;
-    if (p->time.first)
-      timestr = DateTime(p->time.second).get_time_as_iso8601_gmt();
+    if (p.time.first)
+      timestr = DateTime(p.time.second).get_time_as_iso8601_gmt();
     auto r = tx.exec_params1(
         sql,
-        segment->id.first ? &segment->id.second : nullptr,
-        p->longitude,
-        p->latitude,
-        p->time.first ? &timestr : nullptr,
-        p->hdop.first ? &p->hdop.second : nullptr,
-        p->altitude.first ? &p->altitude.second : nullptr);
-    p->id.first = r["id"].to(p->id.second);
+        segment.id.first ? &segment.id.second : nullptr,
+        p.longitude,
+        p.latitude,
+        p.time.first ? &timestr : nullptr,
+        p.hdop.first ? &p.hdop.second : nullptr,
+        p.altitude.first ? &p.altitude.second : nullptr);
+    p.id.first = r["id"].to(p.id.second);
   }
 }
 
 void ItineraryPgDao::create_track_segments(
     work &tx,
-    std::shared_ptr<track> track)
+    track &track)
 {
+  if (track.segments.empty())
+    return;
   const std::string ps_name = "create-track-segments";
   const std::string sql =
     "INSERT INTO itinerary_track_segment "
     "(itinerary_track_id, distance, ascent, descent, lowest, highest) "
     "VALUES ($1, $2, $3, $4, $5, $6) RETURNING id";
-  for (const auto &seg : track->segments) {
+  for (auto &seg : track.segments) {
     auto r = tx.exec_params1(
         sql,
-        track->id.first ? &track->id.second : nullptr,
-        seg->distance.first ? &seg->distance.second : nullptr,
-        seg->ascent.first ? &seg->ascent.second : nullptr,
-        seg->descent.first ? &seg->descent.second : nullptr,
-        seg->lowest.first ? &seg->lowest.second : nullptr,
-        seg->highest.first ? &seg->highest.second : nullptr);
-    seg->id.first = r["id"].to(seg->id.second);
+        track.id.first ? &track.id.second : nullptr,
+        seg.distance.first ? &seg.distance.second : nullptr,
+        seg.ascent.first ? &seg.ascent.second : nullptr,
+        seg.descent.first ? &seg.descent.second : nullptr,
+        seg.lowest.first ? &seg.lowest.second : nullptr,
+        seg.highest.first ? &seg.highest.second : nullptr);
+    seg.id.first = r["id"].to(seg.id.second);
     create_track_points(tx, seg);
   }
 }
@@ -667,25 +765,27 @@ void ItineraryPgDao::create_track_segments(
 void ItineraryPgDao::create_tracks(
     work &tx,
     long itinerary_id,
-    std::vector<std::shared_ptr<track>> tracks)
+    std::vector<track> &tracks)
 {
+  if (tracks.empty())
+    return;
   const std::string ps_name = "create-tracks";
   const std::string sql =
     "INSERT INTO itinerary_track "
     "(itinerary_id, name, color, distance, ascent, descent, lowest, highest) "
     "VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id";
-  for (const auto &t : tracks) {
+  for (auto &t : tracks) {
     auto r = tx.exec_params1(
         sql,
         itinerary_id,
-        t->name.first ? &t->name.second : nullptr,
-        t->color.first ? &t->color.second : nullptr,
-        t->distance.first ? &t->distance.second : nullptr,
-        t->ascent.first ? &t->ascent.second : nullptr,
-        t->descent.first ? &t->descent.second : nullptr,
-        t->lowest.first ? &t->lowest.second : nullptr,
-        t->highest.first ? &t->highest.second : nullptr);
-    t->id.first = r["id"].to(t->id.second);
+        t.name.first ? &t.name.second : nullptr,
+        t.color.first ? &t.color.second : nullptr,
+        t.distance.first ? &t.distance.second : nullptr,
+        t.ascent.first ? &t.ascent.second : nullptr,
+        t.descent.first ? &t.descent.second : nullptr,
+        t.lowest.first ? &t.lowest.second : nullptr,
+        t.highest.first ? &t.highest.second : nullptr);
+    t.id.first = r["id"].to(t.id.second);
     create_track_segments(tx, t);
   }
 }
@@ -701,7 +801,7 @@ void ItineraryPgDao::create_tracks(
 void ItineraryPgDao::create_itinerary_features(
     std::string user_id,
     long itinerary_id,
-    const ItineraryPgDao::itinerary_features &features)
+    ItineraryPgDao::itinerary_features &features)
 {
   work tx(*connection);
   try {
@@ -711,7 +811,7 @@ void ItineraryPgDao::create_itinerary_features(
     create_tracks(tx, itinerary_id, features.tracks);
     tx.commit();
   } catch (const std::exception &e) {
-    std::cerr << "Exception whilst saving itinerary featues: "
+    std::cerr << "Exception whilst saving itinerary features: "
               << e.what();
     throw;
   }

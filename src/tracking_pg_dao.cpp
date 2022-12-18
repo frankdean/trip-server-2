@@ -21,6 +21,9 @@
 */
 #include "../config.h"
 #include "tracking_pg_dao.hpp"
+#ifdef HAVE_GDAL
+#include "elevation_tile.hpp"
+#endif
 #include "../trip-server-common/src/date_utils.hpp"
 #include <iomanip>
 #include <locale>
@@ -35,6 +38,10 @@ using namespace pqxx;
 using json = nlohmann::json;
 
 std::mutex TrackPgDao::location_search_query_params::mutex;
+
+#ifdef HAVE_GDAL
+extern ElevationService *elevation_service;
+#endif
 
 namespace fdsd {
 namespace trip {
@@ -388,24 +395,24 @@ TrackPgDao::tracked_locations_result
 
   r = tx.exec(os.str());
   for (result::const_iterator i = r.begin(); i != r.end(); ++i) {
-    std::unique_ptr<tracked_location> loc(new tracked_location);
-    loc->id.first = i["id"].to(loc->id.second);
-    i["lng"].to(loc->longitude);
-    i["lat"].to(loc->latitude);
+    tracked_location loc;
+    loc.id.first = i["id"].to(loc.id.second);
+    i["lng"].to(loc.longitude);
+    i["lat"].to(loc.latitude);
     std::string date_str;
-    loc->time_point = dao_helper::convert_libpq_date_tz(i["time"].as<std::string>());
-    loc->hdop.first = i["hdop"].to(loc->hdop.second);
-    loc->altitude.first = i["altitude"].to(loc->altitude.second);
-    loc->speed.first = i["speed"].to(loc->speed.second);
-    loc->bearing.first = i["bearing"].to(loc->bearing.second);
-    loc->satellite_count.first = i["sat"].to(loc->satellite_count.second);
+    loc.time_point = dao_helper::convert_libpq_date_tz(i["time"].as<std::string>());
+    loc.hdop.first = i["hdop"].to(loc.hdop.second);
+    loc.altitude.first = i["altitude"].to(loc.altitude.second);
+    loc.speed.first = i["speed"].to(loc.speed.second);
+    loc.bearing.first = i["bearing"].to(loc.bearing.second);
+    loc.satellite_count.first = i["sat"].to(loc.satellite_count.second);
     // This fails to compile with C++17, with a not-assignable message, but I
     // don't see why it isn't assignable.
     // <std::optional<int>> satellite_count  = satellite.as<std::optional<int>>();
-    loc->provider.first = i["provider"].to(loc->provider.second);
-    loc->battery.first = i["battery"].to(loc->battery.second);
-    loc->note.first = i["note"].to(loc->note.second);
-    retval.locations.push_back(std::move(loc));
+    loc.provider.first = i["provider"].to(loc.provider.second);
+    loc.battery.first = i["battery"].to(loc.battery.second);
+    loc.note.first = i["note"].to(loc.note.second);
+    retval.locations.push_back(loc);
   }
   tx.commit();
   return retval;
@@ -704,20 +711,22 @@ TrackPgDao::tracked_locations_result TrackPgDao::get_tracked_locations(
     const location_search_query_params& location_search,
     bool fill_distance_and_elevation_values) const {
 
-  if (fill_distance_and_elevation_values) {
-    // TODO implement fill_distance_and_elevation_values
-    throw std::runtime_error("Filling in distance and elevation values has not "
-                             "been implemented");
-  }
-
-  if (location_search.nickname.empty()) {
+  TrackPgDao::tracked_locations_result retval =
+    (location_search.nickname.empty()) ?
     // std::cout << "Nickname is empty, searching for this user's tracks\n";
-    return get_tracked_locations_for_user(location_search);
-  } else {
+    get_tracked_locations_for_user(location_search) :
     // std::cout << "Nickname is not empty, searching for the tracks belonging "
-    // "to \"" << location_search.nickname << "\"\n";
-    return get_shared_tracked_locations(location_search);
+    get_shared_tracked_locations(location_search);
+
+#ifdef HAVE_GDAL
+  if (fill_distance_and_elevation_values) {
+    elevation_service->fill_elevations(
+        retval.locations.begin(),
+        retval.locations.end());
   }
+#endif
+
+  return retval;
 }
 
 TrackPgDao::nickname_result TrackPgDao::get_nicknames(std::string user_id)

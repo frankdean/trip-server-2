@@ -92,7 +92,7 @@ public:
     long total_count;
     std::time_t date_from;
     std::time_t date_to;
-    std::vector<std::unique_ptr<tracked_location>> locations;
+    std::vector<tracked_location> locations;
   };
 
   struct tracked_location_query_params :
