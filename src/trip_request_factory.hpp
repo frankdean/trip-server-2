@@ -22,6 +22,7 @@
 #ifndef TRIP_REQUEST_FACTORY_HPP
 #define TRIP_REQUEST_FACTORY_HPP
 
+#include "trip_config.hpp"
 #include "../trip-server-common/src/http_request_factory.hpp"
 
 namespace fdsd
@@ -34,9 +35,13 @@ class TripConfig;
 class TripRequestFactory : public web::HTTPRequestFactory {
 private:
   static fdsd::utils::Logger logger;
+  std::shared_ptr<TripConfig> config;
 public:
   TripRequestFactory(std::shared_ptr<TripConfig> config);
   virtual ~TripRequestFactory() {}
+  virtual long get_maximum_request_size() const override {
+    return config->get_maximum_request_size();
+  }
 protected:
   virtual std::string get_session_id_cookie_name() const override;
   virtual std::string get_user_id(std::string session_id) const override;

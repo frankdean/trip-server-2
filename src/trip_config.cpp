@@ -32,6 +32,7 @@ TripConfig::TripConfig(std::string filename) :
   db_connect_string(),
   worker_count(20),
   pg_pool_size(24),
+  maximum_request_size(1024 * 1024 * 12),
   providers(),
   tile_cache_max_age(),
   tile_count_frequency(),
@@ -62,6 +63,8 @@ TripConfig::TripConfig(std::string filename) :
         if (gpx["indent"])
           gpx_indent = gpx["indent"].as<int>();
       }
+      if (app["maxFileUploadSize"])
+        maximum_request_size = app["maxFileUploadSize"].as<long>();
       if (app["averageFlatSpeedKph"])
         default_average_kmh_hiking_speed =
           app["averageFlatSpeedKph"].as<double>();

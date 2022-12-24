@@ -44,6 +44,7 @@
 #include "trip_request_handler.hpp"
 // #include "trip_application.hpp"
 #include "../trip-server-common/src/http_request.hpp"
+#include "../trip-server-common/src/http_response.hpp"
 #include <assert.h>
 #include <cstring>
 #include <iostream>
@@ -56,7 +57,8 @@ using namespace fdsd::utils;
 Logger TripRequestFactory::logger("TripRequestFactory", std::clog, Logger::info);
 
 TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
-  : HTTPRequestFactory(config->get_application_prefix_url())
+  : HTTPRequestFactory(config->get_application_prefix_url()),
+    config(config)
 {
   // pre_login_handlers.push_back(
   //     std::make_shared<TripCssHandler>(

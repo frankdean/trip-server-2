@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.0.0-alpha.18],[frank.dean@fdsd.co.uk])
+AC_INIT([trip],[2.0.0-alpha.19],[frank.dean@fdsd.co.uk])
 BOOTSTRAP_VERSION='5.2.3'
 OPENLAYERS_VERSION='7.1.0'
 AC_COPYRIGHT([Copyright (C) 2022 Frank Dean])

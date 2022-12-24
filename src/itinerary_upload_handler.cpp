@@ -355,7 +355,7 @@ void ItineraryUploadHandler::handle_authenticated_request(
 
   try {
     // std::cout << "Upload handler for itinerary ID: " << itinerary_id << "\n";
-    if (action.empty()) {
+    if (action.empty() && request.method == HTTPMethod::get) {
       build_form(request, response);
       return;
     } else if (action == "upload") {
@@ -376,6 +376,8 @@ void ItineraryUploadHandler::handle_authenticated_request(
       } catch (const std::out_of_range &e) {
         std::cerr << "No file uploaded\n";
       }
+    } else if (action != "cancel") {
+      throw BadRequestException("Invalid GPX upload request");
     }
     redirect(request, response,
              get_uri_prefix() + "/itinerary?id=" + std::to_string(itinerary_id) + "&active-tab=features");

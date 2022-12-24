@@ -1196,9 +1196,11 @@ http://localhost:8080/trip/app/login | grep SESSION_ID
 Fetching a single page with @code{curl} using the session ID obtained
 from the previous command:
 
-@item
+@example
 $ curl -H 'Cookie: TRIP_SESSION_ID=b3571314-d5c4-4690-8164-8384fd748faa' \
 'http://localhost:8080/trip/app/tracks'
+@end example
+
 @end enumerate
 
 @node Load Testing,  , Testing with Curl, Testing and Developing Trip

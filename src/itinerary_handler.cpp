@@ -559,7 +559,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
     response.content
       <<
       // Label for menu item to upload a GPX (GPS data) file containing routes, tracks and waypoints
-      "                <li><button class=\"dropdown-item\" accesskey=\"u\" formmethod=\"post\" formaction=\"" << get_uri_prefix() << "/itinerary/upload\">" << translate("Upload GPX") << "</button></li> <!-- writable version -->\n"
+      "                <li><button class=\"dropdown-item\" accesskey=\"u\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary/upload?id=" << itinerary_id << "\">" << translate("Upload GPX") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n";
   }
   response.content
