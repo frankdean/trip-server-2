@@ -29,6 +29,7 @@ using namespace fdsd::utils;
 using namespace fdsd::web;
 using namespace fdsd::trip;
 
+const std::string SessionPgDao::coordinate_format_key = "coordinate_format";
 const std::string SessionPgDao::tracks_query_key = "tracks";
 
 const std::string SessionPgDao::insert_session_ps_name = "session_insert";

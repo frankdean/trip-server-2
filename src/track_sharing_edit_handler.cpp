@@ -152,7 +152,7 @@ void TrackSharingEditHandler::build_form(
     // Label for a save button
         "        <button id=\"btn-save\" type=\"submit\" name=\"action\" value=\"save\" accesskey=\"s\" class=\"btn btn-lg btn-primary\">" << translate("Save") << "</button>\n"
     // Label for a cancel button
-        "        <button id=\"btn-cancel\" type=\"submit\" name=\"action\" value=\"cancel\" accesskey=\"c\" class=\"btn btn-lg btn-danger\">" << translate("Cancel") << "</button>\n"
+        "        <button id=\"btn-cancel\" type=\"submit\" name=\"action\" value=\"cancel\" accesskey=\"c\" class=\"btn btn-lg btn-danger\" formnovalidate>" << translate("Cancel") << "</button>\n"
     // Label for a reset button
     "        <button id=\"btn-reset\" type=\"reset\" accesskey=\"r\" class=\"btn btn-lg btn-danger\">Reset</button>\n"
     "      </div>\n"

@@ -2,9 +2,11 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.0.0-alpha.19],[frank.dean@fdsd.co.uk])
+AC_INIT([trip],[2.0.0-alpha.20],[frank.dean@fdsd.co.uk])
 BOOTSTRAP_VERSION='5.2.3'
 OPENLAYERS_VERSION='7.1.0'
+PROJ4JS_VERSION='2.8.0'
+OLC_VERSION='1.0.4'
 AC_COPYRIGHT([Copyright (C) 2022 Frank Dean])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign dist-xz subdir-objects info-in-builddir])
 AC_CONFIG_SRCDIR([src/trip_request_factory.cpp])
@@ -175,6 +177,10 @@ AC_SUBST([BOOTSTRAP_VERSION])
 AC_DEFINE_UNQUOTED([BOOTSTRAP_VERSION], ["${BOOTSTRAP_VERSION}"], [The version of Bootstrap])
 AC_SUBST([OPENLAYERS_VERSION])
 AC_DEFINE_UNQUOTED([OPENLAYERS_VERSION], ["${OPENLAYERS_VERSION}"], [The version of OpenLayers])
+AC_SUBST([PROJ4JS_VERSION])
+AC_DEFINE_UNQUOTED([PROJ4JS_VERSION], ["${PROJ4JS_VERSION}"], [The version of Proj4js])
+AC_SUBST([OLC_VERSION])
+AC_DEFINE_UNQUOTED([OLC_VERSION], ["${OLC_VERSION}"], [The version of Open Location Code])
 
 AC_CONFIG_FILES([Makefile po/Makefile.in
 	         doc/Makefile

@@ -74,7 +74,7 @@ void TrackingMapHandler::handle_authenticated_request(
     // Save the query parameters
     SessionPgDao session_dao;
     TrackPgDao::location_search_query_params q(get_user_id(),
-                                               request.query_params);
+                                               request.get_query_params());
     json j = q;
     // This is user supplied data, so serialization could fail
     try {

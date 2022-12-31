@@ -111,7 +111,7 @@ void TrackingDownloadHandler::handle_authenticated_request(
   TrackPgDao::location_search_query_params q;
   // q.user_id = get_user_id();
   q = TrackPgDao::location_search_query_params(get_user_id(),
-                                               request.query_params);
+                                               request.get_query_params());
   SessionPgDao session_dao;
   try {
     json j = q;

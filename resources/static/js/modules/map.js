@@ -420,9 +420,12 @@ class TripMap {
     this.currentProviderIndex = providerIndex;
     const newTileLayer = this.createMapLayer(providerIndex);
     this.map.setLayers([newTileLayer]);
-    if (this.trackLayer) {
+    if (this.trackLayer)
       this.map.addLayer(this.trackLayer);
-    }
+    if (this.routeLayer)
+      this.map.addLayer(this.routeLayer);
+    if (this.waypointLayer)
+      this.map.addLayer(this.waypointLayer);
   }
 
   setTrackLayer(trackLayer) {

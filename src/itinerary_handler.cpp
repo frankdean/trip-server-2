@@ -489,7 +489,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
     response.content
       <<
       // Label for menu item to view waypoint details
-      "                <li><a class=\"dropdown-item opacity-50\">" << translate("Waypoint") << "</a></li> <!-- read-only version -->\n"
+      "                <li><button class=\"dropdown-item\" name=\"action\" value=\"attributes\" formmethod=\"post\">" << translate("Waypoint") << "</button></li> <!-- read-only version -->\n"
       // Label for menu item to view details of a path, which is either a selected route or track
       "                <li><a class=\"dropdown-item opacity-50\">" << translate("Path") << "</a></li> <!-- read-only version -->\n";
   }
@@ -510,10 +510,10 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
     response.content
       <<
       // Label for menu item to create a new itinerary waypoint
-      "                <li><a class=\"dropdown-item  opacity-50\">" << translate("Add waypoint") << "</a></li> <!-- writable version -->\n"
+      "                <li><a class=\"dropdown-item\" href=\"" << get_uri_prefix() << "/itinerary-wpt-edit?itineraryId=" << itinerary_id << "\">" << translate("Add waypoint") << "</a></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n"
-      // Label for menu item to edit some or all of the details of a selected route, track or waypoint
-      "                <li><a class=\"dropdown-item opacity-50\">" << translate("Attributes") << "</a></li> <!-- writable version -->\n"
+      // Label for menu item to edit some or all of the details of a single selected route, track or waypoint
+      "                <li><button class=\"dropdown-item\" formmethod=\"post\" name=\"action\" value=\"attributes\">" << translate("Attributes") << "</button></li> <!-- writable version -->\n"
       // Label for menu item to edit the segments and points belonging to a route or track
       "                <li><a class=\"dropdown-item opacity-50\">" << translate("Path") << "</a></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n"
@@ -529,8 +529,12 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
   if (!read_only) {
     response.content
       <<
+      "                <li><button class=\"dropdown-item\" accesskey=\"l\" formmethod=\"post\" name=\"action\" value=\"auto-color\""
+      // Confirmation dialog text when converting one or more tracks to routes or vice-versa
+      " onclick=\"return confirm('" << translate("Automatically assign colors to selected tracks and routes?")
+      << "');\">"
       // Label for menu item to set a sequence of colors to the selected routes and tracks
-      "                <li><a class=\"dropdown-item opacity-50\">" << translate("Assign colors to routes and tracks") << "</a></li> <!-- writable version -->\n"
+      << translate("Assign colors to routes and tracks") << "</button></li> <!-- writable version -->\n"
       "                <li><button class=\"dropdown-item\" accesskey=\"v\" formmethod=\"post\" name=\"action\" value=\"convert\" "
       // Confirmation dialog text when converting one or more tracks to routes or vice-versa
       "onclick=\"return confirm('" << translate("Convert selected tracks and routes?") << "');\">"
@@ -638,11 +642,21 @@ void ItineraryHandler::convertTracksToRoutes(
                                 features);
 }
 
+void ItineraryHandler::auto_color_paths(
+    const web::HTTPServerRequest& request)
+{
+  auto selected_features = get_selected_feature_ids(request);
+  if (selected_features.routes.empty() && selected_features.tracks.empty())
+    return;
+  ItineraryPgDao dao;
+  dao.auto_color_paths(get_user_id(), itinerary_id, selected_features);
+}
+
 void ItineraryHandler::handle_authenticated_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
-  const std::string action = request.get_post_param("action");
+  const std::string action = request.get_param("action");
   // std::cout << "Action: \"" << action << "\"\n";
   // auto pp = request.get_post_params();
   // for (auto const &p : pp) {
@@ -658,6 +672,18 @@ void ItineraryHandler::handle_authenticated_request(
   } else if (action == "convert") {
     active_tab = features_tab;
     convertTracksToRoutes(request);
+  } else if (action == "auto-color") {
+    active_tab = features_tab;
+    auto_color_paths(request);
+  } else if (action == "attributes") {
+    auto features = get_selected_feature_ids(request);
+    if (!features.waypoints.empty()) {
+      long waypoint_id = features.waypoints.front();
+      std::ostringstream url;
+      url << get_uri_prefix() << "/itinerary-wpt-edit?itineraryId=" << itinerary_id
+          << "&waypointId=" << waypoint_id;
+      redirect(request, response, url.str());
+    }
   }
   auto itinerary = dao.get_itinerary_details(get_user_id(), itinerary_id);
   if (!itinerary.first)

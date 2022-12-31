@@ -22,6 +22,8 @@ trip_server_SOURCES = \
 	itinerary_simplify_handler.hpp \
 	itinerary_upload_handler.cpp \
 	itinerary_upload_handler.hpp \
+	itinerary_waypoint_edit_handler.cpp \
+	itinerary_waypoint_edit_handler.hpp \
 	main.cpp \
 	session_pg_dao.cpp \
 	session_pg_dao.hpp \

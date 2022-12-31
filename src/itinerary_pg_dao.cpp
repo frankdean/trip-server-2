@@ -812,7 +812,7 @@ void ItineraryPgDao::create_itinerary_features(
     tx.commit();
   } catch (const std::exception &e) {
     std::cerr << "Exception whilst saving itinerary features: "
-              << e.what();
+              << e.what() << '\n';
     throw;
   }
 }
@@ -857,6 +857,33 @@ void ItineraryPgDao::validate_user_itinerary_modification_access(std::string use
   tx.commit();
 }
 
+/**
+ * Validates that the specified user_id has read access to the specified
+ * itinerary.
+ *
+ * \param existing transaction context.  This method does not commit the transaction.
+ * \param user_id the ID of the user to validate.
+ * \param itinerary_id the ID of the itinerary to check.
+ *
+ * \throws ItineraryPgDao::not_authorized if the user is not authorized.
+ */
+void ItineraryPgDao::validate_user_itinerary_read_access(work &tx,
+                                                           std::string user_id,
+                                                           long itinerary_id)
+{
+  auto r = tx.exec_params1(
+      "SELECT sum(count) FROM ("
+      "SELECT COUNT(*) FROM itinerary WHERE user_id=$1 AND id=$2 "
+      "UNION ALL "
+      "SELECT COUNT (*) FROM itinerary_sharing "
+      "WHERE active=true AND itinerary_id=$2 AND shared_to_id=$1) as q",
+      user_id,
+      itinerary_id
+    );
+  if (r[0].as<long>() != 1)
+    throw NotAuthorized();
+}
+
 void ItineraryPgDao::delete_features(
     std::string user_id,
     long itinerary_id,
@@ -898,7 +925,225 @@ void ItineraryPgDao::delete_features(
     tx.commit();
   } catch (const std::exception &e) {
     std::cerr << "Exception whilst deleting itinerary featues: "
-              << e.what();
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+std::vector<std::pair<std::string, std::string>>
+    ItineraryPgDao::get_georef_formats()
+{
+  std::vector<std::pair<std::string, std::string>> retval;
+  work tx(*connection);
+  try {
+    result r = tx.exec("SELECT key, value FROM georef_format ORDER BY ord");
+    for (auto i : r) {
+      std::string key;
+      i["key"].to(key);
+      std::string value;
+      i["value"].to(value);
+      retval.push_back(std::make_pair(key, value));
+    }
+  } catch (const std::exception &e) {
+    std::cerr << "Exception whilst fetching list of georef_format: "
+              << e.what() << '\n';
+    throw;
+  }
+  return retval;
+}
+
+std::vector<std::pair<std::string, std::string>>
+    ItineraryPgDao::get_waypoint_symbols()
+{
+  std::vector<std::pair<std::string, std::string>> retval;
+  work tx(*connection);
+  try {
+    result r = tx.exec("SELECT key, value FROM waypoint_symbol ORDER BY value");
+    for (auto i : r) {
+      std::string key = i["key"].as<std::string>();
+      std::string value = i["value"].as<std::string>();
+      retval.push_back(std::make_pair(key, value));
+    }
+  } catch (const std::exception &e) {
+    std::cerr << "Exception whilst fetching list of waypoint_symbol: "
+              << e.what() << '\n';
+    throw;
+  }
+  return retval;
+}
+
+/**
+ * \return a detailed waypoint object containing all the flat attributes.
+ */
+ItineraryPgDao::waypoint ItineraryPgDao::get_waypoint(
+    std::string user_id,
+    long itinerary_id,
+    long waypoint_id)
+{
+  work tx(*connection);
+  validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+  try {
+    const std::string sql =
+      "SELECT id, name, "
+      "ST_X(geog::geometry) as lng, ST_Y(geog::geometry) as lat, altitude, "
+      "time, symbol, comment, description, color, type, avg_samples "
+      "FROM itinerary_waypoint WHERE itinerary_id=$1 AND id=$2";
+    row r = tx.exec_params1(sql,
+                               itinerary_id,
+                               waypoint_id);
+    waypoint wpt;
+    wpt.id.first = r["id"].to(wpt.id.second);
+    wpt.name.first = r["name"].to(wpt.name.second);
+    r["lng"].to(wpt.longitude);
+    r["lat"].to(wpt.latitude);
+    std::string s;
+    if ((wpt.time.first = r["time"].to(s))) {
+      DateTime time(s);
+      wpt.time.second = time.time_tp();
+    }
+    wpt.altitude.first = r["altitude"].to(wpt.altitude.second);
+    wpt.symbol.first = r["symbol"].to(wpt.symbol.second);
+    wpt.comment.first = r["comment"].to(wpt.comment.second);
+    wpt.description.first = r["description"].to(wpt.description.second);
+    wpt.color.first = r["color"].to(wpt.color.second);
+    wpt.type.first = r["type"].to(wpt.type.second);
+    wpt.avg_samples.first = r["avg_samples"].to(wpt.avg_samples.second);
+    tx.commit();
+    return wpt;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception whilst fetching waypoint: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+void ItineraryPgDao::save(std::string user_id,
+                          long itinerary_id,
+                          const waypoint &wpt)
+{
+  work tx(*connection);
+  try {
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+
+    std::string time_str;
+    if (wpt.time.first)
+      time_str = DateTime(wpt.time.second).get_time_as_iso8601_gmt();
+
+    if (wpt.id.first) {
+      tx.exec_params(
+          "UPDATE itinerary_waypoint SET name=$3, "
+          "geog=ST_SetSRID(ST_POINT($4, $5),4326), altitude=$6, time=$7, "
+          "symbol=$8, comment=$9, description=$10, avg_samples=$11, type=$12, "
+          "color=$13 WHERE itinerary_id=$1 AND id=$2",
+          itinerary_id,
+          wpt.id.second,
+          wpt.name.first && !wpt.name.second.empty() ? &wpt.name.second : nullptr ,
+          wpt.longitude,
+          wpt.latitude,
+          wpt.altitude.first ? &wpt.altitude.second : nullptr,
+          time_str.empty() ? nullptr : &time_str,
+          wpt.symbol.first && !wpt.symbol.second.empty() ? &wpt.symbol.second : nullptr,
+          wpt.comment.first && !wpt.comment.second.empty() ? &wpt.comment.second : nullptr,
+          wpt.description.first && !wpt.description.second.empty() ? &wpt.description.second : nullptr,
+          wpt.avg_samples.first ? &wpt.avg_samples.second : nullptr,
+          wpt.type.first && !wpt.type.second.empty() ? &wpt.type.second : nullptr,
+          wpt.color.first && !wpt.color.second.empty() ? &wpt.color.second : nullptr);
+    } else {
+      tx.exec_params(
+          "INSERT INTO itinerary_waypoint (itinerary_id, name, geog, altitude, "
+          "time, symbol, comment, description, avg_samples, type, color) "
+          "VALUES ($1, $2, ST_SetSRID(ST_POINT($3, $4),4326), $5, $6, $7, $8, "
+          "$9, $10, $11, $12)",
+          itinerary_id,
+          wpt.name.first && !wpt.name.second.empty() ? &wpt.name.second : nullptr ,
+          wpt.longitude,
+          wpt.latitude,
+          wpt.altitude.first ? &wpt.altitude.second : nullptr,
+          time_str.empty() ? nullptr : &time_str,
+          wpt.symbol.first && !wpt.symbol.second.empty() ? &wpt.symbol.second : nullptr,
+          wpt.comment.first && !wpt.comment.second.empty() ? &wpt.comment.second : nullptr,
+          wpt.description.first && !wpt.description.second.empty() ? &wpt.description.second : nullptr,
+          wpt.avg_samples.first ? &wpt.avg_samples.second : nullptr,
+          wpt.type.first && !wpt.type.second.empty() ? &wpt.type.second : nullptr,
+          wpt.color.first && !wpt.color.second.empty() ? &wpt.color.second : nullptr);
+    }
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception whilst saving waypoint: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+void ItineraryPgDao::auto_color_paths(std::string user_id,
+                                      long itinerary_id,
+                                      const selected_feature_ids &selected)
+{
+  std::vector<std::string> colors;
+  work tx(*connection);
+  try {
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    connection->prepare(
+        "auto-color-track",
+        "UPDATE itinerary_track SET color=$3 WHERE itinerary_id=$1 AND id=$2"
+      );
+    connection->prepare(
+        "auto-color-route",
+        "UPDATE itinerary_route SET color=$3 WHERE itinerary_id=$1 AND id=$2"
+      );
+    auto color_result = tx.exec_params("SELECT key FROM path_color ORDER BY key");
+    for (const auto &r : color_result)
+      colors.push_back(r[0].as<std::string>());
+    if (colors.empty())
+      return;
+
+    // Fetch the routes ordered by name so that we assign the colors in name order
+    std::vector<long> sorted_routes;
+    auto route_result = tx.exec_params(
+        "SELECT id FROM itinerary_route r "
+        "WHERE itinerary_id=$1 AND r.id=ANY($2) "
+        "ORDER BY name, id",
+        itinerary_id,
+        dao_helper::to_sql_array(selected.routes));
+    for (const auto &r : route_result)
+      sorted_routes.push_back(r[0].as<long>());
+
+    // Fetch the tracks ordered by name so that we assign the colors in name order
+    std::vector<long> sorted_tracks;
+    auto track_result = tx.exec_params(
+        "SELECT id FROM itinerary_track r "
+        "WHERE itinerary_id=$1 AND r.id=ANY($2) "
+        "ORDER BY name, id",
+        itinerary_id,
+        dao_helper::to_sql_array(selected.tracks));
+    for (const auto &r : track_result)
+      sorted_tracks.push_back(r[0].as<long>());
+
+    auto color = colors.begin();
+    for (const auto &id : sorted_routes) {
+      tx.exec_prepared(
+          "auto-color-route",
+          itinerary_id,
+          id,
+          *color);
+      color++;
+      if (color == colors.end())
+        color = colors.begin();
+    }
+    for (const auto &id : sorted_tracks) {
+      tx.exec_prepared(
+          "auto-color-track",
+          itinerary_id,
+          id,
+          *color);
+      color++;
+      if (color == colors.end())
+        color = colors.begin();
+    }
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception whilst auto-assigning colors to paths: "
+              << e.what() << '\n';
     throw;
   }
 }

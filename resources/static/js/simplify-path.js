@@ -129,7 +129,7 @@ class SimplifyMap extends TripMap {
   }
 
   toleranceChangeEvent(event) {
-    self = this;
+    const self = this;
     // console.debug('tolerance change event', this.toleranceInput.value);
     const originalFeature = this.trackSource.getFeatures()[0];
     const simplifiedFeature = this.simplifiedLayer.getSource().getFeatures()[0];

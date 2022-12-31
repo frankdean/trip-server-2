@@ -234,12 +234,29 @@ public:
       get_waypoints(std::string user_id,
                     long itinerary_id,
                     std::vector<long> ids);
+  waypoint get_waypoint(
+      std::string user_id,
+      long itinerary_id,
+      long waypoint_id);
+  void save(std::string user_id,
+            long itinerary_id,
+            const waypoint &wpt);
   void validate_user_itinerary_modification_access(std::string user_id,
                                                    long itinerary_id);
   void delete_features(
       std::string user_id,
       long itinerary_id,
       const selected_feature_ids &features);
+
+  std::vector<std::pair<std::string, std::string>>
+      get_georef_formats();
+
+  std::vector<std::pair<std::string, std::string>>
+      get_waypoint_symbols();
+
+  void auto_color_paths(std::string user_id,
+                        long itinerary_id,
+                        const selected_feature_ids &selected);
 protected:
   void create_waypoints(
       pqxx::work &tx,
@@ -265,6 +282,9 @@ protected:
   void validate_user_itinerary_modification_access(pqxx::work &tx,
                                                    std::string user_id,
                                                    long itinerary_id);
+  void validate_user_itinerary_read_access(pqxx::work &tx,
+                                           std::string user_id,
+                                           long itinerary_id);
 };
 
 /// Allows Argument-depenedent lookup for the nlohmann/json library to find this method

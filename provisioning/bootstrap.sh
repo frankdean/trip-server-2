@@ -279,7 +279,7 @@ if [ -f /etc/debian_version ]; then
 	    libtool gettext valgrind uuid-dev uuid-runtime make nginx apg \
 	    libboost-locale-dev libpugixml-dev autopoint intltool gdb \
 	    libyaml-cpp-dev nlohmann-json3-dev \
-	    docbook2x texlive info texinfo curl
+	    docbook2x texlive info texinfo curl libgdal-dev
 
     if [ "$VB_GUI" == "y" ]; then
 	apt-get install -y lxde

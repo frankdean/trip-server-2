@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: frank.dean@fdsd.co.uk\n"
-"POT-Creation-Date: 2022-12-15 16:35+0000\n"
+"POT-Creation-Date: 2022-12-31 17:46+0000\n"
 "PO-Revision-Date: 2022-10-23 18:06+0100\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: English (British) <(nothing)>\n"
@@ -262,7 +262,7 @@ msgstr "Example:\n"
 
 #. Title for the login page
 #: src/trip_request_handler.cpp:73
-#: trip-server-common/src/http_request_handler.cpp:670
+#: trip-server-common/src/http_request_handler.cpp:692
 msgid "Login"
 msgstr "Login"
 
@@ -337,18 +337,18 @@ msgid_plural "Creating {1} workers"
 msgstr[0] "Creating {1} worker"
 msgstr[1] "Creating {1} workers"
 
-#: trip-server-common/src/http_request_handler.cpp:626
-#: trip-server-common/src/http_request_handler.cpp:636
+#: trip-server-common/src/http_request_handler.cpp:648
+#: trip-server-common/src/http_request_handler.cpp:658
 msgid "Username"
 msgstr "Username"
 
-#: trip-server-common/src/http_request_handler.cpp:648
-#: trip-server-common/src/http_request_handler.cpp:658
+#: trip-server-common/src/http_request_handler.cpp:670
+#: trip-server-common/src/http_request_handler.cpp:680
 msgid "Password"
 msgstr "Password"
 
 #. Message showing the server administrator the URL a browser is being redirected to
-#: trip-server-common/src/http_request_handler.cpp:834
+#: trip-server-common/src/http_request_handler.cpp:856
 msgid "Redirecting to: {1}"
 msgstr "Redirecting to: {1}"
 

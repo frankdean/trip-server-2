@@ -60,7 +60,7 @@ void TrackingRestHandler::handle_authenticated_request(
     response.content << j.dump();
   } else {
     TrackPgDao::location_search_query_params q(get_user_id(),
-                                               request.query_params);
+                                               request.get_query_params());
     q.order = dao_helper::ascending;
     q.page_offset = -1;
     const int max_result_count = 1000;

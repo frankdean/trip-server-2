@@ -73,6 +73,7 @@ class ItineraryHandler : public TripAuthenticatedRequestHandler {
     return retval;
   }
   void convertTracksToRoutes(const web::HTTPServerRequest& request);
+  void auto_color_paths(const web::HTTPServerRequest& request);
 protected:
   virtual void do_preview_request(
       const web::HTTPServerRequest& request,

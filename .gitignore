@@ -50,6 +50,8 @@
 /po/Makevars.template
 /resources/static/bootstrap-*
 /resources/static/openlayers-*
+/resources/static/open-location-code-*
+/resources/static/proj4js-*
 /src/test_geo_utils
 /doc/Makefile.in
 /doc/texinfo.tex

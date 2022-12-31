@@ -28,11 +28,14 @@ dist_doc_DATA = README.md
 cssdir = $(pkgdatadir)/resources/static/css
 dist_css_DATA = resources/static/css/trip.css
 jsdir = $(pkgdatadir)/resources/static/js
-dist_js_DATA = resources/static/js/tracking-map.js resources/static/js/itinerary-map.js \
+dist_js_DATA = resources/static/js/tracking-map.js \
+	resources/static/js/itinerary-map.js \
+	resources/static/js/itinerary-waypoint.js \
 	resources/static/js/simplify-path.js
 jsmoddir = $(pkgdatadir)/resources/static/js/modules
-dist_jsmod_DATA = resources/static/js/modules/map.js
-
+dist_jsmod_DATA = resources/static/js/modules/location-service.js \
+	resources/static/js/modules/map.js \
+	resources/static/js/modules/utils-service.js
 bsver = bootstrap-$(BOOTSTRAP_VERSION)-dist
 nobase_dist_pkgdata_DATA = resources/static/$(bsver)/LICENSE
 
@@ -53,10 +56,24 @@ dist_ol_DATA = \
 	resources/static/openlayers-$(OPENLAYERS_VERSION)/ol.js.map \
 	resources/static/openlayers-$(OPENLAYERS_VERSION)/ol.js
 
+proj4jsdir = $(pkgdatadir)/resources/static/proj4js-$(PROJ4JS_VERSION)
+dist_proj4js_DATA = \
+	resources/static/proj4js-$(PROJ4JS_VERSION)/proj4-src.js \
+	resources/static/proj4js-$(PROJ4JS_VERSION)/proj4.js \
+	resources/static/proj4js-$(PROJ4JS_VERSION)/LICENSE.md
+
+olcdir = $(pkgdatadir)/resources/static/open-location-code-$(OLC_VERSION)
+dist_olc_DATA = \
+	resources/static/open-location-code-$(OLC_VERSION)/openlocationcode.js \
+	resources/static/open-location-code-$(OLC_VERSION)/openlocationcode.min.js \
+	resources/static/open-location-code-$(OLC_VERSION)/LICENSE
+
 uninstall-hook:
-	-rmdir -p $(DESTDIR)/$(bscssdir)
-	-rmdir -p $(DESTDIR)/$(bsjsdir)
-	-rmdir -p $(DESTDIR)/$(oldir)
-	-rmdir -p $(DESTDIR)/$(cssdir)
-	-rmdir -p $(DESTDIR)/$(jsdir)
-	-rmdir -p $(DESTDIR)/$(jsmoddir)
+	-rmdir -p $(bscssdir)
+	-rmdir -p $(bsjsdir)
+	-rmdir -p $(oldir)
+	-rmdir -p $(cssdir)
+	-rmdir -p $(jsdir)
+	-rmdir -p $(jsmoddir)
+	-rmdir -p $(proj4jsdir)
+	-rmdir -p $(olcdir)

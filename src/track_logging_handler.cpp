@@ -49,7 +49,7 @@ void TrackLoggingHandler::do_handle_request(
   // Must handle both get and post
   if (request.method == HTTPMethod::get) {
     uuid_str = request.get_query_param("uuid");
-    params = request.query_params;
+    params = request.get_query_params();
   } else if (request.method == HTTPMethod::post) {
     const std::string content_type = request.get_header("Content-Type");
     if (content_type.find("application/x-www-form-urlencoded") != std::string::npos) {

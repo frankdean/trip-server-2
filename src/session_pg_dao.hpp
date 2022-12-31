@@ -36,6 +36,7 @@ class SessionPgDao : public TripPgDao {
   static const std::string create_session_data_table_sql;
   static const std::string insert_session_sql;
 public:
+  static const std::string coordinate_format_key;
   static const std::string tracks_query_key;
   void save_value(std::string session_id, std::string key, std::string value);
   std::string get_value(std::string session_id, std::string key);

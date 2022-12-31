@@ -299,7 +299,8 @@ void TrackingRequestHandler::handle_authenticated_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
-  bool first_time = request.query_params.empty();
+  auto query_params = request.get_query_params();
+  bool first_time = query_params.empty();
   TrackPgDao::location_search_query_params q;
   q.user_id = get_user_id();
 
@@ -325,7 +326,7 @@ void TrackingRequestHandler::handle_authenticated_request(
     // }
 
     q = TrackPgDao::location_search_query_params(get_user_id(),
-                                                 request.query_params);
+                                                 query_params);
 
     // std::cout << "Fetched query from URL as: " << q << '\n';
     // This is user supplied data, so serialization could fail
@@ -341,7 +342,7 @@ void TrackingRequestHandler::handle_authenticated_request(
     }
   }
 
-  const std::string action = q.get_value(request.query_params, "action");
+  const std::string action = q.get_value(query_params, "action");
   if (action == "list") {
     // New query, so reset page number
     q.page = 1;
