@@ -308,7 +308,7 @@ class TripMap {
       if (!name) {
         const id = feature.get('id');
         if (id)
-          name = `WPT: {id}`;
+          name = `ID: ${id}`;
       }
       return new Style({
         image: point,
