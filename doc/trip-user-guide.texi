@@ -692,6 +692,18 @@ provide shortcuts for common formatting syntax.  Unfortunately the
 Markdown editor used by the application is not a perfect implementation
 of the Markdown standards but is usefully close.
 
+@node Map
+@section Map
+@cindex Map
+
+The map can be rotated on touch devices by touching and twisting with
+two fingers.  On a system with a keyboard, the map can be rotated by
+holding down the @code{shift} and @code{alt} keys simultaneously while
+dragging with the mouse.  When the map as been rotated, an arrow icon is
+displayed in the top right corner of the map, pointing north.
+
+Click on the @code{north arrow} icon to reset the map orientation.
+
 @node Live Map
 @section Live Map
 @cindex Live Map
@@ -849,28 +861,22 @@ top right of the page.  The icon depicts two connected nodes.
 
 Click on each position you want the route to follow.  When you have
 finished entering all the points for the route, either click the
-@code{Finish} button adjacent to the @code{new route icon} of click on
+@code{Finish} button adjacent to the @code{new route icon} or click on
 the last point of the route.
-
-@quotation
-@strong{Touch Screen Devices:} When creating routes with touch screen
-devices, after placing a point, the system often sees the click as also
-finishing the route, which normally happens when you click the last
-point of a new route.  A new route is created, perhaps with only two
-points.  In this event, select the option to edit the route (see below)
-and continue by moving the last point to the ultimate destination and
-filling in the intervening points by creating new points in between the
-existing ones.
-
-Additionally, the buttons adjacent to the @code{new route icon} are not
-recognised whilst creating a new route.  In this event, click on the
-last placed route point to terminate creating a new route.
-@end quotation
 
 When you view the itinerary page all the new routes are at at the end of
 the list of routes and are unnamed having only an ID.  To edit the
 route's attributes, select the route in the itinerary page and click the
 @code{Edit attributes} button.
+
+On a system with a keyboard, you can create a detailed route by holding
+down the shift key while dragging the route point.
+
+Click the @code{edit icon} to modifying an existing route.  Click and
+drag on existing nodes, or click and drag on other parts of the route to
+create a new node.  Nodes can be deleted by holding down the @code{alt}
+key and clicking on the node to be deleted.  On touch screen devices
+double-click the node to delete it.
 
 @node Creating Waypoints using the Map
 @section Creating Waypoints using the Map
@@ -952,8 +958,7 @@ commence editing the routes on the itinerary map, click the @code{edit
 icon} at the top right hand side of the map.  The icon represents a
 pencil inside a square.
 
-All waypoints on the map are depicted with a surrounding red dotted
-square.  Drag the waypoint to the new location and click the @code{Save}
+Drag the waypoint to the new location and click the @code{Save}
 button adjacent to the @code{edit icon} at the top right hand side of
 the map.
 

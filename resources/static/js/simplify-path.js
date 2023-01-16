@@ -149,7 +149,7 @@ class SimplifyMap extends TripMap {
       featureProjection: 'EPSG:3857',
     });
     const data = JSON.stringify({
-      'action': 'save',
+      'action': 'save_simplified',
       'itinerary_id': this.options.itinerary_id,
       'track': geoJson,
       'tolerance': Number.parseFloat(this.toleranceInput.value),

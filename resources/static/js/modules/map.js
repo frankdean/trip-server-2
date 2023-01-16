@@ -20,7 +20,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export { TripMap };
+export { TripMap, CreateFeatureControl, ModifyFeatureControl };
 
 const fromLonLat = ol.proj.fromLonLat;
 const CircleStyle = ol.style.Circle;
@@ -48,7 +48,7 @@ const XYZ = ol.source.XYZ;
 class SelectMapLayerControl extends Control {
 
   constructor(mapLayerManager, opt_options) {
-    let options = opt_options || {};
+    const options = opt_options || {};
 
     const button = document.createElement('button');
     button.innerHTML = 'M';
@@ -388,7 +388,8 @@ class TripMap {
     return new CircleStyle({
       radius: 10,
       fill: null,
-      stroke: new Stroke({color: 'blue', width: 2})
+      // fill: new Fill({color: 'red'}),
+      stroke: new Stroke({color: 'blue', width: 4})
     });
   }
 
@@ -433,3 +434,206 @@ class TripMap {
   }
 
 } // TripMap
+
+class CreateFeatureControl extends Control {
+
+  constructor(callback, opt_options) {
+    const routeButton = document.createElement('button');
+    routeButton.innerHTML = 'R';
+    routeButton.setAttribute('accesskey', 'r');
+
+    const waypointButton = document.createElement('button');
+    waypointButton.innerHTML = 'W';
+    waypointButton.setAttribute('accesskey', 'w');
+
+    const element = document.createElement('div');
+    element.id = 'create-feature-control';
+    element.className = 'create-feature-layer ol-unselectable ol-control';
+    element.appendChild(routeButton);
+    element.appendChild(waypointButton);
+
+    super({
+      element: element,
+      target: opt_options.target,
+    });
+    const self = this;
+    this.options = opt_options || {};
+    this.eventHandler = callback;
+
+    routeButton.addEventListener('click', function() {
+      // Abort any existing edit
+      self.eventHandler(new CustomEvent('abort'));
+      const options = Object.assign({}, self.options);
+      options.div = 'create-feature-control';
+      self.optionButtons = new ModifyFeatureOptionButtons(
+        self.optionButtonsEventHandler.bind(self), options);
+      self.eventHandler(new CustomEvent('startroute'));
+    }, false);
+    waypointButton.addEventListener('click', function() {
+      // Abort any existing edit
+      self.eventHandler(new CustomEvent('abort'));
+      const options = Object.assign({}, self.options);
+      options.div = 'create-feature-control';
+      options.finish = false;
+      options.undo = false;
+      options.top = '1.375em';
+      self.optionButtons = new ModifyFeatureOptionButtons(
+        self.optionButtonsEventHandler.bind(self), options);
+      self.eventHandler(new CustomEvent('createwaypoint'));
+    }, false);
+  }
+
+  optionButtonsEventHandler(event) {
+    this.eventHandler(event);
+  }
+
+  finishDrawing() {
+    if (this.optionButtons)
+      this.optionButtons.hide();
+  }
+
+}
+
+class ModifyFeatureOptionButtons {
+
+  constructor(callback, opt_options) {
+    this.options = opt_options || {};
+    this.eventHandler = callback;
+    this.options = opt_options || {};
+    const outerElement = document.createElement('ul');
+    outerElement.id = 'create-feature-options';
+    if (this.options.top)
+      outerElement.style.top = this.options.top;
+    outerElement.className = 'modify-feature-option-container';
+    if (this.options.finish !== false) {
+      const finishElement = document.createElement('li');
+      const finishLink = document.createElement('a');
+      finishLink.addEventListener('click', this.handleFinishCreateRoute.bind(this), false);
+      finishLink.innerHTML = 'Finish';
+      finishLink.setAttribute('href', '#');
+      finishLink.setAttribute('title', 'Finish creating route');
+      finishElement.appendChild(finishLink);
+      outerElement.appendChild(finishElement);
+    }
+    if (this.options.save === true) {
+      const saveElement = document.createElement('li');
+      const saveLink = document.createElement('a');
+      saveLink.addEventListener('click', this.handleSaveCreateRoute.bind(this), false);
+      saveLink.innerHTML = 'Save';
+      saveLink.setAttribute('href', '#');
+      saveLink.setAttribute('title', 'Save changes');
+      saveElement.appendChild(saveLink);
+      outerElement.appendChild(saveElement);
+    }
+    if (this.options.undo !== false) {
+      const undoElement = document.createElement('li');
+      const undoLink = document.createElement('a');
+      undoLink.addEventListener('click', this.handleUndoCreateRoute.bind(this), false);
+      undoLink.innerHTML = 'Undo';
+      undoLink.setAttribute('href', '#');
+      undoLink.setAttribute('title', 'Delete last point');
+      undoElement.appendChild(undoLink);
+      outerElement.appendChild(undoElement);
+    }
+    const cancelElement = document.createElement('li');
+    const cancelLink = document.createElement('a');
+    cancelLink.addEventListener('click', this.handleCancelCreateRoute.bind(this), false);
+    cancelLink.innerHTML = 'Cancel';
+    cancelLink.setAttribute('href', '#');
+    cancelLink.setAttribute('title', 'Cancel creating feature');
+    cancelElement.appendChild(cancelLink);
+    outerElement.appendChild(cancelElement);
+
+    const controlDiv = document.getElementById(this.options.div);
+    controlDiv.appendChild(outerElement);
+  }
+
+  handleFinishCreateRoute() {
+    this.eventHandler(new CustomEvent('routecreated'));
+    this.hide();
+  }
+
+  handleSaveCreateRoute() {
+    this.eventHandler(new CustomEvent('save'));
+    this.hide();
+  }
+
+  handleCancelCreateRoute() {
+    this.eventHandler(new CustomEvent('abort'));
+    this.hide();
+  }
+
+  handleUndoCreateRoute() {
+    this.eventHandler(new CustomEvent('undo'));
+  }
+
+  hide() {
+    const optionsElement = document.getElementById('create-feature-options');
+    if (optionsElement)
+      optionsElement.remove();
+  }
+}
+
+class ModifyFeatureControl extends Control {
+
+  constructor(callback, opt_options) {
+    const options = opt_options || {};
+
+    const editButton = document.createElement('button');
+    editButton.innerHTML = 'E';
+    editButton.setAttribute('accesskey', 'e');
+    const deleteButton = document.createElement('button');
+    deleteButton.innerHTML = 'D';
+    deleteButton.setAttribute('accesskey', 'd');
+
+    const element = document.createElement('div');
+    element.id = 'modify-feature-control';
+    element.className = 'modify-feature-layer ol-unselectable ol-control';
+    element.appendChild(editButton);
+    element.appendChild(deleteButton);
+
+    super({
+      element: element,
+      target: options.target,
+    });
+    this.options = options;
+    this.eventHandler = callback;
+    const self = this;
+    editButton.addEventListener('click', function() {
+      self.eventHandler(new CustomEvent('abort'));
+      const options = Object.assign({}, self.options);
+      options.div = 'modify-feature-control';
+      options.save = true;
+      options.finish = false;
+      options.undo = false;
+      options.top = '0em';
+      self.optionButtons = new ModifyFeatureOptionButtons(
+        self.optionButtonsEventHandler.bind(self),
+        options);
+      self.eventHandler(new CustomEvent('edit'));
+    }, false);
+    deleteButton.addEventListener('click', function() {
+      self.eventHandler(new CustomEvent('abort'));
+      const options = Object.assign({}, self.options);
+      options.div = 'modify-feature-control';
+      options.save = true;
+      options.finish = false;
+      options.undo = false;
+      options.top = '1.375em';
+      self.optionButtons = new ModifyFeatureOptionButtons(
+        self.optionButtonsEventHandler.bind(self),
+        options);
+      self.eventHandler(new CustomEvent('delete-select'));
+    }, false);
+  }
+
+  optionButtonsEventHandler(event) {
+    this.eventHandler(event);
+  }
+
+  finishDrawing() {
+    if (this.optionButtons)
+      this.optionButtons.hide();
+  }
+
+}

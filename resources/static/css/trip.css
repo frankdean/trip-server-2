@@ -81,9 +81,54 @@ body {
   top: 4em;
   left: .5em;
 }
-.exit-map-layer {
+#exit-map-control {
   top: 3em;
   right: .5em;
+}
+#create-feature-control {
+  top: 5.5em;
+  right: .5em;
+}
+#modify-feature-control {
+  top: 10em;
+  right: .5em;
+}
+.modify-feature-option-container {
+  position: absolute;
+  top: 0px;
+  right: 1.4em;
+  text-align: right;
+  padding-left: 0;
+}
+.modify-feature-option-container li {
+  display: table-cell;
+  background-color: #919191;
+  border-left: 1px solid #AAA;
+  color: #FFF;
+  font: 11px/19px "Helvetica Neue",Arial,Helvetica,sans-serif;
+  height: 24px;
+}
+.modify-feature-option-container li:last-child {
+  border-radius: 0;
+}
+.modify-feature-option-container li:first-child {
+  border-radius: 4px 0 0 4px;
+  border-left: 0;
+}
+.modify-feature-option-container a:hover {
+  background-color: #a0a0a0;
+}
+.modify-feature-option-container a {
+  color: #FFF;
+  font: 11px/19px "Helvetica Neue",Arial,Helvetica,sans-serif;
+  text-decoration: none;
+  padding: 3px 10px 4px 10px;
+  display: block;
+  height: 24px;
+}
+.modify-feature-option-container li:first-child a {
+  border-radius: 4px 0 0 4px;
+  border-left: 0;
 }
 .ol-touch .select-map-layer {
   top: 80px;
@@ -98,6 +143,7 @@ body {
   position: absolute;
   top: 0;
   background: white;
+  z-index: 1;
 }
 label.map-provider {
   padding-left: 8px;

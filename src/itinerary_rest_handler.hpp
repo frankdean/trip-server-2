@@ -87,7 +87,17 @@ class ItineraryRestHandler : public BaseRestHandler {
   std::vector<location> get_coordinates(
       const nlohmann::basic_json<nlohmann::ordered_map> &coordinates);
 
-  void save_simplified_feature(const nlohmann::basic_json<nlohmann::ordered_map> &j);
+  void save_simplified_feature(
+      const nlohmann::basic_json<nlohmann::ordered_map> &j);
+
+  std::vector<location> extract_locations(
+      const nlohmann::basic_json<nlohmann::ordered_map> &feature);
+
+  ItineraryPgDao::route
+      create_route(const nlohmann::basic_json<nlohmann::ordered_map> &j);
+
+  ItineraryPgDao::waypoint create_waypoint(
+      const nlohmann::basic_json<nlohmann::ordered_map> &j);
 
 protected:
   virtual void handle_authenticated_request(

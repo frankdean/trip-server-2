@@ -57,6 +57,10 @@ void ItineraryMapHandler::handle_authenticated_request(
 {
   try {
     itinerary_id = std::stol(request.get_param("id"));
+    ItineraryPgDao dao;
+    const bool read_only = !dao.has_user_itinerary_modification_access(
+        get_user_id(),
+        itinerary_id);
     json features = ItineraryHandler::get_selected_feature_ids(request);
     json j{
       {"itinerary_id", itinerary_id},
@@ -73,6 +77,7 @@ void ItineraryMapHandler::handle_authenticated_request(
       "    <script>\n"
       "      <!--\n"
       // "      const pageInfo = JSON.parse('" << j << "');\n"
+      "      const readOnly = " << (read_only ? "true" : "false") << ";\n"
       "      const pageInfoJSON = '" << j << "';\n"
       "      const server_prefix = '" << get_uri_prefix() << "';\n"
       // Text displayed to user after clicking on map exit button to exit map

@@ -238,11 +238,21 @@ public:
       std::string user_id,
       long itinerary_id,
       long waypoint_id);
+
   void save(std::string user_id,
             long itinerary_id,
-            const waypoint &wpt);
+            waypoint &wpt);
+
+  void save(std::string user_id,
+            long itinerary_id,
+            route &route);
+
+  bool has_user_itinerary_modification_access(std::string user_id,
+                                              long itinerary_id);
   void validate_user_itinerary_modification_access(std::string user_id,
                                                    long itinerary_id);
+  void validate_user_itinerary_read_access(std::string user_id,
+                                           long itinerary_id);
   void delete_features(
       std::string user_id,
       long itinerary_id,

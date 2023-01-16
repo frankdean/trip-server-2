@@ -316,7 +316,7 @@ class TrackingMap extends TripMap {
         }
         if (!self.stop)
           self.update();
-      }, 5000); // TODO change back to 60secs
+      }, 60000);
     // } else {
       // console.log('Date range preceeds the current date, live updates disabled');
     }

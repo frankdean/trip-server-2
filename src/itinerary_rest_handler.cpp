@@ -21,6 +21,9 @@
 */
 #include "../config.h"
 #include "itinerary_rest_handler.hpp"
+#ifdef HAVE_GDAL
+#include "elevation_tile.hpp"
+#endif
 #include "../trip-server-common/src/http_request.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <boost/locale.hpp>
@@ -35,6 +38,10 @@ using namespace boost::locale;
 using namespace fdsd::trip;
 using namespace fdsd::web;
 using json = nlohmann::basic_json<nlohmann::ordered_map>;
+
+#ifdef HAVE_GDAL
+extern ElevationService *elevation_service;
+#endif
 
 nlohmann::basic_json<nlohmann::ordered_map>
     ItineraryRestHandler::get_routes_as_geojson(
@@ -130,8 +137,8 @@ void ItineraryRestHandler::fetch_itinerary_features(
     web::HTTPServerResponse &response) const
 {
   ItineraryPgDao dao;
-  dao.validate_user_itinerary_modification_access(get_user_id(),
-                                                  itinerary_id);
+  dao.validate_user_itinerary_read_access(get_user_id(),
+                                          itinerary_id);
   const auto routes = dao.get_routes(get_user_id(),
                                      itinerary_id, features.routes);
   const auto waypoints = dao.get_waypoints(get_user_id(),
@@ -298,7 +305,6 @@ void ItineraryRestHandler::save_simplified_track(
     }
 #else
     const auto original_tolerance = tolerance;
-    // TODO solution determining tolerance value when simplifying a track
     tolerance = 0.0001;
     // std::cout << std::fixed << std::setprecision(3)
     //           << "Original tolerance " << original_tolerance << " : "
@@ -350,45 +356,110 @@ void ItineraryRestHandler::save_simplified_feature(
   //           << itinerary_id << "\n";
   const auto track = j["track"];
   const std::string type = track["type"];
+  const auto geometry = track["geometry"];
+  const auto properties = track["properties"];
+  const auto featureType = properties["type"];
+  const std::string geometryFeatureType = geometry["type"];
+  if (featureType.is_string() && featureType == "track") {
+    std::vector<location> locations = extract_locations(track);
+    if (!locations.empty()) {
+      if (j.find("tolerance") == j.end())
+        throw BadRequestException("tolerance value is not specified for the track");
+      const double tolerance = j["tolerance"];
+      save_simplified_track(locations, tolerance, properties);
+    }
+  }
+}
+
+std::vector<location> ItineraryRestHandler::extract_locations(
+    const nlohmann::basic_json<nlohmann::ordered_map> &feature)
+{
+  const std::string type = feature["type"];
   if (type == "Feature") {
-    const auto geometry = track["geometry"];
-    const auto properties = track["properties"];
+    std::vector<location> locations;
+    const auto geometry = feature["geometry"];
+    const auto properties = feature["properties"];
     const auto featureType = properties["type"];
     const std::string geometryFeatureType = geometry["type"];
-    if (featureType.is_string() && featureType == "track") {
-      std::vector<location> locations;
-      if (geometryFeatureType == "LineString") {
-        // array of coordinate arrays
-        locations = get_coordinates(geometry["coordinates"]);
-      } else if (geometryFeatureType == "MultiLineString") {
-        // array of array of coordinate arrays
-        const auto multi_line_string = geometry["coordinates"];
-        if (multi_line_string.is_array()) {
-          for (json::const_iterator i = multi_line_string.begin();
-               i != multi_line_string.end(); ++i) {
-            const auto segment = get_coordinates(*i);
-            locations.insert(locations.end(), segment.begin(), segment.end());
-          }
-        } else {
-          throw BadRequestException("Bad format for MultiLineString coordinates");
+    if (geometryFeatureType == "LineString") {
+      // array of coordinate arrays
+      locations = get_coordinates(geometry["coordinates"]);
+    } else if (geometryFeatureType == "MultiLineString") {
+      const auto multi_line_string = geometry["coordinates"];
+      if (multi_line_string.is_array()) {
+        for (json::const_iterator i = multi_line_string.begin();
+             i != multi_line_string.end(); ++i) {
+          const auto segment = get_coordinates(*i);
+          locations.insert(locations.end(), segment.begin(), segment.end());
         }
       } else {
-        std::cerr << "Unexpected geometry feature type: \""
-                  << geometryFeatureType << "\"\n";
-        throw BadRequestException("Unexpected geometry feature type");
+        throw BadRequestException("Bad format for MultiLineString coordinates");
       }
-      if (!locations.empty()) {
-        if (j.find("tolerance") == j.end())
-          throw BadRequestException("tolerance value is not specified for the track");
-        const double tolerance = j["tolerance"];
-        save_simplified_track(locations, tolerance, properties);
-      }
+    } else {
+      std::cerr << "Unexpected geometry feature type: \""
+                << geometryFeatureType << "\"\n";
+      throw BadRequestException("Unexpected geometry feature type");
     }
+    return locations;
   } else {
     std::cerr << "Unexpected geometry type: \""
               << type << "\"\n";
     throw BadRequestException("Unexpected geometry type");
   }
+}
+
+ItineraryPgDao::route ItineraryRestHandler::create_route(
+    const nlohmann::basic_json<nlohmann::ordered_map> &j)
+{
+  const auto j_route = j["feature"];
+  auto locations = extract_locations(j_route);
+  ItineraryPgDao::route route;
+  const auto properties = j_route["properties"];
+  if ((route.id.first = properties.find("id") != properties.end()))
+    route.id.second = properties["id"];
+  if ((route.name.first = properties.find("name") != properties.end()))
+    route.name.second = properties["name"];
+  if ((route.color.first = properties.find("color_code") != properties.end()))
+    route.color.second = properties["color_code"];
+  if ((route.html_code.first =
+       properties.find("html_color_code") != properties.end()))
+    route.html_code.second = properties["html_color_code"];
+
+  for (const auto& location : locations)
+    route.points.push_back(ItineraryPgDao::route_point(location));
+#ifdef HAVE_GDAL
+  if (elevation_service)
+    elevation_service->fill_elevations(
+        route.points.begin(),
+        route.points.end());
+#endif
+  route.calculate_statistics();
+  return route;
+}
+
+ItineraryPgDao::waypoint ItineraryRestHandler::create_waypoint(
+    const nlohmann::basic_json<nlohmann::ordered_map> &j)
+{
+  const auto j_waypoint = j["feature"];
+  ItineraryPgDao::waypoint waypoint;
+  const auto properties = j_waypoint["properties"];
+  if ((waypoint.id.first = properties.find("id") != properties.end()))
+    waypoint.id.second = properties["id"];
+  auto coordinates = j_waypoint["geometry"]["coordinates"];
+  waypoint.longitude = coordinates[0];
+  waypoint.latitude = coordinates[1];
+#ifdef HAVE_GDAL
+  if (elevation_service) {
+    auto altitude = elevation_service->get_elevation(
+        waypoint.longitude,
+        waypoint.latitude);
+    // The altitude may have been manually set by the user, so only adjust when
+    // we have elevation data
+    if (altitude.first)
+      waypoint.altitude = altitude;
+  }
+#endif
+  return waypoint;
 }
 
 void ItineraryRestHandler::handle_authenticated_request(
@@ -399,13 +470,55 @@ void ItineraryRestHandler::handle_authenticated_request(
   try {
     json j = json::parse(request.content);
     try {
-      // std::cout << j << '\n';
+      // std::cout << j.dump(4) << '\n';
       itinerary_id = j["itinerary_id"];
       if (request.method == HTTPMethod::post) {
         const auto action_j = j["action"];
         const std::string action = action_j.is_string() ? action_j : "";
-        if (action == "save") {
+        if (action == "save_simplified") {
           save_simplified_feature(j);
+        } else if (action == "create-map-feature") {
+          // std::cout << "Creating map feature\n" << j.dump(4) << '\n';
+          ItineraryPgDao dao;
+          const auto j_route = j["feature"];
+          const auto properties = j_route["properties"];
+          if (properties.find("type") != properties.end()) {
+            const std::string type = properties["type"];
+            if (type == "route") {
+              auto route = create_route(j);
+              dao.save(get_user_id(), itinerary_id, route);
+              if (route.id.first)
+                response.content << "{\"id\": " << route.id.second << "}\n";
+            } else if (type == "waypoint") {
+              auto waypoint = create_waypoint(j);
+              // Only the location will have changed for an existing waypoint.
+              if (waypoint.id.first) {
+                auto original_waypoint = dao.get_waypoint(
+                    get_user_id(),
+                    itinerary_id,
+                    waypoint.id.second);
+                if (original_waypoint.id.first == waypoint.id.first) {
+                  original_waypoint.longitude = waypoint.longitude;
+                  original_waypoint.latitude = waypoint.latitude;
+                  original_waypoint.altitude = waypoint.altitude;
+                  waypoint = original_waypoint;
+                }
+              }
+              dao.save(get_user_id(), itinerary_id, waypoint);
+              if (waypoint.id.first)
+                response.content << "{\"id\": " << waypoint.id.second << "}\n";
+            } else {
+              throw BadRequestException("Unexpected GeoJSON property type " + type);
+            }
+          } else {
+            throw BadRequestException("GeoJSON type property not set");
+          }
+        } else if (action == "delete-features") {
+          auto features = j["features"];
+          // std::cout << "Features:\n" << features.dump(4) << '\n';
+          ItineraryPgDao dao;
+          ItineraryPgDao::selected_feature_ids selected_features(features);
+          dao.delete_features(get_user_id(), itinerary_id, selected_features);
         } else if (action_j.is_null()) {
           auto feature_info =
             j["features"].get<fdsd::trip::ItineraryPgDao::selected_feature_ids>();

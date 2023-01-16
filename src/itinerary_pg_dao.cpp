@@ -431,7 +431,10 @@ std::vector<ItineraryPgDao::route>
       "JOIN itinerary i ON i.id=r.itinerary_id "
       "LEFT JOIN path_color rc ON r.color=rc.key "
       "LEFT JOIN itinerary_route_point p ON r.id=p.itinerary_route_id "
-      "WHERE i.user_id=$1 AND r.itinerary_id = $2 AND r.id=ANY($3) "
+      "LEFT JOIN itinerary_sharing sh "
+      "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
+      "WHERE (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
+      "AND r.itinerary_id = $2 AND r.id=ANY($3) "
       "ORDER BY r.id, p.id",
       user_id,
       itinerary_id,
@@ -496,7 +499,10 @@ std::vector<ItineraryPgDao::track>
     "LEFT JOIN path_color rc ON t.color=rc.key "
     "LEFT JOIN itinerary_track_segment ts ON t.id=ts.itinerary_track_id "
     "LEFT JOIN itinerary_track_point p ON ts.id=p.itinerary_track_segment_id "
-    "WHERE i.user_id=$1 AND t.itinerary_id=$2 AND t.id=ANY($3) ORDER BY t.id, ts.id, p.id";
+    "LEFT JOIN itinerary_sharing sh "
+    "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
+    "WHERE (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
+    "AND t.itinerary_id=$2 AND t.id=ANY($3) ORDER BY t.id, ts.id, p.id";
   // std::cout << "SQL: \n" << sql << '\n' << "track ids: " << ids_sql << '\n';
   auto result = tx.exec_params(
       sql,
@@ -586,7 +592,10 @@ std::vector<ItineraryPgDao::waypoint>
       "w.avg_samples "
       "FROM itinerary_waypoint w "
       "JOIN itinerary i ON i.id=w.itinerary_id "
-      "WHERE  i.user_id=$1 AND w.itinerary_id=$2 AND w.id=ANY($3)"
+      "LEFT JOIN itinerary_sharing sh "
+      "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
+      "WHERE  (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
+      "AND w.itinerary_id=$2 AND w.id=ANY($3)"
       "ORDER BY name, symbol, id",
       user_id,
       itinerary_id,
@@ -821,6 +830,28 @@ void ItineraryPgDao::create_itinerary_features(
  * Validates that the specified user_id has write/update/delete access to the
  * specified itinerary.
  *
+ * \param user_id the ID of the user to validate.
+ * \param itinerary_id the ID of the itinerary to check.
+ *
+ * \return true if the user can update the itinerary
+ */
+bool ItineraryPgDao::has_user_itinerary_modification_access(std::string user_id,
+                                                            long itinerary_id)
+{
+  work tx(*connection);
+  auto r = tx.exec_params1(
+      "SELECT COUNT(*) FROM itinerary WHERE user_id=$1 AND id=$2",
+      user_id,
+      itinerary_id
+    );
+  tx.commit();
+  return (r[0].as<long>() == 1);
+}
+
+/**
+ * Validates that the specified user_id has write/update/delete access to the
+ * specified itinerary.
+ *
  * \param existing transaction context.  This method does not commit the transaction.
  * \param user_id the ID of the user to validate.
  * \param itinerary_id the ID of the itinerary to check.
@@ -884,6 +915,23 @@ void ItineraryPgDao::validate_user_itinerary_read_access(work &tx,
     throw NotAuthorized();
 }
 
+/**
+ * Validates that the specified user_id has read access to the specified
+ * itinerary.
+ *
+ * \param user_id the ID of the user to validate.
+ * \param itinerary_id the ID of the itinerary to check.
+ *
+ * \throws ItineraryPgDao::not_authorized if the user is not authorized.
+ */
+void ItineraryPgDao::validate_user_itinerary_read_access(std::string user_id,
+                                                         long itinerary_id)
+{
+  work tx(*connection);
+  validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+  tx.commit();
+}
+
 void ItineraryPgDao::delete_features(
     std::string user_id,
     long itinerary_id,
@@ -924,7 +972,7 @@ void ItineraryPgDao::delete_features(
     }
     tx.commit();
   } catch (const std::exception &e) {
-    std::cerr << "Exception whilst deleting itinerary featues: "
+    std::cerr << "Exception whilst deleting itinerary features: "
               << e.what() << '\n';
     throw;
   }
@@ -1019,7 +1067,7 @@ ItineraryPgDao::waypoint ItineraryPgDao::get_waypoint(
 
 void ItineraryPgDao::save(std::string user_id,
                           long itinerary_id,
-                          const waypoint &wpt)
+                          waypoint &wpt)
 {
   work tx(*connection);
   try {
@@ -1049,11 +1097,11 @@ void ItineraryPgDao::save(std::string user_id,
           wpt.type.first && !wpt.type.second.empty() ? &wpt.type.second : nullptr,
           wpt.color.first && !wpt.color.second.empty() ? &wpt.color.second : nullptr);
     } else {
-      tx.exec_params(
+      auto r = tx.exec_params1(
           "INSERT INTO itinerary_waypoint (itinerary_id, name, geog, altitude, "
           "time, symbol, comment, description, avg_samples, type, color) "
           "VALUES ($1, $2, ST_SetSRID(ST_POINT($3, $4),4326), $5, $6, $7, $8, "
-          "$9, $10, $11, $12)",
+          "$9, $10, $11, $12) RETURNING id",
           itinerary_id,
           wpt.name.first && !wpt.name.second.empty() ? &wpt.name.second : nullptr ,
           wpt.longitude,
@@ -1066,7 +1114,69 @@ void ItineraryPgDao::save(std::string user_id,
           wpt.avg_samples.first ? &wpt.avg_samples.second : nullptr,
           wpt.type.first && !wpt.type.second.empty() ? &wpt.type.second : nullptr,
           wpt.color.first && !wpt.color.second.empty() ? &wpt.color.second : nullptr);
+      wpt.id = std::make_pair(true, r["id"].as<long>());
     }
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception whilst saving waypoint: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+void ItineraryPgDao::save(std::string user_id,
+                          long itinerary_id,
+                          route &route)
+{
+  work tx(*connection);
+  try {
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    if (route.id.first) {
+      // Validate the route belongs to this user
+      auto check = tx.exec_params1(
+          "SELECT COUNT(*) FROM itinerary_route "
+          "WHERE itinerary_id=$1 AND id=$2",
+          itinerary_id,
+          route.id.second
+        );
+      if (check[0].as<long>() != 1)
+        throw NotAuthorized();
+      tx.exec_params("DELETE FROM itinerary_route_point "
+                     "WHERE itinerary_route_id=$1",
+                     route.id.second);
+      auto r = tx.exec_params(
+          "UPDATE itinerary_route "
+          "SET name=$2, distance=$3, ascent=$4, descent=$5, lowest=$6, "
+          "highest=$7, color=$8 "
+          "WHERE id=$9 AND itinerary_id=$1",
+          itinerary_id,
+          route.name.first ? &route.name.second : nullptr,
+          route.distance.first ? &route.distance.second : nullptr,
+          route.ascent.first ? &route.ascent.second : nullptr,
+          route.descent.first ? &route.descent.second : nullptr,
+          route.lowest.first ? &route.lowest.second : nullptr,
+          route.highest.first ? &route.highest.second : nullptr,
+          route.color.first ? &route.color.second : nullptr,
+          route.id.second
+        );
+    } else {
+      auto r = tx.exec_params1(
+          "INSERT INTO itinerary_route "
+          "(itinerary_id, name, distance, ascent, descent, lowest, highest, "
+          "color) "
+          "VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
+          itinerary_id,
+          route.name.first ? &route.name.second : nullptr,
+          route.distance.first ? &route.distance.second : nullptr,
+          route.ascent.first ? &route.ascent.second : nullptr,
+          route.descent.first ? &route.descent.second : nullptr,
+          route.lowest.first ? &route.lowest.second : nullptr,
+          route.highest.first ? &route.highest.second : nullptr,
+          route.color.first ? &route.color.second : nullptr
+        );
+      route.id = std::make_pair(true, r["id"].as<long>());
+    }
+    create_route_points(tx, route);
     tx.commit();
   } catch (const std::exception &e) {
     std::cerr << "Exception whilst saving waypoint: "
