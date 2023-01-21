@@ -487,7 +487,7 @@ class CreateFeatureControl extends Control {
     this.eventHandler(event);
   }
 
-  finishDrawing() {
+  hideOptionButtons() {
     if (this.optionButtons)
       this.optionButtons.hide();
   }
@@ -631,7 +631,7 @@ class ModifyFeatureControl extends Control {
     this.eventHandler(event);
   }
 
-  finishDrawing() {
+  hideOptionButtons() {
     if (this.optionButtons)
       this.optionButtons.hide();
   }

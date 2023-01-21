@@ -23,6 +23,7 @@
 #define TRIP_PG_DAO_HPP
 
 #include "../trip-server-common/src/pg_pool.hpp"
+#include "../trip-server-common/src/http_request_handler.hpp"
 #include <exception>
 #include <string>
 #include <pqxx/pqxx>
@@ -42,8 +43,9 @@ public:
 
   /// Exception thrown when a user attempts to perform an unauthorised action,
   /// e.g. access an itinerary they do not own.
-  class NotAuthorized : public std::exception {
+  class NotAuthorized : public web::BadRequestException {
   public:
+    NotAuthorized();
     virtual const char* what() const throw() override {
       return "User not authorized to perform the requested action";
     }

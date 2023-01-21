@@ -446,9 +446,9 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       // page that allows the general information to be viewed
       "              <button accesskey=\"e\" class=\"nav-link\" formmethod=\"post\" formaction=\"" << get_uri_prefix() << "/itinerary/edit\">" << translate("Edit") << "</button> <!-- writable version -->\n"
       "            </li>\n"
-      "            <li class=\"nav-item opacity-50\">\n"
+      "            <li class=\"nav-item\">\n"
       // Label for a menu item on the general information tab of the itinerary page to show the itinerary sharing page
-      "              <a class=\"nav-link\">" << translate("Sharing") << "</a> <!-- writable version -->\n"
+      "              <a class=\"nav-link\" href=\"" << get_uri_prefix() << "/itinerary-sharing?id=" << itinerary_id << "\">" << translate("Sharing") << "</a> <!-- writable version -->\n"
       "            </li>\n";
   } else {
     response.content
@@ -611,7 +611,11 @@ void ItineraryHandler::do_preview_request(
 {
   set_page_title(translate("Itinerary"));
   set_menu_item(itinerary);
-  itinerary_id = std::stol(request.get_query_param("id"));
+  std::string id = request.get_query_param("id");
+  if (id.empty()) {
+    id = request.get_query_param("itinerary_id");
+  }
+  itinerary_id = std::stol(id);
   if (request.get_param("active-tab") == "features") {
     active_tab = features_tab;
   }

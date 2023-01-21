@@ -2,10 +2,10 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.0.0-alpha.22],[frank.dean@fdsd.co.uk])
+AC_INIT([trip],[2.0.0-alpha.23],[frank.dean@fdsd.co.uk])
 BOOTSTRAP_VERSION='5.2.3'
-OPENLAYERS_VERSION='7.1.0'
-PROJ4JS_VERSION='2.8.0'
+OPENLAYERS_VERSION='7.2.2'
+PROJ4JS_VERSION='2.8.1'
 OLC_VERSION='1.0.4'
 AC_COPYRIGHT([Copyright (C) 2022 Frank Dean])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign dist-xz subdir-objects info-in-builddir])

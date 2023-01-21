@@ -37,6 +37,8 @@ namespace trip {
 class TrackSharingEditHandler : public TripAuthenticatedRequestHandler {
   bool is_new;
   std::string nickname;
+  /// Used to determine which page to return to in the track sharing list
+  std::uint32_t current_page;
   int convert_dhm_to_minutes(
       std::string days,
       std::string hours,
@@ -52,7 +54,8 @@ protected:
       web::HTTPServerResponse& response) override;
 public:
   TrackSharingEditHandler(std::shared_ptr<TripConfig> config) :
-    TripAuthenticatedRequestHandler(config), is_new(false), nickname() {}
+    TripAuthenticatedRequestHandler(config), is_new(false), nickname(),
+    current_page(1) {}
   virtual ~TrackSharingEditHandler() {}
   virtual std::string get_handler_name() const override {
     return "TrackSharingEditHandler";

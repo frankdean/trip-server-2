@@ -24,7 +24,7 @@
 #include "../trip-server-common/src/file_utils.hpp"
 #include <iostream>
 #ifdef HAVE_CXX17
-#include <filesystem>  
+#include <filesystem>
 #endif
 #include <memory>
 #include <string>

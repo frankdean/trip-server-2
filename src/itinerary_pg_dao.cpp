@@ -911,7 +911,8 @@ void ItineraryPgDao::validate_user_itinerary_read_access(work &tx,
       user_id,
       itinerary_id
     );
-  if (r[0].as<long>() != 1)
+  // If the user sets themselves as a shared user, the count is 2
+  if (r[0].as<long>() < 1)
     throw NotAuthorized();
 }
 
@@ -1253,6 +1254,158 @@ void ItineraryPgDao::auto_color_paths(std::string user_id,
     tx.commit();
   } catch (const std::exception &e) {
     std::cerr << "Exception whilst auto-assigning colors to paths: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+long ItineraryPgDao::get_itinerary_shares_count(std::string user_id,
+                                               long itinerary_id)
+{
+  work tx(*connection);
+  try {
+    validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+    auto r = tx.exec_params1(
+        "SELECT COUNT(*) FROM itinerary_sharing "
+        "WHERE itinerary_id=$1",
+        itinerary_id);
+    tx.commit();
+    return r[0].as<long>();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception fetching itinerary share count: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+std::vector<ItineraryPgDao::itinerary_share>
+    ItineraryPgDao::get_itinerary_shares(std::string user_id,
+                                         long itinerary_id,
+                                         std::uint32_t offset,
+                                         int limit)
+{
+  work tx(*connection);
+  try {
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    auto result = tx.exec_params(
+        "SELECT sh.shared_to_id, u.nickname, sh.active "
+        "FROM itinerary_sharing sh "
+        "JOIN usertable u ON u.id=sh.shared_to_id "
+        "WHERE sh.itinerary_id=$1 "
+        "ORDER BY u.nickname "
+        "OFFSET $2 LIMIT $3",
+        itinerary_id,
+        offset,
+        limit);
+    std::vector<itinerary_share> shares;
+    for (const auto &r : result) {
+      itinerary_share share;
+      share.shared_to_id = r["shared_to_id"].as<long>();
+      share.nickname = r["nickname"].as<std::string>();
+      share.active.first = r["active"].to(share.active.second);
+      shares.push_back(share);
+    }
+    tx.commit();
+    return shares;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception fetching itinerary shares: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+ItineraryPgDao::itinerary_share ItineraryPgDao::get_itinerary_share(
+    std::string user_id,
+    long itinerary_id,
+    long shared_to_id)
+{
+  work tx(*connection);
+  try {
+    validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+    auto r = tx.exec_params1(
+        "SELECT sh.shared_to_id, u.nickname, sh.active "
+        "FROM itinerary_sharing sh "
+        "JOIN usertable u ON u.id=sh.shared_to_id "
+        "WHERE sh.itinerary_id=$1 AND sh.shared_to_id=$2"
+        "ORDER BY u.nickname",
+        itinerary_id,
+        shared_to_id);
+    itinerary_share share;
+    share.shared_to_id = r["shared_to_id"].as<long>();
+    share.nickname = r["nickname"].as<std::string>();
+    share.active.first = r["active"].to(share.active.second);
+    tx.commit();
+    return share;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception fetching itinerary share: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+void ItineraryPgDao::save(std::string user_id,
+                          long itinerary_id,
+                          itinerary_share &share)
+{
+  work tx(*connection);
+  try {
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    tx.exec_params(
+        "INSERT INTO itinerary_sharing (itinerary_id, shared_to_id, active) "
+        "VALUES ($1, $2, $3) "
+        "ON CONFLICT (itinerary_id, shared_to_id) DO UPDATE "
+        "SET active=$3",
+        itinerary_id,
+        share.shared_to_id,
+        share.active.first ? &share.active.second : nullptr
+      );
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception saving itinerary share: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+void ItineraryPgDao::activate_itinerary_shares(std::string user_id,
+                                               long itinerary_id,
+                                               const std::vector<long> &shared_to_ids,
+                                               bool activate)
+{
+  try {
+    work tx(*connection);
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    const std::string ids_sql = dao_helper::to_sql_array(shared_to_ids);
+    tx.exec_params(
+        "UPDATE itinerary_sharing SET active=$3 "
+        "WHERE itinerary_id=$1 AND shared_to_id=ANY($2)",
+        itinerary_id,
+        ids_sql,
+        activate);
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception activating itinerary shares: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+void ItineraryPgDao::delete_itinerary_shares(std::string user_id,
+                                             long itinerary_id,
+                                             const std::vector<long> &shared_to_ids)
+{
+  try {
+    work tx(*connection);
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    const std::string ids_sql = dao_helper::to_sql_array(shared_to_ids);
+    tx.exec_params(
+        "DELETE FROM itinerary_sharing "
+        "WHERE itinerary_id=$1 AND shared_to_id=ANY($2)",
+        itinerary_id,
+        ids_sql);
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception activating itinerary shares: "
               << e.what() << '\n';
     throw;
   }

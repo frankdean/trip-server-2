@@ -780,7 +780,7 @@ std::string TrackPgDao::get_logging_uuid_by_user_id(std::string user_id)
   return logging_uuid;
 }
 
-// throws pqxx::unexpected_rows
+// \throws pqxx::unexpected_rows
 std::string TrackPgDao::get_user_id_by_nickname(std::string nickname)
 {
   // try {

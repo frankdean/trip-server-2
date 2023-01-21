@@ -57,9 +57,9 @@ void ItineraryWaypointEditHandler::do_preview_request(
 void ItineraryWaypointEditHandler::append_pre_body_end(std::ostream& os) const
 {
   os << "    <script src=\"" << get_uri_prefix()
-     << "/static/proj4js-2.8.0/proj4-src.js\"></script>\n";
+     << "/static/proj4js-" << PROJ4JS_VERSION << "/proj4-src.js\"></script>\n";
   os << "    <script src=\"" << get_uri_prefix()
-     << "/static/open-location-code-1.0.4/openlocationcode.js\"></script>\n";
+     << "/static/open-location-code-" << OLC_VERSION << "/openlocationcode.js\"></script>\n";
   os << "    <script type=\"module\" src=\"" << get_uri_prefix()
      << "/static/js/itinerary-waypoint.js\"></script>\n";
   TripAuthenticatedRequestHandler::append_pre_body_end(os);

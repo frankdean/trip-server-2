@@ -19,10 +19,10 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef TRACK_SHARING_HANDLER_HPP
-#define TRACK_SHARING_HANDLER_HPP
+#ifndef ITINERARY_SHARING_EDIT_HANDLER
+#define ITINERARY_SHARING_EDIT_HANDLER
 
-#include "tracking_pg_dao.hpp"
+#include "itinerary_pg_dao.hpp"
 #include "trip_request_handler.hpp"
 
 namespace fdsd {
@@ -33,10 +33,15 @@ namespace web {
 }
 namespace trip {
 
-class TrackSharingHandler :  public TripAuthenticatedRequestHandler {
+class ItinerarySharingEditHandler :  public TripAuthenticatedRequestHandler {
+  long itinerary_id;
+  std::pair<bool, long> shared_to_id;
+  bool is_new;
+  bool invalid_nickname_error;
+  /// Used to determine which page to return to in the itinerary sharing list
+  std::uint32_t current_page;
   void build_form(web::HTTPServerResponse& response,
-                  const web::Pagination& pagination,
-                  const std::vector<TrackPgDao::track_share>& track_shares) const;
+                  const ItineraryPgDao::itinerary_share &itinerary_share) const;
 protected:
   virtual void do_preview_request(
       const web::HTTPServerRequest& request,
@@ -45,46 +50,28 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  TrackSharingHandler(std::shared_ptr<TripConfig> config) :
-    TripAuthenticatedRequestHandler(config) {}
-  virtual ~TrackSharingHandler() {}
+  ItinerarySharingEditHandler(std::shared_ptr<TripConfig> config) :
+    TripAuthenticatedRequestHandler(config),
+    itinerary_id(),
+    shared_to_id(),
+    is_new(false),
+    invalid_nickname_error(false),
+    current_page(1) {}
+  virtual ~ItinerarySharingEditHandler() {}
   virtual std::string get_handler_name() const override {
-    return "TrackSharingHandler";
+    return "ItinerarySharingEditHandler";
   }
   virtual bool can_handle(
       const web::HTTPServerRequest& request) const override {
-    // return compare_request_regex(request.uri, "/sharing[^/]*");
-    return compare_request_regex(request.uri, "/sharing(\\?page=[0-9]*)?$");
+    return compare_request_regex(request.uri, "/itinerary-sharing/edit[/\\?]?.*");
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<TrackSharingHandler>(
-        new TrackSharingHandler(config));
-  }
-};
-
-struct period_dhm {
-  int days;
-  int hours;
-  int minutes;
-  period_dhm(int days, int hours, int minutes) :
-    days(days), hours(hours), minutes(minutes) {}
-  period_dhm(int minutes) {
-    hours = minutes / 60;
-    this->minutes = minutes - hours * 60;
-    days = hours / 24;
-    hours = hours - days * 24;
-  }
-  int get_total_minutes() const {
-    return minutes + (hours + days * 24) * 60;
-  }
-  std::string to_string() const {
-    return std::to_string(days) + "d "
-      + std::to_string(hours) + "h "
-      + std::to_string(minutes) + "m";
+    return std::unique_ptr<ItinerarySharingEditHandler>(
+        new ItinerarySharingEditHandler(config));
   }
 };
 
 } // namespace trip
 } // namespace fdsd
 
-#endif // TRACK_SHARING_HANDLER_HPP
+#endif // ITINERARY_SHARING_EDIT_HANDLER

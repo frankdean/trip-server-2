@@ -18,6 +18,10 @@ trip_server_SOURCES = \
 	itinerary_pg_dao.hpp \
 	itinerary_rest_handler.cpp \
 	itinerary_rest_handler.hpp \
+	itinerary_sharing_edit_handler.cpp \
+	itinerary_sharing_edit_handler.hpp \
+	itinerary_sharing_handler.cpp \
+	itinerary_sharing_handler.hpp \
 	itinerary_simplify_handler.cpp \
 	itinerary_simplify_handler.hpp \
 	itinerary_upload_handler.cpp \

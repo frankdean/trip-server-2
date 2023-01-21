@@ -408,5 +408,5 @@ void GeoStatistics::update_statistics(
   // } else {
   //   std::cout << "Altitude not set\n";
   }
-  
+
 }

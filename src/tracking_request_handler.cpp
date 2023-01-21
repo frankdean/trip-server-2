@@ -284,7 +284,7 @@ void TrackingRequestHandler::build_form(
                    << translate("Download tracks") << "</button>\n"
     "        <!--\n"
     // Label for the button to make a copy of the tracked locations
-    "        <button id=\"btn-copy\" type=\"submit\" name=\"action\" value=\"copy\" accesskey=\"c\" class=\"btn btn-lg btn-primary\">" << translate("Copy") << "</button>\n"
+    "        <button id=\"btn-copy\" type=\"submit\" name=\"action\" value=\"copy\" accesskey=\"y\" class=\"btn btn-lg btn-primary\">" << translate("Copy") << "</button>\n"
     "        -->\n"
     // Label for the button which resets the form's input criteria to that originally displayed
     "        <button id=\"btn-reset\" type=\"submit\" name=\"action\" value=\"reset\" accesskey=\"r\" class=\"btn btn-lg btn-danger\">" << translate("Reset") << "</button>\n"

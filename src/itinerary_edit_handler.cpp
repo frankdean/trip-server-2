@@ -62,7 +62,7 @@ void ItineraryEditHandler::build_form(
     "                  <div class=\"col-lg-6\">\n"
     // Label for entering the itinerary title
     "                    <label for=\"input-title\" class=\"form-label\">" << translate("Title") << "</label>\n"
-    "                    <input id=\"input-title\" class=\"form-control\" type=\"text\" name=\"title\" value=\"" << x(itinerary.title) << "\" required>\n"
+    "                    <input id=\"input-title\" class=\"form-control\" type=\"text\" name=\"title\" value=\"" << x(itinerary.title) << "\" required autofocus>\n"
     "                  </div>\n"
     "                  <div class=\"col-lg-3\">\n"
     // Label for entering the start date for an itinerary

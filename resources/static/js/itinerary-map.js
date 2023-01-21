@@ -95,7 +95,10 @@ class ItineraryMap extends TripMap {
     this.routeSource.on('addfeature', function(event) {
       const type = event.feature.get('type');
       // console.debug('routeSource addfeature event', event.feature);
-      self.saveFeature(event.feature);
+      const geometry = event.feature.getGeometry();
+      const pointCount = geometry.flatCoordinates.length / geometry.stride;
+      if (pointCount > 1)
+        self.saveFeature(event.feature);
     });
 
     this.waypointSource = new VectorSource();
@@ -120,7 +123,7 @@ class ItineraryMap extends TripMap {
       self.waypointDraw.finishDrawing();
       self.map.removeInteraction(self.waypointDraw);
       self.waypointDraw = undefined;
-      self.createFeatureControl.finishDrawing();
+      self.createFeatureControl.hideOptionButtons();
     });
 
     if (!this.refetch) {
@@ -190,7 +193,7 @@ class ItineraryMap extends TripMap {
       // console.debug('Draw drawend', event.feature);
       event.feature.set('type', 'route');
       self.routeDraw.finishDrawing();
-      self.createFeatureControl.finishDrawing();
+      self.createFeatureControl.hideOptionButtons();
       self.map.removeInteraction(self.routeDraw);
       self.routeDraw = undefined;
     });
@@ -304,9 +307,7 @@ class ItineraryMap extends TripMap {
     if (selectedFeatures.routes.length > 0 ||
         selectedFeatures.waypoints.length > 0)
       this.deleteFeatures(selectedFeatures);
-    this.map.removeInteraction(this.modifyRoute);
-    this.map.removeInteraction(this.modifyWaypoint);
-    this.map.removeInteraction(this.selectFeatures);
+    this.removeInteractions();
   }
 
   createWaypoint() {
@@ -318,6 +319,34 @@ class ItineraryMap extends TripMap {
   }
 
   abortFeatureEdit() {
+    this.removeInteractions();
+    this.refetch = false;
+    if (this.modifiedRoutes && this.modifiedRoutes.size > 0) {
+      this.refetch = true;
+      this.modifiedRoutes.clear();
+    }
+    if (this.modifiedWaypoints && this.modifiedWaypoints.size > 0) {
+      this.refetch = true;
+      this.modifiedWaypoints.clear();
+    }
+    if (this.deletedRoutes && this.deletedRoutes.length > 0) {
+      this.refetch = true;
+      this.deletedRoutes.length = 0;
+    }
+    if (this.deletedWaypoints && this.deletedWaypoints.length > 0) {
+      this.refetch = true;
+      this.deletedWaypoints.length = 0;
+    }
+    this.createFeatureControl.hideOptionButtons();
+    if (this.refetch) {
+      this.routeSource.clear();
+      this.waypointSource.clear();
+      this.trackSource.clear();
+      this.fetchFeatures();
+    }
+  }
+
+  removeInteractions() {
     if (this.routeDraw) {
       this.routeDraw.abortDrawing();
       this.map.removeInteraction(this.routeDraw);
@@ -336,29 +365,9 @@ class ItineraryMap extends TripMap {
       this.map.removeInteraction(this.modifyWaypoint);
       this.modifyWaypoint = undefined;
     }
-    this.refetch = false;
-    if (this.modifiedRoutes && this.modifiedRoutes.size > 0) {
-      this.refetch = true;
-      this.modifiedRoutes.clear();
-    }
-    if (this.modifiedWaypoints && this.modifiedWaypoints.size > 0) {
-      this.refetch = true;
-      this.modifiedWaypoints.clear();
-    }
-    if (this.deletedRoutes && this.deletedRoutes.length > 0) {
-      this.refetch = true;
-      this.deletedRoutes.length = 0;
-    }
-    if (this.deletedWaypoints && this.deletedWaypoints.length > 0) {
-      this.refetch = true;
-      this.deletedWaypoints.length = 0;
-    }
-    this.createFeatureControl.finishDrawing();
-    if (this.refetch) {
-      this.routeSource.clear();
-      this.waypointSource.clear();
-      this.trackSource.clear();
-      this.fetchFeatures();
+    if (this.selectFeatures) {
+      this.map.removeInteraction(this.selectFeatures);
+      this.selectFeatures = undefined;
     }
   }
 

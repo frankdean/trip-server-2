@@ -23,10 +23,11 @@
 #include "trip_pg_dao.hpp"
 #include "../trip-server-common/src/get_options.hpp"
 #include "../trip-server-common/src/pg_pool.hpp"
+#include <boost/locale.hpp>
 #include <iostream>
-// #include <chrono>
 
 using namespace pqxx;
+using namespace boost::locale;
 using namespace fdsd::utils;
 using namespace fdsd::trip;
 
@@ -61,6 +62,12 @@ TripPgDao::TripPgDao()
 TripPgDao::~TripPgDao()
 {
   TripPgDao::pool_manager->free_connection(connection);
+}
+
+    // Error message displayed when a user attempts an operation they are not authorized for
+TripPgDao::NotAuthorized::NotAuthorized()
+  : BadRequestException(translate("User is not authorized for the requested operation"))
+{
 }
 
 void TripPgDao::set_pool_manager(

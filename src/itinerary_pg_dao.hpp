@@ -192,6 +192,14 @@ public:
                   tracks(),
                   waypoints() {}
   };
+  struct itinerary_share {
+    long shared_to_id;
+    std::string nickname;
+    std::pair<bool, bool> active;
+    itinerary_share() : shared_to_id(),
+                        nickname(),
+                        active() {}
+  };
   struct selected_feature_ids {
     std::vector<long> routes;
     std::vector<long> tracks;
@@ -247,6 +255,10 @@ public:
             long itinerary_id,
             route &route);
 
+  void save(std::string user_id,
+            long itinerary_id,
+            itinerary_share &share);
+
   bool has_user_itinerary_modification_access(std::string user_id,
                                               long itinerary_id);
   void validate_user_itinerary_modification_access(std::string user_id,
@@ -267,6 +279,27 @@ public:
   void auto_color_paths(std::string user_id,
                         long itinerary_id,
                         const selected_feature_ids &selected);
+
+  long get_itinerary_shares_count(std::string user_id,
+                                 long itinerary_id);
+
+  std::vector<itinerary_share> get_itinerary_shares(std::string user_id,
+                                                    long itinerary_id,
+                                                    std::uint32_t offset,
+                                                    int limit);
+
+  itinerary_share get_itinerary_share(std::string user_id,
+                                      long itinerary_id,
+                                      long shared_to_id);
+
+  void activate_itinerary_shares(std::string user_id,
+                                 long itinerary_id,
+                                 const std::vector<long> &shared_to_ids,
+                                 bool activate);
+  void delete_itinerary_shares(std::string user_id,
+                               long itinerary_id,
+                               const std::vector<long> &shared_to_ids);
+
 protected:
   void create_waypoints(
       pqxx::work &tx,

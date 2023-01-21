@@ -19,10 +19,10 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef TRACK_SHARING_HANDLER_HPP
-#define TRACK_SHARING_HANDLER_HPP
+#ifndef ITINERARY_SHARING_HANDLER_HPP
+#define ITINERARY_SHARING_HANDLER_HPP
 
-#include "tracking_pg_dao.hpp"
+#include "itinerary_pg_dao.hpp"
 #include "trip_request_handler.hpp"
 
 namespace fdsd {
@@ -33,10 +33,14 @@ namespace web {
 }
 namespace trip {
 
-class TrackSharingHandler :  public TripAuthenticatedRequestHandler {
+class ItinerarySharingHandler :  public TripAuthenticatedRequestHandler {
+
+  long itinerary_id;
+
   void build_form(web::HTTPServerResponse& response,
-                  const web::Pagination& pagination,
-                  const std::vector<TrackPgDao::track_share>& track_shares) const;
+                const web::Pagination& pagination,
+                const std::vector<ItineraryPgDao::itinerary_share>& itinerary_shares) const;
+
 protected:
   virtual void do_preview_request(
       const web::HTTPServerRequest& request,
@@ -45,46 +49,24 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  TrackSharingHandler(std::shared_ptr<TripConfig> config) :
-    TripAuthenticatedRequestHandler(config) {}
-  virtual ~TrackSharingHandler() {}
+  ItinerarySharingHandler(std::shared_ptr<TripConfig> config) :
+    TripAuthenticatedRequestHandler(config), itinerary_id() {}
+  virtual ~ItinerarySharingHandler() {}
   virtual std::string get_handler_name() const override {
-    return "TrackSharingHandler";
+    return "ItinerarySharingHandler";
   }
   virtual bool can_handle(
       const web::HTTPServerRequest& request) const override {
-    // return compare_request_regex(request.uri, "/sharing[^/]*");
-    return compare_request_regex(request.uri, "/sharing(\\?page=[0-9]*)?$");
+    return compare_request_regex(request.uri, "/itinerary-sharing/?\\?.*");
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<TrackSharingHandler>(
-        new TrackSharingHandler(config));
-  }
-};
-
-struct period_dhm {
-  int days;
-  int hours;
-  int minutes;
-  period_dhm(int days, int hours, int minutes) :
-    days(days), hours(hours), minutes(minutes) {}
-  period_dhm(int minutes) {
-    hours = minutes / 60;
-    this->minutes = minutes - hours * 60;
-    days = hours / 24;
-    hours = hours - days * 24;
-  }
-  int get_total_minutes() const {
-    return minutes + (hours + days * 24) * 60;
-  }
-  std::string to_string() const {
-    return std::to_string(days) + "d "
-      + std::to_string(hours) + "h "
-      + std::to_string(minutes) + "m";
+    return std::unique_ptr<ItinerarySharingHandler>(
+        new ItinerarySharingHandler(config));
   }
 };
 
 } // namespace trip
 } // namespace fdsd
 
-#endif // TRACK_SHARING_HANDLER_HPP
+
+#endif // ITINERARY_SHARING_HANDLER_HPP

@@ -29,6 +29,8 @@
 #include "itinerary_handler.hpp"
 #include "itinerary_map_handler.hpp"
 #include "itinerary_rest_handler.hpp"
+#include "itinerary_sharing_edit_handler.hpp"
+#include "itinerary_sharing_handler.hpp"
 #include "itinerary_simplify_handler.hpp"
 #include "itinerary_waypoint_edit_handler.hpp"
 #include "tile_handler.hpp"
@@ -136,6 +138,12 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
   post_login_handlers.push_back(
       std::make_shared<ItineraryWaypointEditHandler>(
           ItineraryWaypointEditHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<ItinerarySharingHandler>(
+          ItinerarySharingHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<ItinerarySharingEditHandler>(
+          ItinerarySharingEditHandler(config)));
 }
 
 std::string TripRequestFactory::get_session_id_cookie_name() const

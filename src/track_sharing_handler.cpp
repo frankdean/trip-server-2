@@ -72,7 +72,7 @@ void TrackSharingHandler::build_form(
       "        <th>" << translate("Maximum Limit") << "</th>\n"
       // The column heading showing whether track sharing is active with another user
       "        <th>" << translate("Active") << "</th>\n"
-      "        <th><input id=\"select-all\" type=\"checkbox\" class=\"form-check-input\" onclick=\"select_all(this)\"></th>\n"
+      "        <th><input id=\"select-all\" accesskey=\"l\" type=\"checkbox\" class=\"form-check-input\" onclick=\"select_all(this)\"></th>\n"
       "      </tr>\n";
     int c = 0;
     for (auto const &share : track_shares) {
@@ -107,13 +107,21 @@ void TrackSharingHandler::build_form(
       <<
       "    </table>\n"
       "  </div>\n";
-    if (pagination.get_page_count() > 1) {
+    const auto page_count = pagination.get_page_count();
+    if (page_count > 1) {
       response.content
         <<
         "  <div id=\"div-paging\" class=\"pb-0\">\n"
         << pagination.get_html()
         <<
-        "  </div>\n";
+        "  </div>\n"
+        "    <div class=\"d-flex justify-content-center pt-0 pb-0 col-12\">\n"
+        "      <input id=\"page\" type=\"number\" name=\"page\" value=\""
+        << std::fixed << std::setprecision(0) << pagination.get_current_page()
+        << "\" min=\"1\" max=\"" << page_count << "\">\n"
+        // Title of button which goes to a specified page number
+        "      <button id=\"page-btn\" class=\"btn btn-sm btn-primary\" type=\"submit\" name=\"action\" accesskey=\"g\" value=\"page\">" << translate("Go") << "</button>\n"
+        "    </div>\n";
     }
   } // if (!track_shares.empty())
 
@@ -128,7 +136,7 @@ void TrackSharingHandler::build_form(
       // Name of button to de-activate track sharing with selected users
       "      <button id=\"btn-deactivate\" name=\"action\" value=\"de-activate\" accesskey=\"d\" class=\"my-1 btn btn-lg btn-primary\">" << translate("Deactivate") << "</button>\n"
       // Prompt to confirm the user wishes to delete track sharing for the selected users.
-      "      <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"x\"class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected location shares?") << "');\">"
+      "      <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"x\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected location shares?") << "');\">"
       // Name of button to delete track sharing with selected users
       << translate("Delete selected") << "</button>\n"
       // Name of button to edit the track sharing criteria of a selected user
@@ -137,7 +145,7 @@ void TrackSharingHandler::build_form(
   response.content
     <<
     // Name of button to create a new track sharing record
-    "      <button id=\"btn-new\" formaction=\"" << get_uri_prefix() << "/sharing/edit?new=true\" class=\"my-1 btn btn-lg btn-warning\">" << translate("New") << "</button>\n"
+    "      <button id=\"btn-new\" accesskey=\"w\" formmethod=\"post\" formaction=\"" << get_uri_prefix() << "/sharing/edit?new=true\" class=\"my-1 btn btn-lg btn-warning\">" << translate("New") << "</button>\n"
       "  </div>\n"
     "  </form>\n"
     "</div>\n"
@@ -198,7 +206,7 @@ void TrackSharingHandler::handle_authenticated_request(
   auto total_count = dao.get_track_sharing_count_by_user_id(user_id);
   const std::map<std::string, std::string> dummy_map;
   Pagination pagination(get_uri_prefix() + "/sharing", dummy_map, total_count);
-  const std::string page = request.get_query_param("page");
+  const std::string page = request.get_param("page");
   if (!page.empty())
     pagination.set_current_page(std::stoul(page));
   auto track_shares = dao.get_track_sharing_by_user_id(user_id,

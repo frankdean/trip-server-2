@@ -24,6 +24,7 @@
 #include "track_sharing_handler.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <boost/locale.hpp>
+#include <sstream>
 
 using namespace boost::locale;
 using namespace fdsd::trip;
@@ -61,6 +62,7 @@ void TrackSharingEditHandler::build_form(
   response.content
     <<
     "    <form name=\"form\" method=\"post\">\n"
+    "      <input type=\"hidden\" name=\"page\" value=\"" << current_page << "\">\n"
     "      <div id=\"div-nickname\" class=\"container-fluid bg-light py-3 my-3\">\n"
     // Prompt to input the nickname to share location tracking with
     "        <label for=\"input-nickname\">" << translate("Share location with nickname") << "</label>\n"
@@ -70,7 +72,7 @@ void TrackSharingEditHandler::build_form(
   }
   response.content
     <<
-    " value=\"" << x(nickname) << "\" required>\n"
+    " value=\"" << x(nickname) << "\" required autofocus>\n"
     "      </div>\n"
     "      <div id=\"div-recent-time\" class=\"container-fluid bg-light py-3 my-3\">\n"
     // Prompt when entering recent tracking criteria when sharing locations
@@ -182,14 +184,16 @@ void TrackSharingEditHandler::handle_authenticated_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
+  const std::string page = request.get_param("page");
+  try {
+    if (!page.empty())
+      current_page = std::stoul(page);
+  } catch (const std::logic_error& e) {
+    std::cerr << "Error converting string to page number\n";
+  }
+
   const std::string action = request.get_post_param("action");
   TrackPgDao::location_share_details share;
-
-  // std::cout << "Action: \"" << action << "\"\n";
-  // auto pp = request.get_post_params();
-  // for (auto const &p : pp) {
-  //   std::cout << "param: \"" << p.first << "\" -> \"" << p.second << "\"\n";
-  // }
 
   try {
     if (action == "save") {
@@ -216,7 +220,13 @@ void TrackSharingEditHandler::handle_authenticated_request(
           share.active.second = true;
         }
         dao.save(share);
-        redirect(request, response, get_uri_prefix() + "/sharing");
+        std::ostringstream os;
+        os << get_uri_prefix() + "/sharing";
+        const std::string page = request.get_param("page");
+        if (!page.empty())
+          os << "?page=" << page;
+        redirect(request, response, os.str());
+        return;
       } catch (const pqxx::unexpected_rows &e) {
         // Error shown to the user when a nickname does not exist
         add_message(
@@ -224,7 +234,13 @@ void TrackSharingEditHandler::handle_authenticated_request(
                         UserMessage::Type::error));
       }
     } else if (action == "cancel") {
-      redirect(request, response, get_uri_prefix() + "/sharing");
+      std::ostringstream os;
+      os << get_uri_prefix() + "/sharing";
+      const std::string page = request.get_param("page");
+      if (!page.empty())
+        os << "?page=" << page;
+      redirect(request, response, os.str());
+      return;
     } else {
       if (!nickname.empty()) {
         TrackPgDao dao;

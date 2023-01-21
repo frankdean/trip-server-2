@@ -49,7 +49,7 @@ void ItinerarySimplifyHandler::build_form(
     {"itinerary_id", itinerary_id},
     {"features", features}
   };
-  
+
   response.content
     <<
     "<div id=\"main-content\" class=\"container-fluid\">\n"
