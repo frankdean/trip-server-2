@@ -38,8 +38,11 @@ class SessionPgDao : public TripPgDao {
 public:
   static const std::string coordinate_format_key;
   static const std::string tracks_query_key;
+  static const std::string location_history_key;
+  static const std::string itinerary_features_key;
   void save_value(std::string session_id, std::string key, std::string value);
   std::string get_value(std::string session_id, std::string key);
+  void remove_value(std::string session_id, std::string key);
   void create_session_table(bool overwrite = false);
   void save_session(std::string session_id,
                     const fdsd::web::Session session);

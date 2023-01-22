@@ -23,6 +23,7 @@
 #define ITINERARY_PG_DAO_HPP
 
 #include "trip_pg_dao.hpp"
+#include "tracking_pg_dao.hpp"
 #include "geo_utils.hpp"
 #include <chrono>
 #include <string>
@@ -148,6 +149,24 @@ public:
                  color(),
                  type(),
                  avg_samples() {}
+    waypoint(location loc)
+      : location(loc),
+        waypoint_base(),
+        time(),
+        description(),
+        color(),
+        type(),
+        avg_samples() {}
+    waypoint(TrackPgDao::tracked_location loc)
+      : location(loc),
+        waypoint_base(),
+        time(std::make_pair(true, loc.time_point)),
+        description(),
+        color(),
+        type(),
+        avg_samples() {
+      comment = loc.note;
+    }
   };
   struct itinerary_features {
     std::vector<route> routes;
@@ -328,6 +347,15 @@ protected:
   void validate_user_itinerary_read_access(pqxx::work &tx,
                                            std::string user_id,
                                            long itinerary_id);
+public:
+  void create_waypoints(
+      std::string user_id,
+      long itinerary_id,
+      const std::vector<ItineraryPgDao::waypoint> &waypoints);
+  void create_tracks(
+      std::string user_id,
+      long itinerary_id,
+      std::vector<track> &tracks);
 };
 
 /// Allows Argument-depenedent lookup for the nlohmann/json library to find this method

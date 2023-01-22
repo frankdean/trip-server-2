@@ -41,7 +41,7 @@ void ItinerarySharingEditHandler::build_form(
   if (invalid_nickname_error)
     response.content
       <<
-      "            <div class=\"alert alert-danger\">\n"
+      "            <div class=\"alert alert-danger\" role=\"alert\">\n"
       // Message displayed when an entered nickname does not exist
       "              <p>" << translate("That nickname does not exist.  Nicknames are case-sensitive.") << "</p>\n"
       "            </div>\n";

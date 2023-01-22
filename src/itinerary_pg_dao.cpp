@@ -662,6 +662,23 @@ void ItineraryPgDao::create_waypoints(
   }
 }
 
+void ItineraryPgDao::create_waypoints(
+    std::string user_id,
+    long itinerary_id,
+    const std::vector<waypoint> &waypoints)
+{
+  work tx(*connection);
+  try {
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    create_waypoints(tx, itinerary_id, waypoints);
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception whilst creating waypoints: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
 void ItineraryPgDao::create_route_points(
     work &tx,
     route &route)
@@ -796,6 +813,23 @@ void ItineraryPgDao::create_tracks(
         t.highest.first ? &t.highest.second : nullptr);
     t.id.first = r["id"].to(t.id.second);
     create_track_segments(tx, t);
+  }
+}
+
+void ItineraryPgDao::create_tracks(
+    std::string user_id,
+    long itinerary_id,
+    std::vector<track> &tracks)
+{
+  work tx(*connection);
+  try {
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    create_tracks(tx, itinerary_id, tracks);
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception whilst creating tracks: "
+              << e.what() << '\n';
+    throw;
   }
 }
 

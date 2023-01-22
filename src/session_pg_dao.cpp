@@ -31,6 +31,10 @@ using namespace fdsd::trip;
 
 const std::string SessionPgDao::coordinate_format_key = "coordinate_format";
 const std::string SessionPgDao::tracks_query_key = "tracks";
+/// Used for copy-and-paste of location tracking history
+const std::string SessionPgDao::location_history_key = "location-history";
+/// Used for copy-and-paste of itinerary featues
+const std::string SessionPgDao::itinerary_features_key = "itinerary-features";
 
 const std::string SessionPgDao::insert_session_ps_name = "session_insert";
 
@@ -81,6 +85,17 @@ std::string SessionPgDao::get_value(std::string session_id,
       "' AND key = '" + tx.esc(key) + "'");
   tx.commit();
   return r.empty() ? "" : r[0][0].as<std::string>();
+}
+
+void SessionPgDao::remove_value(std::string session_id,
+                                std::string key)
+{
+  work tx(*connection);
+  result r = tx.exec(
+      "DELETE FROM session_data "
+      "WHERE session_id='" + tx.esc(session_id) +
+      "' AND key = '" + tx.esc(key) + "'");
+  tx.commit();
 }
 
 void SessionPgDao::create_session_table(bool overwrite)

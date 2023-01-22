@@ -24,7 +24,9 @@
 
 #include "trip_request_handler.hpp"
 #include "itinerary_pg_dao.hpp"
+#include "tracking_pg_dao.hpp"
 #include "trip_config.hpp"
+#include <nlohmann/json.hpp>
 
 namespace fdsd {
 namespace web {
@@ -35,13 +37,46 @@ namespace web {
 namespace trip {
 
 class ItineraryHandler : public TripAuthenticatedRequestHandler {
+public:
+
+  struct paste_features : public ItineraryPgDao::selected_feature_ids {
+    long itinerary_id;
+    paste_features()  : ItineraryPgDao::selected_feature_ids() {}
+    paste_features(long itinerary_id,
+                   ItineraryPgDao::selected_feature_ids features)
+      : ItineraryPgDao::selected_feature_ids(features),
+        itinerary_id(itinerary_id) {}
+
+    static void to_json(nlohmann::json& j, const paste_features& ids);
+    static void from_json(const nlohmann::json& j, paste_features& ids);
+  };
+
+private:
   bool read_only;
+  bool max_track_paste_exceeded;
   long itinerary_id;
   enum active_tab_type {
     itinerary_tab,
     features_tab
   };
   active_tab_type active_tab;
+  std::pair<bool, TrackPgDao::location_search_query_params>
+      location_history_paste_params;
+  std::pair<bool, paste_features>
+      selected_features_paste_params;
+
+  std::pair<bool, TrackPgDao::location_search_query_params>
+      get_location_history_paste_params();
+
+  std::pair<bool, paste_features>
+      get_selected_features_paste_params();
+
+  void paste_items();
+
+  void paste_locations();
+
+  void paste_itinerary_features();
+
   void append_heading_content(
       web::HTTPServerResponse& response,
       const ItineraryPgDao::itinerary& itinerary);
@@ -82,11 +117,14 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
+  static const long max_track_points;
   ItineraryHandler(std::shared_ptr<TripConfig> config) :
     TripAuthenticatedRequestHandler(config),
     read_only(true),
+    max_track_paste_exceeded(false),
     itinerary_id(),
-    active_tab(itinerary_tab) {}
+    active_tab(itinerary_tab),
+    location_history_paste_params() {}
   virtual ~ItineraryHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItineraryHandler";

@@ -22,14 +22,50 @@
 #include "../config.h"
 #include "itinerary_handler.hpp"
 #include "itineraries_handler.hpp"
+#include "session_pg_dao.hpp"
 #include "geo_utils.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <boost/locale.hpp>
+#include <vector>
 
 using namespace boost::locale;
 using namespace fdsd::trip;
 using namespace fdsd::web;
 using namespace fdsd::utils;
+using json = nlohmann::json;
+
+/// The maximum number of location tracking points that can be pasted into an
+/// itinerary
+const long ItineraryHandler::max_track_points = 1000;
+
+namespace fdsd {
+  namespace trip {
+    void to_json(nlohmann::json& j, const ItineraryHandler::paste_features& ids)
+    {
+      ItineraryHandler::paste_features::to_json(j, ids);
+    }
+
+    void from_json(const nlohmann::json& j, ItineraryHandler::paste_features& ids)
+    {
+      ItineraryHandler::paste_features::from_json(j, ids);
+    }
+  } // namespace trip
+} // namespace fdsd
+
+void ItineraryHandler::paste_features::to_json(nlohmann::json& j,
+                                               const ItineraryHandler::paste_features& ids)
+{
+  ItineraryPgDao::selected_feature_ids::to_json(j, ids);
+  j["itinerary_id"] = ids.itinerary_id;
+}
+
+void ItineraryHandler::paste_features::from_json(
+    const nlohmann::json& j,
+    ItineraryHandler::paste_features& ids)
+{
+  ItineraryPgDao::selected_feature_ids::from_json(j, ids);
+  j.at("itinerary_id").get_to(ids.itinerary_id);
+}
 
 ItineraryPgDao::selected_feature_ids
     ItineraryHandler::get_selected_feature_ids(
@@ -294,7 +330,7 @@ void ItineraryHandler::append_features_content(
 
     response.content
       <<
-      "            <div class=\"alert alert-info\">\n"
+      "            <div class=\"alert alert-info\" role=\"alert\">\n"
       // Message displayed when there are no routes, tracks or waypoints to display on the Itinerary page
       "              <p>" << translate("There are no features to display") << "</p>\n"
       "            </div>\n";
@@ -419,6 +455,14 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
   std::string itinerary_aria_selected = (active_tab == itinerary_tab ? "true" : "false");
   std::string features_active = (active_tab == features_tab ? " active" : "");
   std::string features_aria_selected = (active_tab == features_tab ? "true" : "false");
+  if (max_track_paste_exceeded) {
+    response.content
+      <<
+      "            <div class=\"alert alert-warning\" role=\"alert\">\n"
+      // Message displayed when attempting to paste more than the maximum number of items into an itinerary
+      "              <p>" << format(translate("Pasted the maximum of {1} points")) % max_track_points << "</p>\n"
+      "            </div>\n";
+  }
   response.content
     <<
     "  <form method=\"post\">\n"
@@ -524,7 +568,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
   response.content
     <<
     // Label for menu item to copy the selected items, similarly to copy and paste functions
-    "                <li><a class=\"dropdown-item opacity-50\">" << translate("Copy selected items") << "</a></li>\n"
+    "                <li><button class=\"dropdown-item\" name=\"action\" value=\"copy\" accesskey=\"y\">" << translate("Copy selected items") << "</button></li>\n"
     "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n";
   if (!read_only) {
     response.content
@@ -534,7 +578,23 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       " onclick=\"return confirm('" << translate("Automatically assign colors to selected tracks and routes?")
       << "');\">"
       // Label for menu item to set a sequence of colors to the selected routes and tracks
-      << translate("Assign colors to routes and tracks") << "</button></li> <!-- writable version -->\n"
+      << translate("Assign colors to routes and tracks") << "</button></li> <!-- writable version -->\n";
+
+    if (location_history_paste_params.first ||
+        selected_features_paste_params.first) {
+
+      response.content
+        <<
+        "                <li><button class=\"dropdown-item\" accesskey=\"p\" name=\"action\" value=\"paste\""
+        // Confirmation dialog text when pasting features to itinerary
+        " onclick=\"return confirm('" << translate("Paste items?")
+        << "');\">"
+        // Label for menu item to set paste selected items into an itinerary
+        << translate("Paste") << "</button></li> <!-- writable version -->\n";
+    }
+
+    response.content
+      <<
       "                <li><button class=\"dropdown-item\" accesskey=\"v\" formmethod=\"post\" name=\"action\" value=\"convert\" "
       // Confirmation dialog text when converting one or more tracks to routes or vice-versa
       "onclick=\"return confirm('" << translate("Convert selected tracks and routes?") << "');\">"
@@ -619,6 +679,8 @@ void ItineraryHandler::do_preview_request(
   if (request.get_param("active-tab") == "features") {
     active_tab = features_tab;
   }
+  location_history_paste_params = get_location_history_paste_params();
+  selected_features_paste_params = get_selected_features_paste_params();
 }
 
 void ItineraryHandler::convertTracksToRoutes(
@@ -656,6 +718,126 @@ void ItineraryHandler::auto_color_paths(
   dao.auto_color_paths(get_user_id(), itinerary_id, selected_features);
 }
 
+std::pair<bool, TrackPgDao::location_search_query_params>
+    ItineraryHandler::get_location_history_paste_params()
+{
+  std::pair<bool, TrackPgDao::location_search_query_params> retval;
+  SessionPgDao session_dao;
+  const std::string p =
+    session_dao.get_value(get_session_id(), SessionPgDao::location_history_key);
+  if (const bool key_exists = !p.empty()) {
+    try {
+      json j = json::parse(p);
+      retval.second = j.get<TrackPgDao::location_search_query_params>();
+      retval.first = key_exists;
+    } catch (const std::exception& e) {
+      std::cerr << "Error parsing location history parameters from session: "
+                << e.what() << '\n';
+    }
+  }
+  return retval;
+}
+
+std::pair<bool, ItineraryHandler::paste_features>
+    ItineraryHandler::get_selected_features_paste_params()
+{
+  std::pair<bool, paste_features> retval;
+  SessionPgDao session_dao;
+  const std::string p =
+    session_dao.get_value(get_session_id(), SessionPgDao::itinerary_features_key);
+  if (const bool key_exists = !p.empty()) {
+    try {
+      json j = json::parse(p);
+      retval.second = j.get<ItineraryHandler::paste_features>();
+      retval.first = key_exists;
+    } catch (const std::exception& e) {
+      std::cerr << "Error parsing itinerary features parameters from session: "
+                << e.what() << '\n';
+    }
+  }
+  return retval;
+}
+
+void ItineraryHandler::paste_locations()
+{
+  TrackPgDao track_dao;
+  location_history_paste_params.second.page_offset = 0;
+  location_history_paste_params.second.page_size =
+    ItineraryHandler:: max_track_points;
+  TrackPgDao::tracked_locations_result
+    locations_result =
+    track_dao.get_tracked_locations(location_history_paste_params.second);
+  max_track_paste_exceeded =
+    locations_result.total_count > ItineraryHandler::max_track_points;
+  std::vector<ItineraryPgDao::waypoint> waypoints;
+  std::vector<ItineraryPgDao::track_point> points;
+  for (const auto &location : locations_result.locations) {
+    ItineraryPgDao::track_point point(location);
+    points.push_back(point);
+    if (location.note.first && !location.note.second.empty()) {
+      ItineraryPgDao::waypoint waypoint(location);
+      waypoints.push_back(waypoint);
+    }
+  }
+  std::vector<ItineraryPgDao::track_segment> segments;
+  ItineraryPgDao::track_segment segment(points);
+  segments.push_back(segment);
+  ItineraryPgDao::track track(segments);
+  track.calculate_statistics();
+  ItineraryPgDao dao;
+  dao.create_waypoints(get_user_id(), itinerary_id, waypoints);
+  std::vector<ItineraryPgDao::track> tracks;
+  tracks.push_back(track);
+  dao.create_tracks(get_user_id(), itinerary_id, tracks);
+}
+
+void ItineraryHandler::paste_itinerary_features()
+{
+  ItineraryPgDao dao;
+  ItineraryPgDao::itinerary_features features;
+  if (!selected_features_paste_params.second.routes.empty()) {
+    features.routes = dao.get_routes(
+        get_user_id(),
+        selected_features_paste_params.second.itinerary_id,
+        selected_features_paste_params.second.routes);
+    for (auto &route : features.routes)
+      route.calculate_statistics();
+  }
+  if (!selected_features_paste_params.second.waypoints.empty()) {
+    features.waypoints = dao.get_waypoints(
+        get_user_id(),
+        selected_features_paste_params.second.itinerary_id,
+        selected_features_paste_params.second.waypoints);
+  }
+  if (!selected_features_paste_params.second.tracks.empty()) {
+    features.tracks = dao.get_tracks(
+        get_user_id(),
+        selected_features_paste_params.second.itinerary_id,
+        selected_features_paste_params.second.tracks);
+    for (auto &track : features.tracks)
+      track.calculate_statistics();
+  }
+  dao.create_itinerary_features(get_user_id(),
+                                itinerary_id,
+                                features);
+}
+
+void ItineraryHandler::paste_items()
+{
+  if (location_history_paste_params.first) {
+    paste_locations();
+    SessionPgDao dao;
+    dao.remove_value(get_session_id(), SessionPgDao::location_history_key);
+    location_history_paste_params.first = false;
+  }
+  if (selected_features_paste_params.first) {
+    paste_itinerary_features();
+    SessionPgDao dao;
+    dao.remove_value(get_session_id(), SessionPgDao::itinerary_features_key);
+    selected_features_paste_params.first = false;
+  }
+}
+
 void ItineraryHandler::handle_authenticated_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
@@ -679,6 +861,24 @@ void ItineraryHandler::handle_authenticated_request(
   } else if (action == "auto-color") {
     active_tab = features_tab;
     auto_color_paths(request);
+  } else if (action == "copy") {
+    active_tab = features_tab;
+    auto features = get_selected_feature_ids(request);
+    selected_features_paste_params.second =
+      paste_features(itinerary_id, features);
+    selected_features_paste_params.first =
+      !(selected_features_paste_params.second.routes.empty() &&
+        selected_features_paste_params.second.waypoints.empty() &&
+        selected_features_paste_params.second.tracks.empty());
+    if (selected_features_paste_params.first) {
+      json j = selected_features_paste_params.second;
+      SessionPgDao session_dao;
+      session_dao.save_value(get_session_id(),
+                             SessionPgDao::itinerary_features_key, j.dump());
+    }
+  } else if (action == "paste") {
+    active_tab = features_tab;
+    paste_items();
   } else if (action == "attributes") {
     auto features = get_selected_feature_ids(request);
     if (!features.waypoints.empty()) {

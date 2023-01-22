@@ -282,10 +282,8 @@ void TrackingRequestHandler::build_form(
     "         onclick=\"return confirm('" << translate("Download tracks?") << "');\">"
     // Label for the button to download the tracks as an XML data file
                    << translate("Download tracks") << "</button>\n"
-    "        <!--\n"
     // Label for the button to make a copy of the tracked locations
     "        <button id=\"btn-copy\" type=\"submit\" name=\"action\" value=\"copy\" accesskey=\"y\" class=\"btn btn-lg btn-primary\">" << translate("Copy") << "</button>\n"
-    "        -->\n"
     // Label for the button which resets the form's input criteria to that originally displayed
     "        <button id=\"btn-reset\" type=\"submit\" name=\"action\" value=\"reset\" accesskey=\"r\" class=\"btn btn-lg btn-danger\">" << translate("Reset") << "</button>\n"
     "      </div>\n"
@@ -346,6 +344,16 @@ void TrackingRequestHandler::handle_authenticated_request(
   if (action == "list") {
     // New query, so reset page number
     q.page = 1;
+  } else if (action == "copy") {
+    try {
+      json j = q;
+      session_dao.save_value(get_session_id(),
+                             SessionPgDao::location_history_key,
+                             j.dump());
+    } catch (const std::exception& e) {
+      std::cerr << "Failed to save query parameters in session\n"
+                << e.what() << '\n';
+    }
   } else if (action == "reset") {
     q = TrackPgDao::location_search_query_params{};
     q.user_id = get_user_id();
