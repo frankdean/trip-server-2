@@ -211,101 +211,68 @@ std::pair<bool, ItineraryPgDao::itinerary> ItineraryPgDao::get_itinerary_details
     std::string user_id, long itinerary_id)
 {
   try {
-    const std::string sql =
-      "SELECT i.id, i.start, i.finish, i.title, i.description, "
-      "u.nickname AS owned_by_nickname, null AS shared_to_nickname "
-      "FROM itinerary i JOIN usertable u ON i.user_id=u.id "
-      "WHERE i.archived != true AND i.id=$2 AND u.id=$1 "
-      "UNION SELECT i2.id, i2.start, i2.finish, i2.title, i2.description, "
-      "ownr.nickname AS owned_by_nickname, u2.nickname AS shared_to_nickname "
-      "FROM itinerary i2 JOIN itinerary_sharing s ON i2.id=s.itinerary_id "
-      "JOIN usertable u2 ON s.shared_to_id=u2.id "
-      "JOIN usertable ownr ON ownr.id=i2.user_id "
-      "WHERE i2.id=$2 AND s.active=true AND u2.id=$1 "
-      "ORDER BY shared_to_nickname DESC";
-
-    // std::cout << "SQL:: " << sql << '\n';
     work tx(*connection);
-    auto result = tx.exec_params(
-        sql,
-        user_id,
-        itinerary_id
-      );
-    ItineraryPgDao::itinerary it;
-    if (result.empty()) {
-      return std::make_pair(false, it);
-    }
-    auto r = result[0];
-    it.id.first = r["id"].to(it.id.second);
-    std::string s;
-    if ((it.start.first = r["start"].to(s))) {
-      DateTime start(s);
-      it.start.second = start.time_tp();
-    }
-    if ((it.finish.first = r["finish"].to(s))) {
-      DateTime finish(s);
-      it.finish.second = finish.time_tp();
-    }
-    r["title"].to(it.title);
-    it.owner_nickname.first = r["owned_by_nickname"].to(it.owner_nickname.second);
-    it.shared_to_nickname.first = r["shared_to_nickname"].to(it.shared_to_nickname.second);
-    it.shared.first = (it.shared.second = it.shared_to_nickname.first);
-    it.description.first = r["description"].to(it.description.second);
-    // Query routes, tracks and waypoints
-    auto route_result = tx.exec_params(
-        "SELECT id, name, color, distance, ascent, descent, lowest, highest "
-        "FROM itinerary_route WHERE itinerary_id=$1 ORDER BY name, id",
-        itinerary_id);
-    for (const auto &rt : route_result) {
-      path_summary route;
-      route.id.first = rt["id"].to(route.id.second);
-      route.name.first = rt["name"].to(route.name.second);
-      route.color.first = rt["color"].to(route.color.second);
-      route.distance.first = rt["distance"].to(route.distance.second);
-      route.ascent.first = rt["ascent"].to(route.ascent.second);
-      route.descent.first = rt["descent"].to(route.descent.second);
-      route.lowest.first = rt["lowest"].to(route.lowest.second);
-      route.highest.first = rt["highest"].to(route.highest.second);
-      it.routes.push_back(route);
-    }
-    auto track_result = tx.exec_params(
-        "SELECT id, name, color, distance, ascent, descent, lowest, highest "
-        "FROM itinerary_track WHERE itinerary_id=$1 ORDER BY name, id",
-        itinerary_id);
-    for (const auto &tk : track_result) {
-      path_summary track;
-      track.id.first = tk["id"].to(track.id.second);
-      track.name.first = tk["name"].to(track.name.second);
-      track.color.first = tk["color"].to(track.color.second);
-      track.distance.first = tk["distance"].to(track.distance.second);
-      track.ascent.first = tk["ascent"].to(track.ascent.second);
-      track.descent.first = tk["descent"].to(track.descent.second);
-      track.lowest.first = tk["lowest"].to(track.lowest.second);
-      track.highest.first = tk["highest"].to(track.highest.second);
-      it.tracks.push_back(track);
-    }
-    auto waypoint_result = tx.exec_params(
-        "SELECT id, name, "
-        "comment, type, "
-        "symbol, ws.value AS symbol_text "
-        "FROM itinerary_waypoint iw "
-        "LEFT JOIN waypoint_symbol ws ON iw.symbol=ws.key "
-        "WHERE itinerary_id=$1 ORDER BY name, symbol, id",
-        itinerary_id);
-    for (const auto &wpt : waypoint_result) {
-      waypoint_summary waypoint;
-      wpt["id"].to(waypoint.id);
-      waypoint.name.first = wpt["name"].to(waypoint.name.second);
-      waypoint.comment.first = wpt["comment"].to(waypoint.comment.second);
-      waypoint.type.first = wpt["type"].to(waypoint.type.second);
-      waypoint.symbol.first = wpt["symbol_text"].to(waypoint.symbol.second);
-      if (!waypoint.symbol.first)
-        waypoint.symbol.first = wpt["symbol"].to(waypoint.symbol.second);
-      it.waypoints.push_back(waypoint);
-    }
+    auto details = get_itinerary_details_and_summary(tx, user_id, itinerary_id);
+    if (details.first) {
+      ItineraryPgDao::itinerary it(details.second);
+      // Query routes, tracks and waypoints
+      auto route_result = tx.exec_params(
+          "SELECT id, name, color, distance, ascent, descent, lowest, highest "
+          "FROM itinerary_route WHERE itinerary_id=$1 ORDER BY name, id",
+          itinerary_id);
+      for (const auto &rt : route_result) {
+        path_summary route;
+        route.id.first = rt["id"].to(route.id.second);
+        route.name.first = rt["name"].to(route.name.second);
+        route.color.first = rt["color"].to(route.color.second);
+        route.distance.first = rt["distance"].to(route.distance.second);
+        route.ascent.first = rt["ascent"].to(route.ascent.second);
+        route.descent.first = rt["descent"].to(route.descent.second);
+        route.lowest.first = rt["lowest"].to(route.lowest.second);
+        route.highest.first = rt["highest"].to(route.highest.second);
+        it.routes.push_back(route);
+      }
+      auto track_result = tx.exec_params(
+          "SELECT id, name, color, distance, ascent, descent, lowest, highest "
+          "FROM itinerary_track WHERE itinerary_id=$1 ORDER BY name, id",
+          itinerary_id);
+      for (const auto &tk : track_result) {
+        path_summary track;
+        track.id.first = tk["id"].to(track.id.second);
+        track.name.first = tk["name"].to(track.name.second);
+        track.color.first = tk["color"].to(track.color.second);
+        track.distance.first = tk["distance"].to(track.distance.second);
+        track.ascent.first = tk["ascent"].to(track.ascent.second);
+        track.descent.first = tk["descent"].to(track.descent.second);
+        track.lowest.first = tk["lowest"].to(track.lowest.second);
+        track.highest.first = tk["highest"].to(track.highest.second);
+        it.tracks.push_back(track);
+      }
+      auto waypoint_result = tx.exec_params(
+          "SELECT id, name, "
+          "comment, type, "
+          "symbol, ws.value AS symbol_text "
+          "FROM itinerary_waypoint iw "
+          "LEFT JOIN waypoint_symbol ws ON iw.symbol=ws.key "
+          "WHERE itinerary_id=$1 ORDER BY name, symbol, id",
+          itinerary_id);
+      for (const auto &wpt : waypoint_result) {
+        waypoint_summary waypoint;
+        wpt["id"].to(waypoint.id);
+        waypoint.name.first = wpt["name"].to(waypoint.name.second);
+        waypoint.comment.first = wpt["comment"].to(waypoint.comment.second);
+        waypoint.type.first = wpt["type"].to(waypoint.type.second);
+        waypoint.symbol.first = wpt["symbol_text"].to(waypoint.symbol.second);
+        if (!waypoint.symbol.first)
+          waypoint.symbol.first = wpt["symbol"].to(waypoint.symbol.second);
+        it.waypoints.push_back(waypoint);
+      }
 
-    tx.commit();
-    return std::make_pair(true, it);
+      tx.commit();
+      return std::make_pair(true, it);
+    } else {
+      return std::make_pair(false, ItineraryPgDao::itinerary());
+    }
   } catch (const std::exception &e) {
     std::cerr << "Exception executing query to fetch itinerary details: "
               << e.what() << '\n';
@@ -346,6 +313,69 @@ std::pair<bool, ItineraryPgDao::itinerary_description>
     return std::make_pair(false, it);
   } catch (const std::exception &e) {
     std::cerr << "Exception executing query to fetch itinerary description: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+std::pair<bool, ItineraryPgDao::itinerary_detail>
+    ItineraryPgDao::get_itinerary_details_and_summary(
+        work& tx,
+        std::string user_id, long itinerary_id)
+{
+  const std::string sql =
+    "SELECT i.id, i.start, i.finish, i.title, i.description, "
+    "u.nickname AS owned_by_nickname, null AS shared_to_nickname "
+    "FROM itinerary i JOIN usertable u ON i.user_id=u.id "
+    "WHERE i.archived != true AND i.id=$2 AND u.id=$1 "
+    "UNION SELECT i2.id, i2.start, i2.finish, i2.title, i2.description, "
+    "ownr.nickname AS owned_by_nickname, u2.nickname AS shared_to_nickname "
+    "FROM itinerary i2 JOIN itinerary_sharing s ON i2.id=s.itinerary_id "
+    "JOIN usertable u2 ON s.shared_to_id=u2.id "
+    "JOIN usertable ownr ON ownr.id=i2.user_id "
+    "WHERE i2.id=$2 AND s.active=true AND u2.id=$1 "
+    "ORDER BY shared_to_nickname DESC";
+
+  // std::cout << "SQL:: " << sql << '\n';
+  auto result = tx.exec_params(
+      sql,
+      user_id,
+      itinerary_id
+    );
+  ItineraryPgDao::itinerary_detail it;
+  if (result.empty()) {
+    return std::make_pair(false, it);
+  }
+  auto r = result[0];
+  it.id.first = r["id"].to(it.id.second);
+  std::string s;
+  if ((it.start.first = r["start"].to(s))) {
+    DateTime start(s);
+    it.start.second = start.time_tp();
+  }
+  if ((it.finish.first = r["finish"].to(s))) {
+    DateTime finish(s);
+    it.finish.second = finish.time_tp();
+  }
+  r["title"].to(it.title);
+  it.owner_nickname.first = r["owned_by_nickname"].to(it.owner_nickname.second);
+  it.shared_to_nickname.first = r["shared_to_nickname"].to(it.shared_to_nickname.second);
+  it.shared.first = (it.shared.second = it.shared_to_nickname.first);
+  it.description.first = r["description"].to(it.description.second);
+  return std::make_pair(true, it);
+}
+
+std::pair<bool, ItineraryPgDao::itinerary_detail>
+    ItineraryPgDao::get_itinerary_details_and_summary(
+        std::string user_id, long itinerary_id)
+{
+  try {
+    work tx(*connection);
+    auto details = get_itinerary_details_and_summary(tx, user_id, itinerary_id);
+    tx.commit();
+    return details;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception executing query to fetch itinerary details with summary: "
               << e.what() << '\n';
     throw;
   }
@@ -439,6 +469,68 @@ std::vector<ItineraryPgDao::route>
       user_id,
       itinerary_id,
       route_ids_sql
+    );
+  route rt;
+  for (const auto &r : result) {
+    long route_id = r["route_id"].as<long>();
+    if (!rt.id.first || rt.id.second != route_id) {
+      if (rt.id.first) {
+        routes.push_back(rt);
+      }
+      rt = route();
+      rt.id.first = true;
+      rt.id.second = route_id;
+      rt.name.first = r["route_name"].to(rt.name.second);
+      rt.color.first = r["path_color"].to(rt.color.second);
+      rt.html_code.first = r["html_code"].to(rt.html_code.second);
+      rt.distance.first = r["distance"].to(rt.distance.second);
+      rt.ascent.first = r["ascent"].to(rt.ascent.second);
+      rt.descent.first = r["descent"].to(rt.descent.second);
+      rt.lowest.first = r["lowest"].to(rt.lowest.second);
+      rt.highest.first = r["highest"].to(rt.highest.second);
+    }
+    if (!r["point_id"].is_null()) {
+      route_point p;
+      p.id.first = r["point_id"].to(p.id.second);
+      r["lng"].to(p.longitude);
+      r["lat"].to(p.latitude);
+      p.name.first = r["point_name"].to(p.name.second);
+      p.comment.first = r["comment"].to(p.comment.second);
+      p.description.first = r["description"].to(p.description.second);
+      p.symbol.first = r["symbol"].to(p.symbol.second);
+      p.altitude.first = r["altitude"].to(p.altitude.second);
+      rt.points.push_back(p);
+    }
+  }
+  if (rt.id.first)
+    routes.push_back(rt);
+  tx.commit();
+  return routes;
+}
+
+std::vector<ItineraryPgDao::route>
+    ItineraryPgDao::get_routes(std::string user_id,
+                               long itinerary_id)
+{
+  std::vector<route> routes;
+  work tx(*connection);
+  auto result = tx.exec_params(
+      "SELECT r.id AS route_id, r.name AS route_name, r.color AS path_color, "
+      "rc.html_code, r.distance, r.ascent, r.descent, r.lowest, r.highest, "
+      "p.id AS point_id, "
+      "ST_X(p.geog::geometry) as lng, ST_Y(p.geog::geometry) as lat, "
+      "p.name AS point_name, p.comment, p.description, p.symbol, p.altitude "
+      "FROM itinerary_route r "
+      "JOIN itinerary i ON i.id=r.itinerary_id "
+      "LEFT JOIN path_color rc ON r.color=rc.key "
+      "LEFT JOIN itinerary_route_point p ON r.id=p.itinerary_route_id "
+      "LEFT JOIN itinerary_sharing sh "
+      "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
+      "WHERE (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
+      "AND r.itinerary_id = $2 "
+      "ORDER BY r.id, p.id",
+      user_id,
+      itinerary_id
     );
   route rt;
   for (const auto &r : result) {
@@ -575,6 +667,98 @@ std::vector<ItineraryPgDao::track>
   return tracks;
 }
 
+std::vector<ItineraryPgDao::track>
+    ItineraryPgDao::get_tracks(std::string user_id,
+                               long itinerary_id)
+{
+  std::vector<track> tracks;
+  work tx(*connection);
+  const std::string sql =
+    "SELECT t.id AS track_id, t.name AS track_name, t.color AS path_color, "
+    "rc.html_code, t.distance, t.ascent, t.descent, t.lowest, t.highest, "
+    "ts.id AS segment_id, p.id AS point_id, "
+    "ST_X(p.geog::geometry) as lng, ST_Y(p.geog::geometry) as lat, "
+    "p.time, p.hdop, p.altitude "
+    "FROM itinerary_track t "
+    "JOIN itinerary i ON i.id=t.itinerary_id "
+    "LEFT JOIN path_color rc ON t.color=rc.key "
+    "LEFT JOIN itinerary_track_segment ts ON t.id=ts.itinerary_track_id "
+    "LEFT JOIN itinerary_track_point p ON ts.id=p.itinerary_track_segment_id "
+    "LEFT JOIN itinerary_sharing sh "
+    "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
+    "WHERE (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
+    "AND t.itinerary_id=$2 ORDER BY t.id, ts.id, p.id";
+  // std::cout << "SQL: \n" << sql << '\n' << "track ids: " << ids_sql << '\n';
+  auto result = tx.exec_params(
+      sql,
+      user_id,
+      itinerary_id
+    );
+  // std::cout << "Got " << result.size() << " track points for itinerary " << itinerary_id << "\n";
+  track trk;
+  track_segment trkseg;
+  for (const auto &r : result) {
+    long track_id = r["track_id"].as<long>();
+    if (!trk.id.first || trk.id.second != track_id) {
+      if (trk.id.first) {
+        if (trkseg.id.first) {
+          trk.segments.push_back(trkseg);
+          trkseg = track_segment();
+        }
+        tracks.push_back(trk);
+      }
+      trk = track();
+      trk.id.first = true;
+      trk.id.second = track_id;
+      trk.name.first = r["track_name"].to(trk.name.second);
+      trk.distance.first = r["distance"].to(trk.distance.second);
+      trk.ascent.first = r["ascent"].to(trk.ascent.second);
+      trk.descent.first = r["descent"].to(trk.descent.second);
+      trk.lowest.first = r["lowest"].to(trk.lowest.second);
+      trk.highest.first = r["highest"].to(trk.highest.second);
+      trk.color.first = r["path_color"].to(trk.color.second);
+      trk.html_code.first = r["html_code"].to(trk.html_code.second);
+    }
+    if (!r["segment_id"].is_null()) {
+      long segment_id = r["segment_id"].as<long>();
+      if (!trkseg.id.first || trkseg.id.second != segment_id) {
+        if (trkseg.id.first) {
+          trk.segments.push_back(trkseg);
+          trkseg = track_segment();
+        }
+        trkseg.id.first = true;
+        trkseg.id.second = segment_id;
+        trkseg.distance.first = r["distance"].to(trkseg.distance.second);
+        trkseg.ascent.first = r["ascent"].to(trkseg.ascent.second);
+        trkseg.descent.first = r["descent"].to(trkseg.descent.second);
+        trkseg.lowest.first = r["lowest"].to(trkseg.lowest.second);
+        trkseg.highest.first = r["highest"].to(trkseg.highest.second);
+      }
+      if (!r["point_id"].is_null()) {
+        track_point p;
+        p.id.first = r["point_id"].to(p.id.second);
+        r["lng"].to(p.longitude);
+        r["lat"].to(p.latitude);
+        std::string s;
+        if ((p.time.first = r["time"].to(s))) {
+          DateTime time(s);
+          p.time.second = time.time_tp();
+        }
+        p.hdop.first = r["hdop"].to(p.hdop.second);
+        p.altitude.first = r["altitude"].to(p.altitude.second);
+        trkseg.points.push_back(p);
+      }
+    }
+  }
+  if (trk.id.first) {
+    if (trkseg.id.first)
+      trk.segments.push_back(trkseg);
+    tracks.push_back(trk);
+  }
+  tx.commit();
+  return tracks;
+}
+
 std::vector<ItineraryPgDao::waypoint>
     ItineraryPgDao::get_waypoints(std::string user_id,
                                   long itinerary_id,
@@ -595,11 +779,55 @@ std::vector<ItineraryPgDao::waypoint>
       "LEFT JOIN itinerary_sharing sh "
       "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
       "WHERE  (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
-      "AND w.itinerary_id=$2 AND w.id=ANY($3)"
+      "AND w.itinerary_id=$2 AND w.id=ANY($3) "
       "ORDER BY name, symbol, id",
       user_id,
       itinerary_id,
       ids_sql);
+  for (const auto &r : result) {
+    waypoint wpt;
+    wpt.id.first = r["id"].to(wpt.id.second);
+    wpt.name.first = r["name"].to(wpt.name.second);
+    r["lng"].to(wpt.longitude);
+    r["lat"].to(wpt.latitude);
+    std::string s;
+    if ((wpt.time.first = r["time"].to(s))) {
+      DateTime time(s);
+      wpt.time.second = time.time_tp();
+    }
+    wpt.altitude.first = r["altitude"].to(wpt.altitude.second);
+    wpt.symbol.first = r["symbol"].to(wpt.symbol.second);
+    wpt.comment.first = r["comment"].to(wpt.comment.second);
+    wpt.description.first = r["description"].to(wpt.description.second);
+    wpt.color.first = r["color"].to(wpt.color.second);
+    wpt.type.first = r["type"].to(wpt.type.second);
+    wpt.avg_samples.first = r["avg_samples"].to(wpt.avg_samples.second);
+    waypoints.push_back(wpt);
+  }
+  tx.commit();
+  return waypoints;
+}
+
+std::vector<ItineraryPgDao::waypoint>
+    ItineraryPgDao::get_waypoints(std::string user_id,
+                                  long itinerary_id)
+{
+  std::vector<waypoint> waypoints;
+  work tx(*connection);
+  auto result = tx.exec_params(
+      "SELECT w.id, w.name, "
+      "ST_X(geog::geometry) as lng, ST_Y(geog::geometry) as lat, "
+      "w.time, w.altitude, w.symbol, w.comment, w.description, w.color, w.type, "
+      "w.avg_samples "
+      "FROM itinerary_waypoint w "
+      "JOIN itinerary i ON i.id=w.itinerary_id "
+      "LEFT JOIN itinerary_sharing sh "
+      "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
+      "WHERE  (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
+      "AND w.itinerary_id=$2"
+      "ORDER BY name, symbol, id",
+      user_id,
+      itinerary_id);
   for (const auto &r : result) {
     waypoint wpt;
     wpt.id.first = r["id"].to(wpt.id.second);
@@ -1330,7 +1558,7 @@ std::vector<ItineraryPgDao::itinerary_share>
         "OFFSET $2 LIMIT $3",
         itinerary_id,
         offset,
-        limit);
+        limit < 0 ? nullptr : &limit);
     std::vector<itinerary_share> shares;
     for (const auto &r : result) {
       itinerary_share share;
@@ -1443,4 +1671,391 @@ void ItineraryPgDao::delete_itinerary_shares(std::string user_id,
               << e.what() << '\n';
     throw;
   }
+}
+
+YAML::Node ItineraryPgDao::track_point::encode(
+    const ItineraryPgDao::track_point& rhs)
+{
+  auto node = location::encode(rhs);
+  if (rhs.time.first) {
+    DateTime dt(rhs.time.second);
+    node["time"] = dt.get_time_as_iso8601_gmt();
+  } else {
+    node["time"] = YAML::Null;
+  }
+  if (rhs.hdop.first)
+    node["hdop"] = rhs.hdop.second;
+  else
+    node["hdop"] = YAML::Null;
+  return node;
+}
+
+bool ItineraryPgDao::track_point::decode(
+    const YAML::Node& node, ItineraryPgDao::track_point& rhs)
+{
+  if ((rhs.time.first = !node["time"].IsNull())) {
+    DateTime time(node["time"].as<std::string>());
+    rhs.time.second = time.time_tp();
+  }
+  if ((rhs.hdop.first = !node["hdop"].IsNull()))
+    rhs.hdop.second = node["hdop"].as<float>();
+  return location::decode(node, rhs);
+}
+
+YAML::Node ItineraryPgDao::track_segment::encode(
+    const ItineraryPgDao::track_segment& rhs)
+{
+  auto node = ItineraryPgDao::path_base::encode(rhs);
+  node["points"] = rhs.points;
+  return node;
+}
+
+bool ItineraryPgDao::track_segment::decode(
+    const YAML::Node& node, ItineraryPgDao::track_segment& rhs)
+{
+  rhs.points = node["points"].as<std::vector<track_point>>();
+  return ItineraryPgDao::path_base::decode(node, rhs);
+}
+
+YAML::Node ItineraryPgDao::track::encode(const ItineraryPgDao::track& rhs)
+{
+  auto node = ItineraryPgDao::path_summary::encode(rhs);;
+  node["segments"] = rhs.segments;
+  return node;
+}
+
+bool ItineraryPgDao::track::decode(
+    const YAML::Node& node, ItineraryPgDao::track& rhs)
+{
+  rhs.segments = node["segments"].as<std::vector<ItineraryPgDao::track_segment>>();
+  return ItineraryPgDao::path_summary::decode(node, rhs);
+}
+
+YAML::Node ItineraryPgDao::waypoint_base::encode(
+    const ItineraryPgDao::waypoint_base& rhs)
+{
+  YAML::Node node;
+  if (rhs.name.first)
+    node["name"] = rhs.name.second;
+  else
+    node["name"] = YAML::Null;
+  if (rhs.comment.first)
+    node["comment"] = rhs.comment.second;
+  else
+    node["comment"] = YAML::Null;
+  if (rhs.symbol.first)
+    node["symbol"] = rhs.symbol.second;
+  else
+    node["symbol"] = YAML::Null;
+  if (rhs.type.first)
+    node["type"] = rhs.type.second;
+  else
+    node["type"] = YAML::Null;
+  return node;
+}
+
+bool ItineraryPgDao::waypoint_base::decode(
+    const YAML::Node& node, ItineraryPgDao::waypoint_base& rhs)
+{
+  if ((rhs.name.first = !node["name"].IsNull()))
+    rhs.name.second = node["name"].as<std::string>();
+  if ((rhs.comment.first = !node["comment"].IsNull()))
+    rhs.comment.second = node["comment"].as<std::string>();
+  if ((rhs.symbol.first = !node["symbol"].IsNull()))
+    rhs.symbol.second = node["symbol"].as<std::string>();
+  if ((rhs.type.first = !node["type"].IsNull()))
+    rhs.type.second = node["type"].as<std::string>();
+  return true;
+}
+
+YAML::Node ItineraryPgDao::waypoint::encode(const ItineraryPgDao::waypoint& rhs)
+{
+  auto node = location::encode(rhs);
+  auto base = ItineraryPgDao::waypoint_base::encode(rhs);
+  // switch (base.Type()) {
+  //   case YAML::NodeType::Scalar:
+  //     std::cout << "scalar\n";
+  //     break;
+  //   case YAML::NodeType::Sequence:
+  //     std::cout << "sequence\n";
+  //     break;
+  //   case YAML::NodeType::Map:
+  //     std::cout << "map\n";
+  //     break;
+  //   default:
+  //     std::cout << "unknown\n";
+  // }
+  if (base.IsMap())
+    for (const auto& b : base)
+      node[b.first] = b.second;
+
+  if (rhs.time.first) {
+    DateTime dt(rhs.time.second);
+    node["time"] = dt.get_time_as_iso8601_gmt();
+  } else {
+    node["time"] = YAML::Null;
+  }
+  if (rhs.description.first)
+    node["description"] = rhs.description.second;
+  else
+    node["description"] = YAML::Null;
+  if (rhs.color.first)
+    node["color"] = rhs.color.second;
+  else
+    node["color"] = YAML::Null;
+  if (rhs.type.first)
+    node["type"] = rhs.type.second;
+  else
+    node["type"] = YAML::Null;
+  if (rhs.avg_samples.first)
+    node["samples"] = rhs.avg_samples.second;
+  else
+    node["samples"] = YAML::Null;
+  return node;
+}
+
+bool ItineraryPgDao::waypoint::decode(
+    const YAML::Node& node, ItineraryPgDao::waypoint& rhs)
+{
+  if ((rhs.time.first = !node["time"].IsNull())) {
+    DateTime time(node["time"].as<std::string>());
+    rhs.time.second = time.time_tp();
+  }
+  if ((rhs.description.first = !node["description"].IsNull()))
+    rhs.description.second = node["description"].as<std::string>();
+  if ((rhs.color.first = !node["color"].IsNull()))
+    rhs.color.second = node["color"].as<std::string>();
+  if ((rhs.type.first = !node["type"].IsNull()))
+    rhs.type.second = node["type"].as<std::string>();
+  if ((rhs.avg_samples.first = !node["samples"].IsNull()))
+    rhs.avg_samples.second = node["samples"].as<long>();
+  auto success = ItineraryPgDao::waypoint_base::decode(node, rhs);
+  return location::decode(node, rhs) && success;
+}
+
+YAML::Node ItineraryPgDao::itinerary_share::encode(
+    const ItineraryPgDao::itinerary_share& rhs)
+{
+  YAML::Node node;
+  node["nickname"] = rhs.nickname;
+  if (rhs.active.first)
+    node["active"] = rhs.active.second;
+  else
+    node["active"] = YAML::Null;
+  return node;
+}
+
+bool ItineraryPgDao::itinerary_share::decode(
+    const YAML::Node& node, ItineraryPgDao::itinerary_share& rhs)
+{
+  rhs.nickname = node["nickname"].as<std::string>();
+  if ((rhs.active.first = !node["active"].IsNull())) { 
+    rhs.active.second = node["active"].as<bool>();
+  }
+  return true;
+}
+
+YAML::Node ItineraryPgDao::itinerary_base::encode(
+    const ItineraryPgDao::itinerary_base& rhs)
+{
+  YAML::Node node;
+  if (rhs.id.first)
+    node["id"] = rhs.id.second;
+  else
+    node["id"] = YAML::Null;
+  if (rhs.start.first) {
+    DateTime start(rhs.start.second);
+    node["start"] = start.get_time_as_iso8601_gmt();
+  } else {
+    node["start"] = YAML::Null;
+  }
+  if (rhs.finish.first) {
+    DateTime finish(rhs.finish.second);
+    node["finish"] = finish.get_time_as_iso8601_gmt();
+  } else {
+    node["finish"] = YAML::Null;
+  }
+  node["title"] = rhs.title;
+  return node;
+}
+
+bool ItineraryPgDao::itinerary_base::decode(
+    const YAML::Node& node, ItineraryPgDao::itinerary_base& rhs)
+{
+  if ((rhs.id.first = !node["id"].IsNull()))
+    rhs.id.second = node["id"].as<long>();
+  if ((rhs.start.first = !node["start"].IsNull())) {
+    DateTime start(node["start"].as<std::string>());
+    rhs.start.second = start.time_tp();
+  }
+  if ((rhs.finish.first = !node["finish"].IsNull())) {
+    DateTime finish(node["finish"].as<std::string>());
+    rhs.finish.second = finish.time_tp();
+  }
+  rhs.title = node["title"].as<std::string>();
+  return true;
+}
+
+YAML::Node ItineraryPgDao::itinerary_summary::encode(
+    const ItineraryPgDao::itinerary_summary& rhs)
+{
+  auto node = ItineraryPgDao::itinerary_base::encode(rhs);
+  if (rhs.owner_nickname.first)
+    node["owned_by_nickname"] = rhs.owner_nickname.second;
+  else
+    node["owned_by_nickname"] = YAML::Null;
+  if (rhs.shared.first)
+    node["shared"] = rhs.shared.second;
+  else
+    node["shared"] = YAML::Null;
+  return node;
+}
+
+bool ItineraryPgDao::itinerary_summary::decode(
+    const YAML::Node& node, ItineraryPgDao::itinerary_summary& rhs)
+{
+  if ((rhs.owner_nickname.first = !node["owned_by_nickname"].IsNull()))
+    rhs.owner_nickname.second = node["owned_by_nickname"].as<std::string>();
+  if ((rhs.shared.first = !node["shared"].IsNull()))
+    rhs.shared.second = node["shared"].as<bool>();
+  return ItineraryPgDao::itinerary_base::decode(node, rhs);
+}
+
+YAML::Node ItineraryPgDao::itinerary_description::encode(
+    const ItineraryPgDao::itinerary_description& rhs)
+{
+  auto node = ItineraryPgDao::itinerary_summary::encode(rhs);
+  if (rhs.description.first)
+    node["description"] = rhs.description.second;
+  else
+    node["description"] = YAML::Null;
+  return node;
+}
+
+bool ItineraryPgDao::itinerary_description::decode(
+    const YAML::Node& node, ItineraryPgDao::itinerary_description& rhs)
+{
+  if ((rhs.description.first = !node["description"].IsNull()))
+    rhs.description.second = node["description"].as<std::string>();
+  return ItineraryPgDao::itinerary_summary::decode(node, rhs);
+}
+
+YAML::Node ItineraryPgDao::itinerary_detail::encode(
+    const ItineraryPgDao::itinerary_detail& rhs)
+{
+  auto node = ItineraryPgDao::itinerary_description::encode(rhs);
+  if (rhs.shared_to_nickname.first)
+    node["shared_to_nickname"] = rhs.shared_to_nickname.second;
+  else
+    node["shared_to_nickname"] = YAML::Null;
+  return node;
+}
+
+bool ItineraryPgDao::itinerary_detail::decode(
+    const YAML::Node& node, ItineraryPgDao::itinerary_detail& rhs)
+{
+  if ((rhs.shared_to_nickname.first = !node["shared_to_nickname"].IsNull()))
+    rhs.shared_to_nickname.second = node["shard_to_nickname"].as<std::string>();
+  return ItineraryPgDao::itinerary_description::decode(node, rhs);
+}
+
+YAML::Node
+    ItineraryPgDao::route_point::encode(const ItineraryPgDao::route_point& rhs)
+{
+  YAML::Node node = location::encode(rhs);
+  if (rhs.name.first)
+    node["name"] = rhs.name.second;
+  else
+    node["name"] = YAML::Null;
+  if (rhs.comment.first)
+    node["comment"] = rhs.comment.second;
+  else
+    node["comment"] = YAML::Null;
+  if (rhs.description.first)
+    node["description"] = rhs.description.second;
+  else
+    node["description"] = YAML::Null;
+  if (rhs.symbol.first)
+    node["symbol"] = rhs.symbol.second;
+  else
+    node["symbol"] = YAML::Null;
+  return node;
+}
+
+bool ItineraryPgDao::route_point::decode(
+    const YAML::Node& node, ItineraryPgDao::route_point& rhs)
+{
+  if ((rhs.name.first = !node["name"].IsNull()))
+    rhs.name.second = node["name"].as<std::string>();
+  if ((rhs.comment.first = !node["comment"].IsNull()))
+    rhs.comment.second = node["comment"].as<std::string>();
+  if ((rhs.description.first = !node["description"].IsNull()))
+    rhs.description.second = node["description"].as<std::string>();
+  if ((rhs.symbol.first = !node["symbol"].IsNull()))
+    rhs.symbol.second = node["symbol"].as<std::string>();
+  return location::decode(node, rhs);
+}
+
+YAML::Node
+    ItineraryPgDao::path_base::encode(const ItineraryPgDao::path_base& rhs)
+{
+  YAML::Node node = path_statistics::encode(rhs);
+  if (rhs.id.first)
+    node["id"] = rhs.id.second;
+  else
+    node["id"] = YAML::Null;
+  return node;
+}
+
+bool ItineraryPgDao::path_base::decode(
+    const YAML::Node& node, ItineraryPgDao::path_base& rhs)
+{
+  if ((rhs.id.first = !node["id"].IsNull()))
+    rhs.id.second = node["id"].as<long>();
+  return path_statistics::decode(node, rhs);
+}
+
+YAML::Node
+    ItineraryPgDao::path_summary::encode(const ItineraryPgDao::path_summary& rhs)
+{
+  YAML::Node node = ItineraryPgDao::path_base::encode(rhs);
+  if (rhs.name.first)
+    node["name"] = rhs.name.second;
+  else
+    node["name"] = YAML::Null;
+  if (rhs.color.first)
+    node["color"] = rhs.color.second;
+  else
+    node["color"] = YAML::Null;
+  if (rhs.html_code.first)
+    node["htmlcolor"] = rhs.html_code.second;
+  else
+    node["htmlcolor"] = YAML::Null;
+  return node;
+}
+
+bool ItineraryPgDao::path_summary::decode(const YAML::Node& node,
+                                          ItineraryPgDao::path_summary& rhs)
+{
+  if ((rhs.name.first = !node["name"].IsNull()))
+    rhs.name.second = node["name"].as<std::string>();
+  if ((rhs.color.first = !node["color"].IsNull()))
+    rhs.color.second = node["color"].as<std::string>();
+  if ((rhs.html_code.first = !node["htmlcolor"].IsNull()))
+    rhs.html_code.second = node["htmlcolor"].as<std::string>();
+  return fdsd::trip::ItineraryPgDao::path_base::decode(node, rhs);
+}
+
+YAML::Node ItineraryPgDao::route::encode(const ItineraryPgDao::route& rhs)
+{
+  auto node = fdsd::trip::ItineraryPgDao::path_summary::encode(rhs);
+  node["points"] = rhs.points;
+  return node;
+}
+
+bool ItineraryPgDao::route::decode(const YAML::Node& node,
+                                   ItineraryPgDao::route& rhs)
+{
+  rhs.points = node["points"].as<std::vector<ItineraryPgDao::route_point>>();
+  return fdsd::trip::ItineraryPgDao::path_summary::decode(node, rhs);
 }

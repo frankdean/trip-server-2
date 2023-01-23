@@ -634,7 +634,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
     "                <li><a class=\"dropdown-item opacity-50\">" << translate("Download KML") << "</a></li>\n"
     "                <li><hr class=\"dropdown-divider\"></li>\n"
     // Label for menu item to download the entire Itinerary in a YAML formatted text file
-    "                <li><a class=\"dropdown-item opacity-50\">" << translate("Download full itinerary") << "</a></li>\n"
+    "                <li><button class=\"dropdown-item\" accesskey=\"n\" formaction=\"" << get_uri_prefix() << "/itinerary/export" << "\">" << translate("Download full itinerary") << "</button></li>\n"
     "              </ul>\n"
     "            </li>\n"
     "            <li class=\"nav-item\">\n"

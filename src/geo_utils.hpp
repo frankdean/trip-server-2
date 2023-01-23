@@ -29,6 +29,7 @@
 #include <utility>
 #include <vector>
 #include <nlohmann/json.hpp>
+#include <yaml-cpp/yaml.h>
 
 namespace fdsd {
 namespace trip {
@@ -70,6 +71,8 @@ struct location {
       (std::ostream& out, const location& rhs) {
     return out << rhs.to_string();
   }
+  static YAML::Node encode(const location& rhs);
+  static bool decode(const YAML::Node& node, location& rhs);
 };
 
 struct path_statistics {
@@ -90,6 +93,8 @@ struct path_statistics {
       (std::ostream& out, const path_statistics& rhs) {
     return out << rhs.to_string();
   }
+  static YAML::Node encode(const path_statistics& rhs);
+  static bool decode(const YAML::Node& node, path_statistics& rhs);
 };
 
 /**

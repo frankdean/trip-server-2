@@ -10,6 +10,8 @@ trip_server_SOURCES = \
 	itinerary_download_handler.hpp \
 	itinerary_edit_handler.cpp \
 	itinerary_edit_handler.hpp \
+	itinerary_export_handler.cpp \
+	itinerary_export_handler.hpp \
 	itinerary_handler.cpp \
 	itinerary_handler.hpp \
 	itinerary_map_handler.cpp \

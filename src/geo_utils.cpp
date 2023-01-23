@@ -58,6 +58,33 @@ std::string location::to_string() const
   return os.str();
 }
 
+YAML::Node location::encode(const location& rhs)
+{
+  YAML::Node node;
+  if (rhs.id.first)
+    node["id"] = rhs.id.second;
+  else
+    node["id"] = YAML::Null;
+  node["lng"] = rhs.longitude;
+  node["lat"] = rhs.latitude;
+  if (rhs.altitude.first)
+    node["altitude"] = rhs.altitude.second;
+  else
+    node["altitude"] = YAML::Null;
+  return node;
+}
+
+bool location::decode(const YAML::Node& node, location& rhs)
+{
+  if ((rhs.id.first = !node["id"].IsNull()))
+    rhs.id.second = node["id"].as<long>();
+  rhs.longitude = node["lng"].as<double>();
+  rhs.latitude = node["lat"].as<double>();
+  if ((rhs.altitude.first = !node["altitude"].IsNull()))
+    rhs.altitude.second = node["altitude"].as<double>();
+  return true;
+}
+
 std::string path_statistics::to_string() const
 {
   bool first = true;
@@ -95,6 +122,37 @@ std::string path_statistics::to_string() const
     os << "highest: " << highest.second;
   }
   return os.str();
+}
+
+YAML::Node path_statistics::encode(const path_statistics& rhs)
+{
+  YAML::Node node;
+  if (rhs.distance.first)
+    node["distance"] = rhs.distance.second;
+  if (rhs.ascent.first)
+    node["ascent"] = rhs.ascent.second;
+  if (rhs.descent.first)
+    node["descent"] = rhs.descent.second;
+  if (rhs.lowest.first)
+    node["lowest"] = rhs.lowest.second;
+  if (rhs.highest.first)
+    node["highest"] = rhs.highest.second;
+  return node;
+}
+
+bool path_statistics::decode(const YAML::Node& node, path_statistics& rhs)
+{
+  if ((rhs.distance.first = !node["distance"].IsNull()))
+    rhs.distance.second = node["distance"].as<double>();
+  if ((rhs.ascent.first = !node["ascent"].IsNull()))
+    rhs.ascent.second = node["ascent"].as<double>();
+  if ((rhs.descent.first = !node["descent"].IsNull()))
+    rhs.descent.second = node["descent"].as<double>();
+  if ((rhs.lowest.first = !node["lowest"].IsNull()))
+    rhs.lowest.second = node["lowest"].as<double>();
+  if ((rhs.highest.first = !node["highest"].IsNull()))
+    rhs.highest.second = node["highest"].as<double>();
+  return true;
 }
 
 /**
