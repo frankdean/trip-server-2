@@ -25,6 +25,7 @@
 #include "itineraries_handler.hpp"
 #include "itinerary_download_handler.hpp"
 #include "itinerary_export_handler.hpp"
+#include "itinerary_import_handler.hpp"
 #include "itinerary_upload_handler.hpp"
 #include "itinerary_edit_handler.hpp"
 #include "itinerary_handler.hpp"
@@ -127,6 +128,9 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
   post_login_handlers.push_back(
       std::make_shared<ItineraryExportHandler>(
           ItineraryExportHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<ItineraryImportHandler>(
+          ItineraryImportHandler(config)));
   post_login_handlers.push_back(
       std::make_shared<ItineraryUploadHandler>(
           ItineraryUploadHandler(config)));

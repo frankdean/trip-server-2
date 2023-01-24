@@ -177,7 +177,7 @@ void ItineraryEditHandler::handle_authenticated_request(
       itinerary.description.second = s;
     }
     if (!no_title_error) {
-      long id = dao.save_itinerary(get_user_id(), itinerary);
+      long id = dao.save(get_user_id(), itinerary);
       // Set the itinerary ID after creating a new one
       if (!itinerary_id.first)
         itinerary_id = std::make_pair(true, id);

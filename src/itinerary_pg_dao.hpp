@@ -253,6 +253,26 @@ public:
     static YAML::Node encode(const itinerary_share& rhs);
     static bool decode(const YAML::Node& node, itinerary_share& rhs);
   };
+  struct itinerary_complete : public itinerary_detail {
+    std::vector<route> routes;
+    std::vector<waypoint> waypoints;
+    std::vector<track> tracks;
+    std::vector<itinerary_share> shares;
+    itinerary_complete()
+      : itinerary_detail(),
+        routes(),
+        waypoints(),
+        tracks(),
+        shares() {}
+    itinerary_complete(itinerary_detail itinerary)
+      : itinerary_detail(itinerary),
+        routes(),
+        waypoints(),
+        tracks(),
+        shares() {}
+    static YAML::Node encode(const itinerary_complete& rhs);
+    static bool decode(const YAML::Node& node, itinerary_complete& rhs);
+  };
   struct selected_feature_ids {
     std::vector<long> routes;
     std::vector<long> tracks;
@@ -267,18 +287,18 @@ public:
       std::string user_id,
       std::uint32_t offset,
       int limit);
-  std::pair<bool, ItineraryPgDao::itinerary>
-      get_itinerary_details(
-          std::string user_id, long itinerary_id);
-  std::pair<bool, ItineraryPgDao::itinerary_description>
+  /// Fetches basic detials of an itinerary excluding related child data
+  std::pair<bool, itinerary_description>
       get_itinerary_description(
           std::string user_id, long itinerary_id);
-  std::pair<bool, ItineraryPgDao::itinerary_detail>
-      get_itinerary_details_and_summary(
+  /// Fetches itinerary and itinerary shares including basic summary of routes,
+  /// waypoints and tracks
+  std::pair<bool, ItineraryPgDao::itinerary>
+      get_itinerary_summary(
           std::string user_id, long itinerary_id);
-  long save_itinerary(
-      std::string user_id,
-      ItineraryPgDao::itinerary_description itinerary);
+  std::pair<bool, ItineraryPgDao::itinerary_complete>
+      get_itinerary_complete(
+          std::string user_id, long itinerary_id);
   void delete_itinerary(
       std::string user_id,
       long itinerary_id);
@@ -289,21 +309,21 @@ public:
   std::vector<route>
       get_routes(std::string user_id,
                  long itinerary_id,
-                 std::vector<long> route_ids);
+                 const std::vector<long> &route_ids);
   std::vector<route>
       get_routes(std::string user_id,
                  long itinerary_id);
   std::vector<track>
       get_tracks(std::string user_id,
                  long itinerary_id,
-                 std::vector<long> ids);
+                 const std::vector<long> &ids);
   std::vector<track>
       get_tracks(std::string user_id,
                  long itinerary_id);
   std::vector<ItineraryPgDao::waypoint>
       get_waypoints(std::string user_id,
                     long itinerary_id,
-                    std::vector<long> ids);
+                    const std::vector<long> &ids);
   std::vector<ItineraryPgDao::waypoint>
       get_waypoints(std::string user_id,
                     long itinerary_id);
@@ -311,6 +331,10 @@ public:
       std::string user_id,
       long itinerary_id,
       long waypoint_id);
+
+  long save(
+      std::string user_id,
+      itinerary_description itinerary);
 
   void save(std::string user_id,
             long itinerary_id,
@@ -323,6 +347,10 @@ public:
   void save(std::string user_id,
             long itinerary_id,
             itinerary_share &share);
+
+  void save(std::string user_id,
+            long itinerary_id,
+            std::vector<itinerary_share> &shares);
 
   bool has_user_itinerary_modification_access(std::string user_id,
                                               long itinerary_id);
@@ -387,21 +415,46 @@ protected:
       pqxx::work &tx,
       long itinerary_id,
       std::vector<track> &tracks);
+  bool has_user_itinerary_modification_access(pqxx::work &tx,
+                                              std::string user_id,
+                                              long itinerary_id);
   void validate_user_itinerary_modification_access(pqxx::work &tx,
                                                    std::string user_id,
                                                    long itinerary_id);
   void validate_user_itinerary_read_access(pqxx::work &tx,
                                            std::string user_id,
                                            long itinerary_id);
+  /// Fetches itinerary and itinerary shares
   std::pair<bool, ItineraryPgDao::itinerary_detail>
-      get_itinerary_details_and_summary(pqxx::work &tx,
-                                        std::string user_id,
-                                        long itinerary_id);
+      get_itinerary_details(pqxx::work &tx,
+                            std::string user_id,
+                            long itinerary_id);
+  std::vector<itinerary_share> get_itinerary_shares(pqxx::work &tx,
+                                                    std::string user_id,
+                                                    long itinerary_id,
+                                                    std::uint32_t offset = 0,
+                                                    int limit = -1);
+  std::vector<route>
+      get_routes(pqxx::work &tx,
+                 std::string user_id,
+                 long itinerary_id);
+  std::vector<track>
+      get_tracks(pqxx::work &tx,
+                 std::string user_id,
+                 long itinerary_id);
+  std::vector<ItineraryPgDao::waypoint>
+      get_waypoints(pqxx::work &tx,
+                    std::string user_id,
+                    long itinerary_id);
 public:
   void create_waypoints(
       std::string user_id,
       long itinerary_id,
       const std::vector<ItineraryPgDao::waypoint> &waypoints);
+  void create_routes(
+      std::string user_id,
+      long itinerary_id,
+      std::vector<route> &routes);
   void create_tracks(
       std::string user_id,
       long itinerary_id,
@@ -419,13 +472,43 @@ void from_json(const nlohmann::json& j,  ItineraryPgDao::selected_feature_ids& i
 namespace YAML {
 
   template<>
+  struct convert<fdsd::trip::ItineraryPgDao::itinerary_description> {
+
+    static Node encode(
+        const fdsd::trip::ItineraryPgDao::itinerary_description& rhs) {
+      return fdsd::trip::ItineraryPgDao::itinerary_description::encode(rhs);
+    }
+
+    static bool decode(const Node& node,
+                       fdsd::trip::ItineraryPgDao::itinerary_description& rhs) {
+      return
+        fdsd::trip::ItineraryPgDao::itinerary_description::decode(node, rhs);
+    }
+  };
+
+  template<>
+  struct convert<fdsd::trip::ItineraryPgDao::itinerary_complete> {
+
+    static Node encode(
+        const fdsd::trip::ItineraryPgDao::itinerary_complete& rhs) {
+      return fdsd::trip::ItineraryPgDao::itinerary_complete::encode(rhs);
+    }
+
+    static bool decode(const Node& node,
+                       fdsd::trip::ItineraryPgDao::itinerary_complete& rhs) {
+      return fdsd::trip::ItineraryPgDao::itinerary_complete::decode(node, rhs);
+    }
+  };
+
+  template<>
   struct convert<fdsd::trip::ItineraryPgDao::route_point> {
 
     static Node encode(const fdsd::trip::ItineraryPgDao::route_point& rhs) {
       return fdsd::trip::ItineraryPgDao::route_point::encode(rhs);
     }
 
-    static bool decode(const Node& node, fdsd::trip::ItineraryPgDao::route_point& rhs) {
+    static bool decode(const Node& node,
+                       fdsd::trip::ItineraryPgDao::route_point& rhs) {
       return fdsd::trip::ItineraryPgDao::route_point::decode(node, rhs);
     }
   };
@@ -437,7 +520,8 @@ namespace YAML {
       return fdsd::trip::ItineraryPgDao::itinerary_share::encode(rhs);
     }
 
-    static bool decode(const Node& node, fdsd::trip::ItineraryPgDao::itinerary_share& rhs) {
+    static bool decode(const Node& node,
+                       fdsd::trip::ItineraryPgDao::itinerary_share& rhs) {
       return fdsd::trip::ItineraryPgDao::itinerary_share::decode(node, rhs);
     }
 

@@ -49,31 +49,28 @@ void ItineraryExportHandler::handle_authenticated_request(
 {
   itinerary_id = stol(request.get_param("id"));
   ItineraryPgDao dao;
-  const auto itinerary =
-    dao.get_itinerary_details_and_summary(get_user_id(), itinerary_id);
+  auto itinerary = dao.get_itinerary_complete(get_user_id(), itinerary_id);
+
   if (!itinerary.first)
     throw BadRequestException("Itinerary not found");
-  auto node =  ItineraryPgDao::itinerary_detail::encode(itinerary.second);
 
-  if (dao.has_user_itinerary_modification_access(get_user_id(),
-                                                 itinerary_id)) {
-    const auto itinerary_shares = dao.get_itinerary_shares(
-        get_user_id(),
-        itinerary_id);
-    node["itinerary_shares"] = itinerary_shares;
-  } else {
-    node["itinerary_shares"] = YAML::Null;
-  }
-  const auto routes = dao.get_routes(get_user_id(),
-                                     itinerary_id);
-  const auto waypoints = dao.get_waypoints(get_user_id(),
-                                           itinerary_id);
-  const auto tracks = dao.get_tracks(get_user_id(),
-                                     itinerary_id);
+  // // Don't leak details of whom another user may also be sharing an itinerary
+  // // with
 
-  node["routes"] = routes;
-  node["waypoints"] = waypoints;
-  node["tracks"] = tracks;
+  // // if (!dao.has_user_itinerary_modification_access(get_user_id(),
+  // //                                                 itinerary_id)) {
+  // if (itinerary.second.owner_nickname.first)
+  //   std::cout << "Owned by: \"" << itinerary.second.owner_nickname.second << "\"\n";
+  // if (itinerary.second.shared_to_nickname.first) {
+  //   std::cout << "Shared to nickname: \"" << itinerary.second.shared_to_nickname.second << "\"\n";
+  //   if (!itinerary.second.shared_to_nickname.second.empty())
+  //     itinerary.second.shares.clear();
+  // }
+
+  itinerary.second.routes = dao.get_routes(get_user_id(), itinerary_id);
+  itinerary.second.waypoints = dao.get_waypoints(get_user_id(), itinerary_id);
+  itinerary.second.tracks = dao.get_tracks(get_user_id(), itinerary_id);
+  auto node = ItineraryPgDao::itinerary_complete::encode(itinerary.second);
 
   // std::cout << node << '\n';
   response.content << node;

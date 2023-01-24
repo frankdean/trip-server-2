@@ -76,11 +76,11 @@ YAML::Node location::encode(const location& rhs)
 
 bool location::decode(const YAML::Node& node, location& rhs)
 {
-  if ((rhs.id.first = !node["id"].IsNull()))
+  if ((rhs.id.first = node["id"] && !node["id"].IsNull()))
     rhs.id.second = node["id"].as<long>();
   rhs.longitude = node["lng"].as<double>();
   rhs.latitude = node["lat"].as<double>();
-  if ((rhs.altitude.first = !node["altitude"].IsNull()))
+  if ((rhs.altitude.first = node["altitude"] && !node["altitude"].IsNull()))
     rhs.altitude.second = node["altitude"].as<double>();
   return true;
 }
@@ -142,15 +142,15 @@ YAML::Node path_statistics::encode(const path_statistics& rhs)
 
 bool path_statistics::decode(const YAML::Node& node, path_statistics& rhs)
 {
-  if ((rhs.distance.first = !node["distance"].IsNull()))
+  if ((rhs.distance.first = node["distance"] && !node["distance"].IsNull()))
     rhs.distance.second = node["distance"].as<double>();
-  if ((rhs.ascent.first = !node["ascent"].IsNull()))
+  if ((rhs.ascent.first = node["ascent"] && !node["ascent"].IsNull()))
     rhs.ascent.second = node["ascent"].as<double>();
-  if ((rhs.descent.first = !node["descent"].IsNull()))
+  if ((rhs.descent.first = node["descent"] && !node["descent"].IsNull()))
     rhs.descent.second = node["descent"].as<double>();
-  if ((rhs.lowest.first = !node["lowest"].IsNull()))
+  if ((rhs.lowest.first =  node["lowest"] && !node["lowest"].IsNull()))
     rhs.lowest.second = node["lowest"].as<double>();
-  if ((rhs.highest.first = !node["highest"].IsNull()))
+  if ((rhs.highest.first = node["highest"] && !node["highest"].IsNull()))
     rhs.highest.second = node["highest"].as<double>();
   return true;
 }

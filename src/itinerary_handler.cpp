@@ -22,6 +22,7 @@
 #include "../config.h"
 #include "itinerary_handler.hpp"
 #include "itineraries_handler.hpp"
+#include "itinerary_import_handler.hpp"
 #include "session_pg_dao.hpp"
 #include "geo_utils.hpp"
 #include "../trip-server-common/src/http_response.hpp"
@@ -612,7 +613,9 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
   response.content
     <<
     // Label for menu item to create a complete copy of the current Itinerary as a new Itinerary
-    "                <li><a class=\"dropdown-item opacity-50\">" << translate("Create duplicate itinerary") << "</a></li>\n"
+    "                <li><button class=\"dropdown-item\" name=\"action\" value=\"duplicate\""
+    // Confirmation dialog when creating a duplicating an itinerary
+    "onclick=\"return confirm('" << translate("Create a new copy of this itinerary?") << "');\">" << translate("Create duplicate itinerary") << "</button></li>\n"
     "              </ul>\n"
     "            </li>\n"
     "            <li class=\"nav-item dropdown\">\n"
@@ -879,6 +882,18 @@ void ItineraryHandler::handle_authenticated_request(
   } else if (action == "paste") {
     active_tab = features_tab;
     paste_items();
+  } else if (action == "duplicate") {
+    auto new_itinerary = dao.get_itinerary_complete(get_user_id(),
+                                                    itinerary_id);
+    if (new_itinerary.first) {
+      const long new_itinerary_id =
+        ItineraryImportHandler::duplicate_itinerary(get_user_id(),
+                                                    new_itinerary.second);
+      std::ostringstream url;
+      url << get_uri_prefix() << "/itinerary?id=" << new_itinerary_id
+          << "&active_tab=features";
+      redirect(request, response, url.str());
+    }
   } else if (action == "attributes") {
     auto features = get_selected_feature_ids(request);
     if (!features.waypoints.empty()) {
@@ -889,7 +904,7 @@ void ItineraryHandler::handle_authenticated_request(
       redirect(request, response, url.str());
     }
   }
-  auto itinerary = dao.get_itinerary_details(get_user_id(), itinerary_id);
+  auto itinerary = dao.get_itinerary_summary(get_user_id(), itinerary_id);
   if (!itinerary.first)
     throw BadRequestException("Itinerary ID not found");
   read_only = itinerary.second.shared_to_nickname.first;

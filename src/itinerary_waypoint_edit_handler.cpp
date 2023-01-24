@@ -368,7 +368,7 @@ void ItineraryWaypointEditHandler::handle_authenticated_request(
              std::to_string(itinerary_id) + "&active-tab=features");
     return;
   }
-  auto itinerary = dao.get_itinerary_details(get_user_id(), itinerary_id);
+  auto itinerary = dao.get_itinerary_summary(get_user_id(), itinerary_id);
   if (!itinerary.first)
     throw BadRequestException("Itinerary ID not found");
   read_only = itinerary.second.shared_to_nickname.first;

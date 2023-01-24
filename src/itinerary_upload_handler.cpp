@@ -168,11 +168,11 @@ void ItineraryUploadHandler::build_form(
     "        <input type=\"hidden\" name=\"id\" value=\"" << itinerary_id << "\">\n"
     "        <input id=\"btn-file-upload\" type=\"file\" accesskey=\"f\" name=\"file\" class=\"btn btn-lg btn-primary\">\n"
     "      </div>\n"
-    "      <div class=\"col-12 pt-3\" arial-label=\"Form buttons\">\n"
+    "      <div class=\"col-12 py-3\" arial-label=\"Form buttons\">\n"
     // Label for button to upload a GPX (XML) file containing routes, waypoints and tracks
     "        <button id=\"btn-upload\" type=\"submit\" accesskey=\"u\" name=\"action\" value=\"upload\" class=\"btn btn-lg btn-success\">" << translate("Upload") << "</button>\n"
     // Label for button to cancel uploading a GPX (XML) file containing routes, waypoints and tracks
-    "        <button id=\"btn-cancel\" type=\"submit\" accesskey=\"c\" name=\"action\" value=\"cancel\" class=\"btn btn-lg btn-danger\">" << translate("Cancel") << "</button>\n"
+    "        <button id=\"btn-cancel\" type=\"submit\" accesskey=\"c\" name=\"action\" value=\"cancel\" class=\"btn btn-lg btn-danger\" formnovalidate>" << translate("Cancel") << "</button>\n"
     "      </div>\n"
     "    </form>\n"
     "  </div>\n";

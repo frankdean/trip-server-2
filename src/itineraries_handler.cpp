@@ -116,7 +116,7 @@ void ItinerariesHandler::build_page(
       // Button title for creating something new
       "        <button id=\"btn-new\" formaction=\"" << get_uri_prefix() << "/itinerary/edit\" type=\"submit\" accesskey=\"w\" class=\"btn btn-lg btn-warning\">" << translate("New") << "</button>\n"
       // Button title for importing something
-      "        <button id=\"btn-import\" accesskey=\"i\" class=\"btn btn-lg btn-success\" disabled>" << translate("Import") << "</button>\n"
+      "        <button id=\"btn-import\" accesskey=\"i\" name=\"action\" value=\"import\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary/import\" class=\"btn btn-lg btn-success\">" << translate("Import") << "</button>\n"
       "      </div>\n"
       "    </form>\n";
     if (!itineraries.empty()) {
