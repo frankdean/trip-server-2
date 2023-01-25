@@ -39,8 +39,7 @@ As migrating to Angular 2+ is not trivial and with no reassurance that a
 similar upgrade will not be necessary in the future, I was extremely
 reluctant to simply follow the upgrade path.
 
-Consequently to these issues, I want a solution that has as few dependencies
-as practicle,
+Consequently, I want a solution that has as few dependencies as practical,
 ideally with those minimal dependencies being on widely used libraries which are
 unlikely to force much re-work of any application code.  I've used many
 languages and experimented with some of the more popular modern languages, but
