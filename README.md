@@ -15,11 +15,13 @@ In the event of contact being lost, the plans and tracking information can be
 passed to rescue services etc., to assist with locating the missing
 adventurer.
 
-Trip Server 2 will be a port of [Trip Server][trip-server], written mostly in
-C++.  It is far from complete.  It can be run alongside an existing Trip
-Server version 1.10.x installation.
+Trip Server 2 is a port of [Trip Server v1][trip-server], written mostly in
+C++.  Compared to the previous version, it is not fully complete, but now
+supports all the primary tracking, itinerary management and sharing functions,
+sufficient to support its primary purpose. It can be run alongside an existing
+Trip Server version 1.11.x installation.
 
-The Trip application consists of two primary components, [a server
+The original Trip application consists of two primary components, [a server
 application][trip-server], written in [ECMAScript][] (a JavaScript standard),
 running under [Node.js][] and [a browser application][trip-web-client], also
 written in ECMAScript using [AngularJS][], a web framework.
@@ -34,11 +36,12 @@ within the [npm](https://www.npmjs.com) eco-system, I'm of the view that the
 support impact of development in such an architecture is unacceptably high.
 
 As migrating to Angular 2+ is not trivial and with no reassurance that a
-similar upgrade will not be necessary in the near future, I was extremely
+similar upgrade will not be necessary in the future, I was extremely
 reluctant to simply follow the upgrade path.
 
-Consequently to these issues, I wanted a solution that had few dependencies,
-ideally with those minimal dependencies being on widely used libraries
+Consequently to these issues, I want a solution that has as few dependencies
+as practicle,
+ideally with those minimal dependencies being on widely used libraries which are
 unlikely to force much re-work of any application code.  I've used many
 languages and experimented with some of the more popular modern languages, but
 I don't see any meeting my desire for something that will remain largely
@@ -67,25 +70,25 @@ desire is to keep the YAML configuration file requiring minimal changes.
 
 The following features are proposed:
 
-* Remote tracking server—client applications such as
+* &#x2713; Remote tracking server—client applications such as
   [TripLogger Remote for iOS][TripLogger] &ndash;
   ([on the App Store](https://apps.apple.com/us/app/triplogger-remote/id1322577876?mt=8))
   or
   [GPSLogger for Android][GPSLogger] can be used to submit locations to the
   server.
 
-* Sharing tracks with others.
+* &#x2713; Sharing tracks with others.
 
-* Viewing tracks on a map provided by a tile server, e.g. OpenStreetMap tiles.
+* &#x2713; Viewing tracks on a map provided by a tile server, e.g. OpenStreetMap tiles.
 
-* Creating and sharing itineraries using the Markdown markup language.
+* &#x2713; Creating and sharing itineraries using the Markdown markup language.
 
-* Using the map, interactively creating routes and waypoints for an itinerary.
+* &#x2713; Using the map, interactively creating routes and waypoints for an itinerary.
 
-* Uploading and downloading routes, tracks and waypoints for an itinerary as a
+* &#x2713; Uploading and downloading routes, tracks and waypoints for an itinerary as a
   [GPX][] file.
 
-* Viewing routes, tracks and waypoints of an itinerary on the map.
+* &#x2713; Viewing routes, tracks and waypoints of an itinerary on the map.
 
 * Splitting and joining routes and tracks.
 
