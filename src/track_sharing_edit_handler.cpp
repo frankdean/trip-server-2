@@ -29,6 +29,7 @@
 using namespace boost::locale;
 using namespace fdsd::trip;
 using namespace fdsd::web;
+using namespace fdsd::utils;
 
 void TrackSharingEditHandler::do_preview_request(
     const HTTPServerRequest& request,
@@ -36,6 +37,7 @@ void TrackSharingEditHandler::do_preview_request(
 {
   is_new = (request.get_param("new") == "true");
   nickname = request.get_param("nickname");
+  dao_helper::trim(nickname);
   if (is_new) {
     // Title of the page when creating the sharing of tracked locations with another user
     set_page_title(translate("Track Sharing&mdash;New"));

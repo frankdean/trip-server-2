@@ -896,11 +896,23 @@ void ItineraryHandler::handle_authenticated_request(
     }
   } else if (action == "attributes") {
     auto features = get_selected_feature_ids(request);
-    if (!features.waypoints.empty()) {
+    if (!features.routes.empty()) {
+      long route_id = features.routes.front();
+      std::ostringstream url;
+      url << get_uri_prefix() << "/itinerary-route-name?itinerary_id=" << itinerary_id
+          << "&path_id=" << route_id;
+      redirect(request, response, url.str());
+    } else if (!features.waypoints.empty()) {
       long waypoint_id = features.waypoints.front();
       std::ostringstream url;
       url << get_uri_prefix() << "/itinerary-wpt-edit?itineraryId=" << itinerary_id
           << "&waypointId=" << waypoint_id;
+      redirect(request, response, url.str());
+    } else if (!features.tracks.empty()) {
+      long track_id = features.tracks.front();
+      std::ostringstream url;
+      url << get_uri_prefix() << "/itinerary-track-name?itinerary_id=" << itinerary_id
+          << "&path_id=" << track_id;
       redirect(request, response, url.str());
     }
   }

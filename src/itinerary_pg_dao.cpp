@@ -24,6 +24,7 @@
 #include "../trip-server-common/src/date_utils.hpp"
 #include "../trip-server-common/src/dao_helper.hpp"
 #include <vector>
+#include <stdexcept>
 
 using namespace fdsd::trip;
 using namespace fdsd::utils;
@@ -1456,6 +1457,12 @@ void ItineraryPgDao::save(std::string user_id,
   }
 }
 
+/**
+ * Saves the route.  If the route ID is set, all it's points are deleting and
+ * re-created after updating the route itself.
+ *
+ * Otherwise a new route is created and it's points saved.
+ */
 void ItineraryPgDao::save(std::string user_id,
                           long itinerary_id,
                           route &route)
@@ -1473,6 +1480,7 @@ void ItineraryPgDao::save(std::string user_id,
         );
       if (check[0].as<long>() != 1)
         throw NotAuthorized();
+
       tx.exec_params("DELETE FROM itinerary_route_point "
                      "WHERE itinerary_route_id=$1",
                      route.id.second);
@@ -2197,4 +2205,138 @@ bool ItineraryPgDao::route::decode(const YAML::Node& node,
 {
   rhs.points = node["points"].as<std::vector<ItineraryPgDao::route_point>>();
   return fdsd::trip::ItineraryPgDao::path_summary::decode(node, rhs);
+}
+
+ItineraryPgDao::route ItineraryPgDao::get_route_summary(std::string user_id,
+                                                        long itinerary_id,
+                                                        long route_id)
+{
+  try {
+    work tx(*connection);
+    validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+    auto rt = tx.exec_params1(
+        "SELECT id, name, color, distance, ascent, descent, lowest, highest "
+        "FROM itinerary_route WHERE itinerary_id=$1 AND id=$2",
+        itinerary_id,
+        route_id);
+    route route;
+    route.id.first = rt["id"].to(route.id.second);
+    route.name.first = rt["name"].to(route.name.second);
+    route.color.first = rt["color"].to(route.color.second);
+    route.distance.first = rt["distance"].to(route.distance.second);
+    route.ascent.first = rt["ascent"].to(route.ascent.second);
+    route.descent.first = rt["descent"].to(route.descent.second);
+    route.lowest.first = rt["lowest"].to(route.lowest.second);
+    route.highest.first = rt["highest"].to(route.highest.second);
+    tx.commit();
+    return route;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception getting route summary: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+ItineraryPgDao::track ItineraryPgDao::get_track_summary(std::string user_id,
+                                                        long itinerary_id,
+                                                        long track_id)
+{
+  try {
+    work tx(*connection);
+    validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+    auto rt = tx.exec_params1(
+        "SELECT id, name, color, distance, ascent, descent, lowest, highest "
+        "FROM itinerary_track WHERE itinerary_id=$1 AND id=$2 ORDER BY name, id",
+        itinerary_id,
+        track_id);
+    track track;
+    track.id.first = rt["id"].to(track.id.second);
+    track.name.first = rt["name"].to(track.name.second);
+    track.color.first = rt["color"].to(track.color.second);
+    track.distance.first = rt["distance"].to(track.distance.second);
+    track.ascent.first = rt["ascent"].to(track.ascent.second);
+    track.descent.first = rt["descent"].to(track.descent.second);
+    track.lowest.first = rt["lowest"].to(track.lowest.second);
+    track.highest.first = rt["highest"].to(track.highest.second);
+    tx.commit();
+    return track;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception getting track summary: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+std::vector<std::pair<std::string, std::string>>
+    ItineraryPgDao::get_path_color_options()
+{
+  try {
+    std::vector<std::pair<std::string, std::string>> colours;
+    work tx(*connection);
+    auto result = tx.exec_params(
+        "SELECT key, value FROM path_color ORDER BY value");
+    for (const auto &r : result) {
+      const std::string key = r["key"].as<std::string>();
+      const std::string value = r["value"].as<std::string>();
+      colours.push_back(std::make_pair(key, value));
+    }
+    tx.commit();
+    return colours;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception getting path color options: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+void ItineraryPgDao::update_route_summary(std::string user_id,
+                                          long itinerary_id,
+                                          const ItineraryPgDao::route &route)
+{
+  if (!route.id.first)
+    throw std::invalid_argument("Route ID not set");
+  try {
+    work tx(*connection);
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    tx.exec_params(
+        "UPDATE itinerary_route "
+        "SET name=$3, color=$4 "
+        "WHERE id=$2 AND itinerary_id=$1",
+        itinerary_id,
+        route.id.second,
+        route.name.first ? &route.name.second : nullptr,
+        route.color.first ? &route.color.second : nullptr
+      );
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception updating route summary: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+void ItineraryPgDao::update_track_summary(std::string user_id,
+                                          long itinerary_id,
+                                          const ItineraryPgDao::track &track)
+{
+  if (!track.id.first)
+    throw std::invalid_argument("Track ID not set");
+  try {
+    work tx(*connection);
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    tx.exec_params(
+        "UPDATE itinerary_track "
+        "SET name=$3, color=$4 "
+        "WHERE id=$2 AND itinerary_id=$1",
+        itinerary_id,
+        track.id.second,
+        track.name.first ? &track.name.second : nullptr,
+        track.color.first ? &track.color.second : nullptr
+      );
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception updating track summary: "
+              << e.what() << '\n';
+    throw;
+  }
 }

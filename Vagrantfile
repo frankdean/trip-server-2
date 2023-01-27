@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
     # https://wiki.debian.org/Teams/Cloud/VagrantBaseBoxes
     # Boxes: https://app.vagrantup.com/debian
     debian.vm.box = "debian/bullseye64"
-    debian.vm.box_version = "11.20220912.1"
+    #debian.vm.box_version = "11.20221219.1"
 
     # Create a forwarded port mapping which allows access to a specific port
     # within the machine from a port on the host machine. In the example below,
@@ -42,7 +42,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "fedora", autostart: false do |fedora|
     # boxes at https://app.vagrantup.com/fedora/
     fedora.vm.box = "fedora/36-cloud-base"
-    fedora.vm.box_version = "36-20220504.1"
+    #fedora.vm.box_version = "36-20220504.1"
 
     # If the VirtualBox guest additions fail to install, first try:
     #
@@ -64,7 +64,7 @@ Vagrant.configure("2") do |config|
     # boxes at https://app.vagrantup.com/freebsd
 
     freebsd.vm.box = "freebsd/FreeBSD-13.1-STABLE"
-    freebsd.vm.box_version = "2022.10.14"
+    #freebsd.vm.box_version = "2022.10.14"
     # When using FreeBSD, the following may need to be defined
     freebsd.vm.synced_folder ".", "/vagrant", type: "rsync"
 

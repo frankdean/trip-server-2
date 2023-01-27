@@ -349,6 +349,8 @@ void ItineraryWaypointEditHandler::handle_authenticated_request(
     ItineraryPgDao::waypoint wpt;
     wpt.id = request.get_optional_post_param_long("waypoint_id");
     wpt.name = request.get_optional_post_param("name");
+    if (wpt.name.first)
+      dao_helper::trim(wpt.name.second);
     wpt.longitude = std::stod(request.get_post_param("lng"));
     wpt.latitude = std::stod(request.get_post_param("lat"));
     const auto time_str = request.get_optional_post_param("time");
@@ -357,10 +359,17 @@ void ItineraryWaypointEditHandler::handle_authenticated_request(
       wpt.time.second = DateTime(time_str.second).time_tp();
     wpt.altitude = request.get_optional_post_param_double("altitude");
     wpt.symbol = request.get_optional_post_param("wptSymbol");
+    // Don't trim comment as trailing whitespace can be deliberate and necessary
     wpt.comment = request.get_optional_post_param("comment");
     wpt.description = request.get_optional_post_param("description");
+    if (wpt.description.first)
+      dao_helper::trim(wpt.description.second);
     wpt.color = request.get_optional_post_param("color");
+    if (wpt.color.first)
+      dao_helper::trim(wpt.color.second);
     wpt.type = request.get_optional_post_param("type");
+    if (wpt.type.first)
+      dao_helper::trim(wpt.type.second);
     wpt.avg_samples = request.get_optional_post_param_long("samples");
     dao.save(get_user_id(), itinerary_id, wpt);
     redirect(request, response,

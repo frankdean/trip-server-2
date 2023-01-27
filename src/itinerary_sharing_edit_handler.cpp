@@ -48,7 +48,7 @@ void ItinerarySharingEditHandler::build_form(
   response.content
     <<
     "  <form name=\"form\" method=\"post\">\n"
-    "    <div>\n"
+    "    <div class=\"container-fluid bg-light row g-3 my-3 pb-3 mx-0\">\n"
     "      <input type=\"hidden\" name=\"itinerary_id\" value=\"" << itinerary_id << "\">\n"
     "      <input type=\"hidden\" name=\"goto-page\" value=\"" << current_page << "\">\n";
   if (shared_to_id.first)
@@ -137,6 +137,7 @@ void ItinerarySharingEditHandler::handle_authenticated_request(
     const std::string action = request.get_post_param("action");
     if (action == "save") {
       itinerary_share.nickname = request.get_post_param("nickname");
+      dao_helper::trim(itinerary_share.nickname);
       if (!itinerary_share.nickname.empty()) {
         TrackPgDao tracking_dao;
         try {

@@ -310,16 +310,39 @@ public:
       get_routes(std::string user_id,
                  long itinerary_id,
                  const std::vector<long> &route_ids);
+
+  route get_route(std::string user_id,
+                  long itinerary_id,
+                  long route_id) {
+    std::vector<long> route_ids;
+    route_ids.push_back(route_id);
+    auto routes = get_routes(user_id, itinerary_id, route_ids);
+    return routes.front();
+  }
   std::vector<route>
       get_routes(std::string user_id,
                  long itinerary_id);
+  route get_route_summary(std::string user_id,
+                          long itinerary_id,
+                          long route_id);
   std::vector<track>
       get_tracks(std::string user_id,
                  long itinerary_id,
                  const std::vector<long> &ids);
+  track get_track(std::string user_id,
+                  long itinerary_id,
+                  long track_id) {
+    std::vector<long> track_ids;
+    track_ids.push_back(track_id);
+    auto tracks = get_tracks(user_id, itinerary_id, track_ids);
+    return tracks.front();
+  }
   std::vector<track>
       get_tracks(std::string user_id,
                  long itinerary_id);
+  track get_track_summary(std::string user_id,
+                          long itinerary_id,
+                          long track_id);
   std::vector<ItineraryPgDao::waypoint>
       get_waypoints(std::string user_id,
                     long itinerary_id,
@@ -343,6 +366,14 @@ public:
   void save(std::string user_id,
             long itinerary_id,
             route &route);
+
+  void update_route_summary(std::string user_id,
+                            long itinerary_id,
+                            const route &route);
+
+  void update_track_summary(std::string user_id,
+                            long itinerary_id,
+                            const track &track);
 
   void save(std::string user_id,
             long itinerary_id,
@@ -368,6 +399,9 @@ public:
 
   std::vector<std::pair<std::string, std::string>>
       get_waypoint_symbols();
+
+  std::vector<std::pair<std::string, std::string>>
+      get_path_color_options();
 
   void auto_color_paths(std::string user_id,
                         long itinerary_id,
@@ -455,6 +489,14 @@ public:
       std::string user_id,
       long itinerary_id,
       std::vector<route> &routes);
+
+  void create_route(
+      std::string user_id, long itinerary_id, const route &route) {
+    std::vector<ItineraryPgDao::route> routes;
+    routes.push_back(route);
+    create_routes(user_id, itinerary_id, routes);
+  }
+
   void create_tracks(
       std::string user_id,
       long itinerary_id,
