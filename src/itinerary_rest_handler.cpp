@@ -428,10 +428,15 @@ ItineraryPgDao::route ItineraryRestHandler::create_route(
   for (const auto& location : locations)
     route.points.push_back(ItineraryPgDao::route_point(location));
 #ifdef HAVE_GDAL
+  // OpenLayers sets the altitude to zero when creating new points.
+  // Additionally, if a point has been moved, it's altitude may change, so
+  // re-calculate all altitudes where possible.
   if (elevation_service)
     elevation_service->fill_elevations(
         route.points.begin(),
-        route.points.end());
+        route.points.end(),
+        true // use force option
+      );
 #endif
   route.calculate_statistics();
   return route;

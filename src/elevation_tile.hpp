@@ -135,7 +135,7 @@ public:
 
     for (auto point = begin; point != end; ++point) {
       if ((!skip_all_if_any_exist || elevation_count == 0) &&
-          (elevation_count < points_count)) {
+          (elevation_count < points_count || force)) {
         // std::cout << "Trying " << point->longitude << ", "
         //           << point->latitude << '\n';
 

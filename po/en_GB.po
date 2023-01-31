@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: frank.dean@fdsd.co.uk\n"
-"POT-Creation-Date: 2023-01-21 17:37+0000\n"
+"POT-Creation-Date: 2023-01-27 16:42+0000\n"
 "PO-Revision-Date: 2022-10-23 18:06+0100\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: English (British) <(nothing)>\n"
@@ -178,12 +178,12 @@ msgid "Download tracks"
 msgstr "Download tracks"
 
 #. Label for the button to make a copy of the tracked locations
-#: src/tracking_request_handler.cpp:287
+#: src/tracking_request_handler.cpp:286
 msgid "Copy"
 msgstr "Copy"
 
 #. Label for the button which resets the form's input criteria to that originally displayed
-#: src/tracking_request_handler.cpp:290
+#: src/tracking_request_handler.cpp:288
 msgid "Reset"
 msgstr "Reset"
 
