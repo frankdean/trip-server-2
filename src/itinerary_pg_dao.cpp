@@ -611,6 +611,9 @@ std::vector<ItineraryPgDao::track>
     "SELECT t.id AS track_id, t.name AS track_name, t.color AS path_color, "
     "rc.html_code, t.distance, t.ascent, t.descent, t.lowest, t.highest, "
     "ts.id AS segment_id, p.id AS point_id, "
+    "ts.distance AS ts_distance, ts.ascent AS ts_ascent, "
+    "ts.descent AS ts_descent, ts.lowest AS ts_lowest, "
+    "ts.highest AS ts_highest, "
     "ST_X(p.geog::geometry) as lng, ST_Y(p.geog::geometry) as lat, "
     "p.time, p.hdop, p.altitude "
     "FROM itinerary_track t "
@@ -663,11 +666,11 @@ std::vector<ItineraryPgDao::track>
         }
         trkseg.id.first = true;
         trkseg.id.second = segment_id;
-        trkseg.distance.first = r["distance"].to(trkseg.distance.second);
-        trkseg.ascent.first = r["ascent"].to(trkseg.ascent.second);
-        trkseg.descent.first = r["descent"].to(trkseg.descent.second);
-        trkseg.lowest.first = r["lowest"].to(trkseg.lowest.second);
-        trkseg.highest.first = r["highest"].to(trkseg.highest.second);
+        trkseg.distance.first = r["ts_distance"].to(trkseg.distance.second);
+        trkseg.ascent.first = r["ts_ascent"].to(trkseg.ascent.second);
+        trkseg.descent.first = r["ts_descent"].to(trkseg.descent.second);
+        trkseg.lowest.first = r["ts_lowest"].to(trkseg.lowest.second);
+        trkseg.highest.first = r["ts_highest"].to(trkseg.highest.second);
       }
       if (!r["point_id"].is_null()) {
         track_point p;
@@ -704,6 +707,9 @@ std::vector<ItineraryPgDao::track>
     "SELECT t.id AS track_id, t.name AS track_name, t.color AS path_color, "
     "rc.html_code, t.distance, t.ascent, t.descent, t.lowest, t.highest, "
     "ts.id AS segment_id, p.id AS point_id, "
+    "ts.distance AS ts_distance, ts.ascent AS ts_ascent, "
+    "ts.descent AS ts_descent, ts.lowest AS ts_lowest, "
+    "ts.highest AS ts_highest, "
     "ST_X(p.geog::geometry) as lng, ST_Y(p.geog::geometry) as lat, "
     "p.time, p.hdop, p.altitude "
     "FROM itinerary_track t "
@@ -755,11 +761,15 @@ std::vector<ItineraryPgDao::track>
         }
         trkseg.id.first = true;
         trkseg.id.second = segment_id;
-        trkseg.distance.first = r["distance"].to(trkseg.distance.second);
-        trkseg.ascent.first = r["ascent"].to(trkseg.ascent.second);
-        trkseg.descent.first = r["descent"].to(trkseg.descent.second);
-        trkseg.lowest.first = r["lowest"].to(trkseg.lowest.second);
-        trkseg.highest.first = r["highest"].to(trkseg.highest.second);
+        trkseg.distance.first = r["ts_distance"].to(trkseg.distance.second);
+        trkseg.ascent.first = r["ts_ascent"].to(trkseg.ascent.second);
+        trkseg.descent.first = r["ts_descent"].to(trkseg.descent.second);
+        trkseg.lowest.first = r["ts_lowest"].to(trkseg.lowest.second);
+        trkseg.highest.first = r["ts_highest"].to(trkseg.highest.second);
+        std::cout << "Read segment ID: " << trkseg.id.second;
+        if (trkseg.distance.first)
+          std::cout << " with distance " << trkseg.distance.second;
+        std::cout << '\n';
       }
       if (!r["point_id"].is_null()) {
         track_point p;
