@@ -156,12 +156,7 @@ void ItineraryHandler::append_itinerary_content(
       <<
       "            <hr>\n"
       "            <div id=\"div-view-raw\">\n"
-      "              <textarea id=\"raw-textarea\" class=\"raw-markdown\" rows=\"12\"";
-    if (read_only)
-      response.content << " readonly";
-    response.content
-      <<
-      ">\n"
+      "              <textarea id=\"raw-textarea\" class=\"raw-markdown\" rows=\"12\" readonly>\n"
       << x(itinerary.description.second) <<
       "              </textarea>\n"
       "            </div>\n";
