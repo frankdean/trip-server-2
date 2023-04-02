@@ -4,7 +4,7 @@
 AC_PREREQ([2.69])
 AC_INIT([trip],[2.0.0-alpha.31],[frank.dean@fdsd.co.uk])
 BOOTSTRAP_VERSION='5.2.3'
-OPENLAYERS_VERSION='7.2.2'
+OPENLAYERS_VERSION='7.3.0'
 PROJ4JS_VERSION='2.8.1'
 OLC_VERSION='1.0.4'
 AC_COPYRIGHT([Copyright (C) 2022 Frank Dean])
