@@ -134,7 +134,7 @@ ItineraryPgDao::track::track(const route &r) : path_summary(r), segments()
 void ItineraryPgDao::track::calculate_statistics()
 {
   GeoStatistics geo_stats;
-  for (auto & segment : segments) {
+  for (auto &segment : segments) {
     geo_stats.add_path(segment.points.begin(), segment.points.end());
     GeoStatistics segment_stats;
     segment_stats.add_path(segment.points.begin(), segment.points.end());
@@ -721,7 +721,7 @@ std::vector<ItineraryPgDao::track>
     "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
     "WHERE (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
     "AND t.itinerary_id=$2 ORDER BY t.id, ts.id, p.id";
-  // std::cout << "SQL: \n" << sql << '\n' << "track ids: " << ids_sql << '\n';
+  // std::cout << "SQL: \n" << sql << '\n';
   auto result = tx.exec_params(
       sql,
       user_id,
@@ -766,10 +766,10 @@ std::vector<ItineraryPgDao::track>
         trkseg.descent.first = r["ts_descent"].to(trkseg.descent.second);
         trkseg.lowest.first = r["ts_lowest"].to(trkseg.lowest.second);
         trkseg.highest.first = r["ts_highest"].to(trkseg.highest.second);
-        std::cout << "Read segment ID: " << trkseg.id.second;
-        if (trkseg.distance.first)
-          std::cout << " with distance " << trkseg.distance.second;
-        std::cout << '\n';
+        // std::cout << "Read segment ID: " << trkseg.id.second;
+        // if (trkseg.distance.first)
+        //   std::cout << " with distance " << trkseg.distance.second;
+        // std::cout << '\n';
       }
       if (!r["point_id"].is_null()) {
         track_point p;
@@ -1047,7 +1047,9 @@ void ItineraryPgDao::create_track_points(
     "(itinerary_track_segment_id, geog, time, hdop, altitude) "
     "VALUES ($1, ST_SetSRID(ST_POINT($2, $3),4326), $4, $5, $6) "
     "RETURNING id";
+  int count = 0;
   for (auto &p : segment.points) {
+    count++;
     std::string timestr;
     if (p.time.first)
       timestr = DateTime(p.time.second).get_time_as_iso8601_gmt();
@@ -1468,7 +1470,7 @@ void ItineraryPgDao::save(std::string user_id,
 }
 
 /**
- * Saves the route.  If the route ID is set, all it's points are deleting and
+ * Saves the route.  If the route ID is set, all it's points are deleted and
  * re-created after updating the route itself.
  *
  * Otherwise a new route is created and it's points saved.
@@ -1529,7 +1531,74 @@ void ItineraryPgDao::save(std::string user_id,
     create_route_points(tx, route);
     tx.commit();
   } catch (const std::exception &e) {
-    std::cerr << "Exception whilst saving waypoint: "
+    std::cerr << "Exception whilst saving route: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+/**
+ * Saves the track.  If the track ID is set, all it's segments and points are
+ * deleted and re-created after updating the route itself.
+ *
+ * Otherwise, a new track is created and it's segments and points saved.
+ */
+void ItineraryPgDao::save(std::string user_id,
+                          long itinerary_id,
+                          track &track)
+{
+  work tx(*connection);
+  try {
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    if (track.id.first) {
+      // Validate the track belongs to this user
+      auto check = tx.exec_params1(
+          "SELECT COUNT(*) FROM itinerary_track "
+          "WHERE itinerary_id=$1 AND id=$2",
+          itinerary_id,
+          track.id.second
+        );
+      if (check[0].as<long>() != 1)
+        throw NotAuthorized();
+
+      tx.exec_params("DELETE FROM itinerary_track_segment "
+                     "WHERE itinerary_track_id=$1",
+                     track.id.second);
+      tx.exec_params(
+          "UPDATE itinerary_track "
+          "SET name=$3, color=$4, distance=$5, ascent=$6, descent=$7, "
+          "lowest=$8, highest=$9 "
+          "WHERE id=$2 AND itinerary_id=$1",
+          itinerary_id,
+          track.id.second,
+          track.name.first ? &track.name.second : nullptr,
+          track.color.first ? &track.color.second : nullptr,
+          track.distance.first ? &track.distance.second : nullptr,
+          track.ascent.first ? &track.ascent.second : nullptr,
+          track.descent.first ? &track.descent.second : nullptr,
+          track.lowest.first ? &track.lowest.second : nullptr,
+          track.highest.first ? &track.highest.second : nullptr
+        );
+    } else {
+      auto r = tx.exec_params1(
+          "INSERT INTO itinerary_track "
+          "(itinerary_id, name, color, distance, ascent, descent, lowest, highest "
+          "VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
+          itinerary_id,
+          track.name.first ? &track.name.second : nullptr,
+          track.color.first ? &track.color.second : nullptr,
+          track.distance.first ? &track.distance.second : nullptr,
+          track.ascent.first ? &track.ascent.second : nullptr,
+          track.descent.first ? &track.descent.second : nullptr,
+          track.lowest.first ? &track.lowest.second : nullptr,
+          track.highest.first ? &track.highest.second : nullptr
+        );
+      track.id = std::make_pair(true, r["id"].as<long>());
+    }
+    create_track_segments(tx, track);
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception whilst saving track: "
               << e.what() << '\n';
     throw;
   }
@@ -2255,14 +2324,17 @@ ItineraryPgDao::track ItineraryPgDao::get_track_summary(std::string user_id,
     work tx(*connection);
     validate_user_itinerary_read_access(tx, user_id, itinerary_id);
     auto rt = tx.exec_params1(
-        "SELECT id, name, color, distance, ascent, descent, lowest, highest "
-        "FROM itinerary_track WHERE itinerary_id=$1 AND id=$2 ORDER BY name, id",
+        "SELECT id, name, color, html_code, distance, ascent, descent, "
+        "lowest, highest "
+        "FROM itinerary_track t LEFT JOIN path_color c ON t.color=c.key "
+        "WHERE itinerary_id=$1 AND id=$2 ORDER BY name, id",
         itinerary_id,
         track_id);
     track track;
     track.id.first = rt["id"].to(track.id.second);
     track.name.first = rt["name"].to(track.name.second);
     track.color.first = rt["color"].to(track.color.second);
+    track.html_code.first = rt["html_code"].to(track.html_code.second);
     track.distance.first = rt["distance"].to(track.distance.second);
     track.ascent.first = rt["ascent"].to(track.ascent.second);
     track.descent.first = rt["descent"].to(track.descent.second);
@@ -2346,6 +2418,338 @@ void ItineraryPgDao::update_track_summary(std::string user_id,
     tx.commit();
   } catch (const std::exception &e) {
     std::cerr << "Exception updating track summary: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+long ItineraryPgDao::get_track_segment_count(std::string user_id,
+                                             long itinerary_id,
+                                             long track_id)
+{
+  try {
+    work tx(*connection);
+    validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+    auto r = tx.exec_params1(
+        "SELECT COUNT(*) FROM itinerary_track_segment seg "
+        "JOIN itinerary_track t ON t.id=seg.itinerary_track_id "
+        "WHERE t.itinerary_id=$1 AND seg.itinerary_track_id=$2",
+        itinerary_id,
+        track_id);
+    tx.commit();
+    return r[0].as<long>();
+  } catch (const std::logic_error& e) {
+    std::cerr << "Error fetching track segment count: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+ItineraryPgDao::track
+    ItineraryPgDao::get_track_segments(std::string user_id,
+                                       long itinerary_id,
+                                       long track_id,
+                                       std::uint32_t offset,
+                                       int limit)
+{
+  try {
+    work tx(*connection);
+    validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+    auto r = tx.exec_params1(
+        "SELECT id, name, color, c.value, c.html_code, distance, ascent, "
+        "descent, lowest, highest "
+        "FROM itinerary_track t "
+        "LEFT JOIN path_color c ON t.color=c.key "
+        "WHERE t.itinerary_id=$1 AND t.id=$2",
+        itinerary_id,
+        track_id);
+    track track;
+    track.id.first = r["id"].to(track.id.second);
+    track.name.first = r["name"].to(track.name.second);
+    track.color.first = r["color"].to(track.color.second);
+    track.distance.first = r["distance"].to(track.distance.second);
+    track.ascent.first = r["ascent"].to(track.ascent.second);
+    track.descent.first = r["descent"].to(track.descent.second);
+    track.lowest.first = r["lowest"].to(track.lowest.second);
+    track.highest.first = r["highest"].to(track.highest.second);
+    auto result = tx.exec_params(
+        "SELECT id, distance, ascent, descent, lowest, highest "
+        "FROM itinerary_track_segment WHERE itinerary_track_id=$1 "
+        "ORDER BY id OFFSET $2 LIMIT $3",
+        track_id,
+        offset,
+        limit
+      );
+    for (const auto &r : result) {
+      track_segment trkseg;
+      trkseg.id.first = r["id"].to(trkseg.id.second);
+      trkseg.distance.first = r["distance"].to(trkseg.distance.second);
+      trkseg.ascent.first = r["ascent"].to(trkseg.ascent.second);
+      trkseg.descent.first = r["descent"].to(trkseg.descent.second);
+      trkseg.lowest.first = r["lowest"].to(trkseg.lowest.second);
+      trkseg.highest.first = r["highest"].to(trkseg.highest.second);
+      if (trkseg.id.first)
+        track.segments.push_back(trkseg);
+    }
+    tx.commit();
+    return track;
+  } catch (const std::logic_error& e) {
+    std::cerr << "Error fetching track segments: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+  std::vector<ItineraryPgDao::track_point>
+    ItineraryPgDao::get_track_points(
+        std::string user_id,
+        long itinerary_id,
+        const std::vector<long> &point_ids)
+{
+  try {
+    work tx(*connection);
+    validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+    const std::string ids_sql = dao_helper::to_sql_array(point_ids);
+    auto result = tx.exec_params(
+        "SELECT tp.id, tp.time, ST_X(tp.geog::geometry) as lng, "
+        "ST_Y(tp.geog::geometry) as lat, tp.altitude, tp.hdop "
+        "FROM itinerary_track_point tp "
+        "JOIN itinerary_track_segment ts ON tp.itinerary_track_segment_id=ts.id "
+        "JOIN itinerary_track t ON ts.itinerary_track_id=t.id "
+        "WHERE t.itinerary_id=$1 AND tp.id=ANY($2) "
+        "ORDER BY tp.id",
+        itinerary_id,
+        ids_sql);
+    std::vector<track_point> retval;
+    for (const auto &r : result) {
+      track_point p;
+      p.id.first = r["id"].to(p.id.second);
+      r["lng"].to(p.longitude);
+      r["lat"].to(p.latitude);
+      std::string s;
+      if ((p.time.first = r["time"].to(s))) {
+        DateTime time(s);
+        p.time.second = time.time_tp();
+      }
+      p.hdop.first = r["hdop"].to(p.hdop.second);
+      p.altitude.first = r["altitude"].to(p.altitude.second);
+      retval.push_back(p);
+    }
+    tx.commit();
+    return retval;
+  } catch (const std::logic_error& e) {
+    std::cerr << "Error fetching track points: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+long ItineraryPgDao::get_track_segment_point_count(
+    std::string user_id,
+    long itinerary_id,
+    long track_segment_id)
+{
+  try {
+    work tx(*connection);
+    validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+    auto r = tx.exec_params1(
+        "SELECT COUNT(*) FROM itinerary_track_point tp "
+        "JOIN itinerary_track_segment ts ON tp.itinerary_track_segment_id=ts.id "
+        "JOIN itinerary_track t ON ts.itinerary_track_id=t.id "
+        "WHERE t.itinerary_id=$1 AND tp.itinerary_track_segment_id=$2",
+        itinerary_id,
+        track_segment_id);
+    tx.commit();
+    return r[0].as<long>();
+  } catch (const std::logic_error& e) {
+    std::cerr << "Error fetching track segment point count: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+ItineraryPgDao::track_segment ItineraryPgDao::get_track_segment(
+    std::string user_id,
+    long itinerary_id,
+    long track_segment_id,
+    std::uint32_t offset,
+    int limit)
+{
+  try {
+    work tx(*connection);
+    validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+    // Get the track segment validating that it belongs to both the track_id and
+    // itinerary_id
+    auto r = tx.exec_params1(
+        "SELECT ts.id, ts.distance, ts.ascent, ts.descent, ts.lowest, ts.highest "
+        "FROM itinerary_track_segment ts "
+        "JOIN itinerary_track t ON t.id=ts.itinerary_track_id "
+        "WHERE t.itinerary_id=$1 AND ts.id=$2",
+        itinerary_id,
+        track_segment_id
+      );
+    track_segment trkseg;
+    trkseg.id.first = r["id"].to(trkseg.id.second);
+    trkseg.distance.first = r["distance"].to(trkseg.distance.second);
+    trkseg.ascent.first = r["ascent"].to(trkseg.ascent.second);
+    trkseg.descent.first = r["descent"].to(trkseg.descent.second);
+    trkseg.lowest.first = r["lowest"].to(trkseg.lowest.second);
+    trkseg.highest.first = r["highest"].to(trkseg.highest.second);
+    auto result = tx.exec_params(
+        "SELECT tp.id, tp.time, ST_X(tp.geog::geometry) as lng, "
+        "ST_Y(tp.geog::geometry) as lat, tp.altitude, tp.hdop "
+        "FROM itinerary_track_point tp "
+        "JOIN itinerary_track_segment ts ON tp.itinerary_track_segment_id=ts.id "
+        "JOIN itinerary_track t ON ts.itinerary_track_id=t.id "
+        "WHERE t.itinerary_id=$1 AND tp.itinerary_track_segment_id=$2 "
+        "ORDER BY tp.id OFFSET $3 LIMIT $4",
+        itinerary_id,
+        track_segment_id,
+        offset,
+        limit < 0 ? nullptr : &limit
+      );        
+    for (const auto &r : result) {
+      track_point p;
+      p.id.first = r["id"].to(p.id.second);
+      r["lng"].to(p.longitude);
+      r["lat"].to(p.latitude);
+      std::string s;
+      if ((p.time.first = r["time"].to(s))) {
+        DateTime time(s);
+        p.time.second = time.time_tp();
+      }
+      p.hdop.first = r["hdop"].to(p.hdop.second);
+      p.altitude.first = r["altitude"].to(p.altitude.second);
+      trkseg.points.push_back(p);
+    }
+    tx.commit();
+    return trkseg;
+  } catch (const std::logic_error& e) {
+    std::cerr << "Error fetching track segment: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+std::vector<ItineraryPgDao::track_segment> ItineraryPgDao::get_track_segments(
+    std::string user_id,
+    long itinerary_id,
+    long track_id,
+    std::vector<long> track_segment_ids)
+{
+  try {
+    work tx(*connection);
+    validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+    const std::string ids_sql = dao_helper::to_sql_array(track_segment_ids);
+    // Get the track segment validating that it belongs to both the track_id and
+    // itinerary_id
+    auto segments_result = tx.exec_params(
+        "SELECT ts.id, ts.distance, ts.ascent, ts.descent, ts.lowest, ts.highest "
+        "FROM itinerary_track_segment ts "
+        "JOIN itinerary_track t ON t.id=ts.itinerary_track_id "
+        "WHERE t.itinerary_id=$1 AND t.id=$2 AND ts.id=ANY($3) "
+        "ORDER BY ts.id",
+        itinerary_id,
+        track_id,
+        ids_sql
+      );
+    // use prepared statement to fetch each of the sets of points
+    connection->prepare(
+        "fetch-segment-points",
+        "SELECT tp.id, tp.time, ST_X(tp.geog::geometry) as lng, "
+        "ST_Y(tp.geog::geometry) as lat, tp.altitude, tp.hdop "
+        "FROM itinerary_track_point tp "
+        "JOIN itinerary_track_segment ts ON tp.itinerary_track_segment_id=ts.id "
+        "JOIN itinerary_track t ON ts.itinerary_track_id=t.id "
+        "WHERE t.itinerary_id=$1 AND tp.itinerary_track_segment_id=$2 "
+        "ORDER BY tp.id");
+    std::vector<track_segment> retval;
+    for (const auto &seg : segments_result) {
+      track_segment trkseg;
+      trkseg.id.first = seg["id"].to(trkseg.id.second);
+      if (trkseg.id.first) {
+        trkseg.distance.first = seg["distance"].to(trkseg.distance.second);
+        trkseg.ascent.first = seg["ascent"].to(trkseg.ascent.second);
+        trkseg.descent.first = seg["descent"].to(trkseg.descent.second);
+        trkseg.lowest.first = seg["lowest"].to(trkseg.lowest.second);
+        trkseg.highest.first = seg["highest"].to(trkseg.highest.second);
+        auto result = tx.exec_prepared(
+            "fetch-segment-points",
+            itinerary_id,
+            trkseg.id.second
+          );
+        for (const auto &r : result) {
+          track_point p;
+          p.id.first = r["id"].to(p.id.second);
+          r["lng"].to(p.longitude);
+          r["lat"].to(p.latitude);
+          std::string s;
+          if ((p.time.first = r["time"].to(s))) {
+            DateTime time(s);
+            p.time.second = time.time_tp();
+          }
+          p.hdop.first = r["hdop"].to(p.hdop.second);
+          p.altitude.first = r["altitude"].to(p.altitude.second);
+          trkseg.points.push_back(p);
+        }
+        retval.push_back(trkseg);
+      }
+    }
+    tx.commit();
+    return retval;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception getting track segments: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+void ItineraryPgDao::save_updated_statistics(
+    std::string user_id,
+    long itinerary_id,
+    const ItineraryPgDao::track &track)
+{
+  if (!track.id.first)
+    throw std::invalid_argument("Track ID not set");
+  try {
+    work tx(*connection);
+    validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
+    tx.exec_params(
+        "UPDATE itinerary_track "
+        "SET distance=$3, ascent=$4, descent=$5, lowest=$6, highest=$7 "
+        "WHERE id=$2 AND itinerary_id=$1",
+        itinerary_id,
+        track.id.second,
+        track.distance.first ? &track.distance.second : nullptr,
+        track.ascent.first ? &track.ascent.second : nullptr,
+        track.descent.first ? &track.descent.second : nullptr,
+        track.lowest.first ? &track.lowest.second : nullptr,
+        track.highest.first ? &track.highest.second : nullptr
+      );
+    const std::string ps_name = "update_track_segment_stats";
+    connection->prepare(
+        ps_name,
+        "UPDATE itinerary_track_segment "
+        "SET distance=$3, ascent=$4, descent=$5, lowest=$6, highest=$7 "
+        "WHERE id=$2 AND itinerary_track_id=$1"
+      );
+    for (const auto &ts : track.segments) {
+      if (!ts.id.first)
+        throw std::invalid_argument("Track segment ID not set");
+      tx.exec_prepared(
+          ps_name,
+          track.id.second,
+          ts.id.second,
+          ts.distance.first ? &ts.distance.second : nullptr,
+          ts.ascent.first ? &ts.ascent.second : nullptr,
+          ts.descent.first ? &ts.descent.second : nullptr,
+          ts.lowest.first ? &ts.lowest.second : nullptr,
+          ts.highest.first ? &ts.highest.second : nullptr
+        );
+    }
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception saving updated track statistics: "
               << e.what() << '\n';
     throw;
   }

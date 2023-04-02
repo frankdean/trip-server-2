@@ -258,6 +258,8 @@ void BaseRestHandler::set_content_headers(HTTPServerResponse& response) const
   response.set_header("Cache-Control", "no-cache");
 }
 
+bool BaseMapHandler::no_map_provider_warning_given = false;
+
 BaseMapHandler::BaseMapHandler(std::shared_ptr<TripConfig> config) :
     TripAuthenticatedRequestHandler(config)
 {
@@ -279,4 +281,36 @@ void BaseMapHandler::append_pre_body_end(std::ostream& os) const
 {
   append_bootstrap_scripts(os);
   append_openlayers_scripts(os);
+}
+
+/**
+ * Writes JavaScript to the stream to make the map provider configuration
+ * available for use in a script.
+ */
+void BaseMapHandler::append_map_provider_configuration(std::ostream& os) const
+{
+  if (!config->get_providers().empty()) {
+    os <<
+      "const providers = [\n";
+    int index = 0;
+    for (const auto& p : config->get_providers()) {
+      os <<
+        "  {\n"
+        "    name: '" << p.name << "',\n"
+        "    type: '" << p.type << "',\n"
+        "    attributions: '" << p.tile_attributions_html << "',\n"
+        "    url: '" << get_uri_prefix() << "/tile/" << index << "/{z}/{x}/{y}.png',\n"
+        "    min_zoom: " << p.min_zoom << ",\n"
+        "    max_zoom: " << p.max_zoom << ",\n"
+        "  },\n";
+      index++;
+    }
+    os <<
+      "];\n";
+  } else {
+    if (!no_map_provider_warning_given) {
+      std::cerr << "Warning: no map tile providers have been configured\n";
+      no_map_provider_warning_given = true;
+    }
+  }
 }

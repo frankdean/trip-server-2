@@ -82,27 +82,7 @@ void ItineraryMapHandler::handle_authenticated_request(
       "      const server_prefix = '" << get_uri_prefix() << "';\n"
       // Text displayed to user after clicking on map exit button to exit map
       "      const click_to_exit_text = '" << translate("Click to exit") << "';\n";
-    if (!config->get_providers().empty()) {
-      response.content <<
-        "      const providers = [\n";
-      int index = 0;
-      for (const auto& p : config->get_providers()) {
-        response.content <<
-          "      {\n"
-          "        name: '" << p.name << "',\n"
-          "        type: '" << p.type << "',\n"
-          "        attributions: '" << p.tile_attributions_html << "',\n"
-          "        url: '" << get_uri_prefix() << "/tile/" << index << "/{z}/{x}/{y}.png',\n"
-          "        min_zoom: " << p.min_zoom << ",\n"
-          "        max_zoom: " << p.max_zoom << ",\n"
-          "      },\n";
-        index++;
-      }
-      response.content <<
-        "      ];\n";
-    } else {
-      std::cerr << "Warning: no map tile providers have been configured\n";
-    }
+    append_map_provider_configuration(response.content);
     response.content <<
       "      // -->\n"
       "    </script>\n";

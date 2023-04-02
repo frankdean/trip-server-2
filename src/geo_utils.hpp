@@ -35,6 +35,7 @@ namespace fdsd {
 namespace trip {
 
 const double kms_per_mile = 1.609344;
+const double inches_per_meter = 0.0254;
 const double feet_per_meter = 0.3048;
 /// Mean radius of the Earth in kilometers
 const double earth_mean_radius_kms = 6371; // https://en.wikipedia.org/wiki/Earth

@@ -243,9 +243,17 @@ public:
 };
 
 class BaseMapHandler : public TripAuthenticatedRequestHandler {
+  /**
+   * Used to only issue a single warning that a map provider
+   * has not been configured, during each run.
+   *
+   * If false, no warning has been issued.
+   */
+  static bool no_map_provider_warning_given;
 protected:
   virtual void append_head_content(std::ostream& os) const override;
   virtual void append_pre_body_end(std::ostream& os) const override;
+  virtual void append_map_provider_configuration(std::ostream& os) const;
 public:
   BaseMapHandler(std::shared_ptr<TripConfig> config);
 };

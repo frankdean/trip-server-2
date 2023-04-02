@@ -267,7 +267,7 @@ class TripMap {
 
   fetchFeatures() {
     const self = this;
-    // console.debug('Fetching from:', this.url);
+    // console.debug('Fetching from:', self.options.url);
     const myHeaders = new Headers([
       ['Content-Type', 'application/json; charset=UTF-8']
     ]);

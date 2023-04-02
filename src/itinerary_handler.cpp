@@ -191,7 +191,7 @@ void ItineraryHandler::append_path(
   if (path.name.first) {
     os << x(path.name.second);
   } else {
-    // Database ID or an item, typically a route, track or waypoint
+    // Database ID of an item, typically a route, track or waypoint
     os << format(translate("ID:&nbsp;{1,number=left}")) % path.id.second;
   }
   os
@@ -463,6 +463,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
     <<
     "  <form method=\"post\">\n"
     "    <input type=\"hidden\" name=\"id\" value=\"" << itinerary_id << "\" >\n"
+    "    <input type=\"hidden\" name=\"shared\" value=\"" << (read_only ? "true" : "false") << "\">\n"
     "    <div class=\"container-fluid\">\n"
     "      <ul class=\"nav nav-tabs\" id=\"myTab\" role=\"tablist\">\n"
     "        <li class=\"nav-item\" role=\"presentation\">\n"
@@ -531,7 +532,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       // Label for menu item to view waypoint details
       "                <li><button class=\"dropdown-item\" name=\"action\" value=\"attributes\" formmethod=\"post\">" << translate("Waypoint") << "</button></li> <!-- read-only version -->\n"
       // Label for menu item to view details of a path, which is either a selected route or track
-      "                <li><a class=\"dropdown-item opacity-50\">" << translate("Path") << "</a></li> <!-- read-only version -->\n";
+      "                <li><button class=\"dropdown-item\" name=\"action\" value=\"edit-path\">" << translate("Path") << "</button></li> <!-- read-only version -->\n";
   }
   response.content
     <<
@@ -555,7 +556,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       // Label for menu item to edit some or all of the details of a single selected route, track or waypoint
       "                <li><button class=\"dropdown-item\" formmethod=\"post\" name=\"action\" value=\"attributes\">" << translate("Attributes") << "</button></li> <!-- writable version -->\n"
       // Label for menu item to edit the segments and points belonging to a route or track
-      "                <li><a class=\"dropdown-item opacity-50\">" << translate("Path") << "</a></li> <!-- writable version -->\n"
+      "                <li><button class=\"dropdown-item\" name=\"action\" value=\"edit-path\">" << translate("Path") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n"
       // Label for menu item to join together selected routes or tracks
       "                <li><a class=\"dropdown-item opacity-50\">" << translate("Join paths") << "</a></li> <!-- writable version -->\n"
@@ -886,7 +887,7 @@ void ItineraryHandler::handle_authenticated_request(
                                                     new_itinerary.second);
       std::ostringstream url;
       url << get_uri_prefix() << "/itinerary?id=" << new_itinerary_id
-          << "&active_tab=features";
+          << "&active-tab=features";
       redirect(request, response, url.str());
     }
   } else if (action == "attributes") {
@@ -908,6 +909,27 @@ void ItineraryHandler::handle_authenticated_request(
       std::ostringstream url;
       url << get_uri_prefix() << "/itinerary-track-name?itinerary_id=" << itinerary_id
           << "&path_id=" << track_id;
+      redirect(request, response, url.str());
+    }
+  } else if (action == "edit-path") {
+    const std::string shared = request.get_param("shared");
+    read_only = shared == "true";
+    auto features = get_selected_feature_ids(request);
+    if (!features.routes.empty()) {
+      long route_id = features.routes.front();
+      std::ostringstream url;
+      url << get_uri_prefix() << "/itinerary-route-edit?itineraryId=" << itinerary_id
+          << "&routeId=" << route_id;
+      if (read_only)
+        url << "&shared=true";
+      redirect(request, response, url.str());
+    } else if (!features.tracks.empty()) {
+      long track_id = features.tracks.front();
+      std::ostringstream url;
+      url << get_uri_prefix() << "/itinerary-track-edit?itineraryId=" << itinerary_id
+          << "&trackId=" << track_id;
+      if (read_only)
+        url << "&shared=true";
       redirect(request, response, url.str());
     }
   }

@@ -102,6 +102,36 @@ nlohmann::basic_json<nlohmann::ordered_map>
 }
 
 nlohmann::basic_json<nlohmann::ordered_map>
+    ItineraryRestHandler::get_track_segments_as_geojson(
+        const ItineraryPgDao::track &track,
+        const std::vector<ItineraryPgDao::track_segment> &segments) const
+{
+  json json_features = json::array();
+  for (const auto &ts : segments) {
+    GeoMapUtils geoTrack;
+    geoTrack.add_path(ts.points.begin(), ts.points.end());
+    json properties{
+      {"type", "track"}
+    };
+    if (track.id.first)
+      properties["track_id"] = track.id.second;
+    if (ts.id.first)
+      properties["id"] = ts.id.second;
+    if (track.html_code.first)
+      properties["html_color_code"] = track.html_code.second;
+    if (track.color.first)
+      properties["color_code"] = track.color.second;
+    json feature{
+      {"type", "Feature"},
+      {"properties", properties}
+    };
+    feature["geometry"] = geoTrack.as_geojson();
+    json_features.push_back(feature);
+  }
+  return json_features;
+}
+
+nlohmann::basic_json<nlohmann::ordered_map>
     ItineraryRestHandler::get_waypoints_as_geojson(
     const std::vector<ItineraryPgDao::waypoint> &waypoints) const
 {
@@ -125,6 +155,40 @@ nlohmann::basic_json<nlohmann::ordered_map>
       properties["id"] = w.id.second;
     if (w.name.first)
       properties["name"] = w.name.second;
+    feature["properties"] = properties;
+    json_features.push_back(feature);
+  }
+  return json_features;
+}
+
+nlohmann::basic_json<nlohmann::ordered_map>
+    ItineraryRestHandler::get_track_points_as_geojson(
+        const std::vector<long> &point_ids,
+        ItineraryPgDao &dao) const
+{
+  auto points = dao.get_track_points(get_user_id(), itinerary_id, point_ids);
+  json json_features = json::array();
+  for (const auto &w : points) {
+    json properties;
+    json feature{
+      {"type", "Feature"}
+    };
+    json geometry;
+    geometry["type"] = "Point";
+    json coords{
+      w.longitude,
+      w.latitude
+    };
+    geometry["coordinates"] = coords;
+    feature["geometry"] = geometry;
+
+    properties["type"] = "waypoint";
+    if (w.id.first) {
+      properties["id"] = w.id.second;
+      std::ostringstream ss;
+      ss << as::number << std::setprecision(0) << w.id.second;
+      properties["name"] = ss.str();
+    }
     feature["properties"] = properties;
     json_features.push_back(feature);
   }
@@ -160,6 +224,54 @@ void ItineraryRestHandler::fetch_itinerary_features(
   };
   // std::cout << j.dump(4) << '\n';
   response.content << j << '\n';
+}
+
+void ItineraryRestHandler::fetch_itinerary_segments(
+    const nlohmann::basic_json<nlohmann::ordered_map> &json_request,
+    std::ostream &os
+  ) const
+{
+  // std::cout << "Fetching segments for itinerary ID: " << itinerary_id << "\n";
+  long track_id = json_request["track_id"].get<long>();
+  std::vector<long> segment_ids = json_request["segments"].get<std::vector<long>>();
+  // for (auto n : segment_ids) std::cout << n << '\n';
+  ItineraryPgDao dao;
+  auto track = dao.get_track_summary(get_user_id(), itinerary_id, track_id);
+  auto segments = dao.get_track_segments(
+      get_user_id(),
+      itinerary_id,
+      track_id,
+      segment_ids);
+  json j;
+  j["tracks"] = {
+    {"type", "FeatureCollection"},
+    {"features", get_track_segments_as_geojson(track, segments)}
+  };
+  os << j << '\n';
+}
+
+void ItineraryRestHandler::fetch_itinerary_track_points(
+    const nlohmann::basic_json<nlohmann::ordered_map> &json_request,
+    std::ostream &os
+  ) const
+{
+  ItineraryPgDao dao;
+  long track_id = json_request["track_id"].get<long>();
+  auto track = dao.get_track(get_user_id(), itinerary_id, track_id);
+  std::vector<ItineraryPgDao::track> tracks = { track };
+  std::vector<long> point_ids = json_request["track_point_ids"].get<std::vector<long>>();
+  std::vector<long> track_ids = {track_id};
+  json j;
+  j["tracks"] = {
+    {"type", "FeatureCollection"},
+    {"features", get_tracks_as_geojson(tracks)}
+  };
+  j["waypoints"] = {
+    {"type", "FeatureCollection"},
+    {"features", get_track_points_as_geojson(point_ids, dao)}
+  };
+  // std::cout << "Returning features:\n" << j.dump(4) << '\n';
+  os << j << '\n';
 }
 
 std::vector<location> ItineraryRestHandler::get_coordinates(
@@ -525,9 +637,18 @@ void ItineraryRestHandler::handle_authenticated_request(
           ItineraryPgDao::selected_feature_ids selected_features(features);
           dao.delete_features(get_user_id(), itinerary_id, selected_features);
         } else if (action_j.is_null()) {
-          auto feature_info =
-            j["features"].get<fdsd::trip::ItineraryPgDao::selected_feature_ids>();
-          fetch_itinerary_features(itinerary_id, feature_info, response);
+          if (j.find("features") != j.end()) {
+            auto feature_info =
+              j["features"].get<fdsd::trip::ItineraryPgDao::selected_feature_ids>();
+            fetch_itinerary_features(itinerary_id, feature_info, response);
+          } else if (j.find("segments") != j.end()) {
+            fetch_itinerary_segments(j, response.content);
+          } else if (j.find("track_point_ids") != j.end()) {
+            // std::cout << "Fetching itinerary track points\n";
+            fetch_itinerary_track_points(j, response.content);
+          } else {
+            std::cerr << get_handler_name() << ": Unable to handle request\n";
+          }
           response.set_header("Content-Type", get_mime_type("json"));
         } else {
           throw BadRequestException("Unexpected action: \"" + action + "\"");

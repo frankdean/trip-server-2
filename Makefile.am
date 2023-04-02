@@ -30,10 +30,13 @@ dist_css_DATA = resources/static/css/trip.css
 jsdir = $(pkgdatadir)/resources/static/js
 dist_js_DATA = resources/static/js/tracking-map.js \
 	resources/static/js/itinerary-map.js \
+	resources/static/js/itinerary-segment-edit.js \
+	resources/static/js/itinerary-track-edit.js \
 	resources/static/js/itinerary-waypoint.js \
 	resources/static/js/simplify-path.js
 jsmoddir = $(pkgdatadir)/resources/static/js/modules
-dist_jsmod_DATA = resources/static/js/modules/location-service.js \
+dist_jsmod_DATA = resources/static/js/modules/itinerary.js \
+	resources/static/js/modules/location-service.js \
 	resources/static/js/modules/map.js \
 	resources/static/js/modules/utils-service.js
 bsver = bootstrap-$(BOOTSTRAP_VERSION)-dist

@@ -67,14 +67,33 @@ class ItineraryRestHandler : public BaseRestHandler {
         ) const;
 
   nlohmann::basic_json<nlohmann::ordered_map>
+      get_track_segments_as_geojson(
+          const ItineraryPgDao::track &track,
+          const std::vector<ItineraryPgDao::track_segment> &segments) const;
+
+  nlohmann::basic_json<nlohmann::ordered_map>
       get_waypoints_as_geojson(
           const std::vector<ItineraryPgDao::waypoint>
           &waypoints) const;
+
+  nlohmann::basic_json<nlohmann::ordered_map>
+      get_track_points_as_geojson(
+          const std::vector<long> &point_ids,
+          ItineraryPgDao &dao) const;
 
   void fetch_itinerary_features(
       long itinerary_id,
       ItineraryPgDao::selected_feature_ids features,
       web::HTTPServerResponse &response) const;
+
+  void fetch_itinerary_segments(
+      const nlohmann::basic_json<nlohmann::ordered_map> &json_request,
+      std::ostream &os) const;
+
+  void fetch_itinerary_track_points(
+      const nlohmann::basic_json<nlohmann::ordered_map> &json_request,
+      std::ostream &os
+    ) const;
 
   static std::string create_track_point_key(
       const location &point);

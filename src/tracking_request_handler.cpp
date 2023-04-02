@@ -93,10 +93,10 @@ void TrackingRequestHandler::build_form(
         "<th class=\"text-end\">" << translate("Latitude") << "</th>"
         // The column heading for the longitude coordinate of a tracked location point
         "<th class=\"text-end\">" << translate("Longitude") << "</th>"
-        // The column heading for the Horizontal Dilution Of Precision (estimated accuracy in metres) of a tracked location point
-        "<th class=\"text-end\">HDOP</th>"
         // The column heading for the altitude of a tracked location point
         "<th class=\"text-end\">" << translate("Altitude") << "</th>"
+        // The column heading for the Horizontal Dilution Of Precision (estimated accuracy in metres) of a tracked location point
+        "<th class=\"text-end\">" << translate("HDOP") << "</th>"
         // The column heading for the speed of a tracked location point
         "<th class=\"text-end\">" << translate("Speed") << "</th>"
         // The column heading for the bearing (angle of heading) of a tracked location point
@@ -125,14 +125,14 @@ void TrackingRequestHandler::build_form(
           "        <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << location.latitude << "&lng=" << location.longitude << "\">" << location.longitude << "</a></td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.hdop.first)
-          response.content << as::number << std::fixed << std::setprecision(1) << location.hdop.second;
+        if (location.altitude.first)
+          response.content << std::fixed << std::setprecision(0) << location.altitude.second;
 
         response.content << "</td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.altitude.first)
-          response.content << std::fixed << std::setprecision(0) << location.altitude.second;
+        if (location.hdop.first)
+          response.content << as::number << std::fixed << std::setprecision(1) << location.hdop.second;
 
         response.content << "</td>\n"
           "        <td class=\"text-end\">";

@@ -22,6 +22,7 @@
 #include "../config.h"
 #include "itinerary_path_name_edit.hpp"
 #include "itinerary_pg_dao.hpp"
+#include "geo_utils.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <boost/locale.hpp>
 #include <algorithm>
@@ -34,8 +35,8 @@ using namespace fdsd::utils;
 void ItineraryPathNameEdit::build_form(std::ostream &os)
 {
   os <<
-    "<h1>" << get_page_title() << "</h1>\n"
     "<div class=\"container-fluid\">\n"
+    "  <h1>" << get_page_title() << "</h1>\n"
     "  <form name=\"form\" method=\"post\">\n"
     "    <div class=\"container-fluid bg-light row g-3 my-3 pb-3 mx-0\">\n"
     "      <div>\n"
@@ -49,7 +50,7 @@ void ItineraryPathNameEdit::build_form(std::ostream &os)
       // Shows the total distance for a route or track in kilometers, when editing the name
       "        <span>&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;km")) % distance.second
       // Shows the total distance for a route or track in miles, when editing the name
-       << "&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (distance.second / 1.609344) << "</span>\n";
+       << "&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (distance.second / kms_per_mile) << "</span>\n";
   }
   os <<
     "      </div>\n"
@@ -72,7 +73,7 @@ void ItineraryPathNameEdit::build_form(std::ostream &os)
     "      <div id=\"wpt-buttons\" class=\"col-12 pt-3\" aria-label=\"Form buttons\">\n"
     // Label of button to save an edited route or track name
     "        <button id=\"btn-save\" class=\"btn btn-lg btn-success\" name=\"action\" value=\"save\" accesskey=\"s\">" << translate("Save") << "</button>\n"
-    "        <button id=\"btn-cancel\" class=\"btn btn-lg btn-danger\" accesskey=\"c\" name=\"action\" value=\"cancel\" onclick=\"return confirm('" << translate("Cancel?") << "');\" formnovalidate>"
+    "        <button id=\"btn-cancel\" class=\"btn btn-lg btn-danger\" accesskey=\"c\" name=\"action\" value=\"cancel\">"
     // Label of button to cancel changes when editing a route or track name
       << translate("Cancel") << "</button>\n"
     // Confirmation dialog when resetting changes when editing a route or track name

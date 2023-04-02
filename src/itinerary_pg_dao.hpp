@@ -337,6 +337,41 @@ public:
     auto tracks = get_tracks(user_id, itinerary_id, track_ids);
     return tracks.front();
   }
+  long get_track_segment_count(std::string user_id,
+                               long itinerary_id,
+                               long track_id);
+  /// \return at track with a summary of the track and a list of summarized
+  /// track segments
+  track get_track_segments(std::string user_id,
+                           long itinerary_id,
+                           long track_id,
+                           std::uint32_t offset,
+                           int limit);
+  /// \return a count of track segment points for the specified track segment
+  long get_track_segment_point_count(
+      std::string user_id,
+      long itinerary_id,
+      long track_segment_id);
+  /// \return a track segment with a summary of the segment and a list of
+  /// summarized track segment points
+  track_segment get_track_segment(
+      std::string user_id,
+      long itinerary_id,
+      long track_segment_id,
+      std::uint32_t offset,
+      int limit);
+  /// \return list of track_segment objects for the passed list of segment IDs
+  std::vector<track_segment> get_track_segments(
+      std::string user_id,
+      long itinerary_id,
+      long track_id,
+      std::vector<long> track_segment_ids);
+  /// \return list of track_points for the passed list of itinerary_track_point IDs
+  std::vector<ItineraryPgDao::track_point>
+      get_track_points(
+          std::string user_id,
+          long itinerary_id,
+          const std::vector<long> &point_ids);
   std::vector<track>
       get_tracks(std::string user_id,
                  long itinerary_id);
@@ -367,6 +402,10 @@ public:
             long itinerary_id,
             route &route);
 
+  void save(std::string user_id,
+            long itinerary_id,
+            track &track);
+
   void update_route_summary(std::string user_id,
                             long itinerary_id,
                             const route &route);
@@ -374,6 +413,11 @@ public:
   void update_track_summary(std::string user_id,
                             long itinerary_id,
                             const track &track);
+
+  void save_updated_statistics(
+      std::string user_id,
+      long itinerary_id,
+      const track &track);
 
   void save(std::string user_id,
             long itinerary_id,
@@ -501,6 +545,13 @@ public:
       std::string user_id,
       long itinerary_id,
       std::vector<track> &tracks);
+
+  void create_track(std::string user_id, long itinerary_id, track &track) {
+    std::vector<ItineraryPgDao::track> tracks;
+    tracks.push_back(track);
+    create_tracks(user_id, itinerary_id, tracks);
+  }
+
 };
 
 /// Allows Argument-depenedent lookup for the nlohmann/json library to find this method
