@@ -240,7 +240,7 @@ void ItineraryUploadHandler::add_route(
   if (exts.type() != node_null) {
     auto ext = exts.child("gpxx:RouteExtension");
     if (ext.type() != node_null)
-      rt.color = child_node_as_string(ext, "gpxx:DisplayColor");
+      rt.color_key = child_node_as_string(ext, "gpxx:DisplayColor");
   }
   for (xml_node n : node.children()) {
     const std::string name = n.name();
@@ -288,7 +288,7 @@ void ItineraryUploadHandler::add_track(
   if (exts.type() != node_null) {
     auto ext = exts.child("gpxx:TrackExtension");
     if (ext.type() != node_null)
-      trk.color = child_node_as_string(ext, "gpxx:DisplayColor");
+      trk.color_key = child_node_as_string(ext, "gpxx:DisplayColor");
   }
   for (xml_node n : node.children()) {
     const std::string name = n.name();

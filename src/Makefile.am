@@ -24,6 +24,8 @@ trip_server_SOURCES = \
 	itinerary_pg_dao.hpp \
 	itinerary_rest_handler.cpp \
 	itinerary_rest_handler.hpp \
+	itinerary_route_edit_handler.cpp \
+	itinerary_route_edit_handler.hpp \
 	itinerary_sharing_edit_handler.cpp \
 	itinerary_sharing_edit_handler.hpp \
 	itinerary_sharing_handler.cpp \

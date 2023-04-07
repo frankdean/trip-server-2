@@ -61,8 +61,8 @@ nlohmann::basic_json<nlohmann::ordered_map>
       properties["id"] = r.id.second;
     if (r.name.first)
       properties["name"] = r.name.second;
-    if (r.color.first)
-      properties["color_code"] = r.color.second;
+    if (r.color_key.first)
+      properties["color_code"] = r.color_key.second;
     if (r.html_code.first)
       properties["html_color_code"] = r.html_code.second;
     feature["properties"] = properties;
@@ -93,8 +93,8 @@ nlohmann::basic_json<nlohmann::ordered_map>
       properties["name"] = t.name.second;
     if (t.html_code.first)
       properties["html_color_code"] = t.html_code.second;
-    if (t.color.first)
-      properties["color_code"] = t.color.second;
+    if (t.color_key.first)
+      properties["color_code"] = t.color_key.second;
     feature["properties"] = properties;
     json_features.push_back(feature);
   }
@@ -119,8 +119,8 @@ nlohmann::basic_json<nlohmann::ordered_map>
       properties["id"] = ts.id.second;
     if (track.html_code.first)
       properties["html_color_code"] = track.html_code.second;
-    if (track.color.first)
-      properties["color_code"] = track.color.second;
+    if (track.color_key.first)
+      properties["color_code"] = track.color_key.second;
     json feature{
       {"type", "Feature"},
       {"properties", properties}
@@ -167,6 +167,40 @@ nlohmann::basic_json<nlohmann::ordered_map>
         ItineraryPgDao &dao) const
 {
   auto points = dao.get_track_points(get_user_id(), itinerary_id, point_ids);
+  json json_features = json::array();
+  for (const auto &w : points) {
+    json properties;
+    json feature{
+      {"type", "Feature"}
+    };
+    json geometry;
+    geometry["type"] = "Point";
+    json coords{
+      w.longitude,
+      w.latitude
+    };
+    geometry["coordinates"] = coords;
+    feature["geometry"] = geometry;
+
+    properties["type"] = "waypoint";
+    if (w.id.first) {
+      properties["id"] = w.id.second;
+      std::ostringstream ss;
+      ss << as::number << std::setprecision(0) << w.id.second;
+      properties["name"] = ss.str();
+    }
+    feature["properties"] = properties;
+    json_features.push_back(feature);
+  }
+  return json_features;
+}
+
+nlohmann::basic_json<nlohmann::ordered_map>
+    ItineraryRestHandler::get_route_points_as_geojson(
+        const std::vector<long> &point_ids,
+        ItineraryPgDao &dao) const
+{
+  auto points = dao.get_route_points(get_user_id(), itinerary_id, point_ids);
   json json_features = json::array();
   for (const auto &w : points) {
     json properties;
@@ -269,6 +303,30 @@ void ItineraryRestHandler::fetch_itinerary_track_points(
   j["waypoints"] = {
     {"type", "FeatureCollection"},
     {"features", get_track_points_as_geojson(point_ids, dao)}
+  };
+  // std::cout << "Returning features:\n" << j.dump(4) << '\n';
+  os << j << '\n';
+}
+
+void ItineraryRestHandler::fetch_itinerary_route_points(
+    const nlohmann::basic_json<nlohmann::ordered_map> &json_request,
+    std::ostream &os
+  ) const
+{
+  ItineraryPgDao dao;
+  long route_id = json_request["route_id"].get<long>();
+  auto route = dao.get_route(get_user_id(), itinerary_id, route_id);
+  std::vector<ItineraryPgDao::route> routes = { route };
+  std::vector<long> point_ids = json_request["route_point_ids"].get<std::vector<long>>();
+  std::vector<long> route_ids = {route_id};
+  json j;
+  j["routes"] = {
+    {"type", "FeatureCollection"},
+    {"features", get_routes_as_geojson(routes)}
+  };
+  j["waypoints"] = {
+    {"type", "FeatureCollection"},
+    {"features", get_route_points_as_geojson(point_ids, dao)}
   };
   // std::cout << "Returning features:\n" << j.dump(4) << '\n';
   os << j << '\n';
@@ -531,8 +589,8 @@ ItineraryPgDao::route ItineraryRestHandler::create_route(
     route.id.second = properties["id"];
   if ((route.name.first = properties.find("name") != properties.end()))
     route.name.second = properties["name"];
-  if ((route.color.first = properties.find("color_code") != properties.end()))
-    route.color.second = properties["color_code"];
+  if ((route.color_key.first = properties.find("color_code") != properties.end()))
+    route.color_key.second = properties["color_code"];
   if ((route.html_code.first =
        properties.find("html_color_code") != properties.end()))
     route.html_code.second = properties["html_color_code"];
@@ -646,6 +704,9 @@ void ItineraryRestHandler::handle_authenticated_request(
           } else if (j.find("track_point_ids") != j.end()) {
             // std::cout << "Fetching itinerary track points\n";
             fetch_itinerary_track_points(j, response.content);
+          } else if (j.find("route_point_ids") != j.end()) {
+            // std::cout << "Fetching itinerary route points\n";
+            fetch_itinerary_route_points(j, response.content);
           } else {
             std::cerr << get_handler_name() << ": Unable to handle request\n";
           }

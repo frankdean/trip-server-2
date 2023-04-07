@@ -145,8 +145,8 @@ void ItineraryTrackSegmentEditHandler::build_form(
           os << as::date_medium << as::datetime << date << as::posix;
         }
         os << "</td>\n"
-          "          <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << std::fixed << std::setprecision(6) << point.latitude << "&lng=" << point.longitude << "\">" << point.latitude << "</a></td>\n"
-          "          <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << point.latitude << "&lng=" << point.longitude << "\">" << point.longitude << "</a></td>\n"
+          "          <td class=\"text-end\">" << std::fixed << std::setprecision(6) << point.latitude << "</td>\n"
+          "          <td class=\"text-end\">" << point.longitude << "</td>\n"
           "          <td class=\"text-end\">";
         if (point.altitude.first)
           os << std::fixed << std::setprecision(0) << point.altitude.second;
@@ -197,7 +197,7 @@ void ItineraryTrackSegmentEditHandler::build_form(
   }
   os <<
     // Label for button to return to the itinerary track when viewing a list of track segment points
-    "        <button id=\"btn-close\" accesskey=\"c\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary-track-edit?test=test\" class=\"my-1 btn btn-lg btn-danger\">" << translate("Close") << "</button>\n"
+    "        <button id=\"btn-close\" accesskey=\"c\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary-track-edit\" class=\"my-1 btn btn-lg btn-danger\">" << translate("Close") << "</button>\n"
     "    </div>\n"
     "  </form>\n"
     "</div>\n";
@@ -279,7 +279,7 @@ void ItineraryTrackSegmentEditHandler::delete_points(
               it->points.begin(),
               it->points.end(),
           [&](const ItineraryPgDao::track_point &point) {
-            bool retval= point.id.first &&
+            bool retval = point.id.first &&
               selected_point_id_map.find(point.id.second) !=
               selected_point_id_map.end();
             if (retval)

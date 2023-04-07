@@ -66,15 +66,15 @@ void ItineraryTrackEditHandler::build_form(
     if (track.name.first) {
       // Formatted output of label and track name
       os << format(translate("<strong>Name:</strong>&nbsp;{1}")) % x(track.name.second);
-    } else {
+    } else if (track.id.first) {
       // Database ID of an item, typically a route, track or waypoint
       os << format(translate("<strong>ID:</strong>&nbsp;{1,number=left}")) % track.id.second;
     }
     os
       << "</div>\n";
-    if (track.color.first) {
+    if (track.color_description.first) {
       // Formatted output of label and track color
-      os << "    <div>" << format(translate("<strong>Color:</strong>&nbsp;{1}")) % x(track.color.second) << "</div>\n";
+      os << "    <div>" << format(translate("<strong>Color:</strong>&nbsp;{1}")) % x(track.color_description.second) << "</div>\n";
     }
     os << "      <div class=\"mb-3\">\n";
     if (track.distance.first) {
@@ -183,16 +183,18 @@ void ItineraryTrackEditHandler::build_form(
     "      <div id=\"div-buttons\">\n";
   if (!read_only && !track.segments.empty()) {
     os <<
-      // Label for button to delete one or more selected segments from a track
+      // Confirmation message to delete one or more selected segments from a track
       "        <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"x\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected segments?") << "');\">"
       // Button label for deleting a selection of track segments from a track
        << translate("Delete segments") << "</button>\n"
-      // Label for button to split a track by selected segment
+      // Confirmation message to split a track by selected segment
       "        <button id=\"btn-split\" name=\"action\" value=\"split\" accesskey=\"s\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Split track before selected segment?") << "');\">"
       // Button label for splitting a track at a selected segment
        << translate("Split track") << "</button>\n"
-      // Label for button to merge one ore more segments
-      "        <button id=\"btn-merge\" name=\"action\" value=\"merge\" accesskey=\"m\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Merge selected segments?") << "');\">" << translate("Merge segments") << "</button>\n";
+      // Confirmation message to merge one or more segments
+      "        <button id=\"btn-merge\" name=\"action\" value=\"merge\" accesskey=\"m\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Merge selected segments?") << "');\">"
+      // Button label to merge one or more segments
+       << translate("Merge segments") << "</button>\n";
   }
   os <<
       // Label for button to return to the itinerary when viewing a list of track segments
@@ -304,7 +306,7 @@ void ItineraryTrackEditHandler::split_track(
       % track.id.second;
   }
   new_track.name = std::make_pair(true, os.str());
-  new_track.color = track.color;
+  new_track.color_key = track.color_key;
   for (auto ts : track.segments) {
     if (ts.id.first && ts.id.second >= split_before_id)
       new_track.segments.push_back(ts);

@@ -55,7 +55,7 @@ class SimplifyMap extends TripMap {
       this.trackLayer = new VectorLayer({
         source: self.trackSource,
         style: this.styleFunction.bind(self),
-        opacity: 0.3,
+        opacity: 0.5,
       });
       const simplifiedFeature = this.trackSource.getFeatures()[0].clone();
       this.simplifiedSource = new VectorSource({
@@ -96,7 +96,7 @@ class SimplifyMap extends TripMap {
       this.routeLayer = new VectorLayer({
         source: self.routeSource,
         style: this.styleFunction.bind(self),
-        opacity: 0.3,
+        opacity: 0.5,
       });
       this.map.addLayer(this.routeLayer);
     }

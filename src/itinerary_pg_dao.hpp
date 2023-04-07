@@ -46,12 +46,17 @@ public:
   };
   struct path_summary : public path_base {
     std::pair<bool, std::string> name;
-    std::pair<bool, std::string> color;
+    /// The color key for looking up the color details, e.g. 'DarkBlue'
+    std::pair<bool, std::string> color_key;
+    /// The descriptive name of the color, e.g. 'Dark Blue'
+    std::pair<bool, std::string> color_description;
+    /// The HTML code to render the color in HTML. e.g. 'navy'
     std::pair<bool, std::string> html_code;
     path_summary() :
       path_base(),
       name(),
-      color(),
+      color_key(),
+      color_description(),
       html_code() {}
     static void from_geojson_properties(
         const nlohmann::json& properties,
@@ -340,7 +345,7 @@ public:
   long get_track_segment_count(std::string user_id,
                                long itinerary_id,
                                long track_id);
-  /// \return at track with a summary of the track and a list of summarized
+  /// \return a track with a summary of the track and a list of summarized
   /// track segments
   track get_track_segments(std::string user_id,
                            long itinerary_id,
@@ -369,6 +374,22 @@ public:
   /// \return list of track_points for the passed list of itinerary_track_point IDs
   std::vector<ItineraryPgDao::track_point>
       get_track_points(
+          std::string user_id,
+          long itinerary_id,
+          const std::vector<long> &point_ids);
+  long get_route_point_count(
+      std::string user_id,
+      long itinerary_id,
+      long route_id);
+  route get_route_points(
+      std::string user_id,
+      long itinerary_id,
+      long route_id,
+      std::uint32_t offset,
+      int limit);
+  /// \return list of route_points for the passed list of itinerary_route_point IDs
+  std::vector<ItineraryPgDao::route_point>
+      get_route_points(
           std::string user_id,
           long itinerary_id,
           const std::vector<long> &point_ids);

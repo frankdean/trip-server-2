@@ -81,6 +81,11 @@ class ItineraryRestHandler : public BaseRestHandler {
           const std::vector<long> &point_ids,
           ItineraryPgDao &dao) const;
 
+  nlohmann::basic_json<nlohmann::ordered_map>
+      get_route_points_as_geojson(
+          const std::vector<long> &point_ids,
+          ItineraryPgDao &dao) const;
+
   void fetch_itinerary_features(
       long itinerary_id,
       ItineraryPgDao::selected_feature_ids features,
@@ -91,6 +96,11 @@ class ItineraryRestHandler : public BaseRestHandler {
       std::ostream &os) const;
 
   void fetch_itinerary_track_points(
+      const nlohmann::basic_json<nlohmann::ordered_map> &json_request,
+      std::ostream &os
+    ) const;
+
+  void fetch_itinerary_route_points(
       const nlohmann::basic_json<nlohmann::ordered_map> &json_request,
       std::ostream &os
     ) const;

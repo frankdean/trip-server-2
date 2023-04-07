@@ -80,7 +80,7 @@ class ItineraryMap extends TripMap {
     this.routeLayer = new VectorLayer({
       source: self.routeSource,
       style: this.styleFunction.bind(self),
-      opacity: 0.3,
+      opacity: 0.5,
     });
     this.map.addLayer(this.routeLayer);
     if (data.routes.features.length > 0) {

@@ -107,7 +107,7 @@ void ItineraryRouteNameEdit::do_preview_request(
   set_page_title(translate("Itinerary Route"));
   set_menu_item(unknown);
 }
-  
+
 void ItineraryRouteNameEdit::load_path_data(
     const HTTPServerRequest &request, ItineraryPgDao &dao)
 {
@@ -116,7 +116,7 @@ void ItineraryRouteNameEdit::load_path_data(
     throw BadRequestException("Route ID not set");
   path_id = route.id.second;
   name = route.name;
-  color_key = route.color;
+  color_key = route.color_key;
   distance = route.distance;
 }
 
@@ -125,7 +125,7 @@ void ItineraryRouteNameEdit::save_path(ItineraryPgDao &dao)
   if (reverse_route || make_copy) {
     auto route = dao.get_route(get_user_id(), itinerary_id, path_id);
     route.name = name;
-    route.color = color_key;
+    route.color_key = color_key;
     if (reverse_route) {
       std::reverse(route.points.begin(), route.points.end());
       route.calculate_statistics();
@@ -141,7 +141,7 @@ void ItineraryRouteNameEdit::save_path(ItineraryPgDao &dao)
     route.id.first = true;
     route.id.second = path_id;
     route.name = name;
-    route.color = color_key;
+    route.color_key = color_key;
     dao.update_route_summary(get_user_id(), itinerary_id, route);
   }
 }
@@ -153,7 +153,7 @@ void ItineraryTrackNameEdit::do_preview_request(
   set_page_title(translate("Itinerary Track"));
   set_menu_item(unknown);
 }
-  
+
 void ItineraryTrackNameEdit::load_path_data(
     const HTTPServerRequest &request, ItineraryPgDao &dao)
 {
@@ -162,7 +162,7 @@ void ItineraryTrackNameEdit::load_path_data(
     throw BadRequestException("Track ID not set");
   path_id = track.id.second;
   name = track.name;
-  color_key = track.color;
+  color_key = track.color_key;
   distance = track.distance;
 }
 
@@ -172,7 +172,7 @@ void ItineraryTrackNameEdit::save_path(ItineraryPgDao &dao)
   track.id.first = true;
   track.id.second = path_id;
   track.name = name;
-  track.color = color_key;
+  track.color_key = color_key;
   dao.update_track_summary(get_user_id(), itinerary_id, track);
 }
 

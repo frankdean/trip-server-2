@@ -198,7 +198,7 @@ void ItineraryHandler::append_path(
     <<
     "</label>\n"
     "                          </td>\n"
-    "                          <td>" << (path.color.first ? x(path.color.second) : "") << "</td>\n"
+    "                          <td>" << (path.color_description.first ? x(path.color_description.second) : "") << "</td>\n"
     "                          <td>";
   if (path.distance.first) {
     os <<

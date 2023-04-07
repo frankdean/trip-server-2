@@ -135,14 +135,14 @@ void ItineraryDownloadHandler::handle_gpx_download(
       rte_node.append_child("name").append_child(node_pcdata)
         .set_value(("RTE: " + std::to_string(rte.id.second)).c_str());
     }
-    if (rte.color.first) {
+    if (rte.color_key.first) {
       xml_node rt_ext_node = rte_node.append_child("extensions")
         .append_child("gpxx:RouteExtension");
       // IsAutoNamed is mandatory for a RouteExtension in XSD
       rt_ext_node.append_child("gpxx:IsAutoNamed").append_child(node_pcdata)
         .set_value("false");
       rt_ext_node.append_child("gpxx:DisplayColor").append_child(node_pcdata)
-        .set_value(rte.color.second.c_str());
+        .set_value(rte.color_key.second.c_str());
     }
     int rtept_count = 0;
     for (const auto &p : rte.points) {
@@ -182,11 +182,11 @@ void ItineraryDownloadHandler::handle_gpx_download(
       trk_node.append_child("name").append_child(node_pcdata)
         .set_value(("TRK: " + std::to_string(trk.id.second)).c_str());
     }
-    if (trk.color.first) {
+    if (trk.color_key.first) {
       xml_node ext_node = trk_node.append_child("extensions")
         .append_child("gpxx:TrackExtension");
       ext_node.append_child("gpxx:DisplayColor").append_child(node_pcdata)
-        .set_value(trk.color.second.c_str());
+        .set_value(trk.color_key.second.c_str());
     }
     for (const auto &trkseg : trk.segments) {
       xml_node trkseg_node = trk_node.append_child("trkseg");
