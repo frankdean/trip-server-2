@@ -8,8 +8,7 @@ TRIP is a web application supporting trip recording and itinerary planning.
 
 The intended use is for a hiker, mountain-biker or other adventurer, to be
 able to publish and share their planned itinerary, then subsequently log their
-positions at intervals, allowing someone else to be able to monitor their
-progress.
+positions at intervals, allowing someone else to monitor their progress.
 
 In the event of contact being lost, the plans and tracking information can be
 passed to rescue services etc., to assist with locating the missing
@@ -21,7 +20,7 @@ supports all the primary tracking, itinerary management and sharing functions,
 sufficient to support its primary purpose. It can be run alongside an existing
 Trip Server version 1.11.x installation.
 
-The original Trip application consists of two primary components, [a server
+The original Trip v1 application consists of two primary components, [a server
 application][trip-server], written in [ECMAScript][] (a JavaScript standard),
 running under [Node.js][] and [a browser application][trip-web-client], also
 written in ECMAScript using [AngularJS][], a web framework.
@@ -33,7 +32,8 @@ Maintaining support for Trip v1 required a not inconsiderable amount of work,
 mostly relating to upgrading dependencies, frequently due to security
 vulnerabilities in underlying components.  Coupled with supply-chain attacks
 within the [npm](https://www.npmjs.com) eco-system, I'm of the view that the
-support impact of development in such an architecture is unacceptably high.
+ongoing support impact of development in such an architecture is unacceptably
+high.
 
 As migrating to Angular 2+ is not trivial and with no reassurance that a
 similar upgrade will not be necessary in the future, I was extremely
@@ -58,7 +58,8 @@ committee process (ISO) and has steadily evolved into a powerful and widely
 supported development language.  Using modern C++ practices *can* produce
 stable, reliable, easy to maintain code.  With plenty of mature, stable
 libraries for the more significant things we need; primarily support for
-[PostgreSQL database][PostgreSQL], [PostGIS][], XML, JSON and YAML.
+[PostgreSQL database][PostgreSQL], [PostGIS][], XML, JSON and YAML.  So far,
+I am very satisfied with the results.
 
 The intention during development of version 2 is to maintain database
 compatibility as much as possible, with an `--upgrade` option to the Trip
@@ -67,7 +68,7 @@ desire is to keep the YAML configuration file requiring minimal changes.
 
 ### Proposed Features
 
-The following features are proposed:
+The following features are proposed: (completed features are marked &#x2713;)
 
 * &#x2713; Remote tracking server—client applications such as
   [TripLogger Remote for iOS][TripLogger] &ndash;
@@ -89,9 +90,21 @@ The following features are proposed:
 
 * &#x2713; Viewing routes, tracks and waypoints of an itinerary on the map.
 
-* Splitting and joining routes and tracks.
+* &#x2713; Splitting and joining routes and tracks.
 
-* Deleting individual points from routes and tracks.
+* &#x2713; Deleting individual points from routes and tracks.
+
+* Account maintenance &ndash; uploading [TripLogger][] settings.
+
+* Account maintenance &ndash; password change.
+
+* Itinerary shares report &ndash; list shared itineraries including nicknames.
+
+* Itinerary search by coordinate and radius.
+
+* Administration &ndash; user management.
+
+* Administration &ndash; tile usage report.
 
 ## Documentation
 
@@ -106,6 +119,11 @@ The user guide can also be viewed with:
 
 	$ info trip-user-guide
 
+The [user guide](https://www.fdsd.co.uk/trip-server-2/latest/docs/user-guide/) and
+[application
+manual](https://www.fdsd.co.uk/trip-server-2/latest/docs/application-guide/)
+are available online.
+
 ## Source Control
 
 The source is maintained in a Git repository which can be cloned with:
@@ -118,6 +136,20 @@ These instructions are for building and installing from the source
 distribution tarball, which contains additional artefacts to those maintained
 under Git source control.  Building from a cloned Git repository requires
 additional packages to be installed as described below.
+
+Generally the application is built and installed with:
+
+	$ ./configure
+	$ make
+	$ sudo make install
+
+More detailed build instructions are below.
+
+See the `PostgreSQL Database Configuration` section in the instructions for
+[TripServer v1][trip-server] to install PostgreSQL and create the database.
+Upgrade the database to support Trip Server v2 by running:
+
+	$ trip-server --upgrade
 
 ### Debian
 

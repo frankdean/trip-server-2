@@ -33,10 +33,12 @@
 #include "itinerary_path_name_edit.hpp"
 #include "itinerary_rest_handler.hpp"
 #include "itinerary_route_edit_handler.hpp"
+#include "itinerary_route_join_handler.hpp"
 #include "itinerary_sharing_edit_handler.hpp"
 #include "itinerary_sharing_handler.hpp"
 #include "itinerary_simplify_handler.hpp"
 #include "itinerary_track_edit_handler.hpp"
+#include "itinerary_track_join_handler.hpp"
 #include "itinerary_track_segment_edit_handler.hpp"
 #include "itinerary_waypoint_edit_handler.hpp"
 #include "tile_handler.hpp"
@@ -130,8 +132,14 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
       std::make_shared<ItineraryRouteEditHandler>(
           ItineraryRouteEditHandler(config)));
   post_login_handlers.push_back(
+      std::make_shared<ItineraryRouteJoinHandler>(
+          ItineraryRouteJoinHandler(config)));
+  post_login_handlers.push_back(
       std::make_shared<ItineraryTrackEditHandler>(
           ItineraryTrackEditHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<ItineraryTrackJoinHandler>(
+          ItineraryTrackJoinHandler(config)));
   post_login_handlers.push_back(
       std::make_shared<ItineraryTrackSegmentEditHandler>(
           ItineraryTrackSegmentEditHandler(config)));

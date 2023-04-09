@@ -31,14 +31,9 @@ body {
   z-index: -1;
 }
 
+#itinerary-path-map,
+#itinerary-route-map,
 #itinerary-track-map {
-  padding: 10px;
-  height: 480px;
-  width: 100%;
-  z-index: -1;
-}
-
-#itinerary-route-map {
   padding: 10px;
   height: 480px;
   width: 100%;

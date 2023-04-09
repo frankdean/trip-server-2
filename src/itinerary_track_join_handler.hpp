@@ -19,13 +19,13 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef ITINERARY_ROUTE_EDIT_HANDLER_HPP
-#define ITINERARY_ROUTE_EDIT_HANDLER_HPP
+#ifndef ITINERARY_TRACK_JOIN_HANDLER_HPP
+#define ITINERARY_TRACK_JOIN_HANDLER_HPP
 
+#include "itinerary_path_join_handler.hpp"
 #include "trip_request_handler.hpp"
 #include "itinerary_pg_dao.hpp"
 #include <string>
-// #include <ostream>
 #include <vector>
 
 namespace fdsd {
@@ -36,62 +36,32 @@ namespace web {
 }
 namespace trip {
 
-class ItineraryRouteEditHandler : public BaseMapHandler {
-  long itinerary_id;
-  long route_id;
-  bool read_only;
-  bool select_all;
-  /// Action parameter
-  std::string action;
-  /// Map of selected points
-  std::map<long, std::string> selected_point_id_map;
-  /// IDs of selected points
-  std::vector<long> selected_point_ids;
-  void build_form(std::ostream &os,
-                  const web::Pagination& pagination,
-                  const ItineraryPgDao::route &route);
-  void delete_points(
-      const web::HTTPServerRequest& request,
-      ItineraryPgDao &dao);
-  void split_route(
-      const web::HTTPServerRequest& request,
-      ItineraryPgDao &dao);
-  void reverse_route(
-      const web::HTTPServerRequest& request,
-      ItineraryPgDao &dao);
+class ItineraryTrackJoinHandler : public ItineraryPathJoinHandler {
 protected:
   virtual void do_preview_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
-  virtual void append_pre_body_end(std::ostream& os) const override;
-  virtual void handle_authenticated_request(
-      const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) override;
+  virtual std::vector<ItineraryPgDao::path_summary>
+      get_paths(ItineraryPgDao &dao) override;
+  virtual void join_paths(ItineraryPgDao &dao, std::vector<long> ids) override;
+  virtual ItineraryPgDao::selected_feature_ids get_selected_features() override;
 public:
-  ItineraryRouteEditHandler(std::shared_ptr<TripConfig> config) :
-    BaseMapHandler(config),
-    itinerary_id(),
-    route_id(),
-    read_only(),
-    select_all(),
-    action(),
-    selected_point_id_map(),
-    selected_point_ids() {}
-  virtual ~ItineraryRouteEditHandler() {}
+  ItineraryTrackJoinHandler(std::shared_ptr<TripConfig> config) :
+    ItineraryPathJoinHandler(config) {}
   virtual std::string get_handler_name() const override {
-    return "ItineraryRouteEditHandler";
+    return "ItineraryTrackJoinHandler";
   }
   virtual bool can_handle(
       const web::HTTPServerRequest& request) const override {
-    return compare_request_regex(request.uri, "/itinerary.route.edit($|\\?.*)");
+    return compare_request_regex(request.uri, "/itinerary.track.join($|\\?.*)");
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<ItineraryRouteEditHandler>(
-        new ItineraryRouteEditHandler(config));
+    return std::unique_ptr<ItineraryTrackJoinHandler>(
+        new ItineraryTrackJoinHandler(config));
   }
 };
 
 } // namespace trip
 } // namespace fdsd
 
-#endif // ITINERARY_ROUTE_EDIT_HANDLER_HPP
+#endif // ITINERARY_TRACK_JOIN_HANDLER_HPP

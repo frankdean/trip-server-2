@@ -1603,7 +1603,7 @@ void ItineraryPgDao::save(std::string user_id,
     } else {
       auto r = tx.exec_params1(
           "INSERT INTO itinerary_track "
-          "(itinerary_id, name, color, distance, ascent, descent, lowest, highest "
+          "(itinerary_id, name, color, distance, ascent, descent, lowest, highest) "
           "VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
           itinerary_id,
           track.name.first ? &track.name.second : nullptr,
@@ -2307,9 +2307,10 @@ bool ItineraryPgDao::route::decode(const YAML::Node& node,
   return fdsd::trip::ItineraryPgDao::path_summary::decode(node, rhs);
 }
 
-ItineraryPgDao::route ItineraryPgDao::get_route_summary(std::string user_id,
-                                                        long itinerary_id,
-                                                        long route_id)
+ItineraryPgDao::path_summary ItineraryPgDao::get_route_summary(
+    std::string user_id,
+    long itinerary_id,
+    long route_id)
 {
   try {
     work tx(*connection);
@@ -2337,7 +2338,50 @@ ItineraryPgDao::route ItineraryPgDao::get_route_summary(std::string user_id,
   }
 }
 
-ItineraryPgDao::track ItineraryPgDao::get_track_summary(std::string user_id,
+std::vector<ItineraryPgDao::path_summary> ItineraryPgDao::get_route_summaries(
+    std::string user_id,
+    long itinerary_id,
+    std::vector<long> route_ids)
+{
+  try {
+    work tx(*connection);
+    validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+    const std::string ids_sql = dao_helper::to_sql_array(route_ids);
+    auto result = tx.exec_params(
+        "SELECT id, name, color, html_code, c.value AS path_color_value, "
+        "distance, ascent, descent, lowest, highest "
+        "FROM itinerary_route r "
+        "LEFT JOIN path_color c ON r.color=c.key "
+        "WHERE itinerary_id=$1 AND id=ANY($2) "
+        "ORDER BY name, id",
+        itinerary_id,
+        ids_sql);
+    std::vector<path_summary> routes;
+    for (const auto &rt : result) {
+      path_summary route;
+      route.id.first = rt["id"].to(route.id.second);
+      route.name.first = rt["name"].to(route.name.second);
+      route.color_key.first = rt["color"].to(route.color_key.second);
+      route.html_code.first = rt["html_code"].to(route.html_code.second);
+      route.color_description.first =
+        rt["path_color_value"].to(route.color_description.second);
+      route.distance.first = rt["distance"].to(route.distance.second);
+      route.ascent.first = rt["ascent"].to(route.ascent.second);
+      route.descent.first = rt["descent"].to(route.descent.second);
+      route.lowest.first = rt["lowest"].to(route.lowest.second);
+      route.highest.first = rt["highest"].to(route.highest.second);
+      routes.push_back(route);
+    }
+    tx.commit();
+    return routes;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception getting route summaries: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+ItineraryPgDao::path_summary ItineraryPgDao::get_track_summary(std::string user_id,
                                                         long itinerary_id,
                                                         long track_id)
 {
@@ -2348,7 +2392,7 @@ ItineraryPgDao::track ItineraryPgDao::get_track_summary(std::string user_id,
         "SELECT id, name, color, html_code, distance, ascent, descent, "
         "lowest, highest "
         "FROM itinerary_track t LEFT JOIN path_color c ON t.color=c.key "
-        "WHERE itinerary_id=$1 AND id=$2 ORDER BY name, id",
+        "WHERE itinerary_id=$1 AND id=$2",
         itinerary_id,
         track_id);
     track track;
@@ -2365,6 +2409,48 @@ ItineraryPgDao::track ItineraryPgDao::get_track_summary(std::string user_id,
     return track;
   } catch (const std::exception &e) {
     std::cerr << "Exception getting track summary: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+std::vector<ItineraryPgDao::path_summary> ItineraryPgDao::get_track_summaries(
+    std::string user_id,
+    long itinerary_id,
+    std::vector<long> track_ids)
+{
+  try {
+    work tx(*connection);
+    validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+    const std::string ids_sql = dao_helper::to_sql_array(track_ids);
+    auto result = tx.exec_params(
+        "SELECT id, name, color, html_code, c.value AS path_color_value, "
+        "distance, ascent, descent, "
+        "lowest, highest "
+        "FROM itinerary_track t LEFT JOIN path_color c ON t.color=c.key "
+        "WHERE itinerary_id=$1 AND id=ANY($2) ORDER BY name, id",
+        itinerary_id,
+        ids_sql);
+    std::vector<path_summary> tracks;
+    for (const auto &trk : result) {
+      path_summary track;
+      track.id.first = trk["id"].to(track.id.second);
+      track.name.first = trk["name"].to(track.name.second);
+      track.color_key.first = trk["color"].to(track.color_key.second);
+      track.html_code.first = trk["html_code"].to(track.html_code.second);
+      track.color_description.first =
+        trk["path_color_value"].to(track.color_description.second);
+      track.distance.first = trk["distance"].to(track.distance.second);
+      track.ascent.first = trk["ascent"].to(track.ascent.second);
+      track.descent.first = trk["descent"].to(track.descent.second);
+      track.lowest.first = trk["lowest"].to(track.lowest.second);
+      track.highest.first = trk["highest"].to(track.highest.second);
+      tracks.push_back(track);
+    }
+    tx.commit();
+    return tracks;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception getting track summaries: "
               << e.what() << '\n';
     throw;
   }
@@ -2392,9 +2478,10 @@ std::vector<std::pair<std::string, std::string>>
   }
 }
 
-void ItineraryPgDao::update_route_summary(std::string user_id,
-                                          long itinerary_id,
-                                          const ItineraryPgDao::route &route)
+void ItineraryPgDao::update_route_summary(
+    std::string user_id,
+    long itinerary_id,
+    const ItineraryPgDao::path_summary &route)
 {
   if (!route.id.first)
     throw std::invalid_argument("Route ID not set");
@@ -2418,9 +2505,10 @@ void ItineraryPgDao::update_route_summary(std::string user_id,
   }
 }
 
-void ItineraryPgDao::update_track_summary(std::string user_id,
-                                          long itinerary_id,
-                                          const ItineraryPgDao::track &track)
+void ItineraryPgDao::update_track_summary(
+    std::string user_id,
+    long itinerary_id,
+    const ItineraryPgDao::path_summary &track)
 {
   if (!track.id.first)
     throw std::invalid_argument("Track ID not set");

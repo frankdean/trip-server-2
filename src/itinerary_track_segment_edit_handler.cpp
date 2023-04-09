@@ -242,6 +242,7 @@ void ItineraryTrackSegmentEditHandler::do_preview_request(
   segment_id = std::stol(request.get_param("segmentId"));
   const std::string shared = request.get_param("shared");
   read_only = shared == "true";
+  // page title of the itinerary track segment editing page
   set_page_title(translate("Itinerary Track Segment Edit"));
   set_menu_item(unknown);
   if (request.method == HTTPMethod::post) {

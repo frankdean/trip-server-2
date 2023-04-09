@@ -41,7 +41,8 @@ void ItineraryRouteEditHandler::build_form(std::ostream &os,
 {
   os <<
     "<div class=\"container-fluid\">\n"
-    "  <h1>Itinerary Route Edit</h1>\n"
+    // 
+    "  <h1>" << get_page_title() << "</h1>\n"
     "  <form name=\"form\" method=\"post\">\n"
     "    <input type=\"hidden\" name=\"id\" value=\"" << itinerary_id << "\">\n"
     "    <input type=\"hidden\" name=\"itineraryId\" value=\"" << itinerary_id << "\">\n"
@@ -345,6 +346,7 @@ void ItineraryRouteEditHandler::do_preview_request(
   read_only = shared == "true";
   const std::string select_all_str = request.get_param("select-all");
   select_all = select_all_str == "on";
+  // title of the itinerary route editing page
   set_page_title(translate("Itinerary Route Edit"));
   set_menu_item(unknown);
   if (request.method == HTTPMethod::post) {

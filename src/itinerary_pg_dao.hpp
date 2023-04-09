@@ -327,9 +327,13 @@ public:
   std::vector<route>
       get_routes(std::string user_id,
                  long itinerary_id);
-  route get_route_summary(std::string user_id,
-                          long itinerary_id,
-                          long route_id);
+  path_summary get_route_summary(std::string user_id,
+                                 long itinerary_id,
+                                 long route_id);
+  std::vector<ItineraryPgDao::path_summary> get_route_summaries(
+      std::string user_id,
+      long itinerary_id,
+      std::vector<long> route_id);
   std::vector<track>
       get_tracks(std::string user_id,
                  long itinerary_id,
@@ -396,9 +400,13 @@ public:
   std::vector<track>
       get_tracks(std::string user_id,
                  long itinerary_id);
-  track get_track_summary(std::string user_id,
+  path_summary get_track_summary(std::string user_id,
                           long itinerary_id,
                           long track_id);
+  std::vector<ItineraryPgDao::path_summary> get_track_summaries(
+      std::string user_id,
+      long itinerary_id,
+      std::vector<long> track_ids);
   std::vector<ItineraryPgDao::waypoint>
       get_waypoints(std::string user_id,
                     long itinerary_id,
@@ -429,11 +437,11 @@ public:
 
   void update_route_summary(std::string user_id,
                             long itinerary_id,
-                            const route &route);
+                            const path_summary &route);
 
   void update_track_summary(std::string user_id,
                             long itinerary_id,
-                            const track &track);
+                            const path_summary &track);
 
   void save_updated_statistics(
       std::string user_id,

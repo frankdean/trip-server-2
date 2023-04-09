@@ -109,6 +109,12 @@ private:
   }
   void convertTracksToRoutes(const web::HTTPServerRequest& request);
   void auto_color_paths(const web::HTTPServerRequest& request);
+  void join_routes(const web::HTTPServerRequest &request,
+                   web::HTTPServerResponse& response,
+                   const std::vector<long> &route_ids);
+  void join_tracks(const web::HTTPServerRequest &request,
+                   web::HTTPServerResponse& response,
+                   const std::vector<long> &track_ids);
 protected:
   virtual void do_preview_request(
       const web::HTTPServerRequest& request,

@@ -28,12 +28,14 @@ dist_doc_DATA = README.md
 cssdir = $(pkgdatadir)/resources/static/css
 dist_css_DATA = resources/static/css/trip.css
 jsdir = $(pkgdatadir)/resources/static/js
-dist_js_DATA = resources/static/js/tracking-map.js \
-	resources/static/js/itinerary-map.js \
+dist_js_DATA = resources/static/js/itinerary-map.js \
+	resources/static/js/itinerary-path-join.js \
+	resources/static/js/itinerary-route-edit.js \
 	resources/static/js/itinerary-segment-edit.js \
 	resources/static/js/itinerary-track-edit.js \
 	resources/static/js/itinerary-waypoint.js \
-	resources/static/js/simplify-path.js
+	resources/static/js/simplify-path.js \
+	resources/static/js/tracking-map.js
 jsmoddir = $(pkgdatadir)/resources/static/js/modules
 dist_jsmod_DATA = resources/static/js/modules/itinerary.js \
 	resources/static/js/modules/location-service.js \

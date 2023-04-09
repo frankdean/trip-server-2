@@ -74,6 +74,7 @@ public:
     track_id(),
     read_only(),
     select_all(),
+    action(),
     selected_segment_id_map(),
     selected_segment_ids() {}
   virtual ~ItineraryTrackEditHandler() {}

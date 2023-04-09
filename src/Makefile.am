@@ -18,6 +18,8 @@ trip_server_SOURCES = \
 	itinerary_import_handler.hpp \
 	itinerary_map_handler.cpp \
 	itinerary_map_handler.hpp \
+	itinerary_path_join_handler.cpp \
+	itinerary_path_join_handler.hpp \
 	itinerary_path_name_edit.cpp \
 	itinerary_path_name_edit.hpp \
 	itinerary_pg_dao.cpp \
@@ -26,6 +28,8 @@ trip_server_SOURCES = \
 	itinerary_rest_handler.hpp \
 	itinerary_route_edit_handler.cpp \
 	itinerary_route_edit_handler.hpp \
+	itinerary_route_join_handler.cpp \
+	itinerary_route_join_handler.hpp \
 	itinerary_sharing_edit_handler.cpp \
 	itinerary_sharing_edit_handler.hpp \
 	itinerary_sharing_handler.cpp \
@@ -34,6 +38,8 @@ trip_server_SOURCES = \
 	itinerary_simplify_handler.hpp \
 	itinerary_track_edit_handler.cpp \
 	itinerary_track_edit_handler.hpp \
+	itinerary_track_join_handler.cpp \
+	itinerary_track_join_handler.hpp \
 	itinerary_track_segment_edit_handler.cpp \
 	itinerary_track_segment_edit_handler.hpp \
 	itinerary_upload_handler.cpp \

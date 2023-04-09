@@ -44,7 +44,7 @@ void ItineraryTrackEditHandler::build_form(
   os
     <<
     "<div class=\"container-fluid\">\n"
-    "  <h1>Itinerary Track Edit</h1>\n"
+    "  <h1>" << get_page_title() << "</h1>\n"
     "  <form name=\"form\" method=\"post\">\n"
     // "    <div class=\"container-fluid bg-light row g-3 my-3 pb-3 mx-0\">\n"
     "    <input type=\"hidden\" name=\"id\" value=\"" << itinerary_id << "\">\n"
@@ -244,6 +244,7 @@ void ItineraryTrackEditHandler::do_preview_request(
   read_only = shared == "true";
   const std::string select_all_str = request.get_param("select-all");
   select_all = select_all_str == "on";
+  // Page title of the itinerary track editing page
   set_page_title(translate("Itinerary Track Edit"));
   set_menu_item(unknown);
   if (request.method == HTTPMethod::post) {

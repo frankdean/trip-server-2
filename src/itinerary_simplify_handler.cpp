@@ -78,9 +78,10 @@ void ItinerarySimplifyHandler::build_form(
     // "            <input id=\"highestQuality\" type=\"checkbox\" />\n"
     // "          </span>\n"
     "          <span id=\"show-joined\" style=\"margin-left: 15px;\">\n"
+    // TODO show joined segments
     // Label for a checkbox to the segments of a track as joined whilst simplifying a track
-    "            <label for=\"show-joined\">" << translate("Show joined track segments") << "</label>\n"
-    "            <input id=\"show-joined\" type=\"checkbox\" />\n"
+    // "            <label for=\"show-joined\">" << translate("Show joined track segments") << "</label>\n"
+    // "            <input id=\"show-joined\" type=\"checkbox\" />\n"
     "          </span>\n"
     "        </p>\n"
     "      <div class=\"my-2\">\n"

@@ -559,7 +559,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       "                <li><button class=\"dropdown-item\" name=\"action\" value=\"edit-path\">" << translate("Path") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n"
       // Label for menu item to join together selected routes or tracks
-      "                <li><a class=\"dropdown-item opacity-50\">" << translate("Join paths") << "</a></li> <!-- writable version -->\n"
+      "                <li><button class=\"dropdown-item\" name=\"action\" value=\"join-path\">" << translate("Join paths") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n";
   }
   response.content
@@ -837,6 +837,42 @@ void ItineraryHandler::paste_items()
   }
 }
 
+void ItineraryHandler::join_routes(const web::HTTPServerRequest &request,
+                                   web::HTTPServerResponse& response,
+                                   const std::vector<long> &route_ids)
+{
+  std::ostringstream url;
+  url << get_uri_prefix() << "/itinerary-route-join?itineraryId=" << itinerary_id
+      << "&path-ids=";
+  bool first = true;
+  for (const auto id : route_ids) {
+    if (!first)
+      url << ',';
+    else
+      first = false;
+    url << id;
+  }
+  redirect(request, response, url.str());    
+}
+
+void ItineraryHandler::join_tracks(const web::HTTPServerRequest &request,
+                                   web::HTTPServerResponse& response,
+                                   const std::vector<long> &track_ids)
+{
+  bool first = true;
+  std::ostringstream url;
+  url << get_uri_prefix() << "/itinerary-track-join?itineraryId=" << itinerary_id
+      << "&path-ids=";
+  for (const auto id : track_ids) {
+    if (!first)
+      url << ',';
+    else
+      first = false;
+    url << id;
+  }
+  redirect(request, response, url.str());
+}
+
 void ItineraryHandler::handle_authenticated_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
@@ -889,6 +925,7 @@ void ItineraryHandler::handle_authenticated_request(
       url << get_uri_prefix() << "/itinerary?id=" << new_itinerary_id
           << "&active-tab=features";
       redirect(request, response, url.str());
+      return;
     }
   } else if (action == "attributes") {
     auto features = get_selected_feature_ids(request);
@@ -898,18 +935,21 @@ void ItineraryHandler::handle_authenticated_request(
       url << get_uri_prefix() << "/itinerary-route-name?itinerary_id=" << itinerary_id
           << "&path_id=" << route_id;
       redirect(request, response, url.str());
+      return;
     } else if (!features.waypoints.empty()) {
       long waypoint_id = features.waypoints.front();
       std::ostringstream url;
       url << get_uri_prefix() << "/itinerary-wpt-edit?itineraryId=" << itinerary_id
           << "&waypointId=" << waypoint_id;
       redirect(request, response, url.str());
+      return;
     } else if (!features.tracks.empty()) {
       long track_id = features.tracks.front();
       std::ostringstream url;
       url << get_uri_prefix() << "/itinerary-track-name?itinerary_id=" << itinerary_id
           << "&path_id=" << track_id;
       redirect(request, response, url.str());
+      return;
     }
   } else if (action == "edit-path") {
     const std::string shared = request.get_param("shared");
@@ -923,6 +963,7 @@ void ItineraryHandler::handle_authenticated_request(
       if (read_only)
         url << "&shared=true";
       redirect(request, response, url.str());
+      return;
     } else if (!features.tracks.empty()) {
       long track_id = features.tracks.front();
       std::ostringstream url;
@@ -931,7 +972,18 @@ void ItineraryHandler::handle_authenticated_request(
       if (read_only)
         url << "&shared=true";
       redirect(request, response, url.str());
+      return;
     }
+  } else if (action == "join-path") {
+    auto features = get_selected_feature_ids(request);
+    if (features.routes.size() > 1) {
+      join_routes(request, response, features.routes);
+      return;
+    } else if (features.tracks.size() > 1) {
+      join_tracks(request, response, features.tracks);
+      return;
+    }
+    
   }
   auto itinerary = dao.get_itinerary_summary(get_user_id(), itinerary_id);
   if (!itinerary.first)

@@ -25,8 +25,8 @@ LIBPQXX_VERSION=6.4.8
 LIBPQXX_SHA256=3f7aba951822e01f1b9f9f353702954773323dd9f9dc376ffb57cb6bbd9a7a2f
 NLOHMANN_JSON_VERSION=v3.11.2
 NLOHMANN_JSON_SHA256=665fa14b8af3837966949e8eb0052d583e2ac105d3438baba9951785512cf921
-NODE_VERSION="v14.21.2"
-NODE_SHA256=c73b52b6f2ae5a07e8c8eb626915557065b7f02b7e7c2faff293a71101461f86
+NODE_VERSION="v14.21.3"
+NODE_SHA256=05c08a107c50572ab39ce9e8663a2a2d696b5d262d5bd6f98d84b997ce932d9a
 
 DOWNLOAD_CACHE_DIR="/vagrant/provisioning/downloads"
 LIBPQXX_DOWNLOAD="libpqxx-${LIBPQXX_VERSION}.tar.gz"
@@ -99,7 +99,7 @@ function install_nodejs_14
     NODE_EXTRACT_DIR="${NODE_FILENAME}"
     NODE_DOWNLOAD_URL="https://nodejs.org/dist/${NODE_VERSION}/${NODE_TAR_FILENAME}"
 
-    if [ ! -x /usr/local/lib/nodejs/node-current/bin/node ]; then
+    if [ ! -x "/usr/local/lib/nodejs/${NODE_EXTRACT_DIR}/bin/node" ]; then
 	# Download the tarball distribution if it does not already exist
 	if [ ! -e "${DOWNLOAD_CACHE_DIR}/${NODE_TAR_FILENAME}" ]; then
 	    if [ ! -d ${DOWNLOAD_CACHE_DIR} ]; then

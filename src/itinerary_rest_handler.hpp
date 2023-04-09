@@ -68,7 +68,7 @@ class ItineraryRestHandler : public BaseRestHandler {
 
   nlohmann::basic_json<nlohmann::ordered_map>
       get_track_segments_as_geojson(
-          const ItineraryPgDao::track &track,
+          const ItineraryPgDao::path_summary &track,
           const std::vector<ItineraryPgDao::track_segment> &segments) const;
 
   nlohmann::basic_json<nlohmann::ordered_map>
