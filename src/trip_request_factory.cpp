@@ -41,6 +41,7 @@
 #include "itinerary_track_join_handler.hpp"
 #include "itinerary_track_segment_edit_handler.hpp"
 #include "itinerary_waypoint_edit_handler.hpp"
+#include "my_account_handler.hpp"
 #include "tile_handler.hpp"
 #include "trip_config.hpp"
 #include "track_logging_handler.hpp"
@@ -179,6 +180,9 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
   post_login_handlers.push_back(
       std::make_shared<ItinerarySharingEditHandler>(
           ItinerarySharingEditHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<MyAccountHandler>(
+          MyAccountHandler(config)));
 }
 
 std::string TripRequestFactory::get_session_id_cookie_name() const

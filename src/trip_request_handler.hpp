@@ -160,6 +160,7 @@ protected:
   std::shared_ptr<TripConfig> config;
   enum menu_items {
     unknown,
+    account,
     itineraries,
     itinerary,
     tracks,

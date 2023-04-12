@@ -187,6 +187,8 @@ public:
   /// Saves the passed location_share_details
   void save(const location_share_details& share);
   triplogger_configuration get_triplogger_configuration(std::string user_id);
+  void save(std::string user_id,
+            const triplogger_configuration & tl_config);
   long get_track_sharing_count_by_user_id(std::string user_id);
   std::vector<track_share> get_track_sharing_by_user_id(
       std::string user_id,

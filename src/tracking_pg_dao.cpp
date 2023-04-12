@@ -886,6 +886,22 @@ TrackPgDao::triplogger_configuration TrackPgDao::get_triplogger_configuration(
   return c;
 }
 
+void TrackPgDao::save(std::string user_id,
+                      const triplogger_configuration & tl_config)
+{
+  try {
+    work tx(*connection);
+    tx.exec_params("UPDATE usertable SET tl_settings=$2 WHERE id=$1",
+                    user_id,
+                    tl_config.tl_settings);
+    tx.commit();
+  } catch (const std::exception& e) {
+    std::cerr << "Exception saving TripLogger settings: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
 long TrackPgDao::get_track_sharing_count_by_user_id(std::string user_id)
 {
   try {

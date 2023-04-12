@@ -382,7 +382,7 @@ void ItineraryUploadHandler::handle_authenticated_request(
     redirect(request, response,
              get_uri_prefix() + "/itinerary?id=" + std::to_string(itinerary_id) + "&active-tab=features");
   } catch (const std::exception &e) {
-    std::cerr << "Exception handling request for a list of itineraries: "
+    std::cerr << "Exception handling GPX upload request: "
               << e.what() << '\n';
     throw;
   }

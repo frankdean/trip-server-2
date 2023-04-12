@@ -47,6 +47,8 @@ trip_server_SOURCES = \
 	itinerary_waypoint_edit_handler.cpp \
 	itinerary_waypoint_edit_handler.hpp \
 	main.cpp \
+	my_account_handler.cpp \
+	my_account_handler.hpp \
 	session_pg_dao.cpp \
 	session_pg_dao.hpp \
 	tile_handler.cpp \

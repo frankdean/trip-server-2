@@ -207,7 +207,11 @@ void TripAuthenticatedRequestHandler::append_body_start(std::ostream& os) const
        << translate("Status") << "</a></li>\n";
   }
   os <<
-    "            <li class=\"nav-item\"><a class=\"nav-link opacity-50\">" // href=\"" << prefix << "/account\">"
+    "            <li class=\"nav-item\"><a class=\"nav-link";
+  if (get_menu_item() == account)
+    os << " active";
+  os << "\" href=\""
+     << prefix << "/account\">"
     // Menu item for a user to administer their own account
      << translate("Account") << "</a></li>\n"
     "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"https://www.fdsd.co.uk/trip-server-2/"
