@@ -223,6 +223,46 @@ bool SessionPgDao::validate_password(std::string email, std::string password)
   return retval;
 }
 
+bool SessionPgDao::validate_password_by_user_id(
+    std::string user_id, std::string password)
+{
+  try {
+    bool retval = false;
+    work tx(*connection);
+    auto r = tx.exec_params1(
+        "SELECT (u.password = crypt($2, u.password)) "
+        "AS pswmatch FROM "
+        "(SELECT password FROM usertable WHERE id=$1) as u",
+        user_id,
+        password
+      );
+    r[0].to(retval);
+    tx.commit();
+    return retval;
+  } catch (const std::exception &e) {
+    std::cerr << "Error validating password by user_id: "
+              << e.what() << std::endl;
+    throw;
+  }
+}
+
+void SessionPgDao::change_password(std::string user_id,
+                                   std::string new_password)
+{
+  try {
+    work tx(*connection);
+    // https://www.postgresql.org/docs/13/pgcrypto.html
+    tx.exec_params("UPDATE usertable SET password=crypt($2, gen_salt('bf')) "
+                   "WHERE id=$1",
+                   user_id,
+                   new_password);
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Error changing password: " << e.what() << std::endl;
+    throw;
+  }
+}
+
 std::string SessionPgDao::get_user_id_by_email(const std::string email)
 {
   std::string user_id;

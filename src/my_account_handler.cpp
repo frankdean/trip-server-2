@@ -63,10 +63,9 @@ void MyAccountHandler::build_form(std::ostream &os)
     "      <div>\n"
     // Instructions for uploading a YAML formatted file containing TripLogger settings to be saved
     "        <p>" << translate("Select the TripLogger settings file to be uploaded, then click the upload button.") << "</p>\n"
-    "        <input id=\"btn-file-upload\" type=\"file\" accesskey=\"f\" name=\"file\" class=\"btn btn-lg btn-primary\">\n"
-    "      <div class=\"col-12 py-3\" arial-label=\"Form buttons\">\n"
+    "        <input id=\"btn-file-upload\" type=\"file\" accesskey=\"f\" name=\"file\" class=\"btn btn-lg btn-primary mb-2\">\n"
     // Label for button to initiate upload of a YAML file containing settings for the TripLogger app
-    "        <button id=\"btn-upload\" type=\"submit\" accesskey=\"u\" name=\"action\" value=\"upload\" class=\"btn btn-lg btn-success\">" << translate("Upload") << "</button>\n"
+    "        <button id=\"btn-upload\" type=\"submit\" accesskey=\"u\" name=\"action\" value=\"upload\" class=\"btn btn-lg btn-success mb-2\">" << translate("Upload") << "</button>\n"
     "      </div>\n"
     "    </form>\n"
     "  </div>\n"

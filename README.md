@@ -94,9 +94,9 @@ The following features are proposed: (completed features are marked &#x2713;)
 
 * &#x2713; Deleting individual points from routes and tracks.
 
-* Account maintenance &ndash; uploading [TripLogger][] settings.
+* &#x2713; Account maintenance &ndash; uploading [TripLogger][] settings.
 
-* Account maintenance &ndash; password change.
+* &#x2713; Account maintenance &ndash; password change.
 
 * Itinerary shares report &ndash; list shared itineraries including nicknames.
 
@@ -150,6 +150,25 @@ See the `PostgreSQL Database Configuration` section in the instructions for
 Upgrade the database to support Trip Server v2 by running:
 
 	$ trip-server --upgrade
+
+### Additional Resources
+
+The following resources are included in the [tarball distributions of this
+application](http://www.fdsd.co.uk/trip-server-2/) and will need to be
+separately installed under `./resources/static/` when building from a git
+clone of the repository.  See `./Makefile.am` for details of their expected
+locations.
+
+- [Bootstrap][]
+- [open-location-code][]
+- [proj4js][]
+- [zxcvbn][]
+
+[Bootstrap]: https://getbootstrap.com "Powerful, extensible, and feature-packed frontend toolkit"
+[open-location-code]: https://github.com/google/open-location-code "a library to generate short codes, called "plus codes", that can be used as digital addresses where street addresses don't exist"
+[OpenLayers]: https://openlayers.org "OpenLayers makes it easy to put a dynamic map in any web page"
+[proj4js]: https://github.com/proj4js/proj4js "JavaScript library to transform coordinates from one coordinate system to another, including datum transformations"
+[zxcvbn]: https://github.com/dropbox/zxcvbn "Low-Budget Password Strength Estimation"
 
 ### Debian
 
@@ -218,9 +237,6 @@ application](http://www.fdsd.co.uk/trip-server-2/)
 or can be downloaded from the respective websites.  (In this case, view the
 contents of `./Makefile.am` to determine the required versions and directory
 structure for the build.)
-
-[Bootstrap]: https://getbootstrap.com
-[OpenLayers]: https://openlayers.org
 
 Additional packages required to build from a Git clone:
 

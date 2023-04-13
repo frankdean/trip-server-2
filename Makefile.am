@@ -28,7 +28,8 @@ dist_doc_DATA = README.md
 cssdir = $(pkgdatadir)/resources/static/css
 dist_css_DATA = resources/static/css/trip.css
 jsdir = $(pkgdatadir)/resources/static/js
-dist_js_DATA = resources/static/js/itinerary-map.js \
+dist_js_DATA = resources/static/js/change-password.js \
+	resources/static/js/itinerary-map.js \
 	resources/static/js/itinerary-path-join.js \
 	resources/static/js/itinerary-route-edit.js \
 	resources/static/js/itinerary-segment-edit.js \
@@ -62,16 +63,24 @@ dist_ol_DATA = \
 	resources/static/openlayers-$(OPENLAYERS_VERSION)/ol.js
 
 proj4jsdir = $(pkgdatadir)/resources/static/proj4js-$(PROJ4JS_VERSION)
-dist_proj4js_DATA = \
-	resources/static/proj4js-$(PROJ4JS_VERSION)/proj4-src.js \
-	resources/static/proj4js-$(PROJ4JS_VERSION)/proj4.js \
-	resources/static/proj4js-$(PROJ4JS_VERSION)/LICENSE.md
+dist_proj4js_DATA = resources/static/proj4js-$(PROJ4JS_VERSION)/LICENSE.md
+proj4js2dir = $(pkgdatadir)/resources/static/proj4js-$(PROJ4JS_VERSION)/dist
+dist_proj4js2_DATA = \
+	resources/static/proj4js-$(PROJ4JS_VERSION)/dist/proj4-src.js \
+	resources/static/proj4js-$(PROJ4JS_VERSION)/dist/proj4.js
 
 olcdir = $(pkgdatadir)/resources/static/open-location-code-$(OLC_VERSION)
 dist_olc_DATA = \
 	resources/static/open-location-code-$(OLC_VERSION)/openlocationcode.js \
 	resources/static/open-location-code-$(OLC_VERSION)/openlocationcode.min.js \
 	resources/static/open-location-code-$(OLC_VERSION)/LICENSE
+
+zxcvbndir = $(pkgdatadir)/resources/static/zxcvbn-$(ZXCVBN_VERSION)
+dist_zxcvbn_DATA = resources/static/zxcvbn-$(ZXCVBN_VERSION)/LICENSE.txt
+zxcvbn2dir = $(pkgdatadir)/resources/static/zxcvbn-$(ZXCVBN_VERSION)/dist
+dist_zxcvbn2_DATA = \
+	resources/static/zxcvbn-$(ZXCVBN_VERSION)/dist/zxcvbn.js \
+	resources/static/zxcvbn-$(ZXCVBN_VERSION)/dist/zxcvbn.js.map
 
 uninstall-hook:
 	-rmdir -p $(bscssdir)
@@ -81,4 +90,7 @@ uninstall-hook:
 	-rmdir -p $(jsdir)
 	-rmdir -p $(jsmoddir)
 	-rmdir -p $(proj4jsdir)
+	-rmdir -p $(proj4js2dir)
 	-rmdir -p $(olcdir)
+	-rmdir -p $(zxcvbndir)
+	-rmdir -p $(zxcvbn2dir)

@@ -51,6 +51,8 @@ public:
   void load_sessions(fdsd::web::session_map &sessions);
   void invalidate_session(const std::string session_id);
   bool validate_password(std::string email, std::string password);
+  bool validate_password_by_user_id(std::string user_id, std::string password);
+  void change_password(std::string user_id, std::string new_password);
   std::string get_user_id_by_email(const std::string email);
   bool is_admin(std::string user_id);
   void upgrade();

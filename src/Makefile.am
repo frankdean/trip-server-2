@@ -49,6 +49,8 @@ trip_server_SOURCES = \
 	main.cpp \
 	my_account_handler.cpp \
 	my_account_handler.hpp \
+	password_change_handler.cpp \
+	password_change_handler.hpp \
 	session_pg_dao.cpp \
 	session_pg_dao.hpp \
 	tile_handler.cpp \
