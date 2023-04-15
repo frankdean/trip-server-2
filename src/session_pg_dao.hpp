@@ -26,16 +26,66 @@
 #include "../trip-server-common/src/session.hpp"
 #include <chrono>
 #include <string>
+#include <vector>
 
 namespace fdsd {
 namespace trip {
 
 class SessionPgDao : public TripPgDao {
+public:
+  enum search_type {
+    partial,
+    exact
+  };
+private:
   static const std::string insert_session_ps_name;
   static const std::string create_session_table_sql;
   static const std::string create_session_data_table_sql;
   static const std::string insert_session_sql;
+  void append_user_search_where_clause(
+      pqxx::work &tx,
+      std::string email,
+      std::string nickname,
+      search_type search_type,
+      std::ostream &sql);
+protected:
+  bool is_admin(pqxx::work &tx, std::string user_id);
 public:
+  struct user {
+    std::pair<bool, long> id;
+    std::string firstname;
+    std::string lastname;
+    std::string email;
+    std::pair<bool, std::string> uuid;
+    std::pair<bool, std::string> password;
+    std::string nickname;
+    bool is_admin;
+    user() : id(),
+             firstname(),
+             lastname(),
+             email(),
+             uuid(),
+             password(),
+             nickname(),
+             is_admin(false) {}
+  };
+  // enum user_role {
+  //   admin,
+  //   user
+  // };
+  struct tile_usage_metric {
+    int month;
+    int year;
+    long cumulative_total;
+    int quantity;
+    tile_usage_metric() : month(), year(), cumulative_total(), quantity() {}
+  };
+  struct tile_report {
+    std::pair<bool, long> total;
+    std::pair<bool, std::chrono::system_clock::time_point> time;
+    std::vector<tile_usage_metric> metrics;
+    tile_report() : total(), time(), metrics() {}
+  };
   static const std::string coordinate_format_key;
   static const std::string tracks_query_key;
   static const std::string location_history_key;
@@ -54,7 +104,21 @@ public:
   bool validate_password_by_user_id(std::string user_id, std::string password);
   void change_password(std::string user_id, std::string new_password);
   std::string get_user_id_by_email(const std::string email);
+  tile_report get_tile_usage_metrics(int month_count);
   bool is_admin(std::string user_id);
+  SessionPgDao::user get_user_details_by_user_id(std::string user_id);
+  long save(const SessionPgDao::user &user_details);
+  void delete_users(const std::vector<long> &user_ids);
+  long get_search_users_by_nickname_count(
+      std::string email,
+      std::string nickname,
+      SessionPgDao::search_type search_type);
+  std::vector<user> search_users_by_nickname(
+      std::string email,
+      std::string nickname,
+      SessionPgDao::search_type search_type,
+      std::uint32_t offset,
+      int limit);
   void upgrade();
 };
 

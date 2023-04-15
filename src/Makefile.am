@@ -1,5 +1,11 @@
 bin_PROGRAMS = trip-server
 trip_server_SOURCES = \
+	admin_status_handler.cpp \
+	admin_status_handler.hpp \
+	admin_user_edit_handler.cpp \
+	admin_user_edit_handler.hpp \
+	admin_user_management_handler.cpp \
+	admin_user_management_handler.hpp \
 	download_triplogger_configuration_handler.cpp \
 	download_triplogger_configuration_handler.hpp \
 	geo_utils.cpp \

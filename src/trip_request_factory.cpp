@@ -21,6 +21,9 @@
 */
 #include "../config.h"
 #include "trip_request_factory.hpp"
+#include "admin_status_handler.hpp"
+#include "admin_user_edit_handler.hpp"
+#include "admin_user_management_handler.hpp"
 #include "download_triplogger_configuration_handler.hpp"
 #include "itineraries_handler.hpp"
 #include "itinerary_download_handler.hpp"
@@ -187,6 +190,15 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
   post_login_handlers.push_back(
       std::make_shared<PasswordChangeHandler>(
           PasswordChangeHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<AdminStatusHandler>(
+          AdminStatusHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<AdminUserManagementHandler>(
+          AdminUserManagementHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<AdminUserEditHandler>(
+          AdminUserEditHandler(config)));
 }
 
 std::string TripRequestFactory::get_session_id_cookie_name() const

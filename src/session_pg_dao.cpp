@@ -21,8 +21,10 @@
 */
 #include "../config.h"
 #include "session_pg_dao.hpp"
+#include "../trip-server-common/src/dao_helper.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
 #include <iostream>
+#include <sstream>
 
 using namespace pqxx;
 using namespace fdsd::utils;
@@ -284,7 +286,7 @@ bool SessionPgDao::is_admin(std::string user_id)
   work tx(*connection);
   result r = tx.exec(
       "SELECT count(*) "
-      "FROM user_role ur JOIN role r ON ur.user_id=id "
+      "FROM user_role ur JOIN role r ON ur.role_id=id "
       "WHERE r.name='Admin' AND ur.user_id='" + tx.esc(user_id) + '\'');
   tx.commit();
   return !r.empty() && r[0][0].as<int>() > 0;
@@ -314,5 +316,265 @@ void SessionPgDao::upgrade()
   } catch (const std::exception& e) {
     std::cerr << "Failure creating pgcrypto extension: "
               << e.what() << '\n';
+  }
+}
+
+SessionPgDao::tile_report
+    SessionPgDao::get_tile_usage_metrics(int month_count)
+{
+  try {
+    work tx(*connection);
+    tile_report report;
+    auto summary = tx.exec_params1(
+        "SELECT time, count FROM tile_metric ORDER BY time DESC LIMIT 1");
+    std::string date_str;
+    report.time.first = summary["time"].to(date_str);
+    report.time.second = dao_helper::convert_libpq_date_tz(date_str);
+    report.total.first = summary["count"].to(report.total.second);
+    auto result = tx.exec_params(
+        "SELECT year, month, max(count) AS cumulative_total FROM ("
+        "SELECT time, extract(year from time) AS year, "
+        "extract(month from time) AS month, "
+        "extract(day from time) AS day, "
+        "count FROM tile_metric ORDER BY time DESC) AS q "
+        "GROUP BY q.year, q.month ORDER BY q.year desc, q.month DESC LIMIT $1",
+        month_count);
+    
+    for (auto r: result) {
+      SessionPgDao::tile_usage_metric t;
+      r["year"].to(t.year);
+      r["month"].to(t.month);
+      r["cumulative_total"].to(t.cumulative_total);
+      report.metrics.push_back(t);
+    }
+    auto previous = report.metrics.rend();
+    for (auto t = report.metrics.rbegin(); t != report.metrics.rend(); t++) {
+      if (previous != report.metrics.rend())
+        t->quantity = t->cumulative_total - previous->cumulative_total;
+      else
+        t->quantity = t->cumulative_total;
+      // std::cout << t->year << " " << t->month << " " << t->cumulative_total << " " << t->quantity << '\n';
+      previous = t;
+    }
+    return report;
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Error getting tile usage metrics: " << e.what() << '\n';
+    throw;
+  }
+}
+
+void SessionPgDao::append_user_search_where_clause(
+    work &tx,
+    std::string email,
+    std::string nickname,
+    SessionPgDao::search_type search_type,
+    std::ostream &sql)
+{
+  if (!email.empty() || !nickname.empty())
+    sql << "WHERE ";
+  if (!email.empty()) {
+    switch (search_type) {
+      case exact:
+        sql << "email='" << tx.esc(email) << "' ";
+        break;
+      case partial:
+        sql << "email LIKE '%" << tx.esc(email) << "%' ";
+        break;
+    }
+  }
+  if (!email.empty() && !nickname.empty())
+    sql << " AND ";
+  if (!nickname.empty()) {
+    switch (search_type) {
+      case exact:
+        sql << "nickname='" << tx.esc(nickname) << "' ";
+        break;
+      case partial:
+        sql << "nickname LIKE '%" << tx.esc(nickname) << "%' ";
+        break;
+    }
+  }
+}
+
+long SessionPgDao::get_search_users_by_nickname_count(
+    std::string email,
+    std::string nickname,
+    SessionPgDao::search_type search_type)
+{
+  try {
+    work tx(*connection);
+    std::ostringstream sql;
+    sql <<
+      "SELECT COUNT(*) "
+      "FROM usertable u ";
+    append_user_search_where_clause(tx, email, nickname, search_type, sql);
+    auto r = tx.exec_params1(sql.str());
+    tx.commit();
+    return r[0].as<long>();
+  } catch (const std::exception &e) {
+    std::cerr << "Error getting count for searching users by nickname: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+std::vector<SessionPgDao::user> SessionPgDao::search_users_by_nickname(
+    std::string email,
+    std::string nickname,
+    SessionPgDao::search_type search_type,
+    std::uint32_t offset,
+    int limit)
+{
+  try {
+    work tx(*connection);
+    std::ostringstream sql;
+    sql <<
+      "SELECT DISTINCT ON (nickname) u.id, firstname, lastname, email, uuid, nickname, "
+      "r.name='Admin' AND r.name IS NOT NULL AS admin "
+      "FROM usertable u "
+      "LEFT JOIN user_role ur ON ur.user_id=u.id LEFT JOIN role r on ur.role_id=r.id ";
+    append_user_search_where_clause(tx, email, nickname, search_type, sql);
+    sql << "ORDER BY nickname, admin DESC OFFSET $1 LIMIT $2";
+    // std::cout << "SQL: " << sql.str() << '\n';
+    auto result = tx.exec_params(
+        sql.str(),
+        offset,
+        limit);
+    std::vector<user> users;
+    for (const auto r : result) {
+      user u;
+      u.id.first = r["id"].to(u.id.second);
+      r["firstname"].to(u.firstname);
+      r["lastname"].to(u.lastname);
+      r["email"].to(u.email);
+      u.uuid.first = r["uuid"].to(u.uuid.second);
+      r["nickname"].to(u.nickname);
+      r["admin"].to(u.is_admin);
+      users.push_back(u);
+    }
+    tx.commit();
+    return users;
+  } catch (const std::exception &e) {
+    std::cerr << "Error searching users by nickname: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+SessionPgDao::user SessionPgDao::get_user_details_by_user_id(
+    std::string user_id)
+{
+  try {
+    work tx(*connection);
+    const std::string sql = // "SELECT id, firstname, lastname, email, uuid, nickname FROM usertable WHERE id=$1";
+// SELECT DISTINCT ON (u.id)  u.id, firstname, lastname, email, uuid, nickname, r.name='Admin' AND r.name IS NOT NULL AS admin FROM usertable u LEFT JOIN user_role ur ON ur.user_id=u.id LEFT JOIN role r on ur.role_id=r.id WHERE u.id=6 ORDER BY u.id, admin DESC;
+      "SELECT DISTINCT ON (u.id) u.id, firstname, lastname, email, uuid, nickname, "
+      "r.name='Admin' AND r.name IS NOT NULL AS admin "
+      "FROM usertable u "
+      "LEFT JOIN user_role ur ON ur.user_id=u.id LEFT JOIN role r on ur.role_id=r.id "
+      "WHERE u.id=$1 "
+      "ORDER BY u.id, admin DESC";
+
+    // std::cout << "Searching for user_id: \"" << user_id << "\"\nSQL: " << sql << '\n';
+    auto r = tx.exec_params1(
+        sql,
+        user_id);
+    user u;
+    u.id.first = r["id"].to(u.id.second);
+    r["firstname"].to(u.firstname);
+    r["lastname"].to(u.lastname);
+    r["email"].to(u.email);
+    u.uuid.first = r["uuid"].to(u.uuid.second);
+    r["nickname"].to(u.nickname);
+    r["admin"].to(u.is_admin);
+    tx.commit();
+    return u;
+  } catch (const std::exception &e) {
+    std::cerr << "Error fetching user details by user_id: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+long SessionPgDao::save(const SessionPgDao::user &user_details)
+{
+  try {
+    work tx(*connection);
+    long id;
+    if (user_details.id.first) {
+      id = user_details.id.second;
+      if (user_details.password.first) {
+        tx.exec_params(
+            "UPDATE usertable "
+            "SET firstname=$2, lastname=$3, email=$4, "
+            "nickname=$5, "
+            "password=crypt($6, gen_salt('bf')) "
+            "WHERE id=$1",
+            user_details.id.second,
+            user_details.firstname,
+            user_details.lastname,
+            user_details.email,
+            user_details.nickname,
+            user_details.password.first ? &user_details.password.second : nullptr
+          );
+      } else {
+        tx.exec_params(
+            "UPDATE usertable "
+            "SET firstname=$2, lastname=$3, email=$4, "
+            "nickname=$5 "
+            "WHERE id=$1",
+            user_details.id.second,
+            user_details.firstname,
+            user_details.lastname,
+            user_details.email,
+            user_details.nickname
+          );
+      }
+    } else {
+      auto r = tx.exec_params1(
+          "INSERT INTO usertable "
+          "(firstname, lastname, email, uuid, password, nickname) "
+          "VALUES ($1, $2, $3, $4, crypt($5, gen_salt('bf')), $6) RETURNING id",
+          user_details.firstname,
+          user_details.lastname,
+          user_details.email,
+          user_details.uuid.first ? &user_details.uuid.second : nullptr,
+          user_details.password.first ? &user_details.password.second : nullptr,
+          user_details.nickname);
+      r["id"].to(id);
+    }
+    if (user_details.is_admin) {
+      tx.exec_params(
+          "INSERT INTO user_role (user_id, role_id) "
+          "VALUES ($1, (SELECT id FROM role WHERE name='Admin')) "
+          "ON CONFLICT (user_id, role_id) DO NOTHING",
+          id);
+    } else {
+      tx.exec_params(
+          "DELETE FROM user_role WHERE user_id=$1 "
+          "AND role_id=(SELECT id FROM role WHERE name='Admin')",
+          id);
+    }
+    tx.commit();
+    return id;
+  } catch (const std::exception &e) {
+    std::cerr << "Error saving user details: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+void SessionPgDao::delete_users(const std::vector<long> &user_ids)
+{
+  try {
+    work tx(*connection);
+    const auto sql_ids = dao_helper::to_sql_array(user_ids);
+    tx.exec_params("DELETE FROM usertable WHERE id=ANY($1)", sql_ids);
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Error deleting users: "
+              << e.what() << '\n';
+    throw;
   }
 }

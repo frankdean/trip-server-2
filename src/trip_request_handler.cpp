@@ -199,12 +199,18 @@ void TripAuthenticatedRequestHandler::append_body_start(std::ostream& os) const
 
   if (is_admin) {
     os <<
-      "            <li class=\"nav-item opacity-50\"><a class=\"nav-link\">" // href=\"" << prefix << "/users\">"
+      "            <li class=\"nav-item\"><a class=\"nav-link";
+    if (get_menu_item() == users)
+      os << " active";
+    os <<
       // Menu item for an admin user to administer user accounts, create, delete, reset password
-       << translate("Users") << "</a></li>\n"
-      "            <li class=\"nav-item opacity-50\"><a class=\"nav-link\">" // href=\"" << prefix << "/status\">"
+      "\" href=\"" << prefix << "/users\">" << translate("Users") << "</a></li>\n"
+      "            <li class=\"nav-item\"><a class=\"nav-link";
+    if (get_menu_item() == status)
+      os << " active";
+    os <<
       // Menu item for an admin user to view the system status report
-       << translate("Status") << "</a></li>\n";
+      "\" href=\"" << prefix << "/status\">" << translate("Status") << "</a></li>\n";
   }
   os <<
     "            <li class=\"nav-item\"><a class=\"nav-link";

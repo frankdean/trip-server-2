@@ -91,7 +91,8 @@ void PasswordChangeHandler::build_form(std::ostream &os)
     "      </div>\n"
     "    </div>\n"
     "    <div class=\"py-3\">\n"
-    "      <button id=\"btn-save\" class=\"btn btn-lg btn-success\">Save</button>\n"
+    // Label to save password change
+    "      <button id=\"btn-save\" class=\"btn btn-lg btn-success\">" << translate("Save") << "</button>\n"
     // Label to cancel changing password
     "      <button id=\"btn-cancel\" class=\"btn btn-lg btn-danger\" name=\"action\" value=\"cancel\" formnovalidate>" << translate("Cancel") << "</button>\n"
     "    </div>\n"

@@ -163,9 +163,11 @@ protected:
     account,
     itineraries,
     itinerary,
+    status,
     tracks,
     tracker_info,
-    track_sharing
+    track_sharing,
+    users
   };
 private:
     menu_items menu_item;

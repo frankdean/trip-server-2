@@ -102,9 +102,9 @@ The following features are proposed: (completed features are marked &#x2713;)
 
 * Itinerary search by coordinate and radius.
 
-* Administration &ndash; user management.
+* &#x2713; Administration &ndash; user management.
 
-* Administration &ndash; tile usage report.
+* &#x2713; Administration &ndash; tile usage report.
 
 ## Documentation
 
