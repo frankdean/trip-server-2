@@ -36,6 +36,10 @@ trip_server_SOURCES = \
 	itinerary_route_edit_handler.hpp \
 	itinerary_route_join_handler.cpp \
 	itinerary_route_join_handler.hpp \
+	itinerary_search_handler.cpp \
+	itinerary_search_handler.hpp \
+	itinerary_search_results_handler.cpp \
+	itinerary_search_results_handler.hpp \
 	itinerary_sharing_edit_handler.cpp \
 	itinerary_sharing_edit_handler.hpp \
 	itinerary_sharing_handler.cpp \

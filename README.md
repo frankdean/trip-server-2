@@ -100,7 +100,7 @@ The following features are proposed: (completed features are marked &#x2713;)
 
 * Itinerary shares report &ndash; list shared itineraries including nicknames.
 
-* Itinerary search by coordinate and radius.
+* &#x2713; Itinerary search by coordinate and radius.
 
 * &#x2713; Administration &ndash; user management.
 

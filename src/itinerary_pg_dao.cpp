@@ -2999,3 +2999,141 @@ void ItineraryPgDao::save_updated_statistics(
     throw;
   }
 }
+
+const std::string ItineraryPgDao::itinerary_waypoint_radius_clause =
+  "SELECT DISTINCT(i.id), i.start, i.finish, i.title, null AS nickname FROM itinerary i "
+  "JOIN itinerary_waypoint iw ON iw.itinerary_id=i.id "
+  "WHERE i.archived != true AND i.user_id=$1 "
+  "AND ST_DWithin(iw.geog, ST_MakePoint($2,$3), $4) ";
+
+const std::string ItineraryPgDao::itinerary_route_radius_clause =
+  "SELECT DISTINCT(i.id), i.start, i.finish, i.title, null AS nickname FROM itinerary i "
+  "JOIN itinerary_route ir ON ir.itinerary_id=i.id "
+  "JOIN itinerary_route_point irp ON irp.itinerary_route_id=ir.id "
+  "WHERE i.archived != true AND i.user_id=$1 "
+  "AND ST_DWithin(irp.geog, ST_MakePoint($2,$3), $4) ";
+
+const std::string ItineraryPgDao::itinerary_track_radius_clause =
+  "SELECT DISTINCT(i.id), i.start, i.finish, i.title, null AS nickname FROM itinerary i "
+  "JOIN itinerary_track it ON it.itinerary_id=i.id "
+  "JOIN itinerary_track_segment its ON its.itinerary_track_id=it.id "
+  "JOIN itinerary_track_point itp ON itp.itinerary_track_segment_id=its.id "
+  "WHERE i.archived != true AND i.user_id=$1 "
+  "AND ST_DWithin(itp.geog, ST_MakePoint($2,$3), $4) ";
+
+const std::string ItineraryPgDao::shared_itinerary_waypoint_radius_clause =
+  "SELECT DISTINCT(i2.id), i2.start, i2.finish, i2.title, u3.nickname FROM itinerary i2 "
+  "JOIN itinerary_sharing s ON i2.id=s.itinerary_id "
+  "JOIN usertable u2 ON s.shared_to_id=u2.id "
+  "JOIN itinerary_waypoint iw ON i2.id=iw.itinerary_id "
+  "JOIN usertable u3 ON u3.id=i2.user_id "
+  "WHERE i2.archived != true AND s.active=true AND u2.id=$1 "
+  "AND ST_DWithin(iw.geog, ST_MakePoint($2,$3), $4) ";
+
+const std::string ItineraryPgDao::shared_itinerary_route_radius_clause =
+  "SELECT DISTINCT(i2.id), i2.start, i2.finish, i2.title, u3.nickname FROM itinerary i2 "
+  "JOIN itinerary_sharing s ON i2.id=s.itinerary_id "
+  "JOIN usertable u2 ON s.shared_to_id=u2.id "
+  "JOIN itinerary_route ir ON i2.id=ir.itinerary_id "
+  "JOIN itinerary_route_point irp ON ir.id=irp.itinerary_route_id "
+  "JOIN usertable u3 ON u3.id=i2.user_id "
+  "WHERE i2.archived != true AND s.active=true AND u2.id=$1 "
+  "AND ST_DWithin(irp.geog, ST_MakePoint($2,$3), $4) ";
+
+const std::string ItineraryPgDao::shared_itinerary_track_radius_clause =
+  "SELECT DISTINCT(i2.id), i2.start, i2.finish, i2.title, u3.nickname FROM itinerary i2 "
+  "JOIN itinerary_sharing s ON i2.id=s.itinerary_id "
+  "JOIN usertable u2 ON s.shared_to_id=u2.id "
+  "JOIN itinerary_track it ON i2.id=it.itinerary_id "
+  "JOIN itinerary_track_segment its ON it.id=its.itinerary_track_id "
+  "JOIN itinerary_track_point itp ON its.id=itp.itinerary_track_segment_id "
+  "JOIN usertable u3 ON u3.id=i2.user_id "
+  "WHERE i2.archived != true AND s.active=true AND u2.id=$1 "
+  "AND ST_DWithin(itp.geog, ST_MakePoint($2,$3), $4) ";
+
+const std::string ItineraryPgDao::itinerary_search_query_body =
+  itinerary_waypoint_radius_clause + " UNION " +
+  itinerary_route_radius_clause + " UNION " +
+  itinerary_track_radius_clause + " UNION " +
+  shared_itinerary_waypoint_radius_clause + " UNION " +
+  shared_itinerary_route_radius_clause + " UNION " +
+  shared_itinerary_track_radius_clause;
+
+long ItineraryPgDao::itinerary_radius_search_count(
+    std::string user_id,
+    double longitude,
+    double latitude,
+    double radius)
+{
+  try {
+    work tx(*connection);
+    const std::string sql =
+      "SELECT COUNT(*) FROM (" +
+      itinerary_search_query_body +
+      ") AS q";
+    auto r = tx.exec_params1(
+        sql,
+        user_id,
+        longitude,
+        latitude,
+        radius
+      );
+    tx.commit();
+    return r[0].as<long>();
+  } catch (const std::exception &e) {
+    std::cerr << "Error executing itinerary radius search count: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+std::vector<ItineraryPgDao::itinerary_summary>
+    ItineraryPgDao::itinerary_radius_search(
+        std::string user_id,
+        double longitude,
+        double latitude,
+        double radius,
+        std::uint32_t offset,
+        int limit)
+{
+  try {
+    work tx(*connection);
+    const std::string sql =
+      itinerary_search_query_body +
+      "ORDER BY start DESC, finish DESC, title, id DESC "
+      "OFFSET $5 LIMIT $6";
+    auto result = tx.exec_params(
+        sql,
+        user_id,
+        longitude,
+        latitude,
+        radius,
+        offset,
+        limit
+      );
+    std::vector<ItineraryPgDao::itinerary_summary> itineraries;
+    for (auto r : result) {
+      itinerary_summary it;
+      it.id.first = r["id"].to(it.id.second);
+      std::string s;
+      if ((it.start.first = r["start"].to(s))) {
+        DateTime start(s);
+        it.start.second = start.time_tp();
+      }
+      if ((it.finish.first = r["finish"].to(s))) {
+        DateTime finish(s);
+        it.finish.second = finish.time_tp();
+      }
+      r["title"].to(it.title);
+      it.owner_nickname.first = r["nickname"].to(it.owner_nickname.second);
+      it.shared.first = it.owner_nickname.first && !it.owner_nickname.second.empty();
+      itineraries.push_back(it);
+    }
+    tx.commit();
+    return itineraries;
+  } catch (const std::exception &e) {
+    std::cerr << "Error executing itinerary radius search: "
+              << e.what() << '\n';
+    throw;
+  }
+}

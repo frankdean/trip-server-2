@@ -47,7 +47,8 @@ void ItinerariesHandler::build_page(
     response.content
       <<
       "  <div class=\"alert alert-info\"\n>"
-      "    <p>There are no itineraries to display</p>\n"
+      // Message displayed when there are no itineries belonging to or shared to a user
+      "    <p>" << translate("There are no itineraries to display") << "</p>\n"
       "  </div>\n";
   } else {
     response.content
@@ -112,25 +113,25 @@ void ItinerariesHandler::build_page(
 
     response.content
       <<
-      "      <div id=\"itineraries-div-form-buttons\">\n"
+      "      <div id=\"itineraries-div-form-buttons\" class=\"py-2\">\n"
       // Button title for creating something new
       "        <button id=\"btn-new\" formaction=\"" << get_uri_prefix() << "/itinerary/edit\" type=\"submit\" accesskey=\"w\" class=\"btn btn-lg btn-warning\">" << translate("New") << "</button>\n"
       // Button title for importing something
       "        <button id=\"btn-import\" accesskey=\"i\" name=\"action\" value=\"import\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary/import\" class=\"btn btn-lg btn-success\">" << translate("Import") << "</button>\n"
-      "      </div>\n"
-      "    </form>\n";
+      "      </div>\n";
     if (!itineraries.empty()) {
       response.content
         <<
-        "    <div>\n"
+        "    <div class=\"py-2\">\n"
         // Button title for searching for something
-        "      <button id=\"btn-search\" accesskey=\"s\" class=\"btn btn-lg btn-primary\" disabled>" << translate("Search") << "</button>\n"
+        "      <button id=\"btn-search\" accesskey=\"s\" class=\"btn btn-lg btn-primary\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary-search\">" << translate("Search") << "</button>\n"
         // Button title for navigating to the Itinerary Sharing Report
         "      <button id=\"btn-shares-report\" accesskey=\"r\" class=\"btn btn-lg btn-primary\" disabled>" << translate("Itinerary shares report") << "</button>\n"
         "    </div>\n";
     }
     response.content
       <<
+      "    </form>\n"
       "  </div>\n"
       "</div>\n";
   }
@@ -162,19 +163,25 @@ void ItinerariesHandler::handle_authenticated_request(
       // Use JSON object so we can easily extend in the future,
       // e.g. filtering, sorting etc.
       try {
-        const auto json_str = session_dao.get_value(get_session_id(), "itineraries");
+        const auto json_str = session_dao.get_value(
+            get_session_id(),
+            SessionPgDao::itinerary_page_key);
         if (!json_str.empty()) {
           json j = json::parse(json_str);
           page = j["page"];
         }
       } catch (const nlohmann::detail::parse_error &e) {
-        std::cerr << "JSON parse error parsing session value for itineraries key\n";
+        std::cerr << "JSON parse error parsing session value for "
+                  << SessionPgDao::itinerary_page_key
+                  << " key\n";
       }
     } else {
       json j;
       // if (j.contains("page"))
       j["page"] = page;
-      session_dao.save_value(get_session_id(), "itineraries", j.dump());
+      session_dao.save_value(get_session_id(),
+                             SessionPgDao::itinerary_page_key,
+                             j.dump());
     }
     try {
       if (!page.empty())

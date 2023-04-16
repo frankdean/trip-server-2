@@ -37,6 +37,10 @@ const std::string SessionPgDao::tracks_query_key = "tracks";
 const std::string SessionPgDao::location_history_key = "location-history";
 /// Used for copy-and-paste of itinerary featues
 const std::string SessionPgDao::itinerary_features_key = "itinerary-features";
+/// Used to keep the last viewed page of itineraries
+const std::string SessionPgDao::itinerary_page_key = "itineraries";
+/// Used to keep the last viewed page of itinerary radius search results
+const std::string SessionPgDao::itinerary_radius_search_page_key = "itinerary-search-page-key";
 
 const std::string SessionPgDao::insert_session_ps_name = "session_insert";
 

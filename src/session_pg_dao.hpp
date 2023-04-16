@@ -90,6 +90,8 @@ public:
   static const std::string tracks_query_key;
   static const std::string location_history_key;
   static const std::string itinerary_features_key;
+  static const std::string itinerary_page_key;
+  static const std::string itinerary_radius_search_page_key;
   void save_value(std::string session_id, std::string key, std::string value);
   std::string get_value(std::string session_id, std::string key);
   void remove_value(std::string session_id, std::string key);
