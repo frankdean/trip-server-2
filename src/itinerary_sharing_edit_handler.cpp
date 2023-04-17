@@ -50,6 +50,8 @@ void ItinerarySharingEditHandler::build_form(
     "  <form name=\"form\" method=\"post\">\n"
     "    <div class=\"container-fluid bg-light row g-3 my-3 pb-3 mx-0\">\n"
     "      <input type=\"hidden\" name=\"itinerary_id\" value=\"" << itinerary_id << "\">\n"
+    "      <input type=\"hidden\" name=\"routing\" value=\"" << routing << "\">\n"
+    "      <input type=\"hidden\" name=\"report-page\" value=\"" << report_page << "\">\n"
     "      <input type=\"hidden\" name=\"goto-page\" value=\"" << current_page << "\">\n";
   if (shared_to_id.first)
     response.content
@@ -114,6 +116,8 @@ void ItinerarySharingEditHandler::do_preview_request(
     // Title for the page when editing an existing itinerary share
     set_page_title(translate("Share Itinerary&mdash;New"));
   }
+  routing = request.get_param("routing");
+  report_page = request.get_param("report-page");
 }
 
 void ItinerarySharingEditHandler::handle_authenticated_request(
@@ -154,7 +158,11 @@ void ItinerarySharingEditHandler::handle_authenticated_request(
         // std::cout << "Saving itinerary share for nickname \"" << itinerary_share.nickname << "\"\n";
         dao.save(get_user_id(), itinerary_id, itinerary_share);
         std::ostringstream os;
-        os << get_uri_prefix() << "/itinerary-sharing?id=" << itinerary_id << "&goto-page=" << current_page;
+        os << get_uri_prefix()
+           << "/itinerary-sharing?id=" << itinerary_id
+           << "&goto-page=" << current_page
+           << "&routing=" << routing
+           << "&report-page=" << report_page;
         redirect(request, response, os.str());
         return;
       }

@@ -126,7 +126,7 @@ void ItinerariesHandler::build_page(
         // Button title for searching for something
         "      <button id=\"btn-search\" accesskey=\"s\" class=\"btn btn-lg btn-primary\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary-search\">" << translate("Search") << "</button>\n"
         // Button title for navigating to the Itinerary Sharing Report
-        "      <button id=\"btn-shares-report\" accesskey=\"r\" class=\"btn btn-lg btn-primary\" disabled>" << translate("Itinerary shares report") << "</button>\n"
+        "      <button id=\"btn-shares-report\" accesskey=\"r\" class=\"btn btn-lg btn-primary\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary-sharing-report\">" << translate("Itinerary shares report") << "</button>\n"
         "    </div>\n";
     }
     response.content

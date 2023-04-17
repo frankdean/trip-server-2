@@ -42,6 +42,7 @@ class ItineraryPgDao : public TripPgDao {
   static const std::string shared_itinerary_route_radius_clause;
   static const std::string shared_itinerary_track_radius_clause;
   static const std::string itinerary_search_query_body;
+  static const std::string itinerary_share_report_query_body;
 public:
   struct path_base : public path_statistics {
     std::pair<bool, long> id;
@@ -227,6 +228,9 @@ public:
                           shared() {}
     static YAML::Node encode(const itinerary_summary& rhs);
     static bool decode(const YAML::Node& node, itinerary_summary& rhs);
+  };
+  struct itinerary_share_report : public itinerary_base {
+    std::vector<std::string> nicknames;
   };
   struct itinerary_description : public itinerary_summary {
     std::pair<bool, std::string> description;
@@ -503,6 +507,7 @@ public:
                                  long itinerary_id,
                                  const std::vector<long> &shared_to_ids,
                                  bool activate);
+
   void delete_itinerary_shares(std::string user_id,
                                long itinerary_id,
                                const std::vector<long> &shared_to_ids);
@@ -520,6 +525,15 @@ public:
           double radius,
           std::uint32_t offset,
           int limit);
+
+  long get_shared_itinerary_report_count(std::string user_id);
+
+  std::vector<ItineraryPgDao::itinerary_share_report>
+      get_shared_itinerary_report(
+          std::string user_id,
+          std::uint32_t offset,
+          int limit);
+
 protected:
   void create_waypoints(
       pqxx::work &tx,

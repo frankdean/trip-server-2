@@ -98,7 +98,7 @@ The following features are proposed: (completed features are marked &#x2713;)
 
 * &#x2713; Account maintenance &ndash; password change.
 
-* Itinerary shares report &ndash; list shared itineraries including nicknames.
+* &#x2713; Itinerary shares report &ndash; list shared itineraries including nicknames.
 
 * &#x2713; Itinerary search by coordinate and radius.
 

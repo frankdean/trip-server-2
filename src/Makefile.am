@@ -44,6 +44,8 @@ trip_server_SOURCES = \
 	itinerary_sharing_edit_handler.hpp \
 	itinerary_sharing_handler.cpp \
 	itinerary_sharing_handler.hpp \
+	itinerary_sharing_report_handler.cpp \
+	itinerary_sharing_report_handler.hpp \
 	itinerary_simplify_handler.cpp \
 	itinerary_simplify_handler.hpp \
 	itinerary_track_edit_handler.cpp \

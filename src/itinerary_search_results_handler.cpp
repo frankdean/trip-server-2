@@ -160,7 +160,6 @@ void ItinerarySearchResultsHandler::handle_authenticated_request(
   //           << " with radius of " << radius_meters << " meters\n";
   ItineraryPgDao dao;
   const std::string user_id = get_user_id();
-  // const long total_count = dao.get_itineraries_count(user_id);
   const long total_count = dao.itinerary_radius_search_count(
       user_id,
       longitude,

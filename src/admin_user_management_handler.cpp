@@ -37,15 +37,7 @@ void AdminUserManagementHandler::build_form(
 {
   os <<
     "<div class=\"container-fluid my-3\">\n"
-    "  <h1>" << get_page_title() << "</h1>\n";
-  if (false) {
-    os <<
-      "  <div id=\"save-failed\" class=\"alert alert-danger\" role=\"alert\">"
-      // Error message displayed when failure saving a user's details
-       << translate("Save failed.  The most likely cause is that the nickname or e-mail address already exist.") <<
-      "  </div>\n";
-  }
-  os <<
+    "  <h1>" << get_page_title() << "</h1>\n"
     "  <form name=\"search\" method=\"post\">\n"
     "    <div id=\"search\">\n"
     // "      <div class=\"mb-3\">\n"

@@ -40,6 +40,10 @@ class ItinerarySharingEditHandler :  public TripAuthenticatedRequestHandler {
   bool invalid_nickname_error;
   /// Used to determine which page to return to in the itinerary sharing list
   std::uint32_t current_page;
+  /// String used to indicate who the caller to redirect to
+  std::string routing;
+  /// String containing the page number of the itinerary shares report
+  std::string report_page;
   void build_form(web::HTTPServerResponse& response,
                   const ItineraryPgDao::itinerary_share &itinerary_share) const;
 protected:
@@ -56,7 +60,9 @@ public:
     shared_to_id(),
     is_new(false),
     invalid_nickname_error(false),
-    current_page(1) {}
+    current_page(1),
+    routing(),
+    report_page() {}
   virtual ~ItinerarySharingEditHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItinerarySharingEditHandler";

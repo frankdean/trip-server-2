@@ -47,7 +47,7 @@ void ItinerarySearchHandler::build_form(std::ostream &os)
     "      </div>\n"
     "      <div class=\"col-sm-8 col-lg-4\">\n"
     // Label for input of a location in a variety of formats
-    "        <label for=\"input-position\">" << translate("Position") << "</label>\n"
+    "        <label for=\"input-position\">" << x(translate("Position")) << "</label>\n"
     "        <input id=\"input-position\" name=\"position\" type=\"text\" size=\"30\" value=\"";
   os << position << "\"";
   os

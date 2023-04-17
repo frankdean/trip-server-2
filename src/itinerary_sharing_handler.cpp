@@ -41,7 +41,9 @@ void ItinerarySharingHandler::build_form(HTTPServerResponse& response,
   response.content
     <<
     "  <form name=\"form\" method=\"post\">\n"
-    "          <input type=\"hidden\" name=\"itinerary_id\" value=\"" << itinerary_id << "\">\n";
+    "          <input type=\"hidden\" name=\"itinerary_id\" value=\"" << itinerary_id << "\">\n"
+    "          <input type=\"hidden\" name=\"routing\" value=\"" << routing << "\">\n"
+    "          <input type=\"hidden\" name=\"report-page\" value=\"" << report_page << "\">\n";
   if (itinerary_shares.empty()) {
     response.content
       << "<div class=\"alert alert-info\"><p>"
@@ -107,9 +109,22 @@ void ItinerarySharingHandler::build_form(HTTPServerResponse& response,
   response.content
     <<
     // Label for button to create a new itinerary share
-    "      <button id=\"btn-new\" accesskey=\"w\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary-sharing/edit?itinerary_id=" << itinerary_id << "\" class=\"my-1 btn btn-lg btn-warning\">" << translate("New") << "</button>\n"
-    // Label for button to return to the itinerary when viewing a list of itinerary shares
-    "      <button id=\"btn-close\" accesskey=\"c\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary\" class=\"my-1 btn btn-lg btn-danger\">" << translate("Close") << "</button>\n"
+    "      <button id=\"btn-new\" accesskey=\"w\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary-sharing/edit?itinerary_id=" << itinerary_id << "\" class=\"my-1 btn btn-lg btn-warning\">" << translate("New") << "</button>\n";
+  if (!routing.empty()) {
+    response.content <<
+      // Label for button to return to the itinerary when viewing a list of itinerary shares
+      "      <button id=\"btn-close\" accesskey=\"i\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary\" class=\"my-1 btn btn-lg btn-danger\">" << translate("Itinerary") << "</button>\n";
+  }
+  response.content <<
+    // Label for button to return to the itinerary or itinerary sharing report when viewing a list of itinerary shares
+    "      <button id=\"btn-close\" accesskey=\"c\" formmethod=\"get\" formaction=\"" << get_uri_prefix();
+  if (!routing.empty()) {
+    response.content << "/" << routing << "?report-page=" << report_page << "\"";
+  } else {
+    response.content << "/itinerary\"";
+  }
+  response.content <<
+    " class=\"my-1 btn btn-lg btn-danger\">" << translate("Close") << "</button>\n"
     "    </div>\n"
     "  </form>\n";
   response.content
@@ -137,6 +152,8 @@ void ItinerarySharingHandler::do_preview_request(
   itinerary_id = std::stol(request.get_query_param("id"));
   set_page_title(translate("Itinerary Sharing"));
   // set_menu_item(unknown);
+  routing = request.get_param("routing");
+  report_page = request.get_param("report-page");
 }
 
 void ItinerarySharingHandler::handle_authenticated_request(

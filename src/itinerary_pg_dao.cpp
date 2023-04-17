@@ -23,6 +23,7 @@
 #include "itinerary_pg_dao.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
 #include "../trip-server-common/src/dao_helper.hpp"
+#include <memory>
 #include <vector>
 #include <stdexcept>
 
@@ -377,7 +378,7 @@ std::pair<bool, ItineraryPgDao::itinerary_detail>
     "FROM itinerary i2 JOIN itinerary_sharing s ON i2.id=s.itinerary_id "
     "JOIN usertable u2 ON s.shared_to_id=u2.id "
     "JOIN usertable ownr ON ownr.id=i2.user_id "
-    "WHERE i2.id=$2 AND s.active=true AND u2.id=$1 "
+    "WHERE i2.id=$2 AND i2.archived != true AND s.active=true AND u2.id=$1 "
     "ORDER BY shared_to_nickname DESC";
 
   // std::cout << "SQL:: " << sql << '\n';
@@ -493,7 +494,7 @@ std::vector<ItineraryPgDao::route>
       "LEFT JOIN itinerary_route_point p ON r.id=p.itinerary_route_id "
       "LEFT JOIN itinerary_sharing sh "
       "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
-      "WHERE (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
+      "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
       "AND r.itinerary_id = $2 AND r.id=ANY($3) "
       "ORDER BY r.id, p.id",
       user_id,
@@ -558,7 +559,7 @@ std::vector<ItineraryPgDao::route>
       "LEFT JOIN itinerary_route_point p ON r.id=p.itinerary_route_id "
       "LEFT JOIN itinerary_sharing sh "
       "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
-      "WHERE (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
+      "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
       "AND r.itinerary_id = $2 "
       "ORDER BY r.id, p.id",
       user_id,
@@ -639,7 +640,7 @@ std::vector<ItineraryPgDao::track>
     "LEFT JOIN itinerary_track_point p ON ts.id=p.itinerary_track_segment_id "
     "LEFT JOIN itinerary_sharing sh "
     "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
-    "WHERE (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
+    "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
     "AND t.itinerary_id=$2 AND t.id=ANY($3) ORDER BY t.id, ts.id, p.id";
   // std::cout << "SQL: \n" << sql << '\n' << "track ids: " << ids_sql << '\n';
   auto result = tx.exec_params(
@@ -738,7 +739,7 @@ std::vector<ItineraryPgDao::track>
     "LEFT JOIN itinerary_track_point p ON ts.id=p.itinerary_track_segment_id "
     "LEFT JOIN itinerary_sharing sh "
     "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
-    "WHERE (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
+    "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
     "AND t.itinerary_id=$2 ORDER BY t.id, ts.id, p.id";
   // std::cout << "SQL: \n" << sql << '\n';
   auto result = tx.exec_params(
@@ -845,7 +846,7 @@ std::vector<ItineraryPgDao::waypoint>
       "JOIN itinerary i ON i.id=w.itinerary_id "
       "LEFT JOIN itinerary_sharing sh "
       "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
-      "WHERE  (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
+      "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
       "AND w.itinerary_id=$2 AND w.id=ANY($3) "
       "ORDER BY name, symbol, id",
       user_id,
@@ -890,7 +891,7 @@ std::vector<ItineraryPgDao::waypoint>
       "JOIN itinerary i ON i.id=w.itinerary_id "
       "LEFT JOIN itinerary_sharing sh "
       "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
-      "WHERE  (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
+      "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
       "AND w.itinerary_id=$2"
       "ORDER BY name, symbol, id",
       user_id,
@@ -1269,7 +1270,8 @@ void ItineraryPgDao::validate_user_itinerary_read_access(work &tx,
 {
   auto r = tx.exec_params1(
       "SELECT sum(count) FROM ("
-      "SELECT COUNT(*) FROM itinerary WHERE user_id=$1 AND id=$2 "
+      "SELECT COUNT(*) FROM itinerary i "
+      "WHERE i.archived != true AND user_id=$1 AND id=$2 "
       "UNION ALL "
       "SELECT COUNT (*) FROM itinerary_sharing "
       "WHERE active=true AND itinerary_id=$2 AND shared_to_id=$1) as q",
@@ -3133,6 +3135,76 @@ std::vector<ItineraryPgDao::itinerary_summary>
     return itineraries;
   } catch (const std::exception &e) {
     std::cerr << "Error executing itinerary radius search: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+long ItineraryPgDao::get_shared_itinerary_report_count(
+        std::string user_id)
+{
+  try {
+    const std::string sql =
+      "SELECT COUNT(*) FROM ("
+      "SELECT DISTINCT(it.id) FROM itinerary it "
+      "JOIN itinerary_sharing sh ON it.id=sh.itinerary_id "
+      "WHERE it.archived != true AND sh.active AND it.user_id=$1) AS q";
+    work tx(*connection);
+    auto r = tx.exec_params1(
+        sql,
+        user_id);
+    return r[0].as<long>();
+  } catch (const std::exception &e) {
+    std::cerr << "Error fetching itinerary share report count: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+std::vector<ItineraryPgDao::itinerary_share_report>
+    ItineraryPgDao::get_shared_itinerary_report(
+        std::string user_id,
+        std::uint32_t offset,
+        int limit)
+{
+  try {
+    connection->prepare(
+        "itinerary-share-nicknames",
+        "SELECT nickname FROM itinerary_sharing sh "
+        "JOIN usertable u ON u.id=shared_to_id WHERE sh.active AND itinerary_id=$1");
+    const std::string sql =
+      "SELECT DISTINCT(it.id), title, start FROM itinerary it "
+      "JOIN itinerary_sharing sh ON it.id=sh.itinerary_id "
+      "WHERE it.archived != true AND sh.active AND it.user_id=$1 "
+      "ORDER BY start DESC, it.id OFFSET $2 LIMIT $3";
+    // std::cout << "SQL: " << sql << '\n';
+    work tx(*connection);
+    auto result = tx.exec_params(
+        sql,
+        user_id,
+        offset,
+        limit);
+    std::vector<ItineraryPgDao::itinerary_share_report> itineraries;
+    for (const auto &r : result) {
+      itinerary_share_report i;
+      i.id.first =  r["id"].to(i.id.second);
+      r["title"].to(i.title);
+      std::string s;
+      if ((i.start.first = r["start"].to(s))) {
+        DateTime start(s);
+        i.start.second = start.time_tp();
+      }
+      auto nicknames = tx.exec_prepared(
+          "itinerary-share-nicknames",
+          i.id.second);
+      for (const auto &n : nicknames) {
+        i.nicknames.push_back(n["nickname"].as<std::string>());
+      }
+      itineraries.push_back(i);
+    }
+    return itineraries;
+  } catch (const std::exception &e) {
+    std::cerr << "Error fetching itinerary share report: "
               << e.what() << '\n';
     throw;
   }

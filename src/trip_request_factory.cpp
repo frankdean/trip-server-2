@@ -41,6 +41,7 @@
 #include "itinerary_search_results_handler.hpp"
 #include "itinerary_sharing_edit_handler.hpp"
 #include "itinerary_sharing_handler.hpp"
+#include "itinerary_sharing_report_handler.hpp"
 #include "itinerary_simplify_handler.hpp"
 #include "itinerary_track_edit_handler.hpp"
 #include "itinerary_track_join_handler.hpp"
@@ -186,6 +187,9 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
   post_login_handlers.push_back(
       std::make_shared<ItinerarySharingEditHandler>(
           ItinerarySharingEditHandler(config)));
+  post_login_handlers.push_back(
+      std::make_shared<ItinerarySharingReportHandler>(
+          ItinerarySharingReportHandler(config)));
   post_login_handlers.push_back(
       std::make_shared<MyAccountHandler>(
           MyAccountHandler(config)));
