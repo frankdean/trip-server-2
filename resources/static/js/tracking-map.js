@@ -109,7 +109,9 @@ class TrackingMap extends TripMap {
   } // fetchFeatures()
 
   handleUpdate(data) {
+    const infoDiv = document.getElementById('track-info');
     if (!data.geojsonObject) {
+      infoDiv.style.display = 'none';
       return;
     }
     let length = 0;
@@ -122,7 +124,6 @@ class TrackingMap extends TripMap {
     });
 
     const mapDiv = document.getElementById('map');
-    const infoDiv = document.getElementById('track-info');
     const footerDiv = document.getElementById('footer');
 
     let metric = `${(length / 1000).toFixed(2)}&nbsp;km`;
