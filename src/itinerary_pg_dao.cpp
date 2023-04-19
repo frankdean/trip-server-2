@@ -223,7 +223,7 @@ std::pair<bool, ItineraryPgDao::itinerary> ItineraryPgDao::get_itinerary_summary
           "rc.value AS color_description, "
           "distance, ascent, descent, lowest, highest "
           "FROM itinerary_route r "
-          "JOIN path_color rc ON r.color=rc.key "
+          "LEFT JOIN path_color rc ON r.color=rc.key "
           "WHERE itinerary_id=$1 ORDER BY name, id",
           itinerary_id);
       for (const auto &rt : route_result) {
@@ -245,7 +245,7 @@ std::pair<bool, ItineraryPgDao::itinerary> ItineraryPgDao::get_itinerary_summary
           "rc.value AS color_description, "
           "distance, ascent, descent, lowest, highest "
           "FROM itinerary_track t "
-          "JOIN path_color rc ON t.color=rc.key "
+          "LEFT JOIN path_color rc ON t.color=rc.key "
           "WHERE itinerary_id=$1 ORDER BY name, id",
           itinerary_id);
       for (const auto &tk : track_result) {
