@@ -360,8 +360,8 @@ SessionPgDao::tile_report
       // std::cout << t->year << " " << t->month << " " << t->cumulative_total << " " << t->quantity << '\n';
       previous = t;
     }
-    return report;
     tx.commit();
+    return report;
   } catch (const std::exception &e) {
     std::cerr << "Error getting tile usage metrics: " << e.what() << '\n';
     throw;

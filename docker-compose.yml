@@ -1,0 +1,84 @@
+# -*- mode: docker-compose; -*- vim: set ft=yaml:
+version: '3.7'
+
+services:
+  web:
+    build: .
+    depends_on:
+      - map
+      - postgis
+    image: fdean/trip-server-2:2.0.0-alpha.38
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        #max_attempts: 3
+        window: 90s
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 600M
+        reservations:
+          cpus: '0.25'
+          memory: 40M
+    ports:
+      - 8080:8080
+    environment:
+      TRIP_SIGNING_KEY: divmyelfajsa
+      TRIP_RESOURCE_SIGNING_KEY: niqueSlothUg
+      POSTGRES_PASSWORD: EgceOvovbiag
+      CONFIGURE_TILE_SERVER: 'yes'
+
+  postgis:
+    build:
+      context: .
+      dockerfile: Dockerfile-postgis
+      shm_size: 256m
+    image: fdean/trip-database:1.11.4
+    shm_size: 512m
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        #max_attempts: 3
+        window: 90s
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 400M
+        reservations:
+          cpus: '0.1'
+          memory: 20M
+    volumes:
+      - trip-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: EgceOvovbiag
+
+  map:
+    image: overv/openstreetmap-tile-server:2.3.0
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        #max_attempts: 3
+        window: 90s
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 2048M
+        reservations:
+          cpus: '0.25'
+          memory: 400M
+    volumes:
+      - osm-data:/data/database
+      - osm-tiles:/data/tiles
+    command: "run"
+volumes:
+  trip-db-data:
+  osm-data:
+    external: true
+  osm-tiles:
+    external: true

@@ -1,0 +1,29 @@
+# -*- mode: docker-compose; -*- vim: set ft=yaml:
+version: '3.7'
+
+services:
+  map:
+    image: overv/openstreetmap-tile-server:2.3.0
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        #max_attempts: 3
+        window: 90s
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 2048M
+        reservations:
+          cpus: '0.25'
+          memory: 400M
+    environment:
+      DOWNLOAD_PBF: https://download.geofabrik.de/europe/monaco-latest.osm.pbf
+      DOWNLOAD_POLY: https://download.geofabrik.de/europe/monaco.poly
+    volumes:
+      - osm-data:/data/database
+    command: "import"
+volumes:
+  osm-data:
+    external: true
