@@ -24,7 +24,9 @@
 
 #include "tile_pg_dao.hpp"
 #include "trip_request_handler.hpp"
-// #include "../trip-server-common/src/http_client.hpp"
+#ifdef HAVE_CAIRO
+#include <cairomm/surface.h>
+#endif
 #include <iostream>
 #include <regex>
 #include <string>
@@ -50,7 +52,10 @@ class TileHandler : public fdsd::trip::BaseRestHandler {
       int provider_index,
       int z,
       int x,
-      int y) const;
+      int y);
+#ifdef HAVE_CAIRO
+  TilePgDao::tile_result create_test_tile(int z, int x, int y);
+#endif
 protected:
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,

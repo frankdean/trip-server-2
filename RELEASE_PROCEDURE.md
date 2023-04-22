@@ -30,6 +30,40 @@ T.B.D.
 
 1.  Checkin changed files, including the updated `po` language files
 
+## Docker
+
+1.  Optionally, build the database image.  This only needs updating if
+    there have been any database schema changes.
+
+	Update `Dockerfile-postgis` to use the latest
+	[PostgreSQL build](https://hub.docker.com/_/postgres).
+
+		$ cd ./trip-server-2
+		$ docker build -f Dockerfile-postgis -t fdean/trip-database:latest .
+
+1.  Build the `trip-server-2` image:
+
+	Update `Dockerfile` and the various docker-compose files to use the latest
+    appropriate [node](https://hub.docker.com/_/node) build.  The distribution
+    tarball is required in the root source folder to build the Docker image.
+
+		$ docker build -t fdean/trip-server-2:latest .
+
+1.	Test the Dockerfile
+
+		$ docker-compose up -d
+		$ docker-compose logs --follow
+
+    To test in a browser, if using `docker-machine`, use port 8080
+    together with the IP address shown by the `ip` command, e.g.:
+
+		$ docker-machine ip
+
+	Stop the container with (use the `--volumes` switch to also remove
+    the database volume):
+
+		$ docker-compose down --volumes
+
 ## Release
 
 1.  Tag the `master` branch of the parent project with release version number
@@ -45,6 +79,18 @@ T.B.D.
 
 1.  Push the master branch and check
     <https://www.fdsd.co.uk/trip-server-2/readme.html> has been updated
+
+1.  Push Docker images:
+
+		$ docker tag fdean/trip-server-2:latest fdean/trip-server-2:$VERSION
+		$ docker push fdean/trip-server-2:latest
+		$ docker push fdean/trip-server-2:$VERSION
+
+1.  Optionally, push database image:
+
+		$ docker tag fdean/trip-database:latest fdean/trip-database:$VERSION
+		$ docker push fdean/trip-database:latest
+		$ docker push fdean/trip-database:$VERSION
 
 ## Validation
 

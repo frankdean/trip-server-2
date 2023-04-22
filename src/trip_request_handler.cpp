@@ -319,8 +319,20 @@ void BaseMapHandler::append_map_provider_configuration(std::ostream& os) const
       "];\n";
   } else {
     if (!no_map_provider_warning_given) {
-      std::cerr << "Warning: no map tile providers have been configured\n";
+      // Warning issued to terminal if no map tile providers have been configured
+      std::cerr << translate("Warning: no map tile providers have been configured") << '\n';
       no_map_provider_warning_given = true;
     }
+    os <<
+      "const providers = [\n"
+      "  {\n"
+      "    name: 'Test tile provider',\n"
+      "    type: 'xyz',\n"
+      "    attributions: '',\n"
+      "    url: '" << get_uri_prefix() << "/tile/-1/{z}/{x}/{y}.png',\n"
+      "    min_zoom: 0,\n"
+      "    max_zoom: 20,\n"
+      "  },\n"
+      "];\n";
   }
 }

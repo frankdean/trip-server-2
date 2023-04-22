@@ -57,7 +57,7 @@ Vagrant.configure("2") do |config|
     fedora.vm.network "forwarded_port", guest: 8081, host: 8083
   end
 
-  # The FreeBSD configuration it not recommended for development as it doesn't
+  # The FreeBSD configuration is not recommended for development as it doesn't
   # reliably synchronise the source directory structure.  However, it can be
   # useful to manually test a distribution tarball before release.
   config.vm.define "freebsd", autostart: false do |freebsd|

@@ -19,7 +19,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Uncomment the following to debug the script
-#set -x
+set -x
 
 LIBPQXX_VERSION=6.4.8
 LIBPQXX_SHA256=3f7aba951822e01f1b9f9f353702954773323dd9f9dc376ffb57cb6bbd9a7a2f
@@ -61,7 +61,7 @@ function install_libpqxx_6
 	    cd "libpqxx-${LIBPQXX_VERSION}"
 	    pwd
 	    if [ -r configure ]; then
-		$SU_CMD './configure --disable-documentation'
+		$SU_CMD './configure --disable-cairo --disable-documentation'
 		$SU_CMD make
 		make install
 	    else
@@ -153,7 +153,7 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 	libpq-devel yaml-cpp-devel pugixml-devel libuuid-devel gdal-devel \
 	curl postgresql-server postgresql-contrib \
 	screen vim autoconf automake info libtool \
-	intltool gdb valgrind git apg \
+	intltool gdb valgrind git apg cairomm-devel \
 	nodejs
 
     if [ -f /etc/rocky-release ]; then
@@ -212,7 +212,7 @@ if [ -x /bin/freebsd-version ]; then
 	postgis33 \
 	python3 pugixml e2fsprogs-libuuid nlohmann-json \
 	texinfo vim python3 valgrind apg \
-	intltool gdb libtool autoconf-archive gettext automake \
+	intltool gdb libtool autoconf-archive gettext automake cairomm \
 	node14 yarn-node14
     # Include the textlive-full package to allow building the PDF docs, which
     # needs an additional 11G or more of disk space.
@@ -279,7 +279,7 @@ if [ -f /etc/debian_version ]; then
 	    libtool gettext valgrind uuid-dev uuid-runtime make nginx apg \
 	    libboost-locale-dev libpugixml-dev autopoint intltool gdb \
 	    libyaml-cpp-dev nlohmann-json3-dev \
-	    docbook2x texlive info texinfo curl libgdal-dev
+	    docbook2x texlive info texinfo curl libgdal-dev libcairomm-1.0-dev
 
     if [ "$VB_GUI" == "y" ]; then
 	apt-get install -y lxde

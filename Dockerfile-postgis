@@ -1,0 +1,28 @@
+# -*- mode: dockerfile; -*- vim: set ft=dockerfile:
+FROM postgres:13.10-bullseye
+
+ENV POSTGIS_MAJOR 3
+ENV POSTGIS_VERSION 3.1.1+dfsg-1
+RUN apt-get update \
+    && apt-cache showpkg postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR \
+    && apt-get install -y --no-install-recommends \
+    postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR=$POSTGIS_VERSION \
+    postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR-scripts=$POSTGIS_VERSION \
+    && rm -rf /var/lib/apt/lists/*
+RUN localedef -i en_GB -c -f UTF-8 -A /usr/share/locale/locale.alias en_GB.UTF-8
+ENV LANG en_GB.utf8
+ENV POSTGRES_USER trip
+ENV POSTGRES_DB trip
+
+WORKDIR /docker-entrypoint-initdb.d
+RUN mkdir -p /docker-entrypoint-initdb.d
+COPY provisioning/schema/10_init-trip-db.sh \
+    provisioning/schema/10_trip_role.sql \
+    provisioning/schema/20_schema.sql \
+    provisioning/schema/30_permissions.sql \
+    provisioning/schema/40_path_colors.sql \
+    provisioning/schema/50_georef_formats.sql \
+    provisioning/schema/60_waypoint_symbols.sql \
+    provisioning/schema/90_test-data.sql \
+    ./
+RUN gzip *.sql

@@ -26,14 +26,19 @@
 #include "../trip-server-common/src/http_client.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include "../trip-server-common/src/uri_utils.hpp"
+#ifdef HAVE_CAIRO
+#include <cairommconfig.h>
+#include <cairomm/context.h>
+#endif
 #include <algorithm>
+#include <functional>
 #include <iostream>
 
 using namespace fdsd::trip;
 using namespace fdsd::utils;
 using namespace fdsd::web;
 
-const std::regex TileHandler::tile_url_re = std::regex(".*/tile/(\\d+)/(\\d+)/(\\d+)/(\\d+).png");
+const std::regex TileHandler::tile_url_re = std::regex(".*/tile/(-?\\d+)/(\\d+)/(\\d+)/(\\d+).png");
 
 TileHandler::TileHandler(std::shared_ptr<TripConfig> config)
   : BaseRestHandler(config)
@@ -129,11 +134,88 @@ TilePgDao::tile_result TileHandler::fetch_remote_tile(
   return retval;
 }
 
+#ifdef HAVE_CAIRO
+TilePgDao::tile_result TileHandler::create_test_tile(int z, int x, int y)
+{
+  const double height = 256;
+  const double width = 256;
+  const double text_y_margin_factor = 1.5;
+  const double text_x_margin_factor = 1.1;
+  // surface and ctx are reference-counting pointers that will delete the object
+  // when the reference goes out of scope
+  auto surface =
+    Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, width, height);
+  auto ctx = Cairo::Context::create(surface);
+  ctx->save();
+  // grey background
+  ctx->set_source_rgb(0.8353, 0.8353, 0.8353);
+  ctx->paint();
+  
+  std::vector<double> dashes(1, 3);
+  ctx->set_dash(dashes, 0);
+  ctx->set_source_rgb(0.0, 0.501961, 0.0);
+  ctx->rectangle(0.0, 0.0, surface->get_width(), surface->get_height());
+  ctx->stroke();
+  ctx->restore();
+
+  const double font_size = 16.0;
+  std::ostringstream label;
+  label << "x=" << x << " y=" << y << " z=" << z;
+  Cairo::TextExtents text_extents;
+  ctx->set_font_size(font_size);
+  ctx->get_text_extents(label.str(), text_extents);
+  const double text_origin_y = (height + text_extents.height + text_extents.y_bearing / 2.0) / 2.0;
+  const double text_origin_x = (width - text_extents.width) / 2.0;
+  const double box_height = text_extents.height * text_y_margin_factor - text_extents.y_bearing;
+  const double box_width = text_extents.width * text_x_margin_factor;
+
+  ctx->set_source_rgb(1.0, 1.0, 1.0);
+  double x1 = (width - box_width) / 2.0;
+  double y1 = (height - box_height) / 2.0;
+  ctx->rectangle(x1,
+                 y1,
+                 box_width,
+                 box_height);
+  ctx->fill();
+
+  ctx->move_to(text_origin_x, text_origin_y);
+  ctx->set_source_rgb(0.0, 0.0, 0.0);
+  ctx->select_font_face("sans-serif", Cairo::FONT_SLANT_NORMAL, Cairo::FONT_WEIGHT_NORMAL);
+  ctx->show_text(label.str());
+
+  // debug vertical center
+  // ctx->save();
+  // ctx->set_line_width(1.0);
+  // ctx->set_source_rgb(1.0, 0.0, 0.0);
+  // ctx->move_to(0, height / 2.0);
+  // ctx->line_to(width, height / 2.0);
+  // ctx->stroke();
+  // ctx->restore();
+
+  TilePgDao::tile_result r;
+  r.expires = std::chrono::system_clock::now() + std::chrono::hours(24);
+  surface->write_to_png_stream(
+      [&r] (const unsigned char* data, unsigned int length) {
+        for (int i = 0; i < length; i++)
+          r.tile.push_back(data[i]);
+        return CAIRO_STATUS_SUCCESS;
+      });
+  return r;
+}
+
+#endif
+
 TilePgDao::tile_result TileHandler::find_tile(int provider_index,
                                          int z,
                                          int x,
-                                         int y) const
+                                         int y)
 {
+#ifdef HAVE_CAIRO
+  if (provider_index < 0)
+    return create_test_tile(z, x, y);
+#else
+  std::cout << "No PNG available\n";
+#endif
   const auto provider = get_provider(provider_index);
   if (provider.cache == true) {
     TilePgDao dao;
@@ -169,6 +251,7 @@ void TileHandler::handle_authenticated_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
+  // std::cout << "tile handler\n";
   std::smatch m;
   if (std::regex_match(request.uri, m, tile_url_re) && m.size() > 4) {
     try {
@@ -191,6 +274,11 @@ void TileHandler::handle_authenticated_request(
       // drop through to bad request
     } catch (const std::out_of_range& e) {
       // drop through to bad request
+    } catch (const std::exception &e)  {
+      std::cerr << "Failure handling request: "
+                << e.what() << '\n';
+      response.content << "<h1>Failed</h1>\n";
+      return;
     }
   }
   response.generate_standard_response(HTTPStatus::bad_request);

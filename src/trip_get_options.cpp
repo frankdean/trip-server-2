@@ -21,6 +21,7 @@
 */
 #include "../config.h"
 #include "trip_get_options.hpp"
+#include <iostream>
 #include <locale>
 #include <boost/locale.hpp>
 

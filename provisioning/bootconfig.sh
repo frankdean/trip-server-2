@@ -19,7 +19,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Uncomment the following to debug the script
-#set -x
+set -x
 
 ##Debian 10
 #PG_VERSION=11
@@ -77,7 +77,7 @@ if [ $? -eq 0 ]; then
 	su - postgres -c 'dropuser trip'
 	echo "CREATE USER trip NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT" 2>/dev/null 2>&1 | su - postgres -c 'psql --quiet' 2>/dev/null 2>&1
 fi
-TEST_DATA_DIR=/vagrant/provisioning/downloads
+TEST_DATA_DIR=/vagrant/provisioning/schema
 su - postgres -c 'createdb trip --owner=trip' 2>/dev/null
 if [ $? -eq 0 ]; then
 	su - postgres -c 'psql trip' <<EOF >/dev/null 2>&1

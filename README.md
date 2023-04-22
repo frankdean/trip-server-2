@@ -130,6 +130,79 @@ The source is maintained in a Git repository which can be cloned with:
 
 	$ git clone --recursive git://www.fdsd.co.uk/trip-server-2.git
 
+## Demo Options
+
+### Play With Docker
+
+[play]: https://labs.play-with-docker.com "Play with Docker"
+
+The application can be run as two or three containers in the
+[Play-with-docker][play] environment.
+
+1.  Create a network for the containers to share:
+
+		$ docker network create trip-server
+
+1.  Optionally, run the
+	[Docker container for OpenStreetMap tile server](https://github.com/Overv/openstreetmap-tile-server)
+
+	**Note:** I couldn't get this container to complete the import in the
+	Play-with-docker environment, possibly due to insufficient resources.  It
+	sometimes randomly failed and otherwise failed importing
+	`water-polygons-split` which uses a lot of resources.  Nonetheless, the
+	process is documented here as it may be useful in other environments.
+
+	1.  The import process temporarily requires a lot of memory.  We need to
+		create and mount a swap file:
+
+			$ sudo dd if=/dev/zero of=/swap bs=1G count=2
+			$ sudo chmod 0600 /swap
+			$ sudo mkswap /swap
+			$ sudo swapon /swap
+
+	1.  Create Docker volumes for storing the database and caching map tiles:
+
+			$ docker volume create osm-data
+			$ docker volume create osm-tiles
+
+	1.  Import OSM data for Monaco:
+
+		It is recommended to use a small region to minimise resource usage.
+
+			$ docker run -v osm-data:/data/database/ \
+			-e DOWNLOAD_PBF=https://download.geofabrik.de/europe/monaco-latest.osm.pbf \
+			-e DOWNLOAD_POLY=https://download.geofabrik.de/europe/monaco.poly \
+			overv/openstreetmap-tile-server:2.3.0 import
+
+		The process must complete without error.  Check the final output
+        carefully.  If it fails, it is necessary to delete and re-create the
+		Docker `osm-data` volume.
+
+			$ docker volume rm osm-data
+			$ docker volume create osm-data
+
+	1.  Once the import completes successfully, run the map tile server:
+
+			$ docker run -v osm-tiles:/data/tiles/ -v osm-data:/data/database/ \
+			--network trip-server --network-alias map \
+			-d overv/openstreetmap-tile-server:2.3.0 run
+
+1.  Run the Trip Server database container:
+
+			$ docker run --network trip-server --network-alias postgis \
+			-e POSTGRES_PASSWORD=secret -d fdean/trip-database:1.11.4
+
+1.  Run the Trip Server web container:
+
+			$ docker run --network trip-server -e TRIP_SIGNING_KEY=secret \
+			-e TRIP_RESOURCE_SIGNING_KEY=secret -e POSTGRES_PASSWORD=secret \
+			CONFIGURE_TILE_SERVER=no \
+			--publish 8080:8080 -d fdean/trip-server-2
+
+		Set `CONFIGURE_TILE_SERVER` to `yes` if you have the map tile
+		container running.  When not set to `yes`, dummy map tiles are created
+		showing their x, y and z values.
+
 ## Building
 
 These instructions are for building and installing from the source
@@ -179,6 +252,7 @@ Minimal packages required to build from the source distribution tarball:
 - g++
 - gawk
 - libboost-locale-dev
+- libcairomm-1.0-dev (optional)
 - libgdal-dev (optional)
 - libpqxx-dev
 - libpugixml-dev
@@ -206,6 +280,12 @@ GDAL is only required for extracting elevation data from elevation tile
 datasets.  If you don't need this feature, disable GDAL.
 
 	$ ./configure --disable-gdal
+
+Cairo is only used to create dummy map tiles which may be useful in a
+development environment where you do not wish to use a map tile server.
+Enable it with:
+
+	$ ./configure --enable-cairo
 
 The version of [nlohmann-json] in Debian 10 (Buster) is too old for this
 application.  Uninstall the package and download version `v3.11.2` or later of
@@ -281,6 +361,7 @@ included in the Fedora distribution.  Follow the instructions in the
 - gcc
 - gawk
 - boost-devel
+- cairomm-devel (optional)
 - gdal-devel (optional)
 - libpqxx-devel
 - libpq-devel
@@ -295,6 +376,12 @@ GDAL is only required for extracting elevation data from elevation tile
 datasets.  If you don't need this feature, disable GDAL.
 
 	$ ./configure --disable-gdal
+
+Cairo is only used to create dummy map tiles which may be useful in a
+development environment where you do not wish to use a map tile server.
+Enable it with:
+
+	$ ./configure --enable-cairo
 
 To build from source other than a tarball release, e.g. a git clone, examine
 the contents of `./provisioning/bootstrap.sh` to see which packages are
@@ -322,6 +409,12 @@ datasets.  If you don't need this feature, disable GDAL.
 
 	$ ./configure --disable-gdal
 
+Cairo is only used to create dummy map tiles which may be useful in a
+development environment where you do not wish to use a map tile server.
+Enable it with:
+
+	$ ./configure --enable-cairo
+
 To build from source other than a tarball release, e.g. a git clone, examine
 the contents of `./provisioning/bootstrap.sh` to see which packages are
 installed using `pkg`.
@@ -341,6 +434,7 @@ To build from a Git clone, install the following ports from [MacPorts][]:
 - automake
 - autoconf-archive
 - boost
+- cairomm (optinal)
 - gawk
 - gdal (optional)
 - intltool
@@ -351,7 +445,7 @@ To build from a Git clone, install the following ports from [MacPorts][]:
 - yaml-cpp
 
 **Note:** If `make distcheck` fails on macOS, install the `texinfo` and
-`texlive` packages from [MacPorts][], as the behaviour of the system isntalled
+`texlive` packages from [MacPorts][], as the behaviour of the system installed
 `/usr/bin/texi2dvi` differs from the GNU version.
 
 ### Dependencies

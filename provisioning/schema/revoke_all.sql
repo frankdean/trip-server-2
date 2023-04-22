@@ -1,0 +1,2 @@
+REVOKE ALL ON DATABASE trip FROM public;
+REVOKE ALL ON SCHEMA public FROM public;
