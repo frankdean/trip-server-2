@@ -23,7 +23,10 @@
 #define TRACKING_REST_HANDLER_HPP
 
 #include "trip_request_handler.hpp"
+#include "tracking_pg_dao.hpp"
 #include <string>
+#include <ostream>
+#include <nlohmann/json.hpp>
 
 namespace fdsd {
 namespace web {
@@ -33,11 +36,26 @@ namespace web {
 namespace trip {
 
 class TrackingRestHandler : public fdsd::trip::BaseRestHandler {
+  void live_map_update_check(
+      const web::HTTPServerRequest& request,
+      std::ostream &os,
+      TrackPgDao &dao);
+
+  nlohmann::basic_json<nlohmann::ordered_map>
+      fetch_live_map_updates_as_geojson(
+          const web::HTTPServerRequest& request,
+          std::ostream &os,
+          TrackPgDao &dao);
+
+  nlohmann::basic_json<nlohmann::ordered_map>
+      get_tracked_locations_as_geojson(
+          TrackPgDao::tracked_locations_result locations_result);
 protected:
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
+  static const int max_result_count;
   TrackingRestHandler(std::shared_ptr<TripConfig> config);
   virtual ~TrackingRestHandler() {}
   virtual std::string get_handler_name() const override {

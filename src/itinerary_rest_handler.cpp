@@ -256,6 +256,12 @@ void ItineraryRestHandler::fetch_itinerary_features(
     {"type", "FeatureCollection"},
     {"features", get_waypoints_as_geojson(waypoints)}
   };
+  // Those nicknames that are sharing their locations
+  const auto nicknames =
+    dao.get_nicknames_sharing_location_with_user(get_user_id());
+  j["locationSharers"] = nicknames;
+  if (!nicknames.empty())
+    j["pathColors"] = static_cast<nlohmann::json>(dao.get_path_colors());
   // std::cout << j.dump(4) << '\n';
   response.content << j << '\n';
 }

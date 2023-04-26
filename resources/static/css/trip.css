@@ -139,6 +139,23 @@ body {
   border-radius: 4px 0 0 4px;
   border-left: 0;
 }
+#location-sharing-control {
+  top: 14.5em;
+  right: .5em;
+}
+.location-sharing-modal {
+  position: absolute;
+  top: 14.5em;
+  right: .5em;
+  padding: 10px;
+  background: white;
+}
+button.live-map-form {
+  width: 80px;
+}
+label.location-sharing-nickname {
+  padding-left: 8px;
+}
 .ol-touch .select-map-layer {
   top: 80px;
 }

@@ -20,12 +20,18 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { TripMap, CreateFeatureControl, ModifyFeatureControl } from './modules/map.js';
+import { TripMap,
+         CreateFeatureControl,
+         ModifyFeatureControl,
+         LocationSharingControl,
+         sanitize} from './modules/map.js';
 
+const fromLonLat = ol.proj.fromLonLat;
 const Control = ol.control.Control;
 const Draw = ol.interaction.Draw;
 const GeoJSON = ol.format.GeoJSON;
 const Modify = ol.interaction.Modify;
+const Point = ol.geom.Point;
 const Select = ol.interaction.Select;
 const VectorLayer = ol.layer.Vector;
 const VectorSource = ol.source.Vector;
@@ -38,27 +44,40 @@ class ItineraryMap extends TripMap {
 
   constructor(providers, opt_options) {
     super(providers, opt_options);
-    const options = opt_options || {};
+    this.options = opt_options || {};
+    this.timer_count = 0;
     const self = this;
-    if (!options.readOnly) {
+    if (!this.options.readOnly) {
       const controls = this.map.getControls();
 
       this.createFeatureControl = new CreateFeatureControl(
         this.editFeatureEventHandler.bind(self),
-        options);
+        this.options);
 
       this.modifyFeatureControl = new ModifyFeatureControl(
         this.editFeatureEventHandler.bind(self),
-        options);
+        this.options);
 
       controls.push(this.createFeatureControl);
       controls.push(this.modifyFeatureControl);
     }
+    this.liveLocationsMap = new Map();
   }
 
   handleUpdate(data) {
     const self = this;
-    // console.debug('data:', data);
+    if (data.locationSharers.length > 0) {
+      this.options.nicknames = data.locationSharers;
+      this.options.pathColors = data.pathColors;
+      if (this.locationSharingControl)
+        this.map.getControls().remove(this.locationSharingControl);
+      this.locationSharingControl = new LocationSharingControl(
+        self.handleLocationSharingEvent.bind(self),
+        this.options,
+      );
+      this.map.getControls().push(this.locationSharingControl);
+    }
+    //console.debug('data:', data);
     this.trackSource = new VectorSource({
       wrapX: false,
     });
@@ -138,6 +157,29 @@ class ItineraryMap extends TripMap {
       if (totalExtent[0] != Infinity)
         this.map.getView().fit(totalExtent);
     }
+  }
+
+  handleLocationSharingEvent(event) {
+    // console.debug('Callback in itinerary map', event.type);
+    // console.debug('Details', event.detail);
+    this.liveMapData = event.detail;
+    // Will need to add another map layer especially for these tracks
+    switch(event.type) {
+    case 'start':
+      this.liveLocationsMap = new Map();
+      this.stop = false;
+      this.checkForUpdates();
+      this.update();
+      break;
+    case 'stop':
+      this.stop = true;
+      break;
+    case 'cancel':
+      break;
+    default:
+      console.error('Unexpected create feature event type', event.type);
+    }
+    this.locationSharingControl.setStopState(this.stop);
   }
 
   editFeatureEventHandler(event) {
@@ -451,7 +493,203 @@ class ItineraryMap extends TripMap {
       });
   }
 
-}
+  displayLiveLocations() {
+    const self = this;
+    let dirty = false;
+    if (self.locationLayer !== undefined) {
+      // console.debug('Removing existing layer');
+      self.map.removeLayer(self.locationLayer);
+      self.locationLayer = undefined;
+    }
+    // console.debug('liveLocationsMap', this.liveLocationsMap);
+    const trackSource = new VectorSource({
+      wrapX: false,
+    });
+    self.locationLayer = new VectorLayer({
+      source: trackSource,
+      style: self.styleFunction.bind(self),
+    });
+    self.map.addLayer(self.locationLayer);
+    this.liveLocationsMap.forEach((value, nickname, map) => {
+      // console.debug('Live locations map value', nickname, value);
+      const trackFeatures = new GeoJSON().readFeatures(value.geojsonObject, {
+        dataProjection: 'EPSG:4326',
+        featureProjection: 'EPSG:3857',
+      });
+      if (!dirty && trackFeatures.length > 0)
+        dirty = true;
+      trackSource.addFeatures(trackFeatures);
+      const features = value.geojsonObject.features;
+      const name = value.most_recent && value.most_recent.note ? nickname + ' (' + value.most_recent.note + ')' : nickname;
+      if (trackSource.getFeatures().length == 1 && trackSource.getFeatures()[0].getGeometry().getType() == 'Point') {
+        const feature = trackSource.getFeatures()[0];
+        feature.set('name', name);
+      } else if (features.length > 0) {
+        const coords = features[features.length - 1].geometry.coordinates;
+        trackSource.addFeature(
+          new ol.Feature({
+            geometry: new Point(fromLonLat(coords[coords.length - 1])),
+            name: name,
+          })
+        );
+      }
+    });
+    if (dirty && !this.map_initialized) {
+      this.map_initialized = true;
+      let totalExtent = ol.extent.createEmpty();
+      if (self.trackLayer)
+        ol.extent.extend(totalExtent, self.trackLayer.getSource().getExtent());
+      if (self.routeLayer)
+        ol.extent.extend(totalExtent, self.routeLayer.getSource().getExtent());
+      if (self.waypointLayer)
+        ol.extent.extend(totalExtent, self.waypointLayer.getSource().getExtent());
+      if (self.locationLayer)
+        ol.extent.extend(totalExtent, self.locationLayer.getSource().getExtent());
+      // console.debug('Extent', totalExtent[0]);
+      if (totalExtent[0] != Infinity)
+        self.map.getView().fit(totalExtent);
+    }
+  }
+
+  fetchLiveLocationUpdates(nicknames) {
+    // console.debug('fetchLiveLocationUpdates', this.liveMapData);
+    const self = this;
+    const max_hdop = Number(this.liveMapData.maxHdop);
+    const data = JSON.stringify({
+      nicknames: nicknames,
+      max_hdop: max_hdop == 0 ? -1 : max_hdop,
+      from: this.liveMapData.start,
+    });
+    const myHeaders = new Headers([
+      ['Content-Type', 'application/json; charset=UTF-8']
+    ]);
+    const myRequest = new Request(
+      self.options.liveLocationsUrl,
+      {
+        method: 'POST',
+        body: data,
+        headers: myHeaders,
+        mode: 'same-origin',
+        cache: 'no-store',
+        referrerPolicy: 'no-referrer',
+      });
+
+    fetch(myRequest)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Fetch live location updates failed');
+        }
+        // console.log('Status:', response.status);
+        // console.log('Response body:', response.json());
+        return response.json();
+      })
+      .then((data) => {
+        data.forEach((e) => {
+          // console.debug('Received update for', e.nickname);
+          if (e.locations) {
+            const m = self.liveMapData.nicknames.get(e.nickname);
+            if (m) {
+              const features = e.locations.geojsonObject.features;
+              if (e.locations.geojsonObject.features.length > 0) {
+                features.forEach((feature) => {
+                  feature.properties.color_code = m.pathColor.key;
+                  feature.properties.html_color_code = m.pathColor.html_code;
+                });
+              }
+              self.liveLocationsMap.set(e.nickname, e.locations);
+            }
+          }
+        });
+        self.displayLiveLocations();
+      })
+      .catch((error) => {
+        console.error('Error fetching live location updates:', error);
+      });
+  }
+
+  checkForUpdates() {
+    const self = this;
+    if (this.liveMapData && this.liveMapData.nicknames) {
+      let nicknames = new Array();
+      this.liveMapData.nicknames.forEach((value, key, map) => {
+        if (value.selected) {
+          const locationData = self.liveLocationsMap.get(key);
+          let min_id_threshold =
+              (locationData && locationData.last_location_id) ?
+              locationData.last_location_id : undefined;
+          nicknames.push({
+            nickname: key,
+            min_id_threshold: min_id_threshold,
+          });
+        }
+      });
+      if (nicknames.length == 0)
+        return;
+      const data = JSON.stringify({
+        nicknames: nicknames,
+        from: this.liveMapData.start,
+      });
+      const myHeaders = new Headers([
+        ['Content-Type', 'application/json; charset=UTF-8']
+      ]);
+      const myRequest = new Request(
+        self.options.updatesUrl,
+        {
+          method: 'POST',
+          body: data,
+          headers: myHeaders,
+          mode: 'same-origin',
+          cache: 'no-store',
+          referrerPolicy: 'no-referrer',
+        });
+
+      fetch(myRequest)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Check for updates request failed');
+          }
+          // console.log('Status:', response.status);
+          // console.log('Response body:', response.json());
+          return response.json();
+        })
+        .then((data) => {
+          // console.debug('check for updates response data:', data);
+          const nicknames = new Array();
+          data.forEach((e) => {
+            // console.debug('data entry', e);
+            if (e.update_available)
+              nicknames.push(e.nickname);
+          });
+          if (nicknames.length > 0)
+            self.fetchLiveLocationUpdates(nicknames);
+        })
+        .catch((error) => {
+          console.error('Error fetching from Trip:', error);
+          // self.stop = true;
+        });
+    }
+  }
+
+  update() {
+    const self = this;
+    if (!this.liveMapData) {
+      return;
+    }
+    if (!this.stop) {
+      if (this.timer_count < 1) {
+        this.timer_count++;
+        setTimeout(function() {
+          self.timer_count--;
+          if (!self.stop) {
+            self.checkForUpdates();
+            self.update();
+          }
+        }, 60000);
+      }
+    }
+  }
+
+} // class TripMap
 
 const itineraryMap = new ItineraryMap(providers,
                                       {
@@ -460,6 +698,8 @@ const itineraryMap = new ItineraryMap(providers,
                                           '/rest/itinerary/features',
                                         saveUrl: server_prefix +
                                           '/rest/itinerary/features',
+                                        liveLocationsUrl: `${server_prefix}/rest/locations`,
+                                        updatesUrl: `${server_prefix}/rest/locations/is-updates`,
                                         exitUrl: `${server_prefix}/itinerary?id=${pageInfo.itinerary_id}&active-tab=features`,
                                         readOnly: readOnly,
                                         exitMessage: click_to_exit_text,

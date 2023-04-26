@@ -20,7 +20,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export { TripMap, CreateFeatureControl, ModifyFeatureControl };
+export { TripMap,
+         CreateFeatureControl,
+         ModifyFeatureControl,
+         LocationSharingControl,
+         sanitize};
 
 const fromLonLat = ol.proj.fromLonLat;
 const CircleStyle = ol.style.Circle;
@@ -32,7 +36,6 @@ const Fill = ol.style.Fill;
 const Icon = ol.style.Icon;
 const Link = ol.interaction.Link;
 const LineString = ol.geom.LineString;
-const Map = ol.Map;
 const OSM = ol.source.OSM;
 const Point = ol.geom.Point;
 const RegularShape = ol.style.RegularShape;
@@ -44,6 +47,11 @@ const TileLayer = ol.layer.Tile;
 // const VectorSource = ol.source.Vector;
 const View = ol.View;
 const XYZ = ol.source.XYZ;
+
+const sanitize = function(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot:').replace(/'/g, '&#039;');
+};
 
 class SelectMapLayerControl extends Control {
 
@@ -95,7 +103,7 @@ class SelectMapModal {
     this.mapLayerManager.providers.forEach(function(p) {
       const label = document.createElement('label');
       label.htmlFor = 'provider-' + count;
-      label.innerHTML = p.name;
+      label.innerHTML = sanitize(p.name);
       label.className = 'map-provider';
       const input = document.createElement('input');
       input.id = 'provider-' + count;
@@ -247,7 +255,7 @@ class TripMap {
       controls.push(new SelectMapLayerControl(self, self.options));
     if (this.options.showExitControl)
       controls.push(new ExitMapLayerControl(self));
-    this.map = new Map({
+    this.map = new ol.Map({
       controls: defaultControls().extend(controls),
       target: self.options.mapDivId,
       layers: [
@@ -427,6 +435,8 @@ class TripMap {
       this.map.addLayer(this.routeLayer);
     if (this.waypointLayer)
       this.map.addLayer(this.waypointLayer);
+    if (this.locationLayer)
+      this.map.addLayer(this.locationLayer);
   }
 
   setTrackLayer(trackLayer) {
@@ -634,6 +644,235 @@ class ModifyFeatureControl extends Control {
   hideOptionButtons() {
     if (this.optionButtons)
       this.optionButtons.hide();
+  }
+
+}
+
+class LocationSharingControl extends Control {
+
+  constructor(callback, opt_options) {
+    const options = opt_options || {};
+    const shareButton = document.createElement('button');
+    shareButton.innerHTML = 'L';
+    shareButton.setAttribute('accesskey', 'l');
+
+    const element = document.createElement('div');
+    element.id = 'location-sharing-control';
+    element.className = 'ol-unselectable ol-control';
+    element.appendChild(shareButton);
+
+    super({
+      element: element,
+      target: options.target,
+    });
+    const self = this;
+    this.shareButton = shareButton;
+    this.options = options;
+    this.options.stop = true;
+    this.options.mapDivId = this.options.mapDivId === undefined ? 'map' : this.options.mapDivId;
+    const start = new Date();
+    start.setHours(0);
+    start.setMinutes(0);
+    start.setSeconds(0);
+    start.setMilliseconds(0);
+    this.formData = {
+      start: start,
+      nicknames: new Map(),
+      maxHdop: 0,
+    };
+    const pathColors = this.options.pathColors;
+    let count = 0;
+    this.options.nicknames.forEach(function(nickname) {
+      let value = { selected: false };
+      if (pathColors && pathColors.length > 0) {
+        value.pathColor = pathColors[count];
+        if (++count >= pathColors.length) {
+          count = 0;
+        }
+      }
+      self.formData.nicknames.set(nickname, value);
+    });
+    this.eventHandler = callback;
+    this.shareButton.addEventListener('click', this.showForm.bind(this), false);
+    // element.addEventListener('mouseleave', this.hideForm.bind(this), false);
+  }
+
+  setStopState(state) {
+    this.options.stop = state;
+  }
+
+  showForm(event) {
+    const self = this;
+    if (!this.form) {
+      this.form = new LocationSharingModal(
+        (event) => {
+          self.eventHandler(event);
+          self.hideForm();
+        },
+        self.formData,
+        self.options);
+    }
+  }
+
+  hideForm() {
+    if (this.form) {
+      this.form.hide();
+      this.form = undefined;
+    }
+  }
+
+}
+
+class LocationSharingModal {
+
+  constructor(callback, formData, opt_options) {
+    this.options = opt_options || {};
+    this.formData = formData;
+    this.eventHandler = callback;
+    const outerdiv = document.createElement('div');
+    outerdiv.id = 'location-sharing-outer-div';
+
+    const formDiv = document.createElement('div');
+    formDiv.className = 'location-sharing-modal py-2';
+    const formElement = document.createElement('form');
+    formDiv.appendChild(formElement);
+    const pathColors = this.options.pathColors;
+    let count = 0;
+    const self = this;
+    this.formData.nicknames.forEach(function(value, nickname, map) {
+      const htmlNickname = nickname;
+      const nicknameId = 'nickname-' + count;
+      sanitize(htmlNickname);
+      const label = document.createElement('label');
+      label.htmlFor = nicknameId;
+      label.innerHTML = htmlNickname;
+      label.className = 'location-sharing-nickname';
+      label.style.color = value.pathColor.html_code;
+      const input = document.createElement('input');
+      input.id = nicknameId;
+      input.type = 'checkbox';
+      input.name = htmlNickname;
+      input.className = 'location-sharing-nickname';
+      input.checked = value.selected;
+      // input.addEventListener('click', self.handleNicknameSelect.bind(self), false);
+      formElement.appendChild(input);
+      formElement.appendChild(label);
+      formElement.appendChild(document.createElement('br'));
+      count++;
+    });
+    const startLabel = document.createElement('label');
+    startLabel.htmlFor = 'start';
+    startLabel.innerHTML = 'Starting from';
+    startLabel.className = 'me-2 mb-2';
+    const startInput = document.createElement('input');
+    startInput.type = 'datetime-local';
+    startInput.name = 'start';
+    startInput.id = 'input-start';
+    startInput.className = 'mb-2';
+    const startTime = new Date(this.formData.start);
+    startTime.setMinutes(startTime.getMinutes() - startTime.getTimezoneOffset());
+    const s = startTime.toISOString();
+    const dateStr = s.substring(0, 10) + s.substring(10, 16);
+    startInput.value = dateStr;
+    formElement.appendChild(startLabel);
+    formElement.appendChild(startInput);
+    formElement.appendChild(document.createElement('br'));
+    const hdopLabel = document.createElement('label');
+    hdopLabel.htmlFor = 'hdop-input';
+    hdopLabel.innerHTML = 'Max hdop&nbsp;';
+    const hdopInput = document.createElement('input');
+    hdopInput.id = 'input-max-hdop';
+    hdopInput.type = 'number';
+    hdopInput.name = 'max-hdop';
+    hdopInput.value = formData.maxHdop == 0 ? '' : formData.maxHdop;
+    hdopInput.setAttribute('min', 0);
+    hdopInput.setAttribute('max', 9999);
+    formElement.appendChild(hdopLabel);
+    formElement.appendChild(hdopInput);
+    const buttonDiv = document.createElement('div');
+    buttonDiv.className = 'my-2';
+    formElement.appendChild(buttonDiv);
+    const applyButton = document.createElement('button');
+    applyButton.innerHTML = 'Start';
+    applyButton.className = 'live-map-form btn btn-success me-2';
+    applyButton.setAttribute('accesskey', 's');
+    buttonDiv.appendChild(applyButton);
+    const stopButton = document.createElement('button');
+    stopButton.id = 'btn-stop';
+    stopButton.innerHTML = 'Stop';
+    stopButton.className = 'live-map-form btn ' + (this.options.stop ? 'btn-secondary' : 'btn-primary') + ' me-2';
+    stopButton.setAttribute('accesskey', 'p');
+    buttonDiv.appendChild(stopButton);
+    const cancelButton = document.createElement('button');
+    cancelButton.innerHTML = 'Cancel';
+    cancelButton.className = 'live-map-form btn btn-danger';
+    cancelButton.setAttribute('accesskey', 'c');
+    buttonDiv.appendChild(cancelButton);
+    // const divElement = document.getElementById(this.options.div);
+    // outerdiv.style.width = divElement.offsetWidth + 'px';
+    outerdiv.appendChild(formDiv);
+    // options.div = this.options.mapDivId;
+    // const controlElement = document.getElementById('location-sharing-control');
+    const controlElement = document.getElementById(this.options.mapDivId);
+    controlElement.appendChild(outerdiv);
+    const fitToWidth = formDiv.offsetWidth;
+    formDiv.style.width = fitToWidth + 'px';
+    outerdiv.style.width = fitToWidth + 'px';
+    applyButton.addEventListener('click', self.handleApply.bind(self), false);
+    stopButton.addEventListener('click', self.handleStop.bind(self), false);
+    cancelButton.addEventListener('click', self.handleCancel.bind(self), false);
+  }
+
+  updateFormData() {
+    this.formData.nicknames.forEach(function(value, nickname, map) {
+      value.selected = false;
+      map.set(nickname, value);
+    });
+    let selectedLayer = 0;
+    const checkboxes = document.getElementsByClassName('location-sharing-nickname');
+    for (let i = 0; i < checkboxes.length; i++) {
+      if (checkboxes[i].type == 'checkbox' && checkboxes[i].checked == true) {
+        const name = checkboxes[i].name;
+        let entry = this.formData.nicknames.get(name);
+        entry.selected = checkboxes[i].value == 'on';
+        this.formData.nicknames.set(name, entry);
+      }
+    }
+    const startInput = document.getElementById('input-start');
+    const dt = new Date(startInput.value);
+    if (!isNaN(dt)) {
+      this.formData.start = dt;
+    }
+    const hdopInput = document.getElementById('input-max-hdop');
+    this.formData.maxHdop = hdopInput.value;
+  }
+
+  handleApply() {
+    const self = this;
+    this.updateFormData();
+    this.eventHandler(new CustomEvent('start', { detail: self.formData} ));
+    // this.hide();
+  }
+
+  handleStop() {
+    const self = this;
+    this.updateFormData();
+    this.eventHandler(new CustomEvent('stop', { detail: self.formData} ));
+    // this.hide();
+  }
+
+  handleCancel() {
+    this.eventHandler(new CustomEvent('cancel', { detail: self.formData} ));
+    // this.hide();
+  }
+
+  handleNicknameSelect() {
+  }
+
+  hide() {
+    const mapDiv = document.getElementById(this.options.mapDivId);
+    const popup = document.getElementById('location-sharing-outer-div');
+    mapDiv.removeChild(popup);
   }
 
 }

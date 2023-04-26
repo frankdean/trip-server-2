@@ -52,6 +52,17 @@ public:
     static YAML::Node encode(const path_base& rhs);
     static bool decode(const YAML::Node& node, path_base& rhs);
   };
+  struct path_color {
+    std::string key;
+    std::string description;
+    std::string html_code;
+    static void to_json(nlohmann::json& j, const path_color& p);
+    static void from_json(const nlohmann::json& j, path_color& p);
+    path_color() :
+      key(),
+      description(),
+      html_code() {}
+  };
   struct path_summary : public path_base {
     std::pair<bool, std::string> name;
     /// The color key for looking up the color details, e.g. 'DarkBlue'
@@ -484,6 +495,9 @@ public:
   std::vector<std::pair<std::string, std::string>>
       get_waypoint_symbols();
 
+  std::vector<path_color>
+      get_path_colors();
+
   std::vector<std::pair<std::string, std::string>>
       get_path_color_options();
 
@@ -533,6 +547,9 @@ public:
           std::string user_id,
           std::uint32_t offset,
           int limit);
+
+  std::vector<std::string>
+      get_nicknames_sharing_location_with_user(std::string user_id);
 
 protected:
   void create_waypoints(
@@ -617,10 +634,11 @@ public:
 
 };
 
-/// Allows Argument-depenedent lookup for the nlohmann/json library to find this method
+/// Allows Argument-depenedent lookup for the nlohmann/json library to find these methods
 void to_json(nlohmann::json& j, const ItineraryPgDao::selected_feature_ids& ids);
-/// Allows Argument-depenedent lookup for the nlohmann/json library to find this method
 void from_json(const nlohmann::json& j,  ItineraryPgDao::selected_feature_ids& ids);
+void to_json(nlohmann::json& j, const ItineraryPgDao::path_color& p);
+void from_json(const nlohmann::json& j,  ItineraryPgDao::path_color& p);
 
 } // namespace trip
 } // namespace fdsd

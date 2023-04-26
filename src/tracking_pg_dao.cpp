@@ -561,6 +561,88 @@ bool TrackPgDao::check_new_locations_available(
   }
 }
 
+std::string TrackPgDao::get_nickname_for_user_id(
+    work &tx, std::string user_id)
+{
+  const auto r = tx.exec_params1(
+      "SELECT nickname FROM usertable WHERE id=$1",
+      user_id);
+  return r["nickname"].as<std::string>();
+}
+
+std::string TrackPgDao::get_nickname_for_user_id(std::string user_id)
+{
+  work tx(*connection);
+  auto retval = get_nickname_for_user_id(tx, user_id);
+  tx.commit();
+  return retval;
+}
+
+/**
+ * Returns whether locations have been recorded since the specified
+ * `min_id_threshold`.  The ID is the database unique identifier for a tracked
+ * location.
+ *
+ * This is intended to be used to check whether there are further updates and
+ * the caller can then choose to fetch the additional updates etc.
+ *
+ * \param user_id of the current user.
+ *
+ * \param criteria an object containg the nickname of the user whose locations
+ * are being checked and optionally the min_id_threshold the database ID of the
+ * tracked location to be excluded as well as those of a lower value.  The
+ * passed criteria is updated to indicate whether there are updates available.
+ *
+ */
+void TrackPgDao::check_new_locations_available(
+    std::string user_id,
+    std::chrono::system_clock::time_point since,
+    std::vector<location_update_check> &criteria)
+{
+  work tx(*connection);
+  try {
+    const std::string user_nickname = get_nickname_for_user_id(tx, user_id);
+    const std::string ps_name_user_id = "new-location-checks-user-id";
+    const std::string ps_name = "new-location-checks-nickname";
+    connection->prepare(
+        ps_name_user_id,
+        "SELECT COUNT(*) FROM location loc "
+        "WHERE loc.user_id=$1 AND (loc.id > $2 OR $2 IS NULL) AND time >= $3"
+      );
+    connection->prepare(
+        ps_name,
+        "SELECT COUNT(*) FROM location loc "
+        "JOIN location_sharing sh ON loc.user_id=sh.shared_by_id "
+        "WHERE user_id=(SELECT id FROM usertable WHERE nickname=$2) "
+        "AND sh.shared_to_id=$1 AND (loc.id > $3 OR $3 IS NULL) AND time >= $4"
+      );
+    const DateTime from(since);
+    for (auto &c : criteria) {
+      pqxx::row r;
+      if (c.nickname == user_nickname) {
+        r = tx.exec_prepared1(
+            ps_name_user_id,
+            user_id,
+            c.min_threshold_id.first ? &c.min_threshold_id.second : nullptr,
+            from.get_time_as_iso8601_gmt());
+      } else {
+        r = tx.exec_prepared1(
+            ps_name,
+            user_id,
+            c.nickname,
+            c.min_threshold_id.first ? &c.min_threshold_id.second : nullptr,
+            from.get_time_as_iso8601_gmt());
+      }
+      c.update_available = r[0].as<long>() > 0;
+    }
+    tx.commit();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception whilst deleting itinerary featues: "
+              << e.what();
+    throw;
+  }
+}
+
 std::pair<bool, std::time_t>
     TrackPgDao::get_most_recent_location_time(std::string shared_by_id) const
 {

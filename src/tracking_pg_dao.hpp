@@ -25,6 +25,7 @@
 #include "trip_pg_dao.hpp"
 #include "geo_utils.hpp"
 #include "../trip-server-common/src/dao_helper.hpp"
+#include <chrono>
 #include <map>
 #include <ostream>
 #include <string>
@@ -138,6 +139,16 @@ public:
     std::pair<bool, bool> active;
   };
 
+  struct location_update_check {
+    std::string nickname;
+    std::pair<bool, long> min_threshold_id;
+    bool update_available;
+    location_update_check() :
+      nickname(),
+      min_threshold_id(),
+      update_available(false) {}
+  };
+
   struct date_range {
     std::time_t from;
     std::time_t to;
@@ -211,7 +222,13 @@ public:
       std::string user_id,
       std::string nickname,
       long min_id_threshold);
+  void check_new_locations_available(
+      std::string user_id,
+      std::chrono::system_clock::time_point since,
+      std::vector<location_update_check> &criteria);
+  std::string get_nickname_for_user_id(std::string user_id);
 private:
+  std::string get_nickname_for_user_id(pqxx::work &tx, std::string user_id);
   date_range constrain_shared_location_dates(
       std::string shared_by_id,
       std::time_t date_from,

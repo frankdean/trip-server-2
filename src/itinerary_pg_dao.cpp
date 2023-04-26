@@ -45,6 +45,16 @@ void from_json(const nlohmann::json& j,  ItineraryPgDao::selected_feature_ids& i
   ItineraryPgDao::selected_feature_ids::from_json(j, ids);
 }
 
+void to_json(nlohmann::json& j, const ItineraryPgDao::path_color& p)
+{
+  ItineraryPgDao::path_color::to_json(j, p);
+}
+
+void from_json(const nlohmann::json& j,  ItineraryPgDao::path_color& p)
+{
+  ItineraryPgDao::path_color::from_json(j, p);
+}
+
 } // namespace trip
 } // namespace fdsd
 
@@ -66,6 +76,26 @@ void ItineraryPgDao::selected_feature_ids::from_json(
   j.at("routes").get_to(ids.routes);
   j.at("tracks").get_to(ids.tracks);
   j.at("waypoints").get_to(ids.waypoints);
+}
+
+void ItineraryPgDao::path_color::to_json(
+    nlohmann::json& j,
+    const ItineraryPgDao::path_color& p)
+{
+  j = json{
+    {"key", p.key},
+    {"description", p.description},
+    {"html_code", p.html_code}
+  };
+}
+
+void ItineraryPgDao::path_color::from_json(
+    const nlohmann::json& j,
+    ItineraryPgDao::path_color& p)
+{
+  j.at("key").get_to(p.key);
+  j.at("description").get_to(p.description);
+  j.at("html_code").get_to(p.html_code);
 }
 
 void ItineraryPgDao::path_summary::from_geojson_properties(
@@ -2458,6 +2488,31 @@ std::vector<ItineraryPgDao::path_summary> ItineraryPgDao::get_track_summaries(
   }
 }
 
+std::vector<ItineraryPgDao::path_color>
+    ItineraryPgDao::get_path_colors()
+{
+  try {
+    std::vector<std::pair<std::string, std::string>> colours;
+    work tx(*connection);
+    std::vector<path_color> colors;
+    auto result = tx.exec_params(
+        "SELECT key, value, html_code FROM path_color ORDER BY value");
+    for (const auto &r : result) {
+      path_color c;
+      r["key"].to(c.key);
+      r["value"].to(c.description);
+      r["html_code"].to(c.html_code);
+      colors.push_back(c);
+    }
+    tx.commit();
+    return colors;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception getting path color options: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
 std::vector<std::pair<std::string, std::string>>
     ItineraryPgDao::get_path_color_options()
 {
@@ -3205,6 +3260,32 @@ std::vector<ItineraryPgDao::itinerary_share_report>
     return itineraries;
   } catch (const std::exception &e) {
     std::cerr << "Error fetching itinerary share report: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+std::vector<std::string>
+    ItineraryPgDao::get_nicknames_sharing_location_with_user(
+        std::string user_id)
+{
+  try {
+    work tx(*connection);
+    auto result = tx.exec_params(
+        "SELECT shared_by_id AS id, u.nickname "
+        "FROM location_sharing loc "
+        "JOIN usertable u ON u.id=shared_by_id "
+        "WHERE shared_to_id=$1 UNION ALL "
+        "SELECT id, nickname FROM usertable u2 "
+        "WHERE u2.id=$1 ORDER BY nickname",
+        user_id);
+    std::vector<std::string> retval;
+    for (const auto &r : result)
+      retval.push_back(r["nickname"].as<std::string>());
+    tx.commit();
+    return retval;
+  } catch (const std::exception &e) {
+    std::cerr << "Error fetching nicknames sharing location with user: "
               << e.what() << '\n';
     throw;
   }
