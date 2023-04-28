@@ -253,6 +253,7 @@ Minimal packages required to build from the source distribution tarball:
 - gawk
 - libboost-locale-dev
 - libcairomm-1.0-dev (optional)
+- libcmark-dev
 - libgdal-dev (optional)
 - libpqxx-dev
 - libpugixml-dev
@@ -393,6 +394,7 @@ Minimal packages required to build from the source distribution tarball, for
 Fedora version 36.
 
 - boost-all
+- cmark
 - gdal (optional)
 - yaml-cpp
 - postgresql13-client
@@ -435,6 +437,7 @@ To build from a Git clone, install the following ports from [MacPorts][]:
 - autoconf-archive
 - boost
 - cairomm (optinal)
+- cmark
 - gawk
 - gdal (optional)
 - intltool

@@ -153,7 +153,7 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 	libpq-devel yaml-cpp-devel pugixml-devel libuuid-devel gdal-devel \
 	curl postgresql-server postgresql-contrib \
 	screen vim autoconf automake info libtool \
-	intltool gdb valgrind git apg cairomm-devel \
+	intltool gdb valgrind git apg cairomm-devel cmark-devel \
 	nodejs
 
     if [ -f /etc/rocky-release ]; then
@@ -213,6 +213,7 @@ if [ -x /bin/freebsd-version ]; then
 	python3 pugixml e2fsprogs-libuuid nlohmann-json \
 	texinfo vim python3 valgrind apg \
 	intltool gdb libtool autoconf-archive gettext automake cairomm \
+	cmark \
 	node14 yarn-node14
     # Include the textlive-full package to allow building the PDF docs, which
     # needs an additional 11G or more of disk space.
@@ -278,7 +279,7 @@ if [ -f /etc/debian_version ]; then
 	    libpqxx-dev screen autoconf autoconf-doc automake autoconf-archive \
 	    libtool gettext valgrind uuid-dev uuid-runtime make nginx apg \
 	    libboost-locale-dev libpugixml-dev autopoint intltool gdb \
-	    libyaml-cpp-dev nlohmann-json3-dev \
+	    libyaml-cpp-dev nlohmann-json3-dev libcmark-dev \
 	    docbook2x texlive info texinfo curl libgdal-dev libcairomm-1.0-dev
 
     if [ "$VB_GUI" == "y" ]; then

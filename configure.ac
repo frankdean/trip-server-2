@@ -62,6 +62,7 @@ AX_BOOST_BASE([1.67],[],[AC_MSG_ERROR([Please install at least version 1.67 of t
 AX_BOOST_LOCALE
 PKG_CHECK_MODULES([LIBPQXX], [libpqxx >= 6.2.5 libpqxx < 7 libpq >= 11.14 yaml-cpp >= 0.6.2])
 PKG_CHECK_MODULES([LIBPUGIXML], [pugixml >= 1.11])
+PKG_CHECK_MODULES([LIBCMARK], [libcmark >= 0.29])
 if test "x${use_cairo}" = xyes; then
    PKG_CHECK_MODULES([LIBCAIROMM], [cairomm-1.0 >= 1.12.2 cairomm-png-1.0 >= 1.12.2])
    AC_DEFINE([HAVE_CAIRO], [1], [Build to use CAIRO library])
@@ -122,9 +123,9 @@ if test "x${use_keep_alive}" == xyes; then
    AC_DEFINE([ENABLE_KEEP_ALIVE], [1], [Enable HTTP keep alive])
 fi
 
-CXXFLAGS="${CXXFLAGS} -Wsuggest-override -Wno-deprecated-declarations ${LIBPQXX_CFLAGS} ${LIBUUID_CFLAGS} ${BOOST_CPPFLAGS} ${LIBPUGIXML_CFLAGS} ${LIBGDAL_CFLAGS} ${LIBCAIROMM_CFLAGS}"
+CXXFLAGS="${CXXFLAGS} -Wsuggest-override -Wno-deprecated-declarations ${LIBPQXX_CFLAGS} ${LIBUUID_CFLAGS} ${BOOST_CPPFLAGS} ${LIBPUGIXML_CFLAGS} ${LIBGDAL_CFLAGS} ${LIBCAIROMM_CFLAGS} ${LIBCMARK_CFLAGS}"
 dnl CPPFLAGS="${CPPFLAGS} ${XXXXXX_CPPFLAGS}"
-LIBS="${LIBS} ${LIBPQXX_LIBS} ${LIBUUID_LIBS} ${BOOST_LDFLAGS} ${BOOST_LOCALE_LIB} ${LIBPUGIXML_LIBS} ${LIBGDAL_LIBS} ${LIBCAIROMM_LIBS}"
+LIBS="${LIBS} ${LIBPQXX_LIBS} ${LIBUUID_LIBS} ${BOOST_LDFLAGS} ${BOOST_LOCALE_LIB} ${LIBPUGIXML_LIBS} ${LIBGDAL_LIBS} ${LIBCAIROMM_LIBS} ${LIBCMARK_LIBS}"
 
 # Checks for header files.
 dnl echo "Host_os: ${host_os}"

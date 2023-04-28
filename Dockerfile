@@ -7,7 +7,7 @@ RUN apt-get update \
     procps locales coreutils tar xz-utils ca-certificates tzdata \
     make g++ gawk \
     libboost-locale-dev libpqxx-dev libpugixml-dev libyaml-cpp-dev \
-    nlohmann-json3-dev uuid-dev cairomm-1.0-dev \
+    nlohmann-json3-dev uuid-dev cairomm-1.0-dev libcmark-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \
@@ -22,7 +22,6 @@ RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \
     dpkg-reconfigure tzdata
 ENV LANG en_GB.utf8
 ARG TRIP_SERVER_VERSION=2.0.0-alpha.41
-ARG TRIP_SERVER_SHA256=49fec7ba5d0df588594eee4e39c7afeaf5a61b2467f3c8ee62e94541eaddc3ad
 ARG TRIP_SERVER_FILENAME=trip-${TRIP_SERVER_VERSION}.tar.xz
 RUN chgrp trip /usr/local/src && \
     chmod g+w /usr/local/src
@@ -30,9 +29,10 @@ RUN chgrp trip /usr/local/src && \
 USER trip
 WORKDIR /usr/local/src
 # ADD --chown=trip:trip https://www.fdsd.co.uk/trip-server-2/download/${TRIP_SERVER_FILENAME} .
-COPY ./${TRIP_SERVER_FILENAME} .
+# ARG TRIP_SERVER_SHA256=49fec7ba5d0df588594eee4e39c7afeaf5a61b2467f3c8ee62e94541eaddc3ad
+# RUN echo "$TRIP_SERVER_SHA256 *${TRIP_SERVER_FILENAME}" | sha256sum -c -
 
-RUN echo "$TRIP_SERVER_SHA256 *${TRIP_SERVER_FILENAME}" | sha256sum -c -
+COPY ./${TRIP_SERVER_FILENAME} .
 RUN tar -xf $TRIP_SERVER_FILENAME
 WORKDIR "/usr/local/src/trip-${TRIP_SERVER_VERSION}"
 
@@ -52,7 +52,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     locales tzdata \
     libboost-locale1.74.0 libpugixml1v5 libyaml-cpp0.6 \
-    uuid libpqxx-6.4 libcairomm-1.0-1v5 \
+    uuid libpqxx-6.4 libcairomm-1.0-1v5 libcmark0.29.0 \
     postgresql postgresql-contrib postgis
 
 RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \

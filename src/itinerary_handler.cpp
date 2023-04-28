@@ -27,6 +27,7 @@
 #include "geo_utils.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <boost/locale.hpp>
+#include <cmark.h>
 #include <vector>
 
 using namespace boost::locale;
@@ -152,14 +153,14 @@ void ItineraryHandler::append_itinerary_content(
     "          <div id=\"itinerary-tab-content\">\n";
   append_heading_content(response, itinerary);
   if (itinerary.description.first) {
+    char *p_html = cmark_markdown_to_html(itinerary.description.second.c_str(),
+                                          itinerary.description.second.length(),
+                                          0);
     response.content
       <<
       "            <hr>\n"
-      "            <div id=\"div-view-raw\">\n"
-      "              <textarea id=\"raw-textarea\" class=\"raw-markdown\" rows=\"12\" readonly>\n"
-      << x(itinerary.description.second) <<
-      "              </textarea>\n"
-      "            </div>\n";
+      "            <div id=\"div-view-raw\">\n" << p_html << "            </div>\n";
+    free(p_html);
   }
   response.content
     <<
