@@ -89,52 +89,54 @@ void ItinerariesHandler::build_page(
       <<
       "      </tr>\n"
       "    </table>\n"
-      "  </div>\n" // #itineraries div
-      "  <div id=\"div-buttons\">\n"
-      "    <form name=\"form\" class=\"css-form\">\n";
-
-    const auto page_count = pagination.get_page_count();
-    if (page_count > 1) {
-      response.content
-          <<
-        "    <div id=\"div-paging\" class=\"pb-0\">\n"
-          << pagination.get_html()
-          <<
-        "    </div>\n"
-        "    <div class=\"d-flex justify-content-center pt-0 pb-0 col-12\">\n"
-        "      <input id=\"goto-page\" type=\"number\" name=\"page\" value=\""
-        << std::fixed << std::setprecision(0) << pagination.get_current_page()
-        << "\" min=\"1\" max=\"" << page_count << "\">\n"
-        // Title of button which goes to a specified page number
-        "      <button id=\"goto-page-btn\" class=\"btn btn-sm btn-primary\" type=\"submit\" name=\"action\" accesskey=\"g\" value=\"goto-page\">" << translate("Go") << "</button>\n"
-        "    </div>\n"
-        ;
-    }
-
-    response.content
-      <<
-      "      <div id=\"itineraries-div-form-buttons\" class=\"py-2\">\n"
-      // Button title for creating something new
-      "        <button id=\"btn-new\" formaction=\"" << get_uri_prefix() << "/itinerary/edit\" type=\"submit\" accesskey=\"w\" class=\"btn btn-lg btn-warning\">" << translate("New") << "</button>\n"
-      // Button title for importing something
-      "        <button id=\"btn-import\" accesskey=\"i\" name=\"action\" value=\"import\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary/import\" class=\"btn btn-lg btn-success\">" << translate("Import") << "</button>\n"
-      "      </div>\n";
-    if (!itineraries.empty()) {
-      response.content
-        <<
-        "    <div class=\"py-2\">\n"
-        // Button title for searching for something
-        "      <button id=\"btn-search\" accesskey=\"s\" class=\"btn btn-lg btn-primary\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary-search\">" << translate("Search") << "</button>\n"
-        // Button title for navigating to the Itinerary Sharing Report
-        "      <button id=\"btn-shares-report\" accesskey=\"r\" class=\"btn btn-lg btn-primary\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary-sharing-report\">" << translate("Itinerary shares report") << "</button>\n"
-        "    </div>\n";
-    }
-    response.content
-      <<
-      "    </form>\n"
-      "  </div>\n"
-      "</div>\n";
+      "  </div>\n"; // #itineraries div
   }
+  response.content
+    <<
+    "  <div id=\"div-buttons\">\n"
+    "    <form name=\"form\" class=\"css-form\">\n";
+
+  const auto page_count = pagination.get_page_count();
+  if (page_count > 1) {
+    response.content
+      <<
+      "    <div id=\"div-paging\" class=\"pb-0\">\n"
+      << pagination.get_html()
+      <<
+      "    </div>\n"
+      "    <div class=\"d-flex justify-content-center pt-0 pb-0 col-12\">\n"
+      "      <input id=\"goto-page\" type=\"number\" name=\"page\" value=\""
+      << std::fixed << std::setprecision(0) << pagination.get_current_page()
+      << "\" min=\"1\" max=\"" << page_count << "\">\n"
+      // Title of button which goes to a specified page number
+      "      <button id=\"goto-page-btn\" class=\"btn btn-sm btn-primary\" type=\"submit\" name=\"action\" accesskey=\"g\" value=\"goto-page\">" << translate("Go") << "</button>\n"
+      "    </div>\n"
+      ;
+  }
+
+  response.content
+    <<
+    "      <div id=\"itineraries-div-form-buttons\" class=\"py-2\">\n"
+    // Button title for creating something new
+    "        <button id=\"btn-new\" formaction=\"" << get_uri_prefix() << "/itinerary/edit\" type=\"submit\" accesskey=\"w\" class=\"btn btn-lg btn-warning\">" << translate("New") << "</button>\n"
+    // Button title for importing something
+    "        <button id=\"btn-import\" accesskey=\"i\" name=\"action\" value=\"import\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary/import\" class=\"btn btn-lg btn-success\">" << translate("Import") << "</button>\n"
+    "      </div>\n";
+  if (!itineraries.empty()) {
+    response.content
+      <<
+      "    <div class=\"py-2\">\n"
+      // Button title for searching for something
+      "      <button id=\"btn-search\" accesskey=\"s\" class=\"btn btn-lg btn-primary\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary-search\">" << translate("Search") << "</button>\n"
+      // Button title for navigating to the Itinerary Sharing Report
+      "      <button id=\"btn-shares-report\" accesskey=\"r\" class=\"btn btn-lg btn-primary\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary-sharing-report\">" << translate("Itinerary shares report") << "</button>\n"
+      "    </div>\n";
+  }
+  response.content
+    <<
+    "    </form>\n"
+    "  </div>\n"
+    "</div>\n";
 }
 
 void ItinerariesHandler::do_preview_request(
