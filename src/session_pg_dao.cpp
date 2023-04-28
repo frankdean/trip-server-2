@@ -341,7 +341,7 @@ SessionPgDao::tile_report
         "extract(month from time) AS month, "
         "extract(day from time) AS day, "
         "count FROM tile_metric ORDER BY time DESC) AS q "
-        "GROUP BY q.year, q.month ORDER BY q.year desc, q.month DESC LIMIT $1",
+        "GROUP BY q.year, q.month ORDER BY q.year desc, q.month DESC LIMIT $1 + 1",
         month_count);
     
     for (auto r: result) {
@@ -353,14 +353,12 @@ SessionPgDao::tile_report
     }
     auto previous = report.metrics.rend();
     for (auto t = report.metrics.rbegin(); t != report.metrics.rend(); t++) {
-      if (previous != report.metrics.rend())
-        t->quantity = t->cumulative_total - previous->cumulative_total;
-      else
-        t->quantity = t->cumulative_total;
+      t->quantity = t->cumulative_total - previous->cumulative_total;
       // std::cout << t->year << " " << t->month << " " << t->cumulative_total << " " << t->quantity << '\n';
       previous = t;
     }
     tx.commit();
+    report.metrics.pop_back();
     return report;
   } catch (const std::exception &e) {
     std::cerr << "Error getting tile usage metrics: " << e.what() << '\n';

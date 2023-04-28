@@ -58,22 +58,22 @@ void AdminStatusHandler::build_form(
       "      <div>\n"
       "        <table id=\"tile-metrics\" class=\"tile-metric-table table table-striped\">\n"
       "          <tr>\n"
-      // Column heading for admin status report for months
-      "            <th class=\"text-end\">" << translate("Month") << "</th>\n"
       // Column heading for admin status report for years
       "            <th class=\"text-end\">" << translate("Year") << "</th>\n"
-      // Column heading for admin status report for the cumulate total tile downloads
-      "            <th class=\"text-end\">" << translate("Cumulative Total") << "</th>\n"
+      // Column heading for admin status report for months
+      "            <th class=\"text-end\">" << translate("Month") << "</th>\n"
       // Column heading for admin status report for the monthly tile download
       "            <th class=\"text-end\">" << translate("Monthly Usage") << "</th>\n"
+      // Column heading for admin status report for the cumulate total tile downloads
+      "            <th class=\"text-end\">" << translate("Cumulative Total") << "</th>\n"
       "          </tr>\n";
     for (auto const &t : tile_report.metrics) {
       os <<
         "          <tr>\n"
-        "            <td class=\"text-end\">" << t.month << "</td>\n"
         "            <td class=\"text-end\">" << t.year << "</td>\n"
-        "            <td class=\"text-end\">" << as::number << t.cumulative_total << "</td>\n"
-        "            <td class=\"text-end\">" << t.quantity << as::posix << "</td>\n"
+        "            <td class=\"text-end\">" << t.month << "</td>\n"
+        "            <td class=\"text-end\">" << as::number << t.quantity << "</td>\n"
+        "            <td class=\"text-end\">" << t.cumulative_total << as::posix << "</td>\n"
         "          </tr>\n";
     }
     os <<
