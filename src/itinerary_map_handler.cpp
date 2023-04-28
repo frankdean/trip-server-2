@@ -24,6 +24,7 @@
 #include "itinerary_map_handler.hpp"
 #include "itinerary_handler.hpp"
 #include "itinerary_pg_dao.hpp"
+#include "tracking_pg_dao.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <boost/locale.hpp>
 #include <nlohmann/json.hpp>
@@ -58,6 +59,7 @@ void ItineraryMapHandler::handle_authenticated_request(
   try {
     itinerary_id = std::stol(request.get_param("id"));
     ItineraryPgDao dao;
+    TrackPgDao track_dao;
     const bool read_only = !dao.has_user_itinerary_modification_access(
         get_user_id(),
         itinerary_id);
@@ -80,6 +82,7 @@ void ItineraryMapHandler::handle_authenticated_request(
       "      const readOnly = " << (read_only ? "true" : "false") << ";\n"
       "      const pageInfoJSON = '" << j << "';\n"
       "      const server_prefix = '" << get_uri_prefix() << "';\n"
+      "      const logging_uuid = '" << track_dao.get_logging_uuid_by_user_id(get_user_id()) << "';\n"
       // Text displayed to user after clicking on map exit button to exit map
       "      const click_to_exit_text = '" << translate("Click to exit") << "';\n";
     append_map_provider_configuration(response.content);

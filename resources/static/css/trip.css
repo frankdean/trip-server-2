@@ -145,6 +145,7 @@ body {
 }
 .location-sharing-modal {
   position: absolute;
+  min-width: 300px;
   top: 14.5em;
   right: .5em;
   padding: 10px;

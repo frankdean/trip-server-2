@@ -192,11 +192,7 @@ void TripAuthenticatedRequestHandler::append_body_start(std::ostream& os) const
   os <<
     "\" href=\"" << prefix << "/itineraries\">"
     // Menu item to select the list of itineraries page
-     << translate("Itineraries") << "</a></li>\n"
-    "            <li class=\"nav-item opacity-50\"><a class=\"nav-link\">" // href=\"" << prefix << "/location\">"
-    // Menu item to select the page potentially showing or recording the user's current location
-     << translate("Location") << "</a></li>\n";
-
+                 << translate("Itineraries") << "</a></li>\n";
   if (is_admin) {
     os <<
       "            <li class=\"nav-item\"><a class=\"nav-link";

@@ -679,6 +679,9 @@ class LocationSharingControl extends Control {
       start: start,
       nicknames: new Map(),
       maxHdop: 0,
+      trackMe: false,
+      refreshInterval: 60,
+      trackingInterval: 60,
     };
     const pathColors = this.options.pathColors;
     let count = 0;
@@ -789,22 +792,76 @@ class LocationSharingModal {
     hdopInput.setAttribute('max', 9999);
     formElement.appendChild(hdopLabel);
     formElement.appendChild(hdopInput);
+    formElement.appendChild(document.createElement('br'));
+
+    const refreshIntervalLabel = document.createElement('label');
+    refreshIntervalLabel.htmlFor = 'refresh-interval-input';
+    refreshIntervalLabel.innerHTML = 'Refresh interval (seconds)&nbsp;';
+    refreshIntervalLabel.className = 'mb-2';
+    const refreshIntervalElement = document.createElement('input');
+    refreshIntervalElement.id = 'refresh-interval-input';
+    refreshIntervalElement.type = 'number';
+    refreshIntervalElement.name = 'refresh-interval';
+    refreshIntervalElement.className = 'mb-2';
+    refreshIntervalElement.value = formData.refreshInterval;
+    refreshIntervalElement.setAttribute('min', 10);
+    refreshIntervalElement.setAttribute('max', 86400);
+    refreshIntervalElement.setAttribute('step', 1);
+    formElement.appendChild(refreshIntervalLabel);
+    formElement.appendChild(refreshIntervalElement);
+    formElement.appendChild(document.createElement('br'));
+    formElement.appendChild(document.createElement('hr'));
+
+    const trackMeLabel = document.createElement('label');
+    trackMeLabel.htmlFor = 'track-me-checkbox';
+    trackMeLabel.innerHTML = 'Track & record yourself&nbsp;';
+    trackMeLabel.className = 'mb-2';
+    const trackMeElement = document.createElement('input');
+    trackMeElement.id = 'track-me-checkbox';
+    trackMeElement.type = 'checkbox';
+    trackMeElement.name = 'track-me';
+    trackMeElement.className = 'mb-2';
+    trackMeElement.checked = (formData.trackMe === true);
+    formElement.appendChild(trackMeLabel);
+    formElement.appendChild(trackMeElement);
+    formElement.appendChild(document.createElement('br'));
+
+    const trackingIntervalLabel = document.createElement('label');
+    trackingIntervalLabel.htmlFor = 'tracking-interval-input';
+    trackingIntervalLabel.innerHTML = 'Tracking interval (seconds)&nbsp;';
+    trackingIntervalLabel.className = 'mb-2';
+    const trackingIntervalElement = document.createElement('input');
+    trackingIntervalElement.id = 'tracking-interval-input';
+    trackingIntervalElement.type = 'number';
+    trackingIntervalElement.name = 'tracking-interval';
+    trackingIntervalElement.className = 'mb-2';
+    trackingIntervalElement.value = formData.trackingInterval;
+    trackingIntervalElement.setAttribute('min', 10);
+    trackingIntervalElement.setAttribute('max', 86400);
+    trackingIntervalElement.setAttribute('step', 1);
+    formElement.appendChild(trackingIntervalLabel);
+    formElement.appendChild(trackingIntervalElement);
+    formElement.appendChild(document.createElement('br'));
+
     const buttonDiv = document.createElement('div');
     buttonDiv.className = 'my-2';
     formElement.appendChild(buttonDiv);
     const applyButton = document.createElement('button');
-    applyButton.innerHTML = 'Start';
+    applyButton.innerHTML = this.options.stop ? 'Start' : 'Apply';
+    applyButton.type = 'button';
     applyButton.className = 'live-map-form btn btn-success me-2';
     applyButton.setAttribute('accesskey', 's');
     buttonDiv.appendChild(applyButton);
     const stopButton = document.createElement('button');
     stopButton.id = 'btn-stop';
     stopButton.innerHTML = 'Stop';
+    stopButton.type = 'button';
     stopButton.className = 'live-map-form btn ' + (this.options.stop ? 'btn-secondary' : 'btn-primary') + ' me-2';
     stopButton.setAttribute('accesskey', 'p');
     buttonDiv.appendChild(stopButton);
     const cancelButton = document.createElement('button');
     cancelButton.innerHTML = 'Cancel';
+    cancelButton.type = 'button';
     cancelButton.className = 'live-map-form btn btn-danger';
     cancelButton.setAttribute('accesskey', 'c');
     buttonDiv.appendChild(cancelButton);
@@ -845,6 +902,10 @@ class LocationSharingModal {
     }
     const hdopInput = document.getElementById('input-max-hdop');
     this.formData.maxHdop = hdopInput.value;
+
+    this.formData.trackMe = document.getElementById('track-me-checkbox').checked;
+    this.formData.refreshInterval = document.getElementById('refresh-interval-input').value;
+    this.formData.trackingInterval = document.getElementById('tracking-interval-input').value;
   }
 
   handleApply() {
@@ -862,7 +923,7 @@ class LocationSharingModal {
   }
 
   handleCancel() {
-    this.eventHandler(new CustomEvent('cancel', { detail: self.formData} ));
+    this.eventHandler(new CustomEvent('cancel'));
     // this.hide();
   }
 

@@ -66,29 +66,46 @@ void TrackLoggingHandler::do_handle_request(
           params[el.key()] = el.value();
         uuid_str = j["uuid"];
       } catch(const std::exception& e) {
+        if (GetOptions::verbose_flag)
+          std::cerr << "Track log_point Error parsing JSON POST: "
+                    << e.what() << '\n';
         std::ostringstream os;
         os << "Track log_point Error parsing JSON POST: "
            << e.what();
         throw BadRequestException(os.str());
       }
     } else {
+      if (GetOptions::verbose_flag)
+        std::cerr << "Track log_point: empty request" << '\n';
       throw BadRequestException("Track log_point: empty request");
     }
   } else {
+    if (GetOptions::verbose_flag)
+      std::cerr << "Unexpected HTTP request method: \""
+                << request.method_to_str() << "\"\n";
     throw BadRequestException("Unexpected HTTP request method: \""
                               + request.method_to_str() + '"');
   }
   if (!UUID::is_valid(uuid_str)) {
+    if (GetOptions::verbose_flag)
+      std::cerr << "Track log_point: invalid UUID" << '\n';
     throw BadRequestException("Track log_point: invalid UUID");
   }
   TrackPgDao dao;
-  std::string user_id = dao.get_user_id_by_uuid(uuid_str);
-  if (user_id.empty()){
+  try {
+    std::string user_id = dao.get_user_id_by_uuid(uuid_str);
+    if (user_id.empty()) {
+      if (GetOptions::verbose_flag)
+        std::cerr << "UUID not found\n";
+      throw BadRequestException("Track log_point: UUID not found");
+    }
+    TrackPgDao::tracked_location_query_params qp(user_id, params);
+    qp.user_id = user_id;
+    dao.save_tracked_location(qp);
+  } catch (const std::exception &e) {
     if (GetOptions::verbose_flag)
-      std::cerr << "UUID not found\n";
-    throw BadRequestException("Track log_point: UUID not found");
+      std::cerr << "Failure searching for user by UUID: "
+                << e.what() << '\n';
+    throw;
   }
-  TrackPgDao::tracked_location_query_params qp(user_id, params);
-  qp.user_id = user_id;
-  dao.save_tracked_location(qp);
 }

@@ -30,12 +30,14 @@ const fromLonLat = ol.proj.fromLonLat;
 const Control = ol.control.Control;
 const Draw = ol.interaction.Draw;
 const GeoJSON = ol.format.GeoJSON;
+const GeoLocation = ol.Geolocation;
 const Modify = ol.interaction.Modify;
 const Point = ol.geom.Point;
 const Select = ol.interaction.Select;
 const VectorLayer = ol.layer.Vector;
 const VectorSource = ol.source.Vector;
 const eventCondition = ol.events.condition;
+const toLonLat = ol.proj.toLonLat;
 
 const pageInfo = JSON.parse(pageInfoJSON);
 // console.debug('pageInfo', pageInfo);
@@ -46,6 +48,11 @@ class ItineraryMap extends TripMap {
     super(providers, opt_options);
     this.options = opt_options || {};
     this.timer_count = 0;
+    this.liveMapData = {
+      refreshInterval: 10,
+      trackingInterval: 30,
+      trackMe: true,
+    };
     const self = this;
     if (!this.options.readOnly) {
       const controls = this.map.getControls();
@@ -61,7 +68,15 @@ class ItineraryMap extends TripMap {
       controls.push(this.createFeatureControl);
       controls.push(this.modifyFeatureControl);
     }
+    this.tracking = false;
     this.liveLocationsMap = new Map();
+      this.geoLocation = new GeoLocation({
+        tracking: false,
+        trackingOptions: {
+          enableHighAccuracy: true,
+        },
+        projection: this.map.getView().getProjection(),
+      });
   }
 
   handleUpdate(data) {
@@ -160,10 +175,14 @@ class ItineraryMap extends TripMap {
   }
 
   handleLocationSharingEvent(event) {
-    // console.debug('Callback in itinerary map', event.type);
-    // console.debug('Details', event.detail);
-    this.liveMapData = event.detail;
-    // Will need to add another map layer especially for these tracks
+    if (event.detail)
+      this.liveMapData = event.detail;
+    if (event.detail && event.detail.refreshInterval !== undefined)
+      this.liveMapData.refreshInterval = event.detail.refreshInterval;
+    if (event.detail && event.detail.trackingInterval !== undefined)
+      this.liveMapData.trackingInterval = event.detail.trackingInterval;
+    if (event.detail && event.detail.trackMe !== undefined)
+      this.liveMapData.trackMe = event.detail.trackMe;
     switch(event.type) {
     case 'start':
       this.liveLocationsMap = new Map();
@@ -173,6 +192,8 @@ class ItineraryMap extends TripMap {
       break;
     case 'stop':
       this.stop = true;
+      this.liveMapData.trackMe = false;
+      this.updateTracking();
       break;
     case 'cancel':
       break;
@@ -609,6 +630,7 @@ class ItineraryMap extends TripMap {
 
   checkForUpdates() {
     const self = this;
+    this.updateTracking();
     if (this.liveMapData && this.liveMapData.nicknames) {
       let nicknames = new Array();
       this.liveMapData.nicknames.forEach((value, key, map) => {
@@ -670,6 +692,107 @@ class ItineraryMap extends TripMap {
     }
   }
 
+  recordLocation() {
+    const self = this;
+    const now = new Date();
+    // if (self.lastPositionDate) {
+    //   console.debug('last', self.lastPositionDate.getTime());
+    //   console.debug('now ', now.getTime());
+    // }
+    const age = self.lastPositionDate ? (now.getTime() - self.lastPositionDate.getTime()) : 0;
+    const next = self.liveMapData.trackingInterval * 1000;
+    // console.debug('Age: ', age);
+    // console.debug('Next:', next);
+    if (self.lastPositionDate !== undefined && age < next) {
+      // console.debug('Ignoring location as too soon since last');
+      return;
+    }
+    self.lastPositionDate = now;
+    const coords = toLonLat(self.geoLocation.getPosition());
+    const position =
+          {
+            uuid: this.options.loggingUUID,
+            lng: '' + coords[0],
+            lat: '' + coords[1],
+            time: now.toISOString(),
+            // sat: '',
+            prov: 'web-browser',
+            // batt: '',
+            // note: '',
+          };
+    const hdop = self.geoLocation.getAccuracy();
+    if (hdop !== undefined)
+      position.hdop = '' + hdop;
+    const altitude = self.geoLocation.getAltitude();
+    if (altitude !== undefined)
+      position.altitude = '' + altitude;
+    const speed = self.geoLocation.getSpeed();
+    if (speed !== undefined)
+      position.speed = '' + speed;
+    const bearing = self.geoLocation.getHeading();
+    if (bearing !== undefined)
+      position.bearing = '' + bearing;
+
+    // console.debug('Logging', position);
+    const myHeaders = new Headers([
+      ['Content-Type', 'application/json; charset=UTF-8']
+    ]);
+    const myRequest = new Request(
+      self.options.trackingUrl,
+      {
+        method: 'POST',
+        body: JSON.stringify(position),
+        headers: myHeaders,
+        mode: 'same-origin',
+        cache: 'no-store',
+        referrerPolicy: 'no-referrer',
+      });
+
+    fetch(myRequest)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('HTTP status code: ' + response.status);
+        }
+        return;
+      })
+      .catch((error) => {
+        // alert('Failed to log tracked location: ' + error);
+        console.error('Failed to log tracked location: ', error);
+      });
+  }
+
+  trackingListener() {
+    this.recordLocation();
+  }
+
+  trackingErrorHandler(error) {
+    console.error('Tracking error', error);
+    // window.console.log(error);
+  }
+
+  updateTracking() {
+    const self = this;
+    if (!this.liveMapData)
+      console.error('liveMapData is not null/undefined', this.liveMapData);
+    if (this.liveMapData.trackMe && !self.tracking) {
+      self.tracking = true;
+      this.geoLocation.setTracking(self.tracking);
+      // console.debug('Start tracking', new Date());
+      this.geoLocation.on('change:position', this.trackingListener.bind(this));
+      this.geoLocation.on('error', this.trackingErrorHandler.bind(this));
+    } else if (self.tracking && !this.liveMapData.trackMe) {
+      self.tracking = false;
+      this.geoLocation.setTracking(self.tracking);
+      this.geoLocation.un('change:position', self.trackingListener.bind(this));
+      this.geoLocation.un('error', self.trackingErrorHandler.bind(this));
+      // console.debug('Stopped tracking');
+    // } else if (self.tracking && this.liveMapData.trackMe) {
+    //   console.debug('Could get a new location');
+    // } else {
+    //   console.debug('Nothing to do');
+    }
+  }
+
   update() {
     const self = this;
     if (!this.liveMapData) {
@@ -678,13 +801,15 @@ class ItineraryMap extends TripMap {
     if (!this.stop) {
       if (this.timer_count < 1) {
         this.timer_count++;
+        // console.debug('Setting refresh interval to', this.liveMapData.refreshInterval);
         setTimeout(function() {
           self.timer_count--;
           if (!self.stop) {
+            // console.debug('Timeout', new Date());
             self.checkForUpdates();
             self.update();
           }
-        }, 60000);
+        }, this.liveMapData.refreshInterval * 1000);
       }
     }
   }
@@ -696,6 +821,9 @@ const itineraryMap = new ItineraryMap(providers,
                                         itinerary_id: pageInfo.itinerary_id,
                                         url: server_prefix +
                                           '/rest/itinerary/features',
+                                        trackingUrl: server_prefix +
+                                          '/rest/log_point',
+                                        loggingUUID: logging_uuid,
                                         saveUrl: server_prefix +
                                           '/rest/itinerary/features',
                                         liveLocationsUrl: `${server_prefix}/rest/locations`,
