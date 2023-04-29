@@ -66,7 +66,7 @@ compatibility as much as possible, with an `--upgrade` option to the Trip
 Server version 2 to upgrade a version 1 database to version 2.  Also, the
 desire is to keep the YAML configuration file requiring minimal changes.
 
-### Proposed Features
+### Features
 
 The following features have been implemented:
 
