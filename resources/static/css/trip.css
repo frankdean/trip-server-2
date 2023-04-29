@@ -90,17 +90,53 @@ body {
   top: 4em;
   left: .5em;
 }
+.select-map-layer button.map-layers-control {
+  background-image: url(../icons/map-layers-btn.svg);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
 #exit-map-control {
   top: 3em;
   right: .5em;
+}
+.exit-map-layer button.map-exit-control {
+  background-image: url(../icons/map-exit-btn.svg);
+  background-repeat: no-repeat;
+  background-position: center center;
 }
 #create-feature-control {
   top: 5.5em;
   right: .5em;
 }
+.create-feature-layer button.map-route-control
+{
+  background-image: url(../icons/map-route-btn.svg);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+.create-feature-layer button.map-waypoint-control {
+  background-image: url(../icons/map-waypoint-btn.svg);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
 #modify-feature-control {
   top: 10em;
   right: .5em;
+}
+.modify-feature-layer button.map-edit-control {
+  background-image: url(../icons/map-edit-btn.svg);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+.modify-feature-layer button.map-delete-control {
+  background-image: url(../icons/map-delete-btn.svg);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+.location-sharing-layer button.map-live-control {
+  background-image: url(../icons/map-live-btn.svg);
+  background-repeat: no-repeat;
+  background-position: center center;
 }
 .modify-feature-option-container {
   position: absolute;
@@ -146,7 +182,7 @@ body {
 .location-sharing-modal {
   position: absolute;
   min-width: 300px;
-  top: 0;
+  top: .5em;
   right: .5em;
   padding: 10px;
   background: white;

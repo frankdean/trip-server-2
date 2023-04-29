@@ -27,6 +27,15 @@ dist_doc_DATA = README.md
 
 cssdir = $(pkgdatadir)/resources/static/css
 dist_css_DATA = resources/static/css/trip.css
+icondir = $(pkgdatadir)/resources/static/icons
+dist_icon_DATA = resources/static/icons/LICENSE \
+	resources/static/icons/map-delete-btn.svg \
+	resources/static/icons/map-edit-btn.svg \
+	resources/static/icons/map-exit-btn.svg \
+	resources/static/icons/map-layers-btn.svg \
+	resources/static/icons/map-live-btn.svg \
+	resources/static/icons/map-route-btn.svg \
+	resources/static/icons/map-waypoint-btn.svg
 jsdir = $(pkgdatadir)/resources/static/js
 dist_js_DATA = resources/static/js/change-password.js \
 	resources/static/js/itinerary-map.js \
@@ -87,6 +96,7 @@ uninstall-hook:
 	-rmdir -p $(bsjsdir)
 	-rmdir -p $(oldir)
 	-rmdir -p $(cssdir)
+	-rmdir -p $(icondir)
 	-rmdir -p $(jsdir)
 	-rmdir -p $(jsmoddir)
 	-rmdir -p $(proj4jsdir)

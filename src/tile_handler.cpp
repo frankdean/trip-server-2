@@ -213,8 +213,6 @@ TilePgDao::tile_result TileHandler::find_tile(int provider_index,
 #ifdef HAVE_CAIRO
   if (provider_index < 0)
     return create_test_tile(z, x, y);
-#else
-  std::cout << "No PNG available\n";
 #endif
   const auto provider = get_provider(provider_index);
   if (provider.cache == true) {

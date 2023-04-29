@@ -59,11 +59,12 @@ class SelectMapLayerControl extends Control {
     const options = opt_options || {};
 
     const button = document.createElement('button');
-    button.innerHTML = 'M';
+    button.className = 'map-layers-control';
 
     const element = document.createElement('div');
     element.id = 'select-map-control';
     element.className = 'select-map-layer ol-unselectable ol-control';
+    element.setAttribute('data-bs-original-title', 'Select map');
     element.appendChild(button);
 
     super({
@@ -156,8 +157,8 @@ class ExitMapLayerControl extends Control {
     const options = opt_options || {};
 
     const button = document.createElement('button');
-    button.innerHTML = 'X';
     button.setAttribute('accesskey', 'x');
+    button.className = 'map-exit-control';
 
     const element = document.createElement('div');
     element.id = 'exit-map-control';
@@ -449,12 +450,14 @@ class CreateFeatureControl extends Control {
 
   constructor(callback, opt_options) {
     const routeButton = document.createElement('button');
-    routeButton.innerHTML = 'R';
     routeButton.setAttribute('accesskey', 'r');
+    routeButton.setAttribute('data-bs-original-title', 'Create route');
+    routeButton.className = "map-route-control";
 
     const waypointButton = document.createElement('button');
-    waypointButton.innerHTML = 'W';
     waypointButton.setAttribute('accesskey', 'w');
+    waypointButton.setAttribute('data-bs-original-title', 'Create waypoint');
+    waypointButton.className = "map-waypoint-control";
 
     const element = document.createElement('div');
     element.id = 'create-feature-control';
@@ -590,11 +593,13 @@ class ModifyFeatureControl extends Control {
     const options = opt_options || {};
 
     const editButton = document.createElement('button');
-    editButton.innerHTML = 'E';
     editButton.setAttribute('accesskey', 'e');
+    editButton.setAttribute('data-bs-original-title', 'Edit features');
+    editButton.className = 'map-edit-control';
     const deleteButton = document.createElement('button');
-    deleteButton.innerHTML = 'D';
     deleteButton.setAttribute('accesskey', 'd');
+    deleteButton.setAttribute('data-bs-original-title', 'Delete features');
+    deleteButton.className = 'map-delete-control';
 
     const element = document.createElement('div');
     element.id = 'modify-feature-control';
@@ -653,12 +658,13 @@ class LocationSharingControl extends Control {
   constructor(callback, opt_options) {
     const options = opt_options || {};
     const shareButton = document.createElement('button');
-    shareButton.innerHTML = 'L';
     shareButton.setAttribute('accesskey', 'l');
+    shareButton.setAttribute('data-bs-original-title', 'Live map options');
+    shareButton.className = 'map-live-control';
 
     const element = document.createElement('div');
     element.id = 'location-sharing-control';
-    element.className = 'ol-unselectable ol-control';
+    element.className = 'location-sharing-layer ol-unselectable ol-control';
     element.appendChild(shareButton);
 
     super({

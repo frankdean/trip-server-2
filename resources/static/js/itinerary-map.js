@@ -77,6 +77,13 @@ class ItineraryMap extends TripMap {
         },
         projection: this.map.getView().getProjection(),
       });
+    document
+      .querySelectorAll('.ol-zoom-in, .ol-zoom-out, .ol-rotate-reset, .select-map-layer, .map-route-control, .map-waypoint-control, .map-edit-control, .map-delete-control')
+      .forEach(function (el) {
+        new bootstrap.Tooltip(el, {
+          container: '#map',
+        });
+      });
   }
 
   handleUpdate(data) {
@@ -91,6 +98,13 @@ class ItineraryMap extends TripMap {
         this.options,
       );
       this.map.getControls().push(this.locationSharingControl);
+      document
+        .querySelectorAll('.map-live-control')
+        .forEach(function (el) {
+          new bootstrap.Tooltip(el, {
+            container: '#map',
+          });
+        });
     }
     //console.debug('data:', data);
     this.trackSource = new VectorSource({
