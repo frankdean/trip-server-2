@@ -204,7 +204,9 @@ void ItineraryWaypointEditHandler::build_form(
     // Label for input of a waypoint's time and date
     "        <label for=\"input-time\">" << translate("Time") << "</label>\n"
     "        <input id=\"input-time\" type=\"datetime-local\" name=\"time\" size=\"25\" step=\"1\" value=\"";
-  if (waypoint->id.first && waypoint->time.first)
+  if (!waypoint->id.first && !waypoint->time.first)
+    waypoint->time = std::make_pair(true, std::chrono::system_clock::now());
+  if (waypoint->time.first)
     response.content << dao_helper::datetime_as_html_input_value(waypoint->time.second);
   response.content << "\"";
   append_element_disabled_flag(response.content, read_only);

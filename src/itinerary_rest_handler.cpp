@@ -626,6 +626,8 @@ ItineraryPgDao::waypoint ItineraryRestHandler::create_waypoint(
   const auto properties = j_waypoint["properties"];
   if ((waypoint.id.first = properties.find("id") != properties.end()))
     waypoint.id.second = properties["id"];
+  if (!waypoint.id.first && !waypoint.time.first)
+    waypoint.time = std::make_pair(true, std::chrono::system_clock::now());
   auto coordinates = j_waypoint["geometry"]["coordinates"];
   waypoint.longitude = coordinates[0];
   waypoint.latitude = coordinates[1];
