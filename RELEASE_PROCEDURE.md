@@ -47,7 +47,7 @@ T.B.D.
     appropriate [node](https://hub.docker.com/_/node) build.  The distribution
     tarball is required in the root source folder to build the Docker image.
 
-		$ docker build -t fdean/trip-server-2:latest .
+		$ docker build --no-cache -t fdean/trip-server-2:latest .
 
 1.	Test the Dockerfile
 

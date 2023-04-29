@@ -6,7 +6,7 @@ services:
     build: .
     depends_on:
       - postgis
-    image: fdean/trip-server-2:2.0.0-alpha.41
+    image: fdean/trip-server-2:latest
     deploy:
       replicas: 1
       restart_policy:
@@ -34,7 +34,7 @@ services:
       context: .
       dockerfile: Dockerfile-postgis
       shm_size: 256m
-    image: fdean/trip-database:1.11.4
+    image: fdean/trip-database:latest
     shm_size: 512m
     deploy:
       replicas: 1

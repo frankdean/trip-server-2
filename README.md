@@ -68,43 +68,43 @@ desire is to keep the YAML configuration file requiring minimal changes.
 
 ### Proposed Features
 
-The following features are proposed: (completed features are marked &#x2713;)
+The following features have been implemented:
 
-* &#x2713; Remote tracking server—client applications such as
+* Remote tracking server—client applications such as
   [TripLogger Remote for iOS][TripLogger] &ndash;
   ([on the App Store](https://apps.apple.com/us/app/triplogger-remote/id1322577876?mt=8))
   or
   [GPSLogger for Android][GPSLogger] can be used to submit locations to the
   server.
 
-* &#x2713; Sharing tracks with others.
+* Sharing tracks with others.
 
-* &#x2713; Viewing tracks on a map provided by a tile server, e.g. OpenStreetMap tiles.
+* Viewing tracks on a map provided by a tile server, e.g. OpenStreetMap tiles.
 
-* &#x2713; Creating and sharing itineraries using the Markdown markup language.
+* Creating and sharing itineraries using the Markdown markup language.
 
-* &#x2713; Using the map, interactively creating routes and waypoints for an itinerary.
+* Using the map, interactively creating routes and waypoints for an itinerary.
 
-* &#x2713; Uploading and downloading routes, tracks and waypoints for an itinerary as a
+* Uploading and downloading routes, tracks and waypoints for an itinerary as a
   [GPX][] file.
 
-* &#x2713; Viewing routes, tracks and waypoints of an itinerary on the map.
+* Viewing routes, tracks and waypoints of an itinerary on the map.
 
-* &#x2713; Splitting and joining routes and tracks.
+* Splitting and joining routes and tracks.
 
-* &#x2713; Deleting individual points from routes and tracks.
+* Deleting individual points from routes and tracks.
 
-* &#x2713; Account maintenance &ndash; uploading [TripLogger][] settings.
+* Account maintenance &ndash; uploading [TripLogger][] settings.
 
-* &#x2713; Account maintenance &ndash; password change.
+* Account maintenance &ndash; password change.
 
-* &#x2713; Itinerary shares report &ndash; list shared itineraries including nicknames.
+* Itinerary shares report &ndash; list shared itineraries including nicknames.
 
-* &#x2713; Itinerary search by coordinate and radius.
+* Itinerary search by coordinate and radius.
 
-* &#x2713; Administration &ndash; user management.
+* Administration &ndash; user management.
 
-* &#x2713; Administration &ndash; tile usage report.
+* Administration &ndash; tile usage report.
 
 ## Documentation
 
