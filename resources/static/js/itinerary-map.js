@@ -39,14 +39,15 @@ const VectorSource = ol.source.Vector;
 const eventCondition = ol.events.condition;
 const toLonLat = ol.proj.toLonLat;
 
-const pageInfo = JSON.parse(pageInfoJSON);
-// console.debug('pageInfo', pageInfo);
+const globalPageInfo = JSON.parse(pageInfoJSON);
+// console.debug('pageInfo', globalPageInfo);
 
 class ItineraryMap extends TripMap {
 
   constructor(providers, opt_options) {
-    super(providers, opt_options);
-    this.options = opt_options || {};
+    let options = opt_options || {};
+    options.pageInfo = globalPageInfo;
+    super(providers, options);
     this.timer_count = 0;
     this.liveMapData = {
       refreshInterval: 10,
@@ -142,7 +143,6 @@ class ItineraryMap extends TripMap {
     }
     this.routeSource.on('addfeature', function(event) {
       const type = event.feature.get('type');
-      // console.debug('routeSource addfeature event', event.feature);
       const geometry = event.feature.getGeometry();
       const pointCount = geometry.flatCoordinates.length / geometry.stride;
       if (pointCount > 1)
@@ -166,7 +166,6 @@ class ItineraryMap extends TripMap {
     }
     this.waypointSource.on('addfeature', function(event) {
       event.feature.set('type', 'waypoint');
-      // console.debug('waypointSource addfeature event', event.feature);
       self.saveFeature(event.feature);
       self.waypointDraw.finishDrawing();
       self.map.removeInteraction(self.waypointDraw);
@@ -358,7 +357,6 @@ class ItineraryMap extends TripMap {
   saveModifiedFeatures() {
     if (this.modifiedRoutes && this.modifiedRoutes.size > 0) {
       for (const [key, value] of this.modifiedRoutes.entries()) {
-        // console.debug('Saving feature ID:', key);
         this.saveFeature(value);
       }
       this.modifiedRoutes.clear();
@@ -366,7 +364,6 @@ class ItineraryMap extends TripMap {
     // waypoints
     if (this.modifiedWaypoints && this.modifiedWaypoints.size > 0) {
       for (const [key, value] of this.modifiedWaypoints.entries()) {
-        // console.debug('Saving feature ID:', key);
         this.saveFeature(value);
       }
       this.modifiedWaypoints.clear();
@@ -384,6 +381,11 @@ class ItineraryMap extends TripMap {
     if (selectedFeatures.routes.length > 0 ||
         selectedFeatures.waypoints.length > 0)
       this.deleteFeatures(selectedFeatures);
+
+    if (this.deletedRoutes)
+      this.deletedRoutes.length = 0;
+    if (this.deletedWaypoints)
+      this.deletedWaypoints.length = 0;
     this.removeInteractions();
   }
 
@@ -396,13 +398,16 @@ class ItineraryMap extends TripMap {
   }
 
   abortFeatureEdit() {
+    console.debug('abortFeatureEdit');
     this.removeInteractions();
     this.refetch = false;
     if (this.modifiedRoutes && this.modifiedRoutes.size > 0) {
+      console.debug('Clearing map of modified routes');
       this.refetch = true;
       this.modifiedRoutes.clear();
     }
     if (this.modifiedWaypoints && this.modifiedWaypoints.size > 0) {
+      console.debug('Clearing map of modified waypoints');
       this.refetch = true;
       this.modifiedWaypoints.clear();
     }
@@ -416,6 +421,7 @@ class ItineraryMap extends TripMap {
     }
     this.createFeatureControl.hideOptionButtons();
     if (this.refetch) {
+      console.debug('Clearing all mapping features and refetching');
       this.routeSource.clear();
       this.waypointSource.clear();
       this.trackSource.clear();
@@ -449,6 +455,7 @@ class ItineraryMap extends TripMap {
   }
 
   saveFeature(feature) {
+    // console.debug('Saving feature pageInfo', this.options.pageInfo);
     const self = this;
     const geoJson = new GeoJSON().writeFeatureObject(feature,{
       dataProjection: 'EPSG:4326',
@@ -484,13 +491,24 @@ class ItineraryMap extends TripMap {
       .then((data) => {
         // console.debug('Data response', data);
         if (data.id && !feature.get('id') ) {
-          // console.debug('Setting id to', data.id);
           feature.set('id', data.id);
+          const geometry = feature.getGeometry();
+          // Add id to list of features so they are included when we re-fetch objects.
+          switch (feature.get('type')) {
+          case 'route':
+            self.options.pageInfo.features.routes.push(data.id);
+            break;
+          case 'waypoint':
+            self.options.pageInfo.features.waypoints.push(data.id);
+            break;
+          default:
+            console.error('Unexpected feature type:', feature.get('type'));
+          }
         }
       })
       .catch((error) => {
-        alert('Failed to save route: ' + error);
         console.error('Error saving route: ', error);
+        alert('Failed to save route: ' + error);
       });
   }
 
@@ -832,7 +850,7 @@ class ItineraryMap extends TripMap {
 
 const itineraryMap = new ItineraryMap(providers,
                                       {
-                                        itinerary_id: pageInfo.itinerary_id,
+                                        itinerary_id: globalPageInfo.itinerary_id,
                                         url: server_prefix +
                                           '/rest/itinerary/features',
                                         trackingUrl: server_prefix +
@@ -842,7 +860,7 @@ const itineraryMap = new ItineraryMap(providers,
                                           '/rest/itinerary/features',
                                         liveLocationsUrl: `${server_prefix}/rest/locations`,
                                         updatesUrl: `${server_prefix}/rest/locations/is-updates`,
-                                        exitUrl: `${server_prefix}/itinerary?id=${pageInfo.itinerary_id}&active-tab=features`,
+                                        exitUrl: `${server_prefix}/itinerary?id=${globalPageInfo.itinerary_id}&active-tab=features`,
                                         readOnly: readOnly,
                                         exitMessage: click_to_exit_text,
                                       });

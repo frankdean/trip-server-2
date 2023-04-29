@@ -26,16 +26,17 @@ const GeoJSON = ol.format.GeoJSON;
 const VectorLayer = ol.layer.Vector;
 const VectorSource = ol.source.Vector;
 
-const pageInfo = JSON.parse(pageInfoJSON);
+const globalPageInfo = JSON.parse(pageInfoJSON);
 
 class FeatureMap extends TripMap {
 
   constructor(providers, opt_options) {
-    super(providers, opt_options);
+    let options = opt_options || {};
+    options.pageInfo = globalPageInfo;
+    super(providers, options);
     const selectHandler = new SelectionHandler(this.pointChange.bind(this));
-    // console.log(pageInfo);
     const all = selectHandler.isSelectAll();
-    let point_ids = pageInfo.track_point_ids;
+    let point_ids = this.options.pageInfo.track_point_ids;
     this.pointIdMap = new Map();
     point_ids.forEach(x => this.pointIdMap.set(x, all));
     // console.debug('Finished FeatureMap constructor');
@@ -112,7 +113,7 @@ class FeatureMap extends TripMap {
 
 const featureMap = new FeatureMap(providers,
                                   {
-                                    itinerary_id: pageInfo.itinerary_id,
+                                    itinerary_id: globalPageInfo.itinerary_id,
                                     url: server_prefix +
                                       '/rest/itinerary/features',
                                     mapDivId: 'itinerary-track-map',

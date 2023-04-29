@@ -25,13 +25,14 @@ const GeoJSON = ol.format.GeoJSON;
 const VectorLayer = ol.layer.Vector;
 const VectorSource = ol.source.Vector;
 
-const pageInfo = JSON.parse(pageInfoJSON);
+const globalPageInfo = JSON.parse(pageInfoJSON);
 
 class FeatureMap extends TripMap {
 
   constructor(providers, opt_options) {
-    super(providers, opt_options);
-    // console.log(pageInfo);
+    let options = opt_options || {};
+    options.pageInfo = globalPageInfo;
+    super(providers, options);
   }
 
   handleUpdate(data) {
@@ -83,7 +84,7 @@ class FeatureMap extends TripMap {
 
 const featureMap = new FeatureMap(providers,
                                   {
-                                    itinerary_id: pageInfo.itinerary_id,
+                                    itinerary_id: globalPageInfo.itinerary_id,
                                     url: server_prefix +
                                       '/rest/itinerary/features',
                                     mapDivId: 'itinerary-path-map',

@@ -26,13 +26,14 @@ const GeoJSON = ol.format.GeoJSON;
 const VectorLayer = ol.layer.Vector;
 const VectorSource = ol.source.Vector;
 
-const pageInfo = JSON.parse(pageInfoJSON);
-// console.debug('pageInfo', pageInfo);
+const globalPageInfo = JSON.parse(pageInfoJSON);
 
 class SimplifyMap extends TripMap {
 
   constructor(providers, opt_options) {
-    super(providers, opt_options);
+    let options = opt_options || {};
+    options.pageInfo = globalPageInfo;
+    super(providers, options);
     this.toleranceInput = document.getElementById('tolerance');
     // this.toleranceInput.addEventListener('change', this.toleranceChangeEvent.bind(this), false);
     this.toleranceInput.addEventListener('input', this.toleranceChangeEvent.bind(this), false);
@@ -191,12 +192,12 @@ class SimplifyMap extends TripMap {
 
 const simplifyMap = new SimplifyMap(providers,
                                     {
-                                      itinerary_id: pageInfo.itinerary_id,
+                                      itinerary_id: globalPageInfo.itinerary_id,
                                       url: server_prefix +
                                         '/rest/itinerary/features',
                                       saveUrl: server_prefix +
                                         '/rest/itinerary/features',
-                                      updatesUrl: `${server_prefix}/itinerary?id=${pageInfo.itinerary_id}&active-tab=features`,
+                                      updatesUrl: `${server_prefix}/itinerary?id=${globalPageInfo.itinerary_id}&active-tab=features`,
                                       mapDivId: 'simplify-track-map',
                                       showExitControl: false,
                                     });

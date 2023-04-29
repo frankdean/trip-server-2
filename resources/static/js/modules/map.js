@@ -147,7 +147,8 @@ class SelectMapModal {
   hide() {
     const mapControlElement = document.getElementById('select-map-control');
     const popup = document.getElementById('map-layer-list-container');
-    mapControlElement.removeChild(popup);
+    if (popup)
+      mapControlElement.removeChild(popup);
   }
 }
 
@@ -284,7 +285,7 @@ class TripMap {
       self.options.url,
       {
         method: 'POST',
-        body: pageInfoJSON,
+        body: JSON.stringify(self.options.pageInfo),
         headers: myHeaders,
         mode: 'same-origin',
         cache: 'no-store',

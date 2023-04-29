@@ -26,16 +26,17 @@ const GeoJSON = ol.format.GeoJSON;
 const VectorLayer = ol.layer.Vector;
 const VectorSource = ol.source.Vector;
 
-const pageInfo = JSON.parse(pageInfoJSON);
+const globalPageInfo = JSON.parse(pageInfoJSON);
 
 class FeatureMap extends TripMap {
 
   constructor(providers, opt_options) {
-    super(providers, opt_options);
+    let options = opt_options || {};
+    options.pageInfo = globalPageInfo;
+    super(providers, options);
     const selectHandler = new SelectionHandler(this.segmentChange.bind(this));
-    // console.log(pageInfo);
     const all = selectHandler.isSelectAll();
-    let segments = pageInfo.segments;
+    let segments = this.options.pageInfo.segments;
     this.segmentMap = new Map();
     segments.forEach(x => this.segmentMap.set(x, all));
     // console.log(this.segmentMap);
@@ -102,7 +103,7 @@ class FeatureMap extends TripMap {
 
 const featureMap = new FeatureMap(providers,
                                   {
-                                    itinerary_id: pageInfo.itinerary_id,
+                                    itinerary_id: globalPageInfo.itinerary_id,
                                     url: server_prefix +
                                       '/rest/itinerary/features',
                                     mapDivId: 'itinerary-track-map',
