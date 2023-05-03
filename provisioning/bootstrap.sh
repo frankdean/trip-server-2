@@ -25,8 +25,8 @@ LIBPQXX_VERSION=6.4.8
 LIBPQXX_SHA256=3f7aba951822e01f1b9f9f353702954773323dd9f9dc376ffb57cb6bbd9a7a2f
 NLOHMANN_JSON_VERSION=v3.11.2
 NLOHMANN_JSON_SHA256=665fa14b8af3837966949e8eb0052d583e2ac105d3438baba9951785512cf921
-NODE_VERSION="v14.21.3"
-NODE_SHA256=05c08a107c50572ab39ce9e8663a2a2d696b5d262d5bd6f98d84b997ce932d9a
+NODE_VERSION="v16.20.0"
+NODE_SHA256=dff21020b555cc165a1ac36da7d4f6c810b35409c94e00afc51d5d370aae47ae
 
 DOWNLOAD_CACHE_DIR="/vagrant/provisioning/downloads"
 LIBPQXX_DOWNLOAD="libpqxx-${LIBPQXX_VERSION}.tar.gz"
@@ -38,7 +38,7 @@ SU_CMD="su vagrant -c"
 function install_libpqxx_6
 {
     # Download and install libpqxx if it does not exist
-    if [ ! -d /usr/local/include/pqxx ]; then
+    if [ ! -f /usr/local/include/pqxx/pqxx ]; then
 	# Does not exist on FreeBSD
 	if [ ! -d /usr/local/src ]; then
 	    mkdir /usr/local/src
@@ -51,7 +51,7 @@ function install_libpqxx_6
 	if [ -r "${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD}" ]; then
 	    echo "$LIBPQXX_SHA256  ${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD}" | shasum -c -
 	    if [ $? -ne "0" ]; then
-		>&2 echo "Checksum of ${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD} does not match expected value of ${LIBPQXX_SHA256}"
+		2>&1 echo "Checksum of ${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD} does not match expected value of ${LIBPQXX_SHA256}"
 		exit 1
 	    fi
 	    cd /usr/local/src
@@ -61,7 +61,19 @@ function install_libpqxx_6
 	    cd "libpqxx-${LIBPQXX_VERSION}"
 	    pwd
 	    if [ -r configure ]; then
-		$SU_CMD './configure --disable-cairo --disable-documentation'
+		if [ -f /etc/rocky-release ]; then
+		    # Weirdly, pkg-config was appending a space to the include
+		    # path, presumably due to an incorrect configuration file
+		    # which caused 'configure' to fail, apparently unable to
+		    # build `libpqxx` by appending a known 'libpq' header
+		    # file. Proven by executing the following:
+		    # echo "x$(PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/pgsql-13/lib/pkgconfig pkg-config libpq --cflags)x"
+		    # So we pedantically specify the lib and include directories
+		    PG_LIBDIR=$(/usr/pgsql-13/bin/pg_config --libdir)
+		    $SU_CMD "./configure LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR} --with-postgres-include=$(/usr/pgsql-13/bin/pg_config --includedir) --with-postgres-lib=${PG_LIBDIR} --disable-documentation"
+		else
+		    $SU_CMD './configure --disable-documentation'
+		fi
 		$SU_CMD make
 		make install
 	    else
@@ -91,7 +103,7 @@ function install_nlohmann_json
     fi
 }
 
-function install_nodejs_14
+function install_nodejs
 {
     # https://github.com/nodejs/help/wiki/Installation
     NODE_FILENAME="node-${NODE_VERSION}-linux-x64"
@@ -150,10 +162,10 @@ function install_nodejs_14
 if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
     DNF_OPTIONS="--assumeyes"
     dnf $DNF_OPTIONS install gcc gawk boost-devel libpq-devel \
-	libpq-devel yaml-cpp-devel pugixml-devel libuuid-devel gdal-devel \
-	curl postgresql-server postgresql-contrib \
+	libpq-devel yaml-cpp-devel pugixml-devel libuuid-devel \
+	curl libX11 libXt libXmu \
 	screen vim autoconf automake info libtool \
-	intltool gdb valgrind git apg cairomm-devel cmark-devel \
+	intltool gdb valgrind git cmark-devel \
 	nodejs
 
     if [ -f /etc/rocky-release ]; then
@@ -166,12 +178,18 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 
 	# rockylinux: Error: Unable to find a match: postgis autoconf-archive texinfo texinfo-tex yarnpkg
 
-	dnf $DNF_OPTIONS update
+	dnf $DNF_OPTIONS update --refresh
 	dnf $DNF_OPTIONS install epel-release
+	# https://forums.rockylinux.org/t/how-do-i-install-powertools-on-rocky-linux-9/7427/3
+	dnf $DNF_OPTIONS config-manager --set-enabled crb
 	dnf $DNF_OPTIONS install gcc gcc-c++ make perl kernel-devel kernel-headers \
-	    bzip2 dkms boost
+	    bzip2 dkms boost-locale autoconf-archive info yarnpkg \
+	    texinfo apg
 	dnf $DNF_OPTIONS update 'kernel-*'
 
+	# postgresql & postgis - https://postgis.net/install/
+	dnf $DNF_OPTIONS install https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+	dnf $DNF_OPTIONS install postgresql13-devel postgis31_13
 	# The Rocky Linux box otherwise uninstalls this package with 'dnf autoremove'
 	dnf $DNF_OPTIONS mark install NetworkManager-initscripts-updown \
 	    grub2-tools-efi python3-configobj rdma-core
@@ -179,8 +197,9 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
     elif [ -f /usr/lib/fedora-release ]; then
 	# The Fedora box otherwise uninstalls this package with 'dnf autoremove'
 	dnf $DNF_OPTIONS mark install linux-firmware-whence
-	dnf $DNF_OPTIONS install postgis autoconf-archive texinfo texinfo-tex \
-	    yarnpkg
+	dnf $DNF_OPTIONS install postgresql-server postgresql-contrib postgis \
+	    autoconf-archive texinfo texinfo-tex \
+	    yarnpkg gdal-devel cairomm-devel apg
     fi
 
     install_libpqxx_6
@@ -189,14 +208,26 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 	dnf $DNF_OPTIONS group install lxde-desktop
     fi
 
-    if [ ! -r /var/lib/pgsql/data/postgresql.conf ]; then
-	postgresql-setup --initdb
+    if [ -f /etc/rocky-release ]; then
+	if [ ! -r /var/lib/pgsql/13/data/postgresql.conf ]; then
+	    sudo /usr/pgsql-13/bin/postgresql-13-setup initdb
+	fi
+	systemctl is-active postgresql-13 >/dev/null
+	if [ $? -ne 0 ]; then
+	    systemctl enable postgresql-13
+	    systemctl start postgresql-13
+	fi
+    else
+	if [ ! -r /var/lib/pgsql/data/postgresql.conf ]; then
+	    postgresql-setup --initdb
+	fi
+	systemctl is-active postgresql.service >/dev/null
+	if [ $? -ne 0 ]; then
+	    systemctl enable postgresql.service
+	    systemctl start postgresql.service
+	fi
     fi
-    systemctl is-active postgresql.service >/dev/null
-    if [ $? -ne 0 ]; then
-	systemctl enable postgresql.service
-	systemctl start postgresql.service
-    fi
+
     exit 0;
 fi
 
@@ -214,7 +245,7 @@ if [ -x /bin/freebsd-version ]; then
 	texinfo vim python3 valgrind apg \
 	intltool gdb libtool autoconf-archive gettext automake cairomm \
 	cmark \
-	node14 yarn-node14
+	node16 yarn-node16
     # Include the textlive-full package to allow building the PDF docs, which
     # needs an additional 11G or more of disk space.
     
@@ -289,7 +320,7 @@ if [ -f /etc/debian_version ]; then
     ## Additional configuration to also support developing with Trip Server version 1 series.
     if [ "$TRIP_DEV" == "y" ]; then
 	apt-get install -y openjdk-11-jdk chromium chromium-l10n firefox-esr-l10n-en-gb vim
-	install_nodejs_14
+	install_nodejs
     fi
     ## END Additional configuration to also support developing with Trip Server version 1 series.
 fi

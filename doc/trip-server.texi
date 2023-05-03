@@ -1101,7 +1101,7 @@ convenience, @strong{the VM is insecure by default and design}.
 @code{Guest additions on this VM do not match the installed version of
 VirtualBox!}
 
-This means the installed box needs updating or an older version of
+This means the installed box needs updating or a different version of
 VirtualBox needs to be used.
 
 There is a script in @code{./provisioning/init.sh} that automates the
@@ -1128,7 +1128,7 @@ $ vagrant vbguest --status
 If the guest version does not match the host, do:
 
 @example
-$ vagrant vbguest --do install
+$ vagrant vbguest --do install [ $TARGET ]
 @end example
 
 @item

@@ -31,6 +31,15 @@ Vagrant.configure("2") do |config|
     debian.vm.box = "debian/bullseye64"
     #debian.vm.box_version = "11.20221219.1"
 
+    # Share an additional folder to the guest VM. The first argument is
+    # the path on the host to the actual folder. The second argument is
+    # the path on the guest to mount the folder. And the optional third
+    # argument is a set of non-required options.
+    if myEnv[:TRIP_DEV] == "y"
+      debian.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client"
+      debian.vm.synced_folder "../trip-server", "/vagrant-trip-server"
+    end
+
     # Create a forwarded port mapping which allows access to a specific port
     # within the machine from a port on the host machine. In the example below,
     # accessing "localhost:8080" will access port 80 on the guest machine.
@@ -46,27 +55,62 @@ Vagrant.configure("2") do |config|
 
     # If the VirtualBox guest additions fail to install, first try:
     #
+    #   vagrant vbguest --do install fedora
     #   vagrant reload fedora --provision
     #
-    # The initial provisioning installs packages needed to install the
-    # VirtualBox guest additions.  Failing that, uncomment the following
-    # definition to use the rsync method to synchronise the current folder:
+    # The initial provisioning script installs packages needed to install the
+    # VirtualBox guest additions and a restart is required to enable the guest
+    # additions.
 
-    #fedora.vm.synced_folder ".", "/vagrant", type: "rsync"
+    if myEnv[:TRIP_DEV] == "y"
+      fedora.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client"
+      fedora.vm.synced_folder "../trip-server", "/vagrant-trip-server"
+    end
+
     fedora.vm.network "forwarded_port", guest: 8080, host: 8082
     fedora.vm.network "forwarded_port", guest: 8081, host: 8083
   end
 
-  # The FreeBSD configuration is not recommended for development as it doesn't
-  # reliably synchronise the source directory structure.  However, it can be
-  # useful to manually test a distribution tarball before release.
+  # The FreeBSD configuration is not recommended for testing with Trip Server
+  # v1.
+  #
+  # It is configured to use `rsync` to synchronise the source directory
+  # structure, which is less than ideal.  In that configuration, it may fail
+  # to download and build the Node.js modules.
+  #
+  # However, it can be useful to manually test a distribution tarball before
+  # release.
+  #
+  # If may take multiple attempts to fully succeed in provisioning a working
+  # system:
+  #
+  #   vagrant reload freebsd --provision
+  #
   config.vm.define "freebsd", autostart: false do |freebsd|
-    # boxes at https://app.vagrantup.com/freebsd
-
+    # https://app.vagrantup.com/freebsd
     freebsd.vm.box = "freebsd/FreeBSD-13.1-STABLE"
     #freebsd.vm.box_version = "2022.10.14"
-    # When using FreeBSD, the following may need to be defined
+    freebsd.vm.box_version = "2023.01.27"
+
+    # Bento box does not have bash shell:
+    #freebsd.vm.box = "bento/freebsd-13"
+    # VirtualBox 7.0.6
+    #freebsd.vm.box_version = "202303.13.0"
+    # VirtualBox 6.1.40
+    #freebsd.vm.box_version = "202212.12.0"
+
+    # https://superuser.com/questions/764069/freebsd-with-vagrant-dont-know-how-to-check-guest-additions-version
+    # Needs host root privileges though to alter host network settings!
+    #freebsd.vm.network "private_network", type: "dhcp"
+    #freebsd.vm.synced_folder ".", "/vagrant", type: "nfs"
+
+    # https://developer.hashicorp.com/vagrant/docs/cli/rsync
     freebsd.vm.synced_folder ".", "/vagrant", type: "rsync"
+
+    if myEnv[:TRIP_DEV] == "y"
+      freebsd.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client", type: "rsync"
+      freebsd.vm.synced_folder "../trip-server", "/vagrant-trip-server", type: "rsync"
+    end
 
     freebsd.vm.network "forwarded_port", guest: 8080, host: 8084
     freebsd.vm.network "forwarded_port", guest: 8081, host: 8085
@@ -81,13 +125,27 @@ Vagrant.configure("2") do |config|
     freebsd.vm.disk :disk, size: "28GB", primary: true
   end
 
-  # Currently there are no boxes at https://app.vagrantup.com/rockylinux that
-  # are easily configured.
-  # config.vm.define "rockylinux", autostart: false do |rockylinux|
-  #   rockylinux.vm.box = "rockylinux/8"
-  #   rockylinux.vm.network "forwarded_port", guest: 8080, host: 8086
-  #   rockylinux.vm.network "forwarded_port", guest: 8081, host: 8087
-  # end
+  config.vm.define "rockylinux", autostart: false do |rockylinux|
+    # https://app.vagrantup.com/rockylinux
+    #rockylinux.vm.box = "rockylinux/9"
+    #
+    # Using Bento box:
+    rockylinux.vm.box = "bento/rockylinux-9"
+    # VirtualBox 7.0.6
+    #rockylinux.vm.box_version = "202303.13.0"
+    # if myEnv[:ROCKY_INIT] == "y"
+    #   puts "Rocky Linux init\r"
+    #   rockylinux.vbguest.auto_update = false
+    #   #rockylinux.vm.synced_folder ".", "/vagrant", type: "rsync"
+    #   rockylinux.vm.synced_folder ".", "/vagrant", type: "virtualbox", automount: false
+    # end
+    if myEnv[:TRIP_DEV] == "y"
+      rockylinux.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client"
+      rockylinux.vm.synced_folder "../trip-server", "/vagrant-trip-server"
+    end
+    rockylinux.vm.network "forwarded_port", guest: 8080, host: 8086
+    rockylinux.vm.network "forwarded_port", guest: 8081, host: 8087
+  end
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -102,18 +160,6 @@ Vagrant.configure("2") do |config|
   # Bridged networks make the machine appear as another physical device on
   # your network.
   # config.vm.network "public_network"
-
-  # Share an additional folder to the guest VM. The first argument is
-  # the path on the host to the actual folder. The second argument is
-  # the path on the guest to mount the folder. And the optional third
-  # argument is a set of non-required options.
-  if myEnv[:TRIP_DEV] == "y"
-    config.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client"
-    config.vm.synced_folder "../trip-server", "/vagrant-trip-server"
-
-    # When using Fedora, the following may need to be defined
-    #fedora.vm.synced_folder ".", "/vagrant", type: "virtualbox", automount: true
-  end
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.

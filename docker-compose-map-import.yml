@@ -21,6 +21,8 @@ services:
     environment:
       DOWNLOAD_PBF: https://download.geofabrik.de/europe/monaco-latest.osm.pbf
       DOWNLOAD_POLY: https://download.geofabrik.de/europe/monaco.poly
+      # https://osm2pgsql.org/doc/manual.html
+      # OSM2PGSQL_EXTRA_ARGS: "-C 4096 --slim"
     volumes:
       - osm-data:/data/database
     command: "import"
