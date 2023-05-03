@@ -43,6 +43,14 @@ void ItinerariesHandler::build_page(
     "<div class=\"container-fluid\">\n"
     // Page title of the itenerary list page
     "  <h1 class=\"pt-2\">" << translate("Itineraries") << "</h1>\n";
+  if (itinerary_upload_failed) {
+    response.content
+      <<
+      "  <div class=\"alert alert-danger\"\n>"
+      // Message displayed when there uploading an itinerary failed
+      "    <p>" << translate("Itinerary upload failed") << "</p>\n"
+      "  </div>\n";
+  }
   if (itineraries.empty()) {
     response.content
       <<
@@ -151,6 +159,8 @@ void ItinerariesHandler::handle_authenticated_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
+  const std::string error = request.get_query_param("error");
+  itinerary_upload_failed = error == "itinerary-upload-failed";
   try {
     ItineraryPgDao dao;
     const std::string user_id = get_user_id();

@@ -22,6 +22,7 @@
 #include "../config.h"
 #include "itinerary_import_handler.hpp"
 #include "itinerary_pg_dao.hpp"
+#include "../trip-server-common/src/get_options.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <boost/locale.hpp>
 #include <yaml-cpp/yaml.h>
@@ -135,10 +136,13 @@ void ItineraryImportHandler::handle_authenticated_request(
   } catch (const std::out_of_range &e) {
     std::cerr << "No file uploaded\n";
   } catch (const std::exception &e) {
-    // TODO Display error message for user
-    std::cerr << "Exception handling file upload: "
-              << e.what() << '\n';
-    throw BadRequestException("Invalid file uploaded");
+    if (GetOptions::verbose_flag)
+      std::cout << "Exception handling file upload: "
+                << e.what() << '\n';
+    redirect(request,
+             response,
+             get_uri_prefix() + "/itineraries?error=itinerary-upload-failed");
+    return;
   }
   redirect(request, response, get_uri_prefix() + "/itineraries");
 }

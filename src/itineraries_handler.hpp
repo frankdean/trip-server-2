@@ -34,7 +34,8 @@ namespace web {
 namespace trip {
 
 class ItinerariesHandler : public TripAuthenticatedRequestHandler {
-void build_page(
+  bool itinerary_upload_failed;
+  void build_page(
     web::HTTPServerResponse& response,
     const web::Pagination& pagination,
     const std::vector<ItineraryPgDao::itinerary_summary> itineraries);
@@ -47,7 +48,8 @@ protected:
       web::HTTPServerResponse& response) override;
 public:
   ItinerariesHandler(std::shared_ptr<TripConfig> config) :
-    TripAuthenticatedRequestHandler(config) {}
+    TripAuthenticatedRequestHandler(config),
+    itinerary_upload_failed() {}
   virtual ~ItinerariesHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItinerariesHandler";
