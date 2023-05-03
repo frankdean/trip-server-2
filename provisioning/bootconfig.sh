@@ -19,7 +19,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Uncomment the following to debug the script
-set -x
+#set -x
 
 ##Debian 10
 #PG_VERSION=11
