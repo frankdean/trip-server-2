@@ -83,9 +83,9 @@ void TrackingMapHandler::handle_authenticated_request(
                              SessionPgDao::tracks_query_key,
                              j.dump());
     } catch (const std::exception& e) {
-      // TODO create an error message for the user
       std::cerr << "Failed to save query parameters in session\n"
                 << e.what() << '\n';
+      throw;
     }
   }
   response.content <<
