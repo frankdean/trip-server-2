@@ -159,12 +159,11 @@ bool path_statistics::decode(const YAML::Node& node, path_statistics& rhs)
  * Updates the various altitude related member variables using the passed
  * location.
  *
- * \param the location to update details for.
+ * \param the location to update details from.
  */
 void GeoMapUtils::update_altitude_info(const location *loc)
 {
-  if (last_altitude.first) {
-    // TODO handle where loc.altitude.first is false
+  if (last_altitude.first && loc->altitude.first) {
     // See the GeoStatistics::upudate_statistics method
     double diff = loc->altitude.second - last_altitude.second;
     // std::cout << std::fixed << std::setprecision(1) << "Diff: " << diff << '\n';
@@ -176,7 +175,6 @@ void GeoMapUtils::update_altitude_info(const location *loc)
         ascent.second = diff;
       }
     } else {
-      // TODO Shouldn't descent be a positive number
       if (descent.first) {
         descent.second -= diff;
       } else {
