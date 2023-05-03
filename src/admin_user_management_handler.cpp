@@ -155,13 +155,18 @@ void AdminUserManagementHandler::build_form(
       // Label for button to edit a selected user
       "      <button id=\"btn-edit\" class=\"btn btn-lg btn-secondary\" name=\"action\" value=\"edit-selected\">" << translate("Edit") << "</button>\n"
       // Label for button to reset the password of the selected user
-      "      <button id=\"btn-edit-password\" class=\"btn btn-lg btn-info\" name=\"action\" value=\"password-reset-selected\">" << translate("Password reset") << "</button>\n"
-      // Label for button to create a new user
-      "      <button id=\"btn-new\" class=\"btn btn-lg btn-warning\" name=\"action\" value=\"new-user\">" << translate("New") << "</button>\n"
-      "    </div>\n";
-    os <<     "  </form>\n";
+      "      <button id=\"btn-edit-password\" class=\"btn btn-lg btn-info\" name=\"action\" value=\"password-reset-selected\">" << translate("Password reset") << "</button>\n";
   }
+
+  // The new button is in the div-choice-buttons div only if the list is not
+  // empty, otherwise it sits under the search button.
   os <<
+    // Label for button to create a new user
+    "      <button id=\"btn-new\" class=\"btn btn-lg btn-warning\" name=\"action\" value=\"new-user\">" << translate("New") << "</button>\n";
+  if (!users.empty())
+    os << "    </div>\n";
+  os <<
+    "  </form>\n"
     "</div>\n";
 }
 
