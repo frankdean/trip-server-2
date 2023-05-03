@@ -58,39 +58,26 @@ void ItinerarySimplifyHandler::build_form(
     "  <div>\n"
     "    <form name=\"simplify-path-form\">\n"
     "      <div class=\"container-fluid bg-light py-2\">\n"
-    "      <input type=\"hidden\" name=\"id\" value=\"" << itinerary_id << "\">\n"
+    "        <input type=\"hidden\" name=\"id\" value=\"" << itinerary_id << "\">\n"
     "        <p id=\"track-name\"><span class=\"view-label\">" << translate("Name") << "</span><span id=\"path-name\" style=\"padding-left: 1em; padding-right: 1em;\"></span></p>\n"
     "        <p>\n"
     "          <span>\n"
     // Label for a tolerance slider control to set a tolerance value when simplifying a track
     "            <label for=\"tolerance\">" << translate("Tolerance") << "</label>\n"
-    "            <input id=\"tolerance\" style=\"width: 100%;\" size=\"10\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" value=\"0\" />\n"
+    "            <input id=\"tolerance\" style=\"width: 100%;\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" value=\"0\" >\n"
     "          </span>\n"
     "        </p>\n"
     // Label for how many locations there are in the original track when simplifying it
     "        <p id=\"original-points\">" << translate("Original points") << " <span id=\"original-point-count\"></span></p>\n"
     // Label for how many locations there are in the simplified track while simplifying a track
-    "        <p id=\"current-points\">" << translate("Current points") << " <span id=\"current-point-count\"</span></p>\n"
-    "        <p>\n"
-    // "          <span>\n"
-    // // Checkbox to select a higher quality solution when simplifying a track
-    // "            <label for=\"highestQuality\">" << translate("High quality") << "</label>\n"
-    // "            <input id=\"highestQuality\" type=\"checkbox\" />\n"
-    // "          </span>\n"
-    "          <span id=\"show-joined\" style=\"margin-left: 15px;\">\n"
-    // TODO show joined segments
-    // Label for a checkbox to the segments of a track as joined whilst simplifying a track
-    // "            <label for=\"show-joined\">" << translate("Show joined track segments") << "</label>\n"
-    // "            <input id=\"show-joined\" type=\"checkbox\" />\n"
-    "          </span>\n"
-    "        </p>\n"
-    "      <div class=\"my-2\">\n"
+    "        <p id=\"current-points\">" << translate("Current points") << " <span id=\"current-point-count\"></span></p>\n"
+    "        <div class=\"my-2\">\n"
     // Label to save changes when simplifying a track
-    "        <button id=\"btn-save\" type=\"button\" class=\"btn btn-success\" name=\"action\" value=\"save\" accesskey=\"s\">" << translate("Save") << "</button>\n"
-    "        <button id=\"btn-cancel\" type=\"button\" class=\"btn btn-danger mx-3\" name=\"action\" value=\"cancel\" accesskey=\"c\" formnovalidate>"
+    "          <button id=\"btn-save\" type=\"button\" class=\"btn btn-success\" name=\"action\" value=\"save\" accesskey=\"s\">" << translate("Save") << "</button>\n"
+    "          <button id=\"btn-cancel\" type=\"button\" class=\"btn btn-danger mx-3\" name=\"action\" value=\"cancel\" accesskey=\"c\">"
     // Button label to cancel simplifying a track
     << translate("Cancel") << "</button>\n"
-    "      </div>\n"
+    "        </div>\n"
     "      </div>\n"
     "    </form>\n"
     "  </div>\n"
