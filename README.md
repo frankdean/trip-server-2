@@ -90,7 +90,7 @@ The following features have been implemented:
 
 * Viewing routes, tracks and waypoints of an itinerary on the map.
 
-* Splitting and joining routes and tracks.
+* Splitting, simplifying and joining routes and tracks.
 
 * Deleting individual points from routes and tracks.
 

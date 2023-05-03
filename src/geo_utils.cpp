@@ -163,7 +163,9 @@ bool path_statistics::decode(const YAML::Node& node, path_statistics& rhs)
  */
 void GeoMapUtils::update_altitude_info(const location *loc)
 {
-  if (last_altitude.first && loc->altitude.first) {
+  if (!loc->altitude.first)
+    return;
+  if (last_altitude.first) {
     // See the GeoStatistics::upudate_statistics method
     double diff = loc->altitude.second - last_altitude.second;
     // std::cout << std::fixed << std::setprecision(1) << "Diff: " << diff << '\n';
