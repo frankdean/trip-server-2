@@ -18,7 +18,7 @@ This User Guide is for using Trip, version @value{VERSION},
 @value{UPDATED} in a browser.  Trip is a an application supporting trip
 recording and itinerary planning.
 
-Copyright @copyright{} 2021-2022 Frank Dean
+Copyright @copyright{} 2021-2023 Frank Dean
 @end copying
 
 @titlepage
@@ -130,7 +130,7 @@ Useful Queries
 * Map Tiles::
 * Useful Queries for Testing::
 
-Map Tles
+Map Tiles
 
 * Freeing System Disk Space::
 
@@ -306,6 +306,9 @@ $ psql trip
 CREATE EXTENSION pgcrypto;
 @end example
 
+This is also executed when running @code{trip-server} with the
+@code{--upgrade} option.
+
 @subsection Session Table
 @cindex Session Table
 
@@ -405,7 +408,7 @@ TYPE = local
 @item
 DATABASE = trip
 @item
-USER = buget
+USER = trip
 @item
 ADDRESS =
 @item
@@ -422,7 +425,7 @@ local   trip          trip                                  md5
 Restart PostgreSQL:
 
 @example
-$ sudo systemctrl restart postgresql
+$ sudo systemctl restart postgresql
 @end example
 
 Test connecting to the database as the @code{trip} user and create the
@@ -448,7 +451,7 @@ trip=> CREATE EXTENSION pgcrypto;
 As a Unix user who is also a postgresql superuser:
 
 @example
-$ cd ./spec/support
+$ cd ./provisioning/schema
 $ psql trip <10_trip_role.sql
 $ psql trip <20_schema.sql
 $ psql trip <30_permissions.sql
@@ -482,8 +485,8 @@ to waypoint entries when downloading GPX files.
 
 @item track_color
 
-Key-value pairs together with an HTML color code.  The 'key' is written
-to track entries when downloading GPX files and the HTML color code is
+Key-value pairs together with an HTML colour code.  The 'key' is written
+to track entries when downloading GPX files and the HTML colour code is
 used to render the tracks on the itinerary map page.
 
 @item georef_format
@@ -520,7 +523,7 @@ lat/long value of @samp{1.5,-2.5} being displayed as
 1@textdegree{}30'00''N 2@textdegree{}30'00''W
 
 Scripts to create default values for these lookup tables are in the
-@code{./spec/support} folder;
+@code{./provisioning/schema} folder;
 
 @itemize
 @item
@@ -556,7 +559,7 @@ for more information.
 @cindex Creating an Initial Admin User
 
 An initial admin user needs to be created in the database.  Thereafter,
-that user maintains other users using web application.  Creating the
+that user maintains other users using the web application.  Creating the
 initial admin user fundamentally consists of making entries in the
 @code{usertable}, @code{role} and @code{user_role} tables.
 
@@ -567,43 +570,57 @@ following script using @code{psql}:
 INSERT INTO role (name) VALUES ('Admin'), ('User');
 @end example
 
-@c TODO Replace the helper script
-There is a [Node.js][] helper script
-(@code{./spec/support/startup_helper.js}) in Trip Server version 1,
-which will output the SQL commands to create an admin user.  You can
-either output the result to a file and then run the file into
-@code{psql}, or pipe the output directly to @code{psql}.  e.g.
+An initial admin user can be created similarly to the following, replacing
+each value appropriately:
 
 @example
-$ cd ./spec/support
-$ node startup_helper.js | psql trip
+INSERT INTO usertable (firstname, lastname, email, uuid, password, nickname)
+VALUES ('admin', '', 'admin@@trip.test', gen_random_uuid(),
+crypt('SECRET', gen_salt('bf')), 'admin');
+
+INSERT INTO user_role (user_id, role_id)
+VALUES (
+(SELECT id FROM usertable u WHERE u.nickname='admin'),
+(SELECT id FROM role WHERE name='Admin')
+);
 @end example
 
 @node Configuration, Internationalisation and Localisation, PostgreSQL Setup, Top
 @chapter Configuration
 @cindex Configuration
 
-@c TODO instructions for creating the application's configuration file.
+Please refer to the comments in the @code{trip-server-dist.yaml} file for
+information on the application's configuration parameters.
 
-T.B.D. Describe the changes to the YAML configuration in use with Trip
-Server version 1.
+By default the application looks for its configuration file under the
+installation prefix (usually @code{/usr/local}) named
+@code{./etc/trip-server.yaml}.  Alternatively, it can be overridden with the
+@code{--config-file} command line option.
 
-@c Update how the password file is located - it is no longer triprc
-The application reads a configuration file named @code{.triprc} in the
-current working directory.  If not found, it then tries to read
-@code{/etc/triprc}.  Failing that, the PostgreSQL library will try other
-methods, potentially including using the environment variable
-@code{PGPASSWORD}, depending how the database has been configured.
+The configuration file should be readable by the user running
+@code{trip-server}, e.g. @code{trip}, but not world-readable.
 
-The password file should be readable by the user running @code{trip},
-e.g. @code{nobody}, but not world-readable.  On a Debian system, run
-@code{trip} using the @code{nobody} user and set the file permissions as
+On a Debian system, you can create a system user to run the application as
 follows:
 
 @example
-$ sudo chmod 0640 /etc/triprc
-$ sudo chown root:nogroup /etc/triprc
+sudo adduser trip --system --group --home /nonexistent --no-create-home
 @end example
+
+On other systems, you will probably need to use the less friendly
+@code{useradd} command.
+
+Run @code{trip-server} using the @code{trip} user and set the file
+permissions as follows:
+
+@example
+$ sudo chmod 0640 /usr/local/etc/trip-server.yaml
+$ sudo chown trip:trip /usr/local/etc/trip-server.yaml
+@end example
+
+Refer to the Vagrant configurations in the source distribution of trip-server,
+under the @code{./provisioning} directories for information relating to
+configuring and running the application as a daemon under @code{systemd}.
 
 @menu
 * Tile Server Configuration::
@@ -657,13 +674,18 @@ If a link is included, the text will be wrapped in HTML link tags and
 included in the map attribution.  The entries are displayed in the
 sequence they have been defined.
 
+For development, if no map tile provider is configured, dummy tiles are
+displayed showing the x, y & z coordinates of the tile.  Alternatively, you
+can use @url{Docker,https://www.docker.com} to run a small tile server.  See
+the section on Docker in this application's README in the source distribution
+and the various @code{docker-compose-map-*.yaml} configuration files for
+hints.
+
+@c TODO more information on running Docker
+
 @node Elevation Data,  , Tile Server Configuration, Configuration
 @section Elevation Data
 @cindex Elevation Data, Altitude Data
-
-@strong{Note:} The Elevation Data feature has not yet been ported to
-Trip Server version 2.  The documentation is included here for
-completeness.
 
 The @url{http://srtm.csi.cgiar.org/, Consortium for Spatial Information}
 (CGIAR CSI) make
@@ -681,10 +703,9 @@ e.g. @code{/var/local/elevation-data} and configure an @code{elevation}
 section in @code{config.yaml}, e.g.
 
 @example
-"elevation" : @{
-    "tileCacheMs" : 60000,
-    "datasetDir" : "/var/local/elevation-data/"
-@},
+elevation:
+  tileCacheMs: 60000
+  datasetDir: /var/local/elevation-data/
 @end example
 
 When the Trip Server application is started, it reads all the
@@ -807,7 +828,7 @@ SquashFS HOWTO} for more information
 @chapter Internationalisation and Localisation
 @cindex Internationalisation and Localisation
 
-A quick way to test localization is to temporarily set the environment
+A quick way to test localisation is to temporarily set the environment
 variable @code{LC_ALL} when running the server, e.g.
 
 @example
@@ -1035,7 +1056,7 @@ machine and login providing the above credentials
 When finished, halt the server with:
 
 @example
-$ vagrant halt
+$ vagrant halt debian
 @end example
 @end enumerate
 
@@ -1201,6 +1222,16 @@ $ curl -H 'Cookie: TRIP_SESSION_ID=b3571314-d5c4-4690-8164-8384fd748faa' \
 'http://localhost:8080/trip/app/tracks'
 @end example
 
+@item
+Submitting a file for file upload:
+
+@example
+$ curl -i -H 'Content-Type: multipart/form-data' \
+-H 'Cookie: TRIP_SESSION_ID=b3571314-d5c4-4690-8164-8384fd748faa' \
+'localhost:8080/trip/app/itinerary/upload' \
+--form 'file=@@/path/to/file.gpx' -F 'id=2450' -F 'action=upload'
+@end example
+
 @end enumerate
 
 @node Load Testing,  , Testing with Curl, Testing and Developing Trip
@@ -1264,7 +1295,7 @@ maintenance and application development.
 @end menu
 
 @node Map Tiles, Useful Queries for Testing, Useful Queries, Useful Queries
-@subsection Map Tles
+@subsection Map Tiles
 @cindex Map Tiles, Tiles
 
 Monthly cumulative totals of map tile usage for the last year:
