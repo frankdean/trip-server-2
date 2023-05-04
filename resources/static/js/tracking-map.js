@@ -189,10 +189,6 @@ class TrackingMap extends TripMap {
 
       this.markerOverlay = new ol.Overlay({
         element: container,
-        autoPan: true,
-        autoPanAnimation: {
-          duration: 250
-        }
       });
       this.map.addOverlay(this.markerOverlay);
       closer.onclick = function() {
