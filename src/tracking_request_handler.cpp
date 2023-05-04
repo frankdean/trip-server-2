@@ -44,7 +44,8 @@ using json = nlohmann::json;
 const std::string TrackingRequestHandler::tracking_url = "/tracks";
 
 TrackingRequestHandler::TrackingRequestHandler(std::shared_ptr<TripConfig> config) :
-  TripAuthenticatedRequestHandler(config)
+  TripAuthenticatedRequestHandler(config),
+  track_copy_success(false)
 {
 }
 
@@ -70,6 +71,13 @@ void TrackingRequestHandler::build_form(
     // The title of the location tracking page
     "  <h1 class=\"pt-2\">" << translate("Tracks") << "</h1>\n";
 
+  if (track_copy_success) {
+    response.content <<
+      "  <div class=\"alert alert-info\">\n"
+      // Message displayed when copying location tracking query parameters into the copy buffer of the location tracking page is successful
+      "    <p>" << translate("Search parameters copied.  Use the paste button on an itinerary to create an itinerary track based on these search parameters.") << "</p>\n"
+      "  </div>\n";
+  }
   if (!(first_time && locations_result.locations.empty())) {
     response.content <<
       "  <div id=\"location-count\" class=\"card mb-3\">\n"
@@ -350,6 +358,7 @@ void TrackingRequestHandler::handle_authenticated_request(
       session_dao.save_value(get_session_id(),
                              SessionPgDao::location_history_key,
                              j.dump());
+      track_copy_success = true;
     } catch (const std::exception& e) {
       std::cerr << "Failed to save query parameters in session\n"
                 << e.what() << '\n';

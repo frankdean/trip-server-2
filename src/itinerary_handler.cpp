@@ -455,10 +455,17 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
   if (max_track_paste_exceeded) {
     response.content
       <<
-      "            <div class=\"alert alert-warning\" role=\"alert\">\n"
+      "  <div class=\"alert alert-warning\" role=\"alert\">\n"
       // Message displayed when attempting to paste more than the maximum number of items into an itinerary
-      "              <p>" << format(translate("Pasted the maximum of {1} points")) % max_track_points << "</p>\n"
-      "            </div>\n";
+      "    <p>" << format(translate("Pasted the maximum of {1} points")) % max_track_points << "</p>\n"
+      "  </div>\n";
+  }
+  if (feature_copy_success) {
+    response.content <<
+      "  <div class=\"alert alert-info\">\n"
+      // Message displayed when copying one or more features into the copy buffer on the itinerary page is successful
+      "    <p>" << translate("Features copied.  Use the paste button to copy the features to an itinerary you own.") << "</p>\n"
+      "  </div>\n";
   }
   response.content
     <<
@@ -911,6 +918,7 @@ void ItineraryHandler::handle_authenticated_request(
       SessionPgDao session_dao;
       session_dao.save_value(get_session_id(),
                              SessionPgDao::itinerary_features_key, j.dump());
+      feature_copy_success = true;
     }
   } else if (action == "paste") {
     active_tab = features_tab;

@@ -36,6 +36,8 @@ namespace trip {
 
 class TrackingRequestHandler : public TripAuthenticatedRequestHandler {
 private:
+  /// When set, response includes success alert
+  bool track_copy_success;
   void build_form(
       web::HTTPServerResponse& response,
       bool first_time,

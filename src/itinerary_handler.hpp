@@ -52,6 +52,7 @@ public:
   };
 
 private:
+  bool feature_copy_success;
   bool read_only;
   bool max_track_paste_exceeded;
   long itinerary_id;
@@ -126,6 +127,7 @@ public:
   static const long max_track_points;
   ItineraryHandler(std::shared_ptr<TripConfig> config) :
     TripAuthenticatedRequestHandler(config),
+    feature_copy_success(false),
     read_only(true),
     max_track_paste_exceeded(false),
     itinerary_id(),
