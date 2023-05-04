@@ -515,7 +515,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
     <<
     "            <li class=\"nav-item\">\n"
     // Label for a link to the Markdown syntax help page
-    "              <a class=\"nav-link\" href=\"http://daringfireball.net/projects/markdown/syntax\">" << translate("What is Markdown?") << "</a> <!-- read-only version -->\n"
+    "              <a class=\"nav-link\" href=\"http://daringfireball.net/projects/markdown/syntax\" target=\"_blank\">" << translate("What is Markdown?") << "</a> <!-- read-only version -->\n"
     "            </li>\n"
     "            <li class=\"nav-item\">\n"
     // Label for a menu item that closes a page
