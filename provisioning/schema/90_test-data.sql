@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 11.9
--- Dumped by pg_dump version 11.9
+-- Dumped from database version 13.10 (Debian 13.10-0+deb11u1)
+-- Dumped by pg_dump version 13.10 (Debian 13.10-0+deb11u1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -97,7 +97,7 @@ DROP TABLE IF EXISTS public.georef_format;
 DROP EXTENSION IF EXISTS postgis;
 DROP EXTENSION IF EXISTS plpgsql;
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
@@ -111,7 +111,7 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
 --
--- Name: postgis; Type: EXTENSION; Schema: -; Owner: 
+-- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
@@ -126,7 +126,7 @@ COMMENT ON EXTENSION postgis IS 'PostGIS geometry, geography, and raster spatial
 
 SET default_tablespace = '';
 
-SET default_with_oids = false;
+SET default_table_access_method = heap;
 
 --
 -- Name: georef_format; Type: TABLE; Schema: public; Owner: trip
@@ -696,7 +696,6 @@ osgb36	OS GB 1936 (BNG)	7
 %dd%M'%S"%c	Proj4	8
 %c%D° %M	QLandkarte GT	9
 %c%d°%M′%S″	+DMS	10
-%c%d°%M′\\	+DM	11
 %c%d°	+D	12
 %d° %M′ %S″ %c	D M S +	13
 %d° %M′ %c	D M +	14
@@ -712,6 +711,7 @@ osgb36	OS GB 1936 (BNG)	7
 %c%d	Plain +D	23
 IrishGrid	Irish Grid	24
 ITM	Irish Transverse Mercator	25
+%c%d°%M′	+DM	11
 \.
 
 
@@ -4266,7 +4266,7 @@ COPY public.role (id, name) FROM stdin;
 
 
 --
--- Data for Name: spatial_ref_sys; Type: TABLE DATA; Schema: public; Owner: trip
+-- Data for Name: spatial_ref_sys; Type: TABLE DATA; Schema: public; Owner: vagrant
 --
 
 COPY public.spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM stdin;
@@ -4312,28 +4312,28 @@ COPY public.user_role (user_id, role_id) FROM stdin;
 -- Data for Name: usertable; Type: TABLE DATA; Schema: public; Owner: trip
 --
 
-COPY public.usertable (id, firstname, lastname, email, uuid, password, nickname) FROM stdin;
-62	oswald	smith	oswald@trip.test	d7cb7b56-f53c-4c64-a795-fdb256775b80	$2a$10$YoVIqJLcUD.AW6ZU7JxUzOoGkumJk0QZyisc0I/3LIdBK6Hq.UrTy	oswald5
-63	Oswald	Jones	oswald6@trip.test	7edf973d-312c-489b-9784-34aad58861d8	$2a$10$5iUvXmI0rEJKzPW26tpuQO6j3EhZwGsVd./WH6IbOIpgdrU0rNhES	oswald6
-31	test	test	tes999t@trip.test	14c9a561-522b-8932-97e0-b6b916296c21	$2y$10$sr0pxDTRTmA9nPfm/I67LO5tLZbqtdVkrRVdKWRq.WIIXoX0/xFPW	test997u9879
-32	test	test	test998@trip.test	23b10128-7001-68ab-2150-f36e73a923f4	$2y$10$1LmJbfDKhmDecam19rGTDOA3Sj8XA4VLEwVnb9APKIQGodCyKgLce	tset99
-30	test	test	tes99t@trip.test	f2017e90-6f0b-24a9-ee41-e6a93530a5e7	$2a$10$lHw51RHaxpsSsJzFEih5i.49zLK6LUlCrlIjw.3eDEK5jX.pJR1Uu	test997u987
-456	purple	purple	purple@trip.test	3ef65320-f920-4e88-a3a6-bdf36bb17532	$2a$10$YGUYdOlkdi1NamxkppzV9ekIAwrq32IhlwNyzFOU.teemJzhDAcKm	purple
-791	Orange	Orange	orange@trip.test	bd54bb2d-4f64-4ace-ad4a-cc0fc4152378	$2a$10$CUzhW4pxQKEPfZxA1JwnxupDP7LyxYTAj2ueobipHWivVMEuZK1ne	orange
-2	Test	Test	test2@trip.test	f68a8d21-6e39-e1f5-79f5-55dc9603b138	$2y$10$u26z37kPq5hHDFBSQe6.weD1wnjgw2S4IcZubBf2.OiSDz4AQmMGO	test2
-3	Fred	Test	fred@trip.test	1103c87d-d0f6-e01a-2114-27699feea78b	$2a$10$CNiaAPQX6ANmbe3SYzhSD.fzmmd4Zw.ga3j3hmbxI3tOYU7dW8Sae	Fred
-4	John	Test	john@trip.test	389561bd-1365-eab3-1e6f-3295e14491f1	$2y$10$fy1fmvCZ4T/gXLIVSmRftuMd/DoPUc1u1iJDeSMrKHdHCYXjt/f8y	John
-5	Jane	Test	jane@trip.test	1280186b-2d80-6f34-ae56-525d576f133f	$2y$10$8XTbrY9LooDhCClYiZ4BZOR4amciyOFpEdPtaNmL9..uizayg.wQe	Jane
-6	Adam	Test	adam@trip.test	45448370-02a1-aabc-0f41-c7dfb63f050d	$2y$10$/bfCvk6wGdrRm.skSmcnoOlWRDGrvTBg3xE3VowPJrf3l8E3eDa5.	Adam
-7	Adam	Test	adam2@trip.test	628f8e5e-a7aa-a100-e87e-04daca339255	$2y$10$xlK.3YKn2zh8duQoE2f7r.mYfovQLOS3DJ4.Fx7lqWl6.tzowgotC	Adam2
-9	Adam	Test	adam3@trip.test	ac039082-7574-62b7-a035-3f35e1b4c1a1	$2y$10$8fYio5H.clRBAOfqqzN4Dea9RJKhnl26H3rhDaApaHqLm.0hbPhru	Adam3
-10	test	test	oswald1@trip.test	789cec4d-3980-19a3-9515-a6f53f1dba86	$2y$10$Ur/yQeKkOjUX0BQnWc6ZqeXIFEkqni.3/VvB4tFCsAWU1Fu/HgZxm	oswald
-11	test	test	oswald2@trip.test	6830d8fb-a71c-9a41-cd11-4eaf5e58496e	$2y$10$CJkQGukvcGBoEZnWmzOh9e2nHb4BLSFWGMjptN.3Aa0DZHFOmLTqq	oswald2
-12	test	test	oswald3@trip.test	7ca61784-93da-db15-011f-80b71dc947d2	$2y$10$5LGcQ.mGzVRYm5noUojrJ.HL660x9/omQm5yoEpNrUFkzXbB6NdMK	oswald3
-13	test	test	oswald4@trip.test	af5f4dfd-dce8-95b9-fd1c-956b165a08ea	$2y$10$5OKage5jjnsH5tY6sCd7l.ulY.uGpFjERyWg3P.K.59DHK5JrqI8i	oswald4
-1	admin	admin	admin@trip.test	38de8ade-de0b-4c71-a7ff-7ec37ab5c781	$2a$10$X/L5xzu91K5/oTIXlTRuxO53mwNHp1.R2X/GvytL3oo2rBZsGQmU2	admin
-29	user	user	user@trip.test	178ef589-8cf4-4cfa-baba-a2896b5d51e9	$2b$10$isrRX95ufUijN1zu/L0diOXeYUz9pzY1KXBQFJ3mqlyiY7p86ajb2	user
-670	John	Smith	test@trip.test	c33aae96-050b-41b8-9304-a9779c7c6708	$2b$10$Zzxdh5kwdziJWuk64B0CKuKTY4o0SBtRCzD1qg7uyGxjnGEF/3T0S	test
+COPY public.usertable (id, firstname, lastname, email, uuid, password, nickname, tl_settings) FROM stdin;
+62	oswald	smith	oswald@trip.test	d7cb7b56-f53c-4c64-a795-fdb256775b80	$2a$10$YoVIqJLcUD.AW6ZU7JxUzOoGkumJk0QZyisc0I/3LIdBK6Hq.UrTy	oswald5	\N
+63	Oswald	Jones	oswald6@trip.test	7edf973d-312c-489b-9784-34aad58861d8	$2a$10$5iUvXmI0rEJKzPW26tpuQO6j3EhZwGsVd./WH6IbOIpgdrU0rNhES	oswald6	\N
+31	test	test	tes999t@trip.test	14c9a561-522b-8932-97e0-b6b916296c21	$2y$10$sr0pxDTRTmA9nPfm/I67LO5tLZbqtdVkrRVdKWRq.WIIXoX0/xFPW	test997u9879	\N
+32	test	test	test998@trip.test	23b10128-7001-68ab-2150-f36e73a923f4	$2y$10$1LmJbfDKhmDecam19rGTDOA3Sj8XA4VLEwVnb9APKIQGodCyKgLce	tset99	\N
+30	test	test	tes99t@trip.test	f2017e90-6f0b-24a9-ee41-e6a93530a5e7	$2a$10$lHw51RHaxpsSsJzFEih5i.49zLK6LUlCrlIjw.3eDEK5jX.pJR1Uu	test997u987	\N
+456	purple	purple	purple@trip.test	3ef65320-f920-4e88-a3a6-bdf36bb17532	$2a$10$YGUYdOlkdi1NamxkppzV9ekIAwrq32IhlwNyzFOU.teemJzhDAcKm	purple	\N
+791	Orange	Orange	orange@trip.test	bd54bb2d-4f64-4ace-ad4a-cc0fc4152378	$2a$10$CUzhW4pxQKEPfZxA1JwnxupDP7LyxYTAj2ueobipHWivVMEuZK1ne	orange	\N
+2	Test	Test	test2@trip.test	f68a8d21-6e39-e1f5-79f5-55dc9603b138	$2y$10$u26z37kPq5hHDFBSQe6.weD1wnjgw2S4IcZubBf2.OiSDz4AQmMGO	test2	\N
+3	Fred	Test	fred@trip.test	1103c87d-d0f6-e01a-2114-27699feea78b	$2a$10$CNiaAPQX6ANmbe3SYzhSD.fzmmd4Zw.ga3j3hmbxI3tOYU7dW8Sae	Fred	\N
+4	John	Test	john@trip.test	389561bd-1365-eab3-1e6f-3295e14491f1	$2y$10$fy1fmvCZ4T/gXLIVSmRftuMd/DoPUc1u1iJDeSMrKHdHCYXjt/f8y	John	\N
+5	Jane	Test	jane@trip.test	1280186b-2d80-6f34-ae56-525d576f133f	$2y$10$8XTbrY9LooDhCClYiZ4BZOR4amciyOFpEdPtaNmL9..uizayg.wQe	Jane	\N
+6	Adam	Test	adam@trip.test	45448370-02a1-aabc-0f41-c7dfb63f050d	$2y$10$/bfCvk6wGdrRm.skSmcnoOlWRDGrvTBg3xE3VowPJrf3l8E3eDa5.	Adam	\N
+7	Adam	Test	adam2@trip.test	628f8e5e-a7aa-a100-e87e-04daca339255	$2y$10$xlK.3YKn2zh8duQoE2f7r.mYfovQLOS3DJ4.Fx7lqWl6.tzowgotC	Adam2	\N
+9	Adam	Test	adam3@trip.test	ac039082-7574-62b7-a035-3f35e1b4c1a1	$2y$10$8fYio5H.clRBAOfqqzN4Dea9RJKhnl26H3rhDaApaHqLm.0hbPhru	Adam3	\N
+10	test	test	oswald1@trip.test	789cec4d-3980-19a3-9515-a6f53f1dba86	$2y$10$Ur/yQeKkOjUX0BQnWc6ZqeXIFEkqni.3/VvB4tFCsAWU1Fu/HgZxm	oswald	\N
+11	test	test	oswald2@trip.test	6830d8fb-a71c-9a41-cd11-4eaf5e58496e	$2y$10$CJkQGukvcGBoEZnWmzOh9e2nHb4BLSFWGMjptN.3Aa0DZHFOmLTqq	oswald2	\N
+12	test	test	oswald3@trip.test	7ca61784-93da-db15-011f-80b71dc947d2	$2y$10$5LGcQ.mGzVRYm5noUojrJ.HL660x9/omQm5yoEpNrUFkzXbB6NdMK	oswald3	\N
+13	test	test	oswald4@trip.test	af5f4dfd-dce8-95b9-fd1c-956b165a08ea	$2y$10$5OKage5jjnsH5tY6sCd7l.ulY.uGpFjERyWg3P.K.59DHK5JrqI8i	oswald4	\N
+1	admin	admin	admin@trip.test	38de8ade-de0b-4c71-a7ff-7ec37ab5c781	$2a$10$X/L5xzu91K5/oTIXlTRuxO53mwNHp1.R2X/GvytL3oo2rBZsGQmU2	admin	\N
+29	user	user	user@trip.test	178ef589-8cf4-4cfa-baba-a2896b5d51e9	$2b$10$isrRX95ufUijN1zu/L0diOXeYUz9pzY1KXBQFJ3mqlyiY7p86ajb2	user	\N
+670	John	Smith	test@trip.test	c33aae96-050b-41b8-9304-a9779c7c6708	$2b$10$Zzxdh5kwdziJWuk64B0CKuKTY4o0SBtRCzD1qg7uyGxjnGEF/3T0S	test	\N
 \.
 
 

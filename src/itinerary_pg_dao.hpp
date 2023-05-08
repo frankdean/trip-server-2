@@ -135,6 +135,7 @@ public:
     std::pair<bool, float> hdop;
     track_point() : location(), time(), hdop() {}
     track_point(location loc) : location(loc), time(), hdop() {}
+    track_point(const TrackPgDao::tracked_location &loc);
     static YAML::Node encode(const track_point& rhs);
     static bool decode(const YAML::Node& node, track_point& rhs);
   };

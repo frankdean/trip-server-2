@@ -21,7 +21,7 @@ RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \
     ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime && \
     dpkg-reconfigure tzdata
 ENV LANG en_GB.utf8
-ARG TRIP_SERVER_VERSION=2.0.0-alpha.42
+ARG TRIP_SERVER_VERSION=2.0.0-rc.2
 ARG TRIP_SERVER_FILENAME=trip-${TRIP_SERVER_VERSION}.tar.xz
 RUN chgrp trip /usr/local/src && \
     chmod g+w /usr/local/src

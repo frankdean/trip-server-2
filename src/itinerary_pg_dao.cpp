@@ -182,6 +182,13 @@ void ItineraryPgDao::track::calculate_statistics()
   distance = geo_stats.get_distance();
 }
 
+ItineraryPgDao::track_point::track_point(const TrackPgDao::tracked_location &loc) :
+  location(loc)
+{
+  time = std::make_pair(true, loc.time_point);
+  hdop = loc.hdop;
+}
+
 long ItineraryPgDao::get_itineraries_count(
     std::string user_id)
 {

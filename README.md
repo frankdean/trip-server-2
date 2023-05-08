@@ -15,10 +15,8 @@ passed to rescue services etc., to assist with locating the missing
 adventurer.
 
 Trip Server 2 is a port of [Trip Server v1][trip-server], written mostly in
-C++.  Compared to the previous version, it is not fully complete, but now
-supports all the primary tracking, itinerary management and sharing functions,
-sufficient to support its primary purpose. It can be run alongside an existing
-Trip Server version 1.11.x installation.
+C++. It can be run alongside an existing Trip Server version 1.11.x
+installation.
 
 The original Trip v1 application consists of two primary components, [a server
 application][trip-server], written in [ECMAScript][] (a JavaScript standard),
@@ -61,9 +59,8 @@ libraries for the more significant things we need; primarily support for
 [PostgreSQL database][PostgreSQL], [PostGIS][], XML, JSON and YAML.  So far,
 I am very satisfied with the results.
 
-The intention during development of version 2 is to maintain database
-compatibility as much as possible, with an `--upgrade` option to the Trip
-Server version 2 to upgrade a version 1 database to version 2.  Also, the
+Trip Server version 2 maintains database compatibility with version 1, with an
+`--upgrade` option to upgrade a version 1 database to version 2.  Also, the
 desire is to keep the YAML configuration file requiring minimal changes.
 
 ### Features
@@ -199,9 +196,9 @@ The application can be run as two or three containers in the
 			CONFIGURE_TILE_SERVER=no \
 			--publish 8080:8080 -d fdean/trip-server-2
 
-		Set `CONFIGURE_TILE_SERVER` to `yes` if you have the map tile
-		container running.  When not set to `yes`, dummy map tiles are created
-		showing their x, y and z values.
+	Set `CONFIGURE_TILE_SERVER` to `yes` if you have the map tile
+	container running.  When not set to `yes`, dummy map tiles are created
+	showing their x, y and z values.
 
 ## Building
 
@@ -223,6 +220,9 @@ See the `PostgreSQL Database Configuration` section in the instructions for
 Upgrade the database to support Trip Server v2 by running:
 
 	$ trip-server --upgrade
+
+The upgrade option is re-runable.  If the `pgcrypto` extension has already
+been created, a warning is issued but can be ignored.
 
 ### Additional Resources
 

@@ -831,18 +831,10 @@ void ItineraryHandler::paste_itinerary_features()
 
 void ItineraryHandler::paste_items()
 {
-  if (location_history_paste_params.first) {
+  if (location_history_paste_params.first)
     paste_locations();
-    SessionPgDao dao;
-    dao.remove_value(get_session_id(), SessionPgDao::location_history_key);
-    location_history_paste_params.first = false;
-  }
-  if (selected_features_paste_params.first) {
+  if (selected_features_paste_params.first)
     paste_itinerary_features();
-    SessionPgDao dao;
-    dao.remove_value(get_session_id(), SessionPgDao::itinerary_features_key);
-    selected_features_paste_params.first = false;
-  }
 }
 
 void ItineraryHandler::join_routes(const web::HTTPServerRequest &request,

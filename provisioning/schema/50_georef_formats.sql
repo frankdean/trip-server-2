@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 11.7 (Debian 11.7-2.pgdg90+1)
--- Dumped by pg_dump version 11.7 (Debian 11.7-2.pgdg90+1)
+-- Dumped from database version 13.10 (Debian 13.10-0+deb11u1)
+-- Dumped by pg_dump version 13.10 (Debian 13.10-0+deb11u1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -31,7 +31,6 @@ osgb36	OS GB 1936 (BNG)	7
 %dd%M'%S"%c	Proj4	8
 %c%D° %M	QLandkarte GT	9
 %c%d°%M′%S″	+DMS	10
-%c%d°%M′\\	+DM	11
 %c%d°	+D	12
 %d° %M′ %S″ %c	D M S +	13
 %d° %M′ %c	D M +	14
@@ -47,6 +46,7 @@ osgb36	OS GB 1936 (BNG)	7
 %c%d	Plain +D	23
 IrishGrid	Irish Grid	24
 ITM	Irish Transverse Mercator	25
+%c%d°%M′	+DM	11
 \.
 
 
