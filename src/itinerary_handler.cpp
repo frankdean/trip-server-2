@@ -638,7 +638,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
     // Label for menu item to download the selected routes, tracks and waypoints as a GPX format (GPS data) file
     "                <li><button class=\"dropdown-item\" formmethod=\"post\" formaction=\"" << get_uri_prefix() << "/itinerary/download\" name=\"action\" accesskey=\"g\" value=\"download-gpx\">" << translate("Download GPX") << "</button></li>\n"
     // Label for menu item to download the selected routes, tracks and waypoints as a KML format (GPS data) file
-    "                <li><a class=\"dropdown-item opacity-50\">" << translate("Download KML") << "</a></li>\n"
+    "                <li><button class=\"dropdown-item\" formmethod=\"post\" formaction=\"" << get_uri_prefix() << "/itinerary/download\" name=\"action\" accesskey=\"k\" value=\"download-kml\">" << translate("Download KML") << "</button></li>\n"
     "                <li><hr class=\"dropdown-divider\"></li>\n"
     // Label for menu item to download the entire Itinerary in a YAML formatted text file
     "                <li><button class=\"dropdown-item\" accesskey=\"n\" formaction=\"" << get_uri_prefix() << "/itinerary/export" << "\">" << translate("Download full itinerary") << "</button></li>\n"
@@ -852,7 +852,7 @@ void ItineraryHandler::join_routes(const web::HTTPServerRequest &request,
       first = false;
     url << id;
   }
-  redirect(request, response, url.str());    
+  redirect(request, response, url.str());
 }
 
 void ItineraryHandler::join_tracks(const web::HTTPServerRequest &request,
@@ -984,7 +984,6 @@ void ItineraryHandler::handle_authenticated_request(
       join_tracks(request, response, features.tracks);
       return;
     }
-    
   }
   auto itinerary = dao.get_itinerary_summary(get_user_id(), itinerary_id);
   if (!itinerary.first)

@@ -34,6 +34,31 @@
 namespace fdsd {
 namespace trip {
 
+struct time_span_type {
+  /// False until a time span has been set
+  bool is_valid;
+  std::chrono::system_clock::time_point start;
+  std::chrono::system_clock::time_point finish;
+
+  time_span_type() : is_valid(false), start(), finish() {}
+  time_span_type(const std::chrono::system_clock::time_point start,
+                 const std::chrono::system_clock::time_point finish)
+    : is_valid(true), start(start), finish(finish) {}
+
+  void update_start(const std::chrono::system_clock::time_point start);
+
+  void update_finish(const std::chrono::system_clock::time_point finish);
+
+  void update(const std::chrono::system_clock::time_point time) {
+    update_start(time);
+    update_finish(time);
+  }
+
+  /// Updates this time span to encompass the range of the passed time span
+  void update_time_span(const time_span_type &other);
+
+};
+
 class ItineraryPgDao : public TripPgDao {
   static const std::string itinerary_waypoint_radius_clause;
   static const std::string itinerary_route_radius_clause;
@@ -83,33 +108,25 @@ public:
     static YAML::Node encode(const path_summary& rhs);
     static bool decode(const YAML::Node& node, path_summary& rhs);
   };
-  struct path_info {
-    std::pair<bool, double> minimum_speed;
-    std::pair<bool, double> maximum_speed;
-    std::pair<bool, double> average_speed;
-    path_info() :
-      minimum_speed(),
-      maximum_speed(),
-      average_speed() {}
-  };
-  struct point_info {
+  struct point_info : location {
     std::pair<bool, double> bearing;
-    std::pair<bool, double> speed;
-    point_info() : bearing(), speed() {}
+    point_info() : location(), bearing() {}
+    point_info(location loc) : location(loc), bearing() {}
+    void calculate_bearing(const point_info &previous);
   };
-  struct route_point : public location {
+  struct route_point : public point_info {
     std::pair<bool, std::string> name;
     std::pair<bool, std::string> comment;
     std::pair<bool, std::string> description;
     std::pair<bool, std::string> symbol;
     route_point() :
-      location(),
+      point_info(),
       name(),
       comment(),
       description(),
       symbol() {}
     route_point(location loc) :
-      location(loc),
+      point_info(loc),
       name(),
       comment(),
       description(),
@@ -130,12 +147,14 @@ public:
     static YAML::Node encode(const route& rhs);
     static bool decode(const YAML::Node& node, route& rhs);
   };
-  struct track_point : public location {
+  struct track_point : public point_info {
     std::pair<bool, std::chrono::system_clock::time_point> time;
     std::pair<bool, float> hdop;
-    track_point() : location(), time(), hdop() {}
-    track_point(location loc) : location(loc), time(), hdop() {}
+    std::pair<bool, double> speed;
+    track_point() : point_info(), time(), hdop(), speed() {}
+    track_point(location loc) : point_info(loc), time(), hdop(), speed() {}
     track_point(const TrackPgDao::tracked_location &loc);
+    void calculate_speed(const track_point &previous);
     static YAML::Node encode(const track_point& rhs);
     static bool decode(const YAML::Node& node, track_point& rhs);
   };
@@ -154,6 +173,8 @@ public:
       : path_summary(), segments(std::move(segments)) {}
     track(const route &r);
     void calculate_statistics();
+    void calculate_speed_and_bearing_values();
+    std::pair<bool, double> calculate_maximum_speed() const;
     static void calculate_statistics(std::vector<track> &tracks) {
       for (auto &track : tracks)
         track.calculate_statistics();
@@ -551,6 +572,23 @@ public:
 
   std::vector<std::string>
       get_nicknames_sharing_location_with_user(std::string user_id);
+
+  static void update_time_span(
+      time_span_type &time_span,
+      const std::vector<ItineraryPgDao::track> &tracks);
+
+  static void update_time_span(
+      time_span_type &time_span,
+      const std::vector<ItineraryPgDao::waypoint> &waypoints);
+
+  static time_span_type get_time_span(
+      const std::vector<ItineraryPgDao::track> &tracks,
+      const std::vector<ItineraryPgDao::waypoint> &waypoints);
+
+  static std::pair<bool, bounding_box> get_bounding_box(
+      const std::vector<ItineraryPgDao::track> &tracks,
+      const std::vector<ItineraryPgDao::route> &routes,
+      const std::vector<ItineraryPgDao::waypoint> &waypoints);
 
 protected:
   void create_waypoints(

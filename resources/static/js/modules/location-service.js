@@ -138,8 +138,7 @@ class LocationParser {
   updateLocationText() {
     // console.debug('Value:', this.locationTextElement.value);
     const r = parseLocationText(this.locationTextElement.value);
-    // console.debug('Result', r);
-    if (r && r.lat && r.lng && r.lat != NaN && r.lng != NaN) {
+    if (r !== undefined && r.lng !== undefined && r.lat !== undefined && !isNaN(r.lng) && !isNaN(r.lng)) {
       if (this.targetElement)
         this.targetElement.textContent = convertToFormat(r.lat, r.lng, this.format, this.formatStyle);
       if (this.lngElement)

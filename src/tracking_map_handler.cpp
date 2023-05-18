@@ -90,7 +90,7 @@ void TrackingMapHandler::handle_authenticated_request(
   }
   response.content <<
     "    <div id=\"map\"></div>\n"
-    "    <div id=\"popup\" class=\"ol-popup\">\n"
+    "    <div id=\"popup\" class=\"ol-popup d-none\">\n"
     "      <a href=\"#\" id=\"popup-closer\" class=\"ol-popup-closer\"></a>\n"
     "      <div id=\"popup-content\"></div>\n"
     "    </div>\n";

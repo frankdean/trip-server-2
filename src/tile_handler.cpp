@@ -150,7 +150,7 @@ TilePgDao::tile_result TileHandler::create_test_tile(int z, int x, int y)
   // grey background
   ctx->set_source_rgb(0.8353, 0.8353, 0.8353);
   ctx->paint();
-  
+
   std::vector<double> dashes(1, 3);
   ctx->set_dash(dashes, 0);
   ctx->set_source_rgb(0.0, 0.501961, 0.0);

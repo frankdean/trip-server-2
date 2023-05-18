@@ -41,7 +41,7 @@ void ItineraryRouteEditHandler::build_form(std::ostream &os,
 {
   os <<
     "<div class=\"container-fluid\">\n"
-    // 
+    //
     "  <h1>" << get_page_title() << "</h1>\n"
     "  <form name=\"form\" method=\"post\">\n"
     "    <input type=\"hidden\" name=\"id\" value=\"" << itinerary_id << "\">\n"

@@ -165,12 +165,31 @@ public:
   }
 };
 
+struct bounding_box {
+  location top_left;
+  location bottom_right;
+  bounding_box() : top_left(), bottom_right() {}
+  bounding_box(location loc) : top_left(loc), bottom_right(loc) {}
+  void extend(const location &location);
+  location get_center() const;
+  virtual std::string to_string() const;
+  inline friend std::ostream& operator<<
+      (std::ostream& out, const bounding_box& rhs) {
+    return out << rhs.to_string();
+  }
+};
+
 class GeoUtils {
 public:
   static double degrees_to_radians(double d);
+  static double radians_to_degrees(double r);
   static double haversine(double angle);
   static double distance(double lng1, double lat1, double lng2, double lat2);
-  static double distance(location p1, location p2);
+  static double distance(const location &p1, const location &p2);
+  static double bearing_to_azimuth(double lng1, double lat1, double lng2, double lat2);
+  static double bearing_to_azimuth(const location &p1, const location &p2) {
+    return bearing_to_azimuth(p1.longitude, p1.latitude, p2.longitude, p2.latitude);
+  }
 };
 
 class GeoStatistics : path_statistics {
@@ -178,7 +197,8 @@ class GeoStatistics : path_statistics {
   std::pair<bool, double> last_altitude;
 public:
   GeoStatistics() : path_statistics(),
-                    last_location(nullptr) {
+                    last_location(nullptr),
+                    last_altitude(false, 0) {
     distance.first = true;
     distance.second = 0;
   }

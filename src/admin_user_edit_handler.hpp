@@ -77,5 +77,5 @@ public:
 
 } // namespace trip
 } // namespace fdsd
-  
+
 #endif // ADMIN_USER_EDIT_HANDLER_HPP

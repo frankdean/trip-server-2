@@ -24,6 +24,7 @@
 
 #include "itinerary_pg_dao.hpp"
 #include "trip_request_handler.hpp"
+#include <pugixml.hpp>
 #include <string>
 
 namespace fdsd {
@@ -31,7 +32,25 @@ namespace trip {
 
 class ItineraryDownloadHandler : public BaseRestHandler {
   long itinerary_id;
+  enum download_format {
+    gpx,
+    kml
+  };
+  download_format download_type;
   void handle_gpx_download(
+      const web::HTTPServerRequest& request,
+      web::HTTPServerResponse& response);
+  void append_xml(pugi::xml_node &target, const std::string &xml);
+  void append_kml_route_styles(pugi::xml_node &target);
+  void append_kml_track_styles(pugi::xml_node &target);
+  void append_kml_styles(pugi::xml_node &target);
+  void append_kml_waypoints(
+      pugi::xml_node &kml, const std::vector<ItineraryPgDao::waypoint> &waypoints);
+  void append_kml_routes(
+      pugi::xml_node &kml, std::vector<ItineraryPgDao::route> &routes);
+  void append_kml_tracks(
+      pugi::xml_node &kml, std::vector<ItineraryPgDao::track> &tracks);
+  void handle_kml_download(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response);
 protected:
@@ -41,7 +60,9 @@ protected:
       web::HTTPServerResponse& response) override;
 public:
   ItineraryDownloadHandler(std::shared_ptr<TripConfig> config) :
-    BaseRestHandler(config), itinerary_id() {}
+    BaseRestHandler(config),
+    itinerary_id(),
+    download_type(gpx) {}
   virtual ~ItineraryDownloadHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItineraryDownloadHandler";

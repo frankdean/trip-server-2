@@ -23,6 +23,7 @@
 #include "itinerary_pg_dao.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
 #include "../trip-server-common/src/dao_helper.hpp"
+#include <algorithm>
 #include <memory>
 #include <vector>
 #include <stdexcept>
@@ -182,11 +183,55 @@ void ItineraryPgDao::track::calculate_statistics()
   distance = geo_stats.get_distance();
 }
 
-ItineraryPgDao::track_point::track_point(const TrackPgDao::tracked_location &loc) :
-  location(loc)
+void ItineraryPgDao::track::calculate_speed_and_bearing_values()
+{
+  std::unique_ptr<track_point> tp;
+  for (auto &ts : segments)
+    for (auto p = ts.points.begin(); p != ts.points.end(); p++) {
+      if (tp) {
+        p->calculate_bearing(*tp);
+        p->calculate_speed(*tp);
+      }
+      tp = std::unique_ptr<track_point>(new track_point(*p));
+    }
+}
+
+std::pair<bool, double> ItineraryPgDao::track::calculate_maximum_speed() const
+{
+  std::pair<bool, double> retval;
+  for (const auto &ts : segments)
+    for (const auto &p : ts.points)
+      if (p.speed.first) {
+        if (retval.first)
+          retval = std::make_pair(true, std::max(retval.second, p.speed.second));
+        else
+          retval = std::make_pair(true, p.speed.second);
+      }
+  return retval;
+}
+
+ItineraryPgDao::track_point::track_point(
+    const TrackPgDao::tracked_location &loc) : point_info(loc), speed()
 {
   time = std::make_pair(true, loc.time_point);
   hdop = loc.hdop;
+}
+
+void ItineraryPgDao::point_info::calculate_bearing(const point_info &previous)
+{
+  bearing = std::make_pair(true, GeoUtils::bearing_to_azimuth(previous, *this));
+}
+
+void ItineraryPgDao::track_point::calculate_speed(const track_point &previous)
+{
+  if (time.first && previous.time.first) {
+    const double distance = GeoUtils::distance(previous, *this);
+    std::chrono::duration<double, std::milli> diff =
+      time.second - previous.time.second;
+    const double hours =
+      std::chrono::duration_cast<std::chrono::milliseconds>(diff).count() / 3600000.0;
+    speed = std::make_pair(true, distance / hours);
+  }
 }
 
 long ItineraryPgDao::get_itineraries_count(
@@ -3296,4 +3341,96 @@ std::vector<std::string>
               << e.what() << '\n';
     throw;
   }
+}
+
+void time_span_type::update_start(
+    const std::chrono::system_clock::time_point other_start)
+{
+  if (!is_valid) {
+    start = other_start;
+    finish = start;
+  } else {
+    start = std::min(start, other_start);
+  }
+  is_valid = true;
+}
+
+void time_span_type::update_finish(
+    const std::chrono::system_clock::time_point other_finish)
+{
+  if (!is_valid) {
+    finish = other_finish;
+    start = finish;
+  } else {
+    finish = std::max(finish, other_finish);
+  }
+  is_valid = true;
+}
+
+/// Updates this time span to encompass the range of the passed time span
+void time_span_type::update_time_span(const time_span_type &other) {
+  if (other.is_valid) {
+    update_start(other.start);
+    update_finish(other.finish);
+  }
+}
+
+void ItineraryPgDao::update_time_span(
+    time_span_type &time_span,
+    const std::vector<ItineraryPgDao::track> &tracks)
+{
+  for (const auto &t : tracks)
+    for (const auto &ts : t.segments)
+      for (const auto &p : ts.points)
+        if (p.time.first)
+          time_span.update(p.time.second);
+}
+
+void ItineraryPgDao::update_time_span(
+    time_span_type &time_span,
+    const std::vector<ItineraryPgDao::waypoint> &waypoints)
+{
+  for (const auto &w : waypoints)
+    if (w.time.first)
+      time_span.update(w.time.second);
+}
+
+time_span_type ItineraryPgDao::get_time_span(
+    const std::vector<ItineraryPgDao::track> &tracks,
+    const std::vector<ItineraryPgDao::waypoint> &waypoints)
+{
+  time_span_type time_span;
+  update_time_span(time_span, tracks);
+  update_time_span(time_span, waypoints);
+  return time_span;
+}
+
+std::pair<bool, bounding_box> ItineraryPgDao::get_bounding_box(
+    const std::vector<ItineraryPgDao::track> &tracks,
+    const std::vector<ItineraryPgDao::route> &routes,
+    const std::vector<ItineraryPgDao::waypoint> &waypoints)
+{
+  std::unique_ptr<bounding_box> box;
+  for (const auto &t : tracks)
+    for (const auto &ts : t.segments)
+      for (const auto &p : ts.points)
+        if (box)
+          box->extend(p);
+        else
+          box = std::unique_ptr<bounding_box>(new bounding_box(p));
+  for (const auto &r : routes)
+    for (const auto &p : r.points)
+      if (box)
+        box->extend(p);
+      else
+        box = std::unique_ptr<bounding_box>(new bounding_box(p));
+  for (const auto &p : waypoints)
+    if (box)
+      box->extend(p);
+    else
+      box = std::unique_ptr<bounding_box>(new bounding_box(p));
+  if (!box)
+    return std::make_pair(false, bounding_box());
+
+  return std::make_pair(true, bounding_box(*box));
 }

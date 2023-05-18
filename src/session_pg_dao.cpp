@@ -343,7 +343,7 @@ SessionPgDao::tile_report
         "count FROM tile_metric ORDER BY time DESC) AS q "
         "GROUP BY q.year, q.month ORDER BY q.year desc, q.month DESC LIMIT $1 + 1",
         month_count);
-    
+
     for (auto r: result) {
       SessionPgDao::tile_usage_metric t;
       r["year"].to(t.year);

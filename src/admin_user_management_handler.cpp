@@ -128,7 +128,7 @@ void AdminUserManagementHandler::build_form(
     os <<
       "      </table>\n"
       "    </div>\n";
-    
+
     const auto page_count = pagination.get_page_count();
     if (page_count > 1) {
       os

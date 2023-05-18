@@ -23,6 +23,9 @@
 #include "itinerary_waypoint_edit_handler.hpp"
 #include "itinerary_handler.hpp"
 #include "session_pg_dao.hpp"
+#ifdef HAVE_GDAL
+#include "elevation_tile.hpp"
+#endif
 #include "../trip-server-common/src/http_response.hpp"
 #include "../trip-server-common/src/dao_helper.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
@@ -34,6 +37,10 @@ using json = nlohmann::json;
 using namespace fdsd::trip;
 using namespace fdsd::web;
 using namespace fdsd::utils;
+
+#ifdef HAVE_GDAL
+extern ElevationService *elevation_service;
+#endif
 
 void ItineraryWaypointEditHandler::do_preview_request(
     const web::HTTPServerRequest& request,
@@ -105,7 +112,7 @@ void ItineraryWaypointEditHandler::build_form(
     "        <label for=\"input-position\">" << translate("Position") << "</label>\n"
     "        <input id=\"input-position\" name=\"position\" type=\"text\" size=\"30\" value=\"";
   append_value(response.content, waypoint->id.first, waypoint->latitude);
-  append_value(response.content, waypoint->id.first && waypoint->latitude && waypoint->longitude, ',');
+  append_value(response.content, waypoint->id.first, ',');
   append_value(response.content, waypoint->id.first, waypoint->longitude);
   response.content << "\"";
   append_element_disabled_flag(response.content, read_only);
@@ -373,6 +380,15 @@ void ItineraryWaypointEditHandler::handle_authenticated_request(
     if (wpt.type.first)
       dao_helper::trim(wpt.type.second);
     wpt.avg_samples = request.get_optional_post_param_long("samples");
+#ifdef HAVE_GDAL
+  if (elevation_service) {
+    auto altitude = elevation_service->get_elevation(
+        wpt.longitude,
+        wpt.latitude);
+    if (!wpt.altitude.first)
+      wpt.altitude = altitude;
+  }
+#endif
     dao.save(get_user_id(), itinerary_id, wpt);
     redirect(request, response,
              get_uri_prefix() + "/itinerary?id=" +

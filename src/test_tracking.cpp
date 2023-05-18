@@ -103,7 +103,7 @@ bool test_valid_test_map()
     q.order == dao_helper::descending;
 
   if (!retval)
-    std::cout << "test_valid_test_map failed\n" << q << '\n';
+    std::cerr << "test_valid_test_map failed\n" << q << '\n';
   return retval;
 }
 
@@ -123,7 +123,7 @@ bool test_default_test_map()
     q.order == dao_helper::ascending;
 
   if (!retval)
-    std::cout << "test_default_test_map failed\n" << q << '\n';
+    std::cerr << "test_default_test_map failed\n" << q << '\n';
   return retval;
 }
 
@@ -143,7 +143,7 @@ bool test_invalid_test_map()
     q.order == dao_helper::ascending;
 
   if (!retval)
-    std::cout << "test_invalid_test_map failed\n" << q << '\n';
+    std::cerr << "test_invalid_test_map failed\n" << q << '\n';
   return retval;
 }
 
@@ -166,7 +166,7 @@ bool test_example_test_map()
     q.order == dao_helper::descending;
 
   if (!retval)
-    std::cout << "test_example_test_map failed\n" << q << '\n';
+    std::cerr << "test_example_test_map failed\n" << q << '\n';
   return retval;
 }
 
@@ -218,35 +218,35 @@ bool test_tracked_location_query_params_constructor_01()
     q.battery.first && std::round((q.battery.second - 98.7) * 10) == 0 &&
     q.note.first && q.note.second == "Test note";
   if (!retval) {
-    std::cout
+    std::cerr
       << "test_tracked_location_query_params_constructor_01() failed: "
       << q << '\n';
     if (q.user_id != test_user_id)
-      std::cout << "user_id\n";
+      std::cerr << "user_id\n";
     if (q.time_point != dt.time_tp())
-      std::cout << "time_point\n";
+      std::cerr << "time_point\n";
     if (std::round((q.longitude - 2.294521) * 1e6) != 0)
-      std::cout << "longitude\n";
+      std::cerr << "longitude\n";
     if (std::round((q.latitude - 48.858222) * 1e6) != 0)
-      std::cout << "latitude\n";
+      std::cerr << "latitude\n";
     if (q.altitude.first && std::round((q.altitude.second - 73.000001) * 1e6) != 0)
-      std::cout << "altitude.first && altitude.second\n";
+      std::cerr << "altitude.first && altitude.second\n";
     if (q.hdop.first && std::round((q.hdop.second - 15.8) * 10) != 0)
-      std::cout << "hdop.first && hdop.second\n";
+      std::cerr << "hdop.first && hdop.second\n";
     if (q.speed.first && std::round((q.speed.second - 3.2) * 10) != 0)
-      std::cout << "speed.first && speed.second\n";
+      std::cerr << "speed.first && speed.second\n";
     if (q.bearing.first && std::round((q.bearing.second - 359.56789) * 1e6) != 0)
-      std::cout << "bearing.first && bearing.second\n";
+      std::cerr << "bearing.first && bearing.second\n";
     if (q.satellite_count.first && q.satellite_count.second != 30)
-      std::cout << "satellite_count.first && q.satellitcount.second\n";
+      std::cerr << "satellite_count.first && q.satellitcount.second\n";
     if (!q.provider.first || q.provider.second != "test")
-      std::cout << "provider\n";
+      std::cerr << "provider\n";
     if (q.battery.first && std::round((q.battery.second - 98.7) * 10) != 0)
-      std::cout << "battery.first && battery.second: "
+      std::cerr << "battery.first && battery.second: "
                 << std::fixed << std::setprecision(19)
                 << q.battery.second << '\n';
     if (!q.note.first || q.note.second != "Test note")
-      std::cout << "note\n";
+      std::cerr << "note\n";
   }
   return retval;
 }
@@ -268,14 +268,14 @@ bool test_tracked_location_query_params_constructor_02()
     std::abs(diff.count()) < 2000 &&
     std::round((q.longitude - 2.294521) * 1e6) == 0;
   if (!retval) {
-    std::cout
+    std::cerr
       << "test_tracked_location_query_params_constructor_01() failed: "
       << q << '\n';
     if (std::abs(diff.count()) != 0)
-      std::cout << "Expected time \"" << now.get_time_as_iso8601_gmt()
+      std::cerr << "Expected time \"" << now.get_time_as_iso8601_gmt()
                 << "\" differs by " << diff.count() << "ms\n";
     if (std::round((q.longitude - 2.294521) * 1e6) != 0)
-      std::cout << "longitude\n";
+      std::cerr << "longitude\n";
   }
   return retval;
 }
@@ -289,7 +289,7 @@ bool test_tracked_location_query_params_constructor_03()
   TrackPgDao::tracked_location_query_params q(test_user_id, test_map);
   const bool retval = (q.time_point == test_date.time_tp());
   if (!retval)
-    std::cout
+    std::cerr
       << "test_tracked_location_query_params_constructor_03() failed\n";
   return retval;
 }
@@ -303,7 +303,7 @@ bool test_tracked_location_query_params_constructor_04()
   const TrackPgDao::tracked_location_query_params q(test_user_id, test_map);
   const bool retval = (q.time_point == test_date.time_tp());
   if (!retval)
-    std::cout
+    std::cerr
       << "test_tracked_location_query_params_constructor_04() failed"
       << q << '\n';
   return retval;
@@ -318,7 +318,7 @@ bool test_tracked_location_query_params_constructor_05()
   const TrackPgDao::tracked_location_query_params q(test_user_id, test_map);
   const bool retval = (q.time_point == test_date.time_tp());
   if (!retval)
-    std::cout
+    std::cerr
       << "test_tracked_location_query_params_constructor_05() failed"
       << q << '\n';
   return retval;

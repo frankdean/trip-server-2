@@ -41,6 +41,36 @@ location p12(2.365150, 48.872732, std::make_pair<bool, double>(true, 42));
 location p13(2.363091, 48.855793, std::make_pair<bool, double>(true, 41));
 location p14(2.314854, 48.858052, std::make_pair<bool, double>(true, 38));
 
+location p20(-8.4844798208508632, -6.602169639459575);
+location p21(-4.6028008208115141, 12.543667966533093);
+location p22(15.3182687642961, 16.653402118751146);
+location p23(11.29011131142507, -0.5379650767794999);
+location p24(-0.94083950001967287, -1.7827521027885638);
+
+location p30(27.505040001324652, 23.940840900885192);
+location p31(29.557840949939404, 18.738117112941978);
+location p32(21.802815144061455, 19.169560130569266);
+location p33(26.820773018453064, 21.150000209898565);
+location p34(14.161833835328773, 24.771984788473262);
+
+location p40(-48.511082038978074, -22.531824919650418);
+location p41(-22.058775552428152, -11.59605781852288);
+location p42(-24.413580284168496, -22.749158714957133);
+location p43(-27.396332944372936, -17.593834004707105);
+location p44(-27.239345962256916, -21.074306115699372);
+location p45(-36.109110451812228, -19.158085277352541);
+location p46(-30.22209862246136, -27.09000238824278);
+location p47(-39.013369620958656, -23.615017113149023);
+location p48(-44.507913995019479, -26.177878943535205);
+location p49(-37.835967255088491, -20.560723885721131);
+
+location p50(-24.057753870213595, 16.008441092056486);
+location p51(-22.274615173704827, 18.186048796680481);
+location p52(-25.840892566722367, 17.714844402439169);
+location p53(-26.138082349473823, 13.999151530674069);
+location p54(-21.184919303616134, 12.456244037961326);
+location p55(-23.760564087462139, 14.670999206436761);
+
 std::vector<location> test_points_1 = {
   p1,
   p2,
@@ -60,6 +90,22 @@ std::vector<location> test_points_2 = {
   p14,
 };
 
+std::vector<location> test_points_3 = {
+  p20, p21, p22, p23, p24,
+};
+
+std::vector<location> test_points_4 = {
+  p30, p31, p32, p33, p34,
+};
+
+std::vector<location> test_points_5 = {
+  p40, p41, p42, p43, p44, p45, p46, p47, p48, p49,
+};
+
+std::vector<location> test_points_6 = {
+  p50, p51, p52, p53, p54, p55,
+};
+
 // Tests the example for anti-meridian cutting from the RFC.
 bool test_rfc7946_example()
 {
@@ -75,7 +121,7 @@ bool test_rfc7946_example()
     "[[[170.0,45.0],[180.0,45.0]],"
     "[[-180.0,45.0],[-170.0,45.0]]]}";
   if (!retval) {
-    std::cout << "test_rfc7946_example() failed\n" << result.dump() << '\n';
+    std::cerr << "test_rfc7946_example() failed\n" << result.dump() << '\n';
   }
   return retval;
 }
@@ -112,7 +158,7 @@ bool test_empty_path()
   const auto result = g.as_geojson();
   bool retval = result.dump() == "null";
   if (!retval) {
-    std::cout << "test_empty_path() failed\n" << result.dump() << '\n';
+    std::cerr << "test_empty_path() failed\n" << result.dump() << '\n';
   }
   return retval;
 }
@@ -177,7 +223,7 @@ bool test_stats_single_leg_ascent()
     stats.highest.first && stats.highest.second == 110 &&
     stats.distance.first && stats.distance.second > 0;
   if (!retval)
-    std::cout << "test_stats_single_leg_ascent() failed:\n" << stats << '\n';
+    std::cerr << "test_stats_single_leg_ascent() failed:\n" << stats << '\n';
   return retval;
 }
 
@@ -195,7 +241,7 @@ bool test_stats_single_leg_descent()
     stats.highest.first && stats.highest.second == 110 &&
     stats.distance.first && stats.distance.second > 0;
   if (!retval)
-    std::cout << "test_stats_single_leg_descent() failed:\n" << stats << '\n';
+    std::cerr << "test_stats_single_leg_descent() failed:\n" << stats << '\n';
   return retval;
 }
 
@@ -214,7 +260,7 @@ bool test_stats()
     geo.get_highest().first && geo.get_highest().second == stats.highest.second &&
     geo.get_distance().first && geo.get_distance().second == stats.distance.second;
   if (!retval)
-    std::cout << "test_stats() failed:\n" << stats << '\n';
+    std::cerr << "test_stats() failed:\n" << stats << '\n';
   return retval;
 }
 
@@ -234,7 +280,7 @@ bool test_stats_distance()
     geo.get_distance().first && geo.get_distance().second == stats.distance.second &&
     std::abs(std::round((geo.get_distance().second - 11.829) * 1000) / 1000) < 1;
   if (!retval)
-    std::cout << "test_stats_distance() failed:\n" << stats << '\n' << std::round(geo.get_distance().second) << '\n';
+    std::cerr << "test_stats_distance() failed:\n" << stats << '\n' << std::round(geo.get_distance().second) << '\n';
   return retval;
 }
 
@@ -283,6 +329,139 @@ bool test_stats_distance_multi_path()
   return retval;
 }
 
+bool test_extend_bounding_box_01()
+{
+  bounding_box box(p20);
+  for (const auto p : test_points_3)
+    box.extend(p);
+  auto center = box.get_center();
+  bool retval =
+    std::round(std::abs(box.top_left.longitude - p20.longitude) * 1e10) == 0 &&
+    std::round(std::abs(box.top_left.latitude - p22.latitude) * 1e10) == 0 &&
+    std::round(std::abs(box.bottom_right.longitude - p22.longitude) * 1e10) == 0 &&
+    std::round(std::abs(box.bottom_right.latitude - p20.latitude) * 1e10) == 0;
+  if (retval) {
+    retval =
+      std::round(std::abs(center.longitude - 3.416894471723) * 1e10) == 0 &&
+      std::round(std::abs(center.latitude - 5.025616239646) * 1e10) == 0;
+    if (!retval)
+      std::cerr << "text_extend_bounding_box_01 failed\n"
+                << std::fixed << std::setprecision(12)
+                << "lng: " << center.longitude
+                << " lat: " << center.latitude << '\n';
+  }
+  return retval;
+}
+
+bool test_extend_bounding_box_02()
+{
+  bounding_box box(p30);
+  for (const auto p : test_points_4)
+    box.extend(p);
+  auto center = box.get_center();
+  bool retval =
+    std::round(std::abs(box.top_left.longitude - p34.longitude) * 1e10) == 0 &&
+    std::round(std::abs(box.top_left.latitude - p34.latitude) * 1e10) == 0 &&
+    std::round(std::abs(box.bottom_right.longitude - p31.longitude) * 1e10) == 0 &&
+    std::round(std::abs(box.bottom_right.latitude - p31.latitude) * 1e10) == 0;
+  if (!retval) {
+    std::cerr << "text_extend_bounding_box_02 failed on creating bounding box\n"
+              << box << '\n';;
+  } else {
+    retval =
+      std::round(std::abs(center.longitude - 21.859837392634) * 1e10) == 0 &&
+      std::round(std::abs(center.latitude - 21.755050950708) * 1e10) == 0;
+    if (!retval)
+      std::cerr << "text_extend_bounding_box_02 failed on getting center\n"
+                << std::fixed << std::setprecision(12)
+                << "lng: " << center.longitude
+                << " lat: " << center.latitude << '\n';
+  }
+  return retval;
+}
+
+bool test_extend_bounding_box_03()
+{
+  bounding_box box(p40);
+  for (const auto p : test_points_5)
+    box.extend(p);
+  auto center = box.get_center();
+  bool retval =
+    std::round(std::abs(box.top_left.longitude - p40.longitude) * 1e10) == 0 &&
+    std::round(std::abs(box.top_left.latitude - p41.latitude) * 1e10) == 0 &&
+    std::round(std::abs(box.bottom_right.longitude - p41.longitude) * 1e10) == 0 &&
+    std::round(std::abs(box.bottom_right.latitude - p46.latitude) * 1e10) == 0;
+  if (!retval) {
+    std::cerr << "text_extend_bounding_box_03 failed on creating bounding box\n"
+              << box << '\n';;
+  } else {
+    retval =
+      std::round(std::abs(center.longitude - -35.284928795703) * 1e10) == 0 &&
+      std::round(std::abs(center.latitude -  -19.343030103383) * 1e10) == 0;
+    if (!retval)
+      std::cerr << "text_extend_bounding_box_03 failed on getting center\n"
+                << std::fixed << std::setprecision(12)
+                << "lng: " << center.longitude
+                << " lat: " << center.latitude << '\n';
+  }
+  return retval;
+}
+
+bool test_extend_bounding_box_04()
+{
+  bounding_box box(p50);
+  for (const auto p : test_points_6)
+    box.extend(p);
+  auto center = box.get_center();
+  bool retval =
+    std::round(std::abs(box.top_left.longitude - p53.longitude) * 1e10) == 0 &&
+    std::round(std::abs(box.top_left.latitude - p51.latitude) * 1e10) == 0 &&
+    std::round(std::abs(box.bottom_right.longitude - p54.longitude) * 1e10) == 0 &&
+    std::round(std::abs(box.bottom_right.latitude - p54.latitude) * 1e10) == 0;
+  if (!retval) {
+    std::cerr << "text_extend_bounding_box_04 failed on creating bounding box\n"
+              << box << '\n';;
+  } else {
+    retval =
+      std::round(std::abs(center.longitude - -23.661500826545) * 1e10) == 0 &&
+      std::round(std::abs(center.latitude -  15.321146417321) * 1e10) == 0;
+    if (!retval)
+      std::cerr << "text_extend_bounding_box_04 failed on getting center\n"
+                << std::fixed << std::setprecision(12)
+                << "lng: " << center.longitude
+                << " lat: " << center.latitude << '\n';
+  }
+  return retval;
+}
+
+bool test_bearing_to_azimuth_01() {
+  // https://mapscaping.com/how-to-calculate-bearing-between-two-coordinates/
+  // https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
+  location kansas_city(-94.581213, 39.099912);
+  location st_louis(-90.200203, 38.627089);
+  auto bearing = GeoUtils::bearing_to_azimuth(kansas_city, st_louis);
+  const bool retval = std::round(std::abs(bearing - 96.51) * 1e2) == 0;
+  if (!retval)
+    std::cerr << "test_bearing_to_azimuth_01 failed: "
+      "expected bearing of 96.51 but was "
+              << std::fixed << std::setprecision(2) << bearing << '\n';
+  return retval;
+}
+
+bool test_bearing_to_azimuth_02() {
+  // https://mapscaping.com/how-to-calculate-bearing-between-two-coordinates/
+  // https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
+  location kansas_city(-94.581213, 39.099912);
+  location st_louis(-90.200203, 38.627089);
+  auto bearing = GeoUtils::bearing_to_azimuth(st_louis, kansas_city);
+  const bool retval = std::round(std::abs(bearing - 279.26) * 1e2) == 0;
+  if (!retval)
+    std::cerr << "test_bearing_to_azimuth_02 failed: "
+      "expected bearing of 279.26 but was "
+              << std::fixed << std::setprecision(2) << bearing << '\n';
+  return retval;
+}
+
 int main(void)
 {
   try {
@@ -297,7 +476,13 @@ int main(void)
         test_stats_single_leg_descent() &&
         test_stats() &&
         test_stats_distance() &&
-        test_stats_distance_multi_path()
+        test_stats_distance_multi_path() &&
+        test_extend_bounding_box_01() &&
+        test_extend_bounding_box_02() &&
+        test_extend_bounding_box_03() &&
+        test_extend_bounding_box_04() &&
+        test_bearing_to_azimuth_01() &&
+        test_bearing_to_azimuth_02()
       );
   } catch (const std::exception &e) {
     std::cerr << "Tests failed with: " << e.what() << '\n';

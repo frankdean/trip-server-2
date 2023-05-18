@@ -659,8 +659,8 @@ class LocationSharingControl extends Control {
   constructor(callback, opt_options) {
     const options = opt_options || {};
     const shareButton = document.createElement('button');
-    shareButton.setAttribute('accesskey', 'l');
-    shareButton.setAttribute('data-bs-original-title', 'Live map options');
+    shareButton.setAttribute('accesskey', 'o');
+    shareButton.setAttribute('data-bs-original-title', 'Map options');
     shareButton.className = 'map-live-control';
 
     const element = document.createElement('div');

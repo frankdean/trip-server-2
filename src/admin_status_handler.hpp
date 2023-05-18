@@ -64,5 +64,5 @@ public:
 
 } // namespace trip
 } // namespace fdsd
-  
+
 #endif // ADMIN_STATUS_HANDLER_HPP

@@ -172,6 +172,8 @@ protected:
 private:
     menu_items menu_item;
 protected:
+  virtual std::string get_redirect_uri(
+      const web::HTTPServerRequest& request) const override;
   virtual std::string get_login_uri() const override {
     return get_uri_prefix() + TripLoginRequestHandler::login_url;
   }

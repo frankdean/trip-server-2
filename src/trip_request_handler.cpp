@@ -98,6 +98,15 @@ TripAuthenticatedRequestHandler::TripAuthenticatedRequestHandler(std::shared_ptr
 {
 }
 
+std::string TripAuthenticatedRequestHandler::get_redirect_uri(
+    const HTTPServerRequest& request) const
+{
+  if (request.uri.find("/tile/") != std::string::npos ||
+      request.uri.find("/rest/") != std::string::npos)
+    return get_default_uri();
+  return HTTPRequestHandler::get_redirect_uri(request);
+}
+
 void TripAuthenticatedRequestHandler::append_head_content(std::ostream& os) const
 {
   os <<
@@ -243,12 +252,8 @@ void TripAuthenticatedRequestHandler::append_footer_content(std::ostream& os) co
                  package_name.begin(),
                  ::toupper);
   os <<
-    "    <div id=\"footer\" class=\"fixed-bottom container-fluid bg-light pt-3 pb-1\">\n"
-    "      <footer class=\"footer\">\n"
-    "        <div id=\"version\">\n"
-    "          <p class=\"text-muted\">" << package_name << ": v<span>" <<  VERSION << "</span></p>\n"
-    "        </div>\n"
-    "      </footer>\n"
+    "    <div id=\"footer\" class=\"fixed-bottom px-2 py-2 text-bg-secondary\">\n"
+    "      <div id=\"version\" class=\"small\">" << package_name << ": v<span>" <<  VERSION << "</span></div>\n"
     "    </div>\n";
 }
 

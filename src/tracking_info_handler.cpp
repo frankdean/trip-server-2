@@ -48,7 +48,7 @@ void TrackingInfoHandler::build_form(
 {
   DateTime now;
   os <<
-    "<div class=\"container-fluid mse-5\">\n"
+    "<div class=\"container-fluid\">\n"
     // The title of the Tracker Info page which describes configuring a client
     // track logging page
     "  <h1 class=\"pt-2\">" << translate("Tracker URL") << "</h1>\n";

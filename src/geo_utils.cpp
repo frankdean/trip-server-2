@@ -22,6 +22,7 @@
 #include "../config.h"
 #include "geo_utils.hpp"
 #include "../trip-server-common/src/get_options.hpp"
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
 
@@ -275,8 +276,6 @@ nlohmann::basic_json<nlohmann::ordered_map> GeoMapUtils::as_geojson(const int in
   const char indent_char) const
 {
   if (paths.size() > 1) {
-    if (GetOptions::verbose_flag)
-      std::cerr << "WARNING: Created a MultiLineString GeoJSON feature which this application doesn't currently handle\n";
     json json_paths = json::array();
     for (const auto &path : paths) {
       json coords = json::array();
@@ -322,9 +321,44 @@ nlohmann::basic_json<nlohmann::ordered_map> GeoMapUtils::as_geojson(const int in
   }
 }
 
+void bounding_box::extend(const location &location)
+{
+  auto left = std::min(top_left.longitude, location.longitude);
+  auto right = std::max(bottom_right.longitude, location.longitude);
+  auto top = std::max(top_left.latitude, location.latitude);
+  auto bottom = std::min(bottom_right.latitude, location.latitude);
+  top_left.longitude = left;
+  top_left.latitude = top;
+  bottom_right.longitude = right;
+  bottom_right.latitude = bottom;
+}
+
+location bounding_box::get_center() const
+{
+  location loc;
+  auto width =  bottom_right.longitude - top_left.longitude;
+  auto height = top_left.latitude - bottom_right.latitude;
+  loc.longitude = top_left.longitude + width / 2;
+  loc.latitude = bottom_right.latitude + height / 2;
+  return loc;
+}
+
+std::string bounding_box::to_string() const
+{
+  std::ostringstream os;
+  os << "top_left: " << top_left
+     << ", bottom_right: " << bottom_right;
+  return os.str();
+}
+
 double GeoUtils::degrees_to_radians(double d)
 {
     return d * pi / 180;
+}
+
+double GeoUtils::radians_to_degrees(double r)
+{
+    return r * 180 / pi;
 }
 
 double GeoUtils::haversine(double angle)
@@ -368,9 +402,26 @@ double GeoUtils::distance(double lng1, double lat1, double lng2, double lat2)
 
 }
 
-double GeoUtils::distance(location p1, location p2)
+double GeoUtils::distance(const location &p1, const location &p2)
 {
   return distance(p1.longitude, p1.latitude, p2.longitude, p2.latitude);
+}
+
+double GeoUtils::bearing_to_azimuth(
+    double lng1, double lat1, double lng2, double lat2)
+{
+  // https://mapscaping.com/how-to-calculate-bearing-between-two-coordinates/
+  // https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
+  const auto delta = degrees_to_radians(lng2 - lng1);
+  const auto lat1_r = degrees_to_radians(lat1);
+  const auto lat2_r = degrees_to_radians(lat2);
+  const auto x = std::cos(lat2_r) * std::sin(delta);
+  const auto y = std::cos(lat1_r) * std::sin(lat2_r) - std::sin(lat1_r) *
+    std::cos(lat2_r) * std::cos(delta);
+  auto degrees = radians_to_degrees(std::atan2(x, y));
+  if (degrees < 0)
+    degrees += 360;
+  return degrees;
 }
 
 /**

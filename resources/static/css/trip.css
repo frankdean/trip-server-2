@@ -1,5 +1,5 @@
 body {
-  margin-bottom: 70px;
+  margin-bottom: 37px;
 }
 
 #track-info {
@@ -16,7 +16,7 @@ body {
 #map {
   position: absolute;
   top: 56px;
-  bottom: 60px;
+  bottom: 37px;
   width: 100%;
   z-index: -1;
 }

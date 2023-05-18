@@ -44,7 +44,7 @@ fi
 # Create trip-server configuration file from distribution file
 # signingKey and resourceSigningKey only needed for trip v1
 SIGNING_KEY=$(apg  -m 12 -x 14 -M NC -t -n 20 | tail -n 1 | cut -d ' ' -f 1 -)
-if [ $? -ne 0]; then
+if [ $? -ne 0 ]; then
     echo "apg is not installed"
     exit 1
 fi

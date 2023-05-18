@@ -261,12 +261,19 @@ TrackPgDao::tracked_location_query_params::tracked_location_query_params(
 {
   this->user_id = user_id;
   id.first = false;
-  latitude = std::stod(get_value(params, "lat"));
+  std::string s = get_value(params, "lat");
+  if (s.empty())
+    s = get_value(params, "latitude");
+  latitude = std::stod(s);
   if (latitude < -90 || latitude > 90)
     throw std::invalid_argument("Invalid latitude value");
-  std::string s = get_value(params, "lng");
+  s = get_value(params, "lng");
   if (s.empty())
     s = get_value(params, "lon");
+  if (s.empty())
+    s = get_value(params, "long");
+  if (s.empty())
+    s = get_value(params, "longitude");
   longitude = std::stod(s);
   if (longitude < -180 || longitude > 180)
     throw std::invalid_argument("Invalid longitude value");
@@ -285,10 +292,15 @@ TrackPgDao::tracked_location_query_params::tracked_location_query_params(
     if (s.empty())
       s = get_value(params, "timestamp");
     if (!s.empty()) {
-      // std::cout << "Using unixtime/timestamp parameter \"" << s << "\"\n";
-      const long long seconds = std::stoll(s);
-      time_point = std::chrono::system_clock::time_point(
-          std::chrono::seconds(seconds));
+      try {
+        const long long seconds = std::stoll(s);
+        time_point = std::chrono::system_clock::time_point(
+            std::chrono::seconds(seconds));
+      } catch (const std::invalid_argument &e) {
+        // Try as time string
+        DateTime dt(s);
+        time_point = dt.time_tp();
+      }
     } else {
       s = get_value(params, "time");
       if (!s.empty()) {
