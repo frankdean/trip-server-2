@@ -104,6 +104,22 @@ void SessionPgDao::remove_value(std::string session_id,
   tx.commit();
 }
 
+void SessionPgDao::remove_values(std::string session_id,
+                                 const std::vector<std::string> &keys)
+{
+  for (const auto key : keys)
+    remove_value(session_id, key);
+}
+
+/// Clears any previously copied items so that a subsequent paste doesn't
+/// include them as well.
+void SessionPgDao::clear_copy_buffers(std::string session_id)
+{
+  remove_values(session_id, std::vector<std::string>(
+                    {location_history_key,
+                     itinerary_features_key}));
+}
+
 void SessionPgDao::create_session_table(bool overwrite)
 {
   work tx(*connection);

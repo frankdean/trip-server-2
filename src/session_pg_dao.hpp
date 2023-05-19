@@ -95,6 +95,8 @@ public:
   void save_value(std::string session_id, std::string key, std::string value);
   std::string get_value(std::string session_id, std::string key);
   void remove_value(std::string session_id, std::string key);
+  void remove_values(std::string session_id, const std::vector<std::string> &keys);
+  void clear_copy_buffers(std::string session_id);
   void create_session_table(bool overwrite = false);
   void save_session(std::string session_id,
                     const fdsd::web::Session session);

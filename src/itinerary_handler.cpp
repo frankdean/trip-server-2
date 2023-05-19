@@ -897,6 +897,8 @@ void ItineraryHandler::handle_authenticated_request(
     active_tab = features_tab;
     auto_color_paths(request);
   } else if (action == "copy") {
+    SessionPgDao session_dao;
+    session_dao.clear_copy_buffers(get_session_id());
     active_tab = features_tab;
     auto features = get_selected_feature_ids(request);
     selected_features_paste_params.second =
@@ -907,7 +909,6 @@ void ItineraryHandler::handle_authenticated_request(
         selected_features_paste_params.second.tracks.empty());
     if (selected_features_paste_params.first) {
       json j = selected_features_paste_params.second;
-      SessionPgDao session_dao;
       session_dao.save_value(get_session_id(),
                              SessionPgDao::itinerary_features_key, j.dump());
       feature_copy_success = true;

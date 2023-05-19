@@ -253,7 +253,7 @@ void TripAuthenticatedRequestHandler::append_footer_content(std::ostream& os) co
                  ::toupper);
   os <<
     "    <div id=\"footer\" class=\"fixed-bottom px-2 py-2 text-bg-secondary\">\n"
-    "      <div id=\"version\" class=\"small\">" << package_name << ": v<span>" <<  VERSION << "</span></div>\n"
+    "      <div id=\"version\" class=\"small\">" << package_name << " " <<  VERSION << "</div>\n"
     "    </div>\n";
 }
 

@@ -354,6 +354,7 @@ void TrackingRequestHandler::handle_authenticated_request(
     q.page = 1;
   } else if (action == "copy") {
     try {
+      session_dao.clear_copy_buffers(get_session_id());
       json j = q;
       session_dao.save_value(get_session_id(),
                              SessionPgDao::location_history_key,
