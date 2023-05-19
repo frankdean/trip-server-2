@@ -126,6 +126,8 @@ are available online.
 The source is maintained in a Git repository which can be cloned with:
 
 	$ git clone --recursive git://www.fdsd.co.uk/trip-server-2.git
+	$ cd ./trip-server-2/trip-server-common
+	$ git submodule update --init --recursive
 
 ## Demo Options
 

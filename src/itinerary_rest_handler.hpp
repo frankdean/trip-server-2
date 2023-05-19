@@ -24,8 +24,9 @@
 
 #include "itinerary_pg_dao.hpp"
 #include "trip_request_handler.hpp"
-// #define USE_BOOST_SIMPLIFY
-#ifdef USE_BOOST_SIMPLIFY
+#ifdef HAVE_BOOST_GEOMETRY
+// https://www.boost.org/doc/libs/1_67_0/libs/geometry/doc/html/index.html
+// Headers only library
 #include <boost/geometry.hpp>
 #include <boost/range.hpp>
 #include <boost/geometry/geometries/register/linestring.hpp>
@@ -36,7 +37,7 @@
 #include <string>
 #include <vector>
 
-#ifdef USE_BOOST_SIMPLIFY
+#ifdef HAVE_BOOST_GEOMETRY
 BOOST_GEOMETRY_REGISTER_POINT_2D(fdsd::trip::ItineraryPgDao::track_point,
                                  double,
                                  boost::geometry::cs::cartesian,
@@ -109,9 +110,7 @@ class ItineraryRestHandler : public BaseRestHandler {
       const location &point);
 
   void save_simplified_track(
-      std::vector<location> &locations,
-      double tolerance,
-      const nlohmann::basic_json<nlohmann::ordered_map> &properties);
+      const nlohmann::basic_json<nlohmann::ordered_map> &j);
 
   std::vector<location> get_coordinates(
       const nlohmann::basic_json<nlohmann::ordered_map> &coordinates);

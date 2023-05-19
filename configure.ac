@@ -33,6 +33,11 @@ AC_ARG_ENABLE([directory-listing],
 	[Build to allow directory listings (default no)]),
 	[use_directory_listing=${enableval}],
 	[use_directory_listing=no])
+AC_ARG_ENABLE([boost-geometry],
+    AS_HELP_STRING([--enable-boost-geometry],
+	[Build using Boost Geometrey headers (default yes)]),
+	[use_boost_geometry=${enableval}],
+	[use_boost_geometry=yes])
 AC_ARG_ENABLE([gdal],
     AS_HELP_STRING([--enable-gdal],
 	[Build using GDAL library (default yes)]),
@@ -46,7 +51,7 @@ AC_ARG_ENABLE([cairo],
 
 # Checks for programs.
 dnl : ${CXXFLAGS="-g -O0 -std=c++11"}
-AX_CXX_COMPILE_STDCXX(11)
+AX_CXX_COMPILE_STDCXX(17)
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_LANG(C++)
@@ -60,6 +65,7 @@ AC_CANONICAL_HOST
 AC_SEARCH_LIBS([pthread_create], [pthread])
 AX_BOOST_BASE([1.67],[],[AC_MSG_ERROR([Please install at least version 1.67 of the Boost Locale Library])])
 AX_BOOST_LOCALE
+
 PKG_CHECK_MODULES([LIBPQXX], [libpqxx >= 6.2.5 libpqxx < 7 libpq >= 11.14])
 PKG_CHECK_MODULES([LIBYAML], [yaml-cpp >= 0.6.2])
 PKG_CHECK_MODULES([LIBPUGIXML], [pugixml >= 1.11])
@@ -124,7 +130,7 @@ if test "x${use_keep_alive}" == xyes; then
    AC_DEFINE([ENABLE_KEEP_ALIVE], [1], [Enable HTTP keep alive])
 fi
 
-CXXFLAGS="${CXXFLAGS} -Wsuggest-override -Wno-deprecated-declarations ${LIBPQXX_CFLAGS} ${LIBYAML_CFLAGS} ${LIBUUID_CFLAGS} ${BOOST_CPPFLAGS} ${LIBPUGIXML_CFLAGS} ${LIBGDAL_CFLAGS} ${LIBCAIROMM_CFLAGS} ${LIBCMARK_CFLAGS}"
+CXXFLAGS="${CXXFLAGS} -Wno-deprecated-declarations ${LIBPQXX_CFLAGS} ${LIBYAML_CFLAGS} ${LIBUUID_CFLAGS} ${BOOST_CPPFLAGS} ${LIBPUGIXML_CFLAGS} ${LIBGDAL_CFLAGS} ${LIBCAIROMM_CFLAGS} ${LIBCMARK_CFLAGS}"
 dnl CPPFLAGS="${CPPFLAGS} ${XXXXXX_CPPFLAGS}"
 LIBS="${LIBS} ${LIBPQXX_LIBS} ${LIBYAML_LIBS} ${LIBUUID_LIBS} ${BOOST_LDFLAGS} ${BOOST_LOCALE_LIB} ${LIBPUGIXML_LIBS} ${LIBGDAL_LIBS} ${LIBCAIROMM_LIBS} ${LIBCMARK_LIBS}"
 
@@ -171,6 +177,12 @@ if test "x${have_libuuid}" = xyes; then
     [AC_MSG_RESULT([yes]) AC_DEFINE([HAVE_LINUX_UUID], [1], [Build with support for Linux libuuid implementation])],
     [AC_MSG_RESULT([no])]
     )
+fi
+
+if test "x${use_boost_geometry}" = xyes; then
+   AC_CHECK_HEADERS([boost/geometry.hpp boost/range.hpp boost/geometry/algorithms/simplify.hpp],,
+	 [AC_MSG_ERROR([boost/geometry.hpp not found.  Please install the Boost Geometry library headers.])])
+   AC_DEFINE([HAVE_BOOST_GEOMETRY], [1], [Build to use Boost Geometry headers])
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.

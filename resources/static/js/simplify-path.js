@@ -21,6 +21,7 @@
 */
 
 import { TripMap } from './modules/map.js';
+import { distance, perpendicularDistance, simplify } from './modules/geo-utils.js';
 
 const GeoJSON = ol.format.GeoJSON;
 const VectorLayer = ol.layer.Vector;
@@ -31,6 +32,14 @@ const globalPageInfo = JSON.parse(pageInfoJSON);
 class SimplifyMap extends TripMap {
 
   constructor(providers, opt_options) {
+    const eiffel_tower = {lng: 2.2945, lat: 48.85822222};
+    const bt_tower = {lng: -0.1389, lat: 51.5215};
+    const result = perpendicularDistance(-0.427093, 51.273458, -0.400305, 51.286216, -0.41771, 51.2837);
+    // const result = perpendicularDistance(eiffel_tower.lng, eiffel_tower.lat, bt_tower.lng, bt_tower.lat, -0.41771, 51.2837);
+    // console.debug('Perpendicular distance', result);
+    const d = distance(-0.427093, 51.273458, -0.400305, 51.286216);
+    // const d = distance(eiffel_tower.lng, eiffel_tower.lat, bt_tower.lng, bt_tower.lat);
+    // console.debug('Distance', d);
     let options = opt_options || {};
     options.pageInfo = globalPageInfo;
     super(providers, options);
@@ -76,7 +85,7 @@ class SimplifyMap extends TripMap {
       originalPointsEle.innerHTML = '' + pointCount;
       this.currentPointsEle.innerHTML = pointCount;
       const size = ol.extent.getSize(this.trackSource.getExtent());
-      this.toleranceMax = Math.max(size[0], size[1]) / 20;
+      this.toleranceMax = Math.max(size[0], size[1]) / 2000000;
       this.toleranceStep = this.toleranceMax / 1000;
       // console.debug('Initial tolerance max and step', this.toleranceMax, this.toleranceStep);
       this.toleranceInput.step = this.toleranceStep;
@@ -134,8 +143,28 @@ class SimplifyMap extends TripMap {
     // console.debug('tolerance change event', this.toleranceInput.value);
     const originalFeature = this.trackSource.getFeatures()[0];
     const simplifiedFeature = this.simplifiedLayer.getSource().getFeatures()[0];
-    const geometry = originalFeature.getGeometry();
-    const simplifiedGeometry = geometry.simplify(this.toleranceInput.value);
+    // console.debug('simplifiedFeature:', simplifiedFeature);
+    const geoJson = new GeoJSON().writeFeatureObject(originalFeature,{
+      dataProjection: 'EPSG:4326',
+      featureProjection: 'EPSG:3857',
+    });
+    const epsilon = this.toleranceInput.value;
+    const geotype = geoJson.geometry.type;
+    // console.debug('GeoJSON', geoJson);
+    if (geotype === 'LineString') {
+      geoJson.geometry.coordinates = simplify(geoJson.geometry.coordinates, epsilon);
+    } else {
+      const segments = new Array();
+      geoJson.geometry.coordinates.forEach( (coords) => {
+        segments.push(simplify(coords, epsilon));
+      });
+      geoJson.geometry.coordinates = segments;
+    }
+    const simplifiedFeatures = new GeoJSON().readFeatures(geoJson, {
+      dataProjection: 'EPSG:4326',
+      featureProjection: 'EPSG:3857',
+    });
+    const simplifiedGeometry = simplifiedFeatures[0].getGeometry();
     simplifiedFeature.setGeometry(simplifiedGeometry);
     const points = simplifiedGeometry.flatCoordinates.length / simplifiedGeometry.stride;
     this.currentPointsEle.innerHTML = '' + points;

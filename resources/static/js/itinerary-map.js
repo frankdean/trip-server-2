@@ -398,7 +398,7 @@ class ItineraryMap extends TripMap {
   }
 
   abortFeatureEdit() {
-    console.debug('abortFeatureEdit');
+    // console.debug('abortFeatureEdit');
     this.removeInteractions();
     this.refetch = false;
     if (this.modifiedRoutes && this.modifiedRoutes.size > 0) {

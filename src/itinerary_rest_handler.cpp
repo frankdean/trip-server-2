@@ -31,7 +31,7 @@
 #include <map>
 #include <sstream>
 
-#ifdef USE_BOOST_SIMPLIFY
+#ifdef HAVE_BOOST_GEOMETRY
 using namespace boost::geometry;
 #endif
 using namespace boost::locale;
@@ -374,117 +374,87 @@ std::string ItineraryRestHandler::create_track_point_key(
 }
 
 void ItineraryRestHandler::save_simplified_track(
-    std::vector<location> &locations,
-    double tolerance,
-    const nlohmann::basic_json<nlohmann::ordered_map> &properties)
+    const nlohmann::basic_json<nlohmann::ordered_map> &j)
 {
   // In simplifying the path using OpenLayers (at at version 7.1.0) we lose the
   // altitude, hdop and time attributes of each point in the resultant GeoJSON
   // object.
   //
-  // This method handles this situation by making a copy of the original path
-  // and removing all points that are no longer in the simplified path.
-  //
-  // The points from the simplified path are added to a map.  To reduce rounding
-  // precision issues, the points are keyed by a concatenation of longitude and
-  // latitude rounded to a specific precision.
-  //
-  // Where points are very close together they survive this process, therefore,
-  // after first finding a point, it is removed from the map, causing any
-  // further points appearing to belong to the same location to also be removed.
-  // This may be undesirable in some situations, such as a figure of 8
-  // track, but otherwise difficult to avoid.
-
-  // A map with keys used to identifying a location with a reasonable amount of
-  // accuracy
+  const auto j_track = j["track"];
+  const auto properties = j_track["properties"];
+  if (j.find("tolerance") == j.end())
+    throw BadRequestException("tolerance value is not specified for the track");
+  const double tolerance = j["tolerance"];
   if (properties.find("id") != properties.end()) {
     const long original_track_id = properties["id"];
     // std::cout << "Original track ID: " << original_track_id << '\n';
+    // const auto type = j_track["type"];
+    const auto geometry = j_track["geometry"];
+    const auto geometryFeatureType = geometry["type"];
+
     ItineraryPgDao dao;
+    ItineraryPgDao::itinerary_features features;
+#ifndef HAVE_BOOST_GEOMETRY
+    ItineraryPgDao::track track;
+    if ((track.name.first = properties.find("name") != properties.end()))
+      track.name.second = properties["name"];
+    if ((track.color_key.first = properties.find("color_code") != properties.end()))
+      track.color_key.second = properties["color_code"];
+    if ((track.html_code.first =
+         properties.find("html_color_code") != properties.end()))
+      track.html_code.second = properties["html_color_code"];
+
+    if (geometryFeatureType == "LineString") {
+      const auto locations = get_coordinates(geometry["coordinates"]);
+      std::vector<ItineraryPgDao::track_point> points;
+      for (const auto &loc : locations)
+        points.push_back(ItineraryPgDao::track_point(loc));
+      ItineraryPgDao::track_segment segment(points);
+      track.segments.push_back(segment);
+    } else if (geometryFeatureType == "MultiLineString") {
+      const auto multi_line_string = geometry["coordinates"];
+      if (multi_line_string.is_array()) {
+        for (json::const_iterator i = multi_line_string.begin();
+             i != multi_line_string.end(); ++i) {
+          const auto locations = get_coordinates(*i);
+          std::vector<ItineraryPgDao::track_point> points;
+          for (const auto &loc : locations)
+            points.push_back(ItineraryPgDao::track_point(loc));
+          ItineraryPgDao::track_segment segment(points);
+          track.segments.push_back(segment);
+        }
+      } else {
+        throw BadRequestException("Bad format for MultiLineString coordinates");
+      }
+    } else {
+      std::cerr << "Unexpected geometry feature type: \""
+                << geometryFeatureType << "\"\n";
+      throw BadRequestException("Unexpected geometry feature type");
+    }
+    // A note appended to a path name which has been simplified
+    const std::string additional_note = translate("(simplified)");
+    if (track.name.first) {
+      if (!(track.name.second.empty() || additional_note.empty()))
+        track.name.second += " ";
+      track.name.second += additional_note;
+    } else {
+      track.name =
+        std::make_pair(true, additional_note);
+    }
+    features.tracks.push_back(track);
+    // track.calculate_statistics();
+    // dao.create_track(get_user_id(), itinerary_id, track);
+#else
+    const auto original_tolerance = tolerance;
+    // tolerance = 0.0001;
+    // std::cout << std::fixed << std::setprecision(3)
+    //           << "Original tolerance " << original_tolerance << " : "
+    //           << (original_tolerance / tolerance) << '\n';
     std::vector<long> track_ids;
     track_ids.push_back(original_track_id);
     auto tracks = dao.get_tracks(get_user_id(), itinerary_id, track_ids);
     if (tracks.empty())
       throw BadRequestException("Unable to find original track");
-    ItineraryPgDao::itinerary_features features;
-#ifndef USE_BOOST_SIMPLIFY
-    std::map<std::string, ItineraryPgDao::track_point> simplified_map;
-    // Create a map containing each location in the simplified track
-    std::for_each(
-        locations.cbegin(),
-        locations.cend(),
-        [&simplified_map] (const location &loc) {
-          simplified_map[ItineraryRestHandler::create_track_point_key(loc)]
-            = loc;
-        });
-    for (auto &t : tracks) {
-      t.id.first = false;
-      // A note appended to a path name which has been simplified
-      const std::string additional_note = translate("(simplified)");
-      if (t.name.first) {
-        if (!(t.name.second.empty() || additional_note.empty()))
-          t.name.second += " ";
-        t.name.second += additional_note;
-      } else {
-        t.name =
-          std::make_pair(true, additional_note);
-      }
-
-      for (auto &ts : t.segments) {
-        if (ts.points.size() <= 2)
-          continue;
-        ts.id.first = false;
-        for (auto &point : ts.points) {
-          point.id.first = false;
-        }
-        // std::cout << ts.points.size() << " points in segment before processing\n";
-
-        // Remove the first and last points from the map of simplified points,
-        // if they exist, as we will not remove them during the loop, but we
-        // don't want to keep any other points for the same location.
-        std::string key = ItineraryRestHandler::create_track_point_key(ts.points.front());
-        auto iter = simplified_map.find(key);
-        if (iter != simplified_map.end())
-          simplified_map.erase(iter);
-        key = ItineraryRestHandler::create_track_point_key(ts.points.back());
-        iter = simplified_map.find(key);
-        if (iter != simplified_map.end())
-          simplified_map.erase(iter);
-
-        // Remove all the points that aren't in the map of simplified points
-        ts.points.erase(
-            std::remove_if(
-                ts.points.begin() +1,
-                ts.points.end() -1,
-                [&simplified_map]
-                (const ItineraryPgDao::track_point &point) {
-                  const std::string key =
-                    ItineraryRestHandler::create_track_point_key(point);
-                  auto iter = simplified_map.find(key);
-                  if (iter != simplified_map.end()) {
-                    // Erase the entry from the map so any remaining points with
-                    // the same locations will also be removed
-                    simplified_map.erase(iter);
-                    return false;
-                  } else {
-                    // Do not delete the first and last points
-                    return true;
-                  }
-                }), ts.points.end() -1);
-
-        // Clear the IDs of all the remaining points
-        for (auto &point : ts.points)
-          point.id.first = false;
-
-      }
-      features.tracks.push_back(t);
-    }
-#else
-    const auto original_tolerance = tolerance;
-    tolerance = 0.0001;
-    // std::cout << std::fixed << std::setprecision(3)
-    //           << "Original tolerance " << original_tolerance << " : "
-    //           << (original_tolerance / tolerance) << '\n';
     for (auto &t : tracks) {
       ItineraryPgDao::track new_track(t);
       new_track.segments.clear();
@@ -530,21 +500,7 @@ void ItineraryRestHandler::save_simplified_feature(
   // std::cout << "JSON:\n" << j.dump(4) << '\n';
   // std::cout << "Saving features for itinerary ID: "
   //           << itinerary_id << "\n";
-  const auto track = j["track"];
-  const std::string type = track["type"];
-  const auto geometry = track["geometry"];
-  const auto properties = track["properties"];
-  const auto featureType = properties["type"];
-  const std::string geometryFeatureType = geometry["type"];
-  if (featureType.is_string() && featureType == "track") {
-    std::vector<location> locations = extract_locations(track);
-    if (!locations.empty()) {
-      if (j.find("tolerance") == j.end())
-        throw BadRequestException("tolerance value is not specified for the track");
-      const double tolerance = j["tolerance"];
-      save_simplified_track(locations, tolerance, properties);
-    }
-  }
+  save_simplified_track(j);
 }
 
 std::vector<location> ItineraryRestHandler::extract_locations(

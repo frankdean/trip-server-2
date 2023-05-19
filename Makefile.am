@@ -47,7 +47,8 @@ dist_js_DATA = resources/static/js/change-password.js \
 	resources/static/js/simplify-path.js \
 	resources/static/js/tracking-map.js
 jsmoddir = $(pkgdatadir)/resources/static/js/modules
-dist_jsmod_DATA = resources/static/js/modules/itinerary.js \
+dist_jsmod_DATA = resources/static/js/modules/geo-utils.js \
+	resources/static/js/modules/itinerary.js \
 	resources/static/js/modules/location-service.js \
 	resources/static/js/modules/map.js \
 	resources/static/js/modules/utils-service.js
