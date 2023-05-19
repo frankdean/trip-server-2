@@ -221,35 +221,32 @@ void GeoMapUtils::add_location(std::unique_ptr<location> &previous,
                                std::vector<location> &new_path,
                                location &loc)
 {
-  // TODO calculate actual position line intersects the anti-meridian It is not
-  // as simple as breaking the line at longitude 180° and copying the same
-  // latitude values, which only works with a line parallel to a latitude.
   update_altitude_info(&loc);
   if (previous) {
     if (previous->longitude > 90 && loc.longitude < -90 ||
         previous->longitude < -90 && loc.longitude > 90) {
-      // std::cout << "Path from location id ";
-      // if (previous->id.first)
-      //   std::cout << previous->id.second;
-      // else
-      //   std::cout << "null";
-      // std::cout << " to location id ";
-      // if (loc.id.first)
-      //   std::cout << loc.id.second;
-      // else
-      //   std::cout << "null"
-      //             << " crosses the anti-meridian\n";
+      // Paths that cross the antimeridian pose problems when displayed on the
+      // map.  We try to calculate the actual position the path intersects the
+      // antimeridian and create extra points at roughly where the intersection
+      // occurs.  We then split the path into two.  This is not accurate, but
+      // perhaps good enough for most situations.
+      //
+      // See the 'Antimeridian Cutting' section of the GeoJSON specification.
+      // https://datatracker.ietf.org/doc/html/rfc7946
       location t1(loc);
       location t2(loc);
-      // std::cout << "First: " << t1 << '\n';
-      // std::cout << "Second: " << t2 << '\n';
-      if (t2.longitude < t1.longitude) {
+      if (previous->longitude < 0) {
         t1.longitude = -180.0;
         t2.longitude = 180.0;
       } else {
         t1.longitude = 180.0;
         t2.longitude = -180.0;
       }
+      const auto ydiff = loc.latitude - previous->latitude;
+      t1.latitude -= (ydiff / 2);
+      t2.latitude = t1.latitude;
+      update_altitude_info(&t1);
+      t2.altitude = t1.altitude;
       new_path.push_back(t1);
       paths.push_back(new_path);
       new_path = std::vector<location>();
