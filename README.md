@@ -131,12 +131,18 @@ The source is maintained in a Git repository which can be cloned with:
 
 ## Demo Options
 
-### Play With Docker
+### Play with Docker
 
 [play]: https://labs.play-with-docker.com "Play with Docker"
 
-The application can be run as two or three containers in the
-[Play-with-docker][play] environment.
+1.  Use [Play with Docker][play] to run the application with some test data in
+    a browser, without having to install anything.
+
+1.  Navigate to [Play with Docker][play] and login using a Docker ID.  If you
+    do not have one, you will see the option to sign up after clicking `Login`
+    then `Docker`.
+
+1.  Click `+ ADD NEW INSTANCE`
 
 1.  Create a network for the containers to share:
 
@@ -201,6 +207,19 @@ The application can be run as two or three containers in the
 	Set `CONFIGURE_TILE_SERVER` to `yes` if you have the map tile
 	container running.  When not set to `yes`, dummy map tiles are created
 	showing their x, y and z values.
+
+1.  Once the application is running a link titled `8080` will be shown next to
+    the `OPEN PORT` button at the top of the page.  Click on the `8080` link
+    to open a new browser window to the running web server.  If the port
+    number doesn't show up, click on `OPEN PORT` and enter the port number as
+    `8080`.
+
+1.  Login using one of the following users and credentials:
+
+	- user@trip.test  rasHuthlutcew7
+	- admin@trip.test 7TwilfOrucFeug
+
+1.  Select `Help` from the menu to view the user guide.
 
 ## Building
 
