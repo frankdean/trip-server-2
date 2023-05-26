@@ -6,7 +6,7 @@
 @c @set UPDATED to appropriate values.
 @include version-ug.texi
 @settitle Trip Server User Guide for version @value{VERSION}
-@paragraphindent none
+@c @paragraphindent none
 @c %**end of header
 
 @direntry
@@ -33,7 +33,7 @@ Copyright @copyright{} 2021-2023 Frank Dean
 @contents
 
 @ifnottex
-@node Top, Introduction, (dir), (dir)
+@node Top, Introduction
 @top Trip Server User Guide
 @insertcopying
 @end ifnottex
@@ -50,6 +50,64 @@ Copyright @copyright{} 2021-2023 Frank Dean
 * Itinerary Search::            Searching itineraries
 * My Account::                  Account management
 * Concept Index::               Index
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Tracking
+
+* List Tracks::
+* Show Map::
+* Download Tracks::
+* Copy Tracks::
+
+Tracker Info
+
+* Download TripLogger Settings::
+
+Track Sharing
+
+* Amend Share Details::
+* Activating and Deactivating Shares::
+* Deleting Shares::
+
+My Location
+
+* Recording Your Current Location::
+* Adjusting Your Location::
+* Copying Your Current Location to an Itinerary::
+
+Itineraries
+
+* Itinerary Notes::
+* Map::
+* Live Map::
+* Sharing::
+* GPX Upload::
+* GPX Downloads::
+* Download Full Itinerary::
+* Add Waypoint::
+* Creating a New Route::
+* Creating Waypoints using the Map::
+* Amending Routes::
+* Copying and Renaming Routes and Tracks::
+* Copying and Pasting between Itineraries::
+* Moving Waypoints::
+* Joining Routes and Tracks::
+* Editing Tracks::
+* Split Track::
+* Editing Route Points::
+* Duplicating the Itinerary::
+* Assigning Colours to Routes and Tracks::
+* Convert Tracks to Routes::
+* Simplify Track::
+
+My Account
+
+* Change Password::
+* Upload TripLogger Settings::
+
+@end detailmenu
 @end menu
 
 @node Introduction, Overview, Top, Top
@@ -910,6 +968,10 @@ new point is created when you finishing dragging.
 Click the @code{Save} button adjacent to the @code{edit icon} at the top
 right hand side of the map to finish make changes.  Click the @code{Cancel}
 button to abandon the changes.
+
+Nodes can be deleted by holding down the @code{alt} key and clicking on
+the node to be deleted.  On touch screen devices double-click the node
+to delete it.
 
 @node Copying and Renaming Routes and Tracks, Copying and Pasting between Itineraries, Amending Routes, Itineraries
 @section Copying and Renaming Routes and Tracks

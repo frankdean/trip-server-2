@@ -272,7 +272,9 @@ class TripMap {
         padding: [10, 10, 70, 10],
       }),
     });
-    this.fetchFeatures();
+    if (this.options.fetch_features !== false) {
+      this.fetchFeatures();
+    }
   }
 
   fetchFeatures() {

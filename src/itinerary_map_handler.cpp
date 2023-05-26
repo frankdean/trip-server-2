@@ -70,11 +70,11 @@ void ItineraryMapHandler::handle_authenticated_request(
     };
     // std::cout << j << '\n';
     response.content <<
-      "    <div id=\"map\"></div>\n"
-      "    <div id=\"popup\" class=\"ol-popup d-none\">\n"
-      "      <a href=\"#\" id=\"popup-closer\" class=\"ol-popup-closer\"></a>\n"
-      "      <div id=\"popup-content\"></div>\n"
-      "    </div>\n";
+      "    <div id=\"map\"></div>\n";
+    //   "    <div id=\"popup\" class=\"ol-popup\">\n"
+    //   "      <a href=\"#\" id=\"popup-closer\" class=\"ol-popup-closer\"></a>\n"
+    //   "      <div id=\"popup-content\"></div>\n"
+    //   "    </div>\n";
     response.content <<
       "    <script>\n"
       "      <!--\n"

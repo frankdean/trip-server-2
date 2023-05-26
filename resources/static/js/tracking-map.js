@@ -380,6 +380,7 @@ class TrackingMap extends TripMap {
 
 const simplifyMap = new TrackingMap(providers,
                                     {
+                                      fetch_features: (document.getElementById('track-info') !== null),
                                       query_params: (new URL(document.location)).searchParams,
                                       url: `${server_prefix}/rest/locations`,
                                       updatesUrl: `${server_prefix}/rest/locations/is-updates`,

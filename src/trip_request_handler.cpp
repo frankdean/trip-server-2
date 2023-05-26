@@ -226,7 +226,7 @@ void TripAuthenticatedRequestHandler::append_body_start(std::ostream& os) const
     // Menu item for a user to administer their own account
      << translate("Account") << "</a></li>\n"
     "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"https://www.fdsd.co.uk/trip-server-2/"
-    PACKAGE_NAME "-" PACKAGE_VERSION "/docs/user-guide/\" target=\"_blank\">" <<
+    PACKAGE_NAME "-" PACKAGE_VERSION "/trip-server.html/\" target=\"_blank\">" <<
     // Menu item linking to the user guide
     translate("Help") << "</a></li>\n"
     "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"" << prefix << "/logout\">" <<

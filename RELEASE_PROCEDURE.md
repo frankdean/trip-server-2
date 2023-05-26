@@ -96,6 +96,8 @@ T.B.D.
 
 1.  Check the website links for all the user documentation
 
+1.  Check the `Help` menu item correctly links to the latest user guide
+
 1.  Check the tarballs download
 
 1.  Download the checksums file and validate against the downloaded tarballs

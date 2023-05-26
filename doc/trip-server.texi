@@ -5,7 +5,7 @@
 @c Automake automatically updates version.texi to @set VERSION and
 @c @set UPDATED to appropriate values.
 @include version.texi
-@settitle trip-server version @value{VERSION}
+@settitle Trip Server Application Manual version @value{VERSION}
 @c @paragraphindent none
 @c %**end of header
 
@@ -15,7 +15,7 @@
 
 @copying
 This User Guide is for using Trip, version @value{VERSION},
-@value{UPDATED} in a browser.  Trip is a an application supporting trip
+@value{UPDATED} in a browser.  Trip is an application supporting trip
 recording and itinerary planning.
 
 Copyright @copyright{} 2021-2023 Frank Dean
@@ -27,23 +27,37 @@ Copyright @copyright{} 2021-2023 Frank Dean
 @page
 @vskip 0pt plus 1filll
 @insertcopying
+
 @end titlepage
 
 @contents
 
 @ifnottex
-@node Top, Invoking trip-server, (dir), (dir)
-@top trip-server
+@node Top, Overview
+@top Trip Server Application Manual
+@insertcopying
 @end ifnottex
 
 @c @setchapternewpage off
 
-@chapter Overview
-
-This document describes using @code{trip-server} --- Trip Recording and
-Itinerary Planning, version @value{VERSION}, @value{UPDATED}.
-
 @menu
+* Overview::
+* Invoking trip-server::
+* Upgrading from Trip Server v1::
+* PostgreSQL Setup::
+* Configuration::
+* Internationalisation and Localisation::
+* Proxy Web Servers::
+* Testing and Developing Trip::
+* Miscellaneous::
+* Database Backup::
+* Concept Index::
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Overview
+
 * Invoking trip-server::
 * Upgrading from Trip Server v1::
 * PostgreSQL Setup::
@@ -54,8 +68,6 @@ Itinerary Planning, version @value{VERSION}, @value{UPDATED}.
 * Miscellaneous::
 * Database Backup::
 
-@detailmenu
- --- The Detailed Node Listing ---
 
 Options
 
@@ -143,7 +155,26 @@ Useful Queries for Testing
 @end detailmenu
 @end menu
 
-@node Invoking trip-server, Upgrading from Trip Server v1, Top, Top
+@node Overview, Invoking trip-server, Top, Top
+@chapter Overview
+
+This document describes using @code{trip-server} --- Trip Recording and
+Itinerary Planning, version @value{VERSION}, @value{UPDATED}.
+
+@menu
+* Invoking trip-server::
+* Upgrading from Trip Server v1::
+* PostgreSQL Setup::
+* Configuration::
+* Internationalisation and Localisation::
+* Proxy Web Servers::
+* Testing and Developing Trip::
+* Miscellaneous::
+* Database Backup::
+
+@end menu
+
+@node Invoking trip-server, Upgrading from Trip Server v1, Overview, Top
 @chapter Invoking trip-server
 @cindex Invoking trip-server
 
@@ -1052,7 +1083,15 @@ modify the default configuration and start the TRIP server.
 
 @item
 Use your browser to navigate to @url{http://localhost:8080/} on the host
-machine and login providing the above credentials
+machine and login providing the following credentials:
+
+@itemize
+@item
+user@@trip.test  rasHuthlutcew7
+
+@item
+admin@@trip.test 7TwilfOrucFeug
+@end itemize
 
 @item
 When finished, halt the server with:
@@ -1446,7 +1485,7 @@ UPDATE temp_location SET user_id=3, id=NEXTVAL('location_seq'::regclass);
 INSERT INTO location SELECT * FROM temp_location;
 @end example
 
-@node Database Backup,  , Miscellaneous, Top
+@node Database Backup, Concept Index, Miscellaneous, Top
 @chapter Database Backup
 @cindex Database Backup, Backup
 
@@ -1479,5 +1518,10 @@ $ pg_dump --clean --if-exists --no-owner --exclude-table-data=tile trip
 The above backup is suitable for every-day backup.  If you intend to
 restore from the backup as part of your development and test cycle,
 remove the tile table data exclusion so that the cache is not lost.
+
+@node Concept Index,  , Database Backup, Top
+@unnumbered Index
+
+@printindex cp
 
 @bye
