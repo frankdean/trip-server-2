@@ -28,7 +28,7 @@ T.B.D.
 
 		$ make html pdf
 
-1.  Checkin changed files, including the updated `po` language files
+1.  Check in the changed files, including the updated `po` language files
 
 ## Docker
 
@@ -44,8 +44,9 @@ T.B.D.
 1.  Build the `trip-server-2` image:
 
 	Update `Dockerfile` and the various docker-compose files to use the latest
-    appropriate [node](https://hub.docker.com/_/node) build.  The distribution
-    tarball is required in the root source folder to build the Docker image.
+    appropriate [node](https://hub.docker.com/_/node) build.  The `trip
+    server` distribution tarball is required in the root source folder to
+    build the Docker image.
 
 		$ docker build --no-cache -t fdean/trip-server-2:latest .
 

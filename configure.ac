@@ -214,5 +214,6 @@ AC_CONFIG_FILES([Makefile po/Makefile.in
 	         doc/Makefile
                  src/Makefile
                  tests/Makefile
+		 Dockerfile
                  ])
 AC_OUTPUT
