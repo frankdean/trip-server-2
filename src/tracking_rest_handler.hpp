@@ -55,7 +55,6 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  static const int max_result_count;
   TrackingRestHandler(std::shared_ptr<TripConfig> config);
   virtual ~TrackingRestHandler() {}
   virtual std::string get_handler_name() const override {

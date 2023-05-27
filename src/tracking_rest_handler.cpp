@@ -21,6 +21,7 @@
 */
 #include "../config.h"
 #include "tracking_rest_handler.hpp"
+#include "trip_config.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
 #include <algorithm>
@@ -32,8 +33,6 @@ using namespace fdsd::web;
 using namespace fdsd::utils;
 using namespace boost::locale;
 using json = nlohmann::basic_json<nlohmann::ordered_map>;
-
-const int TrackingRestHandler::max_result_count = 1000;
 
 TrackingRestHandler::TrackingRestHandler(std::shared_ptr<TripConfig> config) :
     BaseRestHandler(config)
@@ -132,7 +131,7 @@ nlohmann::basic_json<nlohmann::ordered_map>
       q.max_hdop = max_hdop;
       q.order = dao_helper::ascending;
       q.page_offset = -1;
-      q.page_size = max_result_count;
+      q.page_size = config->get_maximum_location_tracking_points();
       const auto locations_result = dao.get_tracked_locations(q);
       const auto track_json =
         get_tracked_locations_as_geojson(locations_result);
@@ -187,6 +186,7 @@ nlohmann::basic_json<nlohmann::ordered_map>
   feature["properties"] = properties;
   json features;
   features.push_back(feature);
+  auto max_result_count = config->get_maximum_location_tracking_points();
   json j{
     {"last_location_id", last_location_id},
     {"totalCount", locations_result.total_count},
@@ -268,7 +268,7 @@ void TrackingRestHandler::handle_authenticated_request(
                                                  request.get_query_params());
       q.order = dao_helper::ascending;
       q.page_offset = -1;
-      q.page_size = max_result_count;
+      q.page_size = config->get_maximum_location_tracking_points();
       TrackPgDao::tracked_locations_result locations_result =
         dao.get_tracked_locations(q);
       if (!locations_result.locations.empty()) {

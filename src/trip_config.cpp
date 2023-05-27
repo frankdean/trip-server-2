@@ -42,6 +42,7 @@ TripConfig::TripConfig(std::string filename) :
   default_average_kmh_hiking_speed(4),
   elevation_tile_cache_ms(),
   elevation_tile_path(),
+  maximum_location_tracking_points(1000),
   default_triplogger_configuration()
 {
   try {
@@ -63,6 +64,9 @@ TripConfig::TripConfig(std::string filename) :
         if (gpx["indent"])
           gpx_indent = gpx["indent"].as<int>();
       }
+      if (app["maximum_location_tracking_points"])
+        maximum_location_tracking_points =
+          app["maximum_location_tracking_points"].as<int>();
       if (app["maxFileUploadSize"])
         maximum_request_size = app["maxFileUploadSize"].as<long>();
       if (app["averageFlatSpeedKph"])

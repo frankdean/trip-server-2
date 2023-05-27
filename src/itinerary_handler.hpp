@@ -124,7 +124,6 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  static const long max_track_points;
   ItineraryHandler(std::shared_ptr<TripConfig> config) :
     TripAuthenticatedRequestHandler(config),
     feature_copy_success(false),

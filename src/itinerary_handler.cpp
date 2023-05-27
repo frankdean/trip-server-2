@@ -36,10 +36,6 @@ using namespace fdsd::web;
 using namespace fdsd::utils;
 using json = nlohmann::json;
 
-/// The maximum number of location tracking points that can be pasted into an
-/// itinerary
-const long ItineraryHandler::max_track_points = 1000;
-
 namespace fdsd {
   namespace trip {
     void to_json(nlohmann::json& j, const ItineraryHandler::paste_features& ids)
@@ -457,7 +453,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       <<
       "  <div class=\"alert alert-warning\" role=\"alert\">\n"
       // Message displayed when attempting to paste more than the maximum number of items into an itinerary
-      "    <p>" << format(translate("Pasted the maximum of {1} points")) % max_track_points << "</p>\n"
+      "    <p>" << format(translate("Pasted the maximum of {1} points")) % config->get_maximum_location_tracking_points() << "</p>\n"
       "  </div>\n";
   }
   if (feature_copy_success) {
@@ -769,13 +765,13 @@ void ItineraryHandler::paste_locations()
 {
   TrackPgDao track_dao;
   location_history_paste_params.second.page_offset = 0;
-  location_history_paste_params.second.page_size =
-    ItineraryHandler:: max_track_points;
+  auto max_track_points = config->get_maximum_location_tracking_points();
+  location_history_paste_params.second.page_size = max_track_points;
   TrackPgDao::tracked_locations_result
     locations_result =
     track_dao.get_tracked_locations(location_history_paste_params.second);
   max_track_paste_exceeded =
-    locations_result.total_count > ItineraryHandler::max_track_points;
+    locations_result.total_count > max_track_points;
   std::vector<ItineraryPgDao::waypoint> waypoints;
   std::vector<ItineraryPgDao::track_point> points;
   for (const auto &location : locations_result.locations) {
