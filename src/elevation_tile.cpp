@@ -26,6 +26,7 @@
 #include <boost/locale.hpp>
 #include <gdal_priv.h>
 #include "../trip-server-common/src/file_utils.hpp"
+#include "syslog.h"
 
 using namespace boost::locale;
 using namespace fdsd::trip;
@@ -142,6 +143,7 @@ std::pair<bool, double>
   if (!coordinate_transform->Transform(1, &x, &y)) {
     std::cerr << "Transformation of lon: " << longitude << " lat: " << latitude
               << " failed\n";
+    syslog(LOG_ERR, "Transformation of lon: %.6f lat: %.6f failed", longitude, latitude);
     throw dataset_exception("Transformation failed");
   }
 
@@ -221,8 +223,11 @@ void ElevationService::init()
 
         // std::cout << "Added \"" << entry.name << "\" to set of elevation tiles\n";
       } catch (const ElevationTile::dataset_exception &e) {
-        std::cerr << "Error adding file: \"" << entry.name << "\" to list: "
+        std::cerr << "Error adding file: \"" << entry.name << "\" to elevation tile list: "
                   << e.what() << '\n';
+        syslog(LOG_ERR, "Error adding file: \"%s\" to elevation tile list: %s",
+               entry.name.c_str(),
+               e.what());
       }
     }
     auto finish = std::chrono::system_clock::now();
@@ -233,6 +238,8 @@ void ElevationService::init()
   } catch (const std::exception &e) {
     std::cerr << "Exception initializing elevation tiles: "
               << e.what() << '\n';
+    syslog(LOG_ERR, "Exception initializing elevation tiles: %s",
+           e.what());
     initialization_error = std::current_exception();
   }
   initialized = true;
@@ -272,6 +279,7 @@ std::pair<bool, double>
   }
   if (initialization_error) {
     std::cerr << "FAILURE INIT\n";
+    syslog(LOG_ALERT, "Failed to initialize elevation service");
     std::rethrow_exception(initialization_error);
   }
     // throw std::runtime_error("Failed to initialize elevation tiles service");
@@ -287,6 +295,10 @@ std::pair<bool, double>
     }
   } catch (const ElevationTile::dataset_exception &e) {
     std::cerr << e.what() << '\n';
+    syslog(LOG_ERR, "Error getting elevation for lon: %.6f lat: %.6f: %s",
+           longitude,
+           latitude,
+           e.what());
   }
   update_tile_cache();
   return retval;

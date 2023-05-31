@@ -1,5 +1,6 @@
 # -*- mode: dockerfile; -*- vim: set ft=dockerfile:
 FROM  debian:bullseye-slim AS build
+LABEL uk.co.fdsd.tripserver.version="@PACKAGE_VERSION@"
 RUN groupadd --gid 1000 trip \
     && useradd --uid 1000 --gid trip --shell /bin/bash --create-home trip
 RUN apt-get update \
@@ -8,6 +9,7 @@ RUN apt-get update \
     make g++ gawk \
     libboost-locale-dev libpqxx-dev libpugixml-dev libyaml-cpp-dev \
     nlohmann-json3-dev uuid-dev cairomm-1.0-dev libcmark-dev \
+    texlive texinfo \
     && rm -rf /var/lib/apt/lists/*
 
 RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \
@@ -37,9 +39,10 @@ RUN tar -xf $TRIP_SERVER_FILENAME
 WORKDIR "/usr/local/src/trip-${TRIP_SERVER_VERSION}"
 
 RUN ./configure --disable-gdal --enable-cairo && make check
+RUN make html pdf
 
 USER root
-RUN make install
+RUN make install install-html install-pdf
 
 WORKDIR /usr/local/etc
 
@@ -71,12 +74,15 @@ COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/local/etc/ /usr/local/etc/
 COPY --from=build /usr/local/share/ /usr/local/share/
 
-COPY docker-entrypoint.sh /usr/local/bin/
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/
+
 WORKDIR /usr/local/etc
 RUN rm -f trip-server.yaml && touch trip-server.yaml && \
     chown trip:trip trip-server.yaml && chmod 0640 trip-server.yaml
 
 USER trip
+
+EXPOSE 8080
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 

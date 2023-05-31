@@ -86,11 +86,8 @@ TilePgDao::tile_result TileHandler::fetch_remote_tile(
   provider.path = UriUtils::uri_encode_rfc_1738(path);
   // std::cout << "Path after: \"" << path << "\"\n";
   provider.add_header("Host", provider.host);
-  provider.add_header("Referer", "https://www.fdsd.co.uk/trip/about.html");
-  provider.add_header("User-Agent",
-                      UriUtils::uri_encode_rfc_1738(
-                          PACKAGE "/" PACKAGE_VERSION
-                          " (mailto:support@fdsd.co.uk)"));
+  provider.add_header("Referer", UriUtils::uri_encode_rfc_1738(provider.referrer_info));
+  provider.add_header("User-Agent", UriUtils::uri_encode_rfc_1738(provider.user_agent_info));
   provider.add_header("Accept", "*/*");
   HttpClient client(provider);
   // std::cout << "Options: " << provider.HttpOptions::to_string() << '\n';
@@ -257,26 +254,32 @@ void TileHandler::handle_authenticated_request(
       int z = std::stoi(m[2]);
       int x = std::stoi(m[3]);
       int y = std::stoi(m[4]);
-      auto result = find_tile(provider_index, z, x, y);
-      std::for_each(result.tile.begin(), result.tile.end(),
-                    [&response](const char c) {
-                      response.content << c;
-                    });
-      // The date may be in the past - fine - it's expired!
-      DateTime expires(result.expires);
-      response.set_header("Expires", expires.get_time_as_rfc7231());
-      return;
-    } catch (const std::length_error& e) {
-      // drop through to bad request
+      try {
+        auto result = find_tile(provider_index, z, x, y);
+        std::for_each(result.tile.begin(), result.tile.end(),
+                      [&response](const char c) {
+                        response.content << c;
+                      });
+        // The date may be in the past - fine - it's expired!
+        DateTime expires(result.expires);
+        response.set_header("Expires", expires.get_time_as_rfc7231());
+        return;
+      } catch (const std::length_error& e) {
+        // drop through to bad request
+      } catch (const std::exception &e)  {
+        std::cerr << "Failure handling request: "
+                  << e.what() << '\n';
+        syslog(LOG_WARNING,
+               "Failure handling request for tile provider [%d], "
+               "z=%d, x=%d, y=%d: %s",
+               provider_index, z, x, y, e.what());
+        response.content << "<h1>Failed</h1>\n";
+        return;
+      }
     } catch (const std::invalid_argument& e) {
       // drop through to bad request
     } catch (const std::out_of_range& e) {
       // drop through to bad request
-    } catch (const std::exception &e)  {
-      std::cerr << "Failure handling request: "
-                << e.what() << '\n';
-      response.content << "<h1>Failed</h1>\n";
-      return;
     }
   }
   response.generate_standard_response(HTTPStatus::bad_request);

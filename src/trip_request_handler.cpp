@@ -30,6 +30,7 @@
 #include "../trip-server-common/src/uri_utils.hpp"
 #include <string>
 #include <boost/locale.hpp>
+#include <syslog.h>
 
 using namespace fdsd::trip;
 using namespace fdsd::utils;
@@ -225,8 +226,7 @@ void TripAuthenticatedRequestHandler::append_body_start(std::ostream& os) const
      << prefix << "/account\">"
     // Menu item for a user to administer their own account
      << translate("Account") << "</a></li>\n"
-    "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"https://www.fdsd.co.uk/trip-server-2/"
-    PACKAGE_NAME "-" PACKAGE_VERSION "/trip-server.html/\" target=\"_blank\">" <<
+    "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"" << config->get_user_guide_path() << "\" target=\"_blank\">" <<
     // Menu item linking to the user guide
     translate("Help") << "</a></li>\n"
     "            <li class=\"nav-item\"><a class=\"nav-link\" href=\"" << prefix << "/logout\">" <<
@@ -322,6 +322,7 @@ void BaseMapHandler::append_map_provider_configuration(std::ostream& os) const
     if (!no_map_provider_warning_given) {
       // Warning issued to terminal if no map tile providers have been configured
       std::cerr << translate("Warning: no map tile providers have been configured") << '\n';
+      syslog(LOG_NOTICE, "Warning: no map tile providers have been configured");
       no_map_provider_warning_given = true;
     }
     os <<

@@ -30,9 +30,11 @@
 #include <boost/locale.hpp>
 #include <chrono>
 #include <csignal>
+#include <sstream>
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+#include <syslog.h>
 
 using namespace boost::locale;
 using namespace fdsd::utils;
@@ -42,6 +44,7 @@ using namespace fdsd::trip;
 int main(int argc, char *argv[])
 {
   const auto start = std::chrono::system_clock::now();
+  openlog(PACKAGE_NAME, LOG_PERROR | LOG_PID, LOG_USER);
   generator gen;
   // Section 11.2.3 of GNU gettext states this is the default location for the
   // GNU library and also for packages adhering to its conventions.
@@ -50,13 +53,14 @@ int main(int argc, char *argv[])
   std::locale::global(gen(""));
   std::cout.imbue(std::locale());
   std::clog.imbue(std::locale());
-  Logger logger("main", std::clog, Logger::info);
+  // Logger logger("main", std::clog, Logger::info);
   try {
     TripGetOptions options;
     try {
       if (!options.init(argc, argv))
         return EXIT_SUCCESS;
     } catch (const GetOptions::UnexpectedArgumentException & e) {
+      closelog();
       return EXIT_FAILURE;
     }
 
@@ -83,9 +87,9 @@ int main(int argc, char *argv[])
 #endif // ALLOW_STATIC_FILES
     // Initialize the global database pool and user session managers
     const std::string db_connect_str = application.get_db_connect_string();
-    logger << Logger::debug
-           << "Connecting to database with connect string: \""
-           << db_connect_str << "\"\n";
+    // logger << Logger::debug
+    //        << "Connecting to database with connect string: \""
+    //        << db_connect_str << "\"\n";
     PgPoolManager pool_manager(
         db_connect_str,
         application.get_pg_pool_size()
@@ -94,56 +98,62 @@ int main(int argc, char *argv[])
     TripSessionManager session_manager;
     TripSessionManager::set_session_manager(&session_manager);
     if (options.upgrade_flag) {
-      logger << Logger::debug << "Running upgrade\n";
+      // Message output when the database is being upgraded
+      syslog(LOG_INFO, "%s", translate("Upgrading the database").str().c_str());
       SessionPgDao session_dao;
       session_dao.upgrade();
+      closelog();
       return EXIT_SUCCESS;
     }
     application.initialize_user_sessions(options.expire_sessions);
 
     application.initialize_workers(application.get_worker_count());
-
-    logger << Logger::info
-           // Label for the version text of the application
-           << PACKAGE << ' ' << translate("version") << ' ' << VERSION
-           // Label for the web address the application is listening at
-           << ' ' << translate("listening at") << " http://"
-           << options.listen_address << ':' << options.port
-           << application.get_application_prefix_url()
-           << Logger::endl;
+    std::stringstream msg01;
+    msg01
+      // Label for the version text of the application
+      << PACKAGE << ' ' << translate("version") << ' ' << VERSION
+      // Label for the web address the application is listening at
+      << ' ' << translate("listening at") << " http://"
+      << options.listen_address << ':' << options.port
+      << application.get_application_prefix_url();
+    syslog(LOG_INFO, "%s", msg01.str().c_str());
 #ifdef ALLOW_STATIC_FILES
-    logger
-      << Logger::info
-      // Notice output to the terminal when the application has been built to
-      // allow serving static files.
-      << translate("This application has been built to serve static files.")
-      << Logger::endl
-      // Displays the name of the directory that static files will be served from.
-      << format(translate("Static files will be served from the {1} directory.")) %
-        options.doc_root
+    // Output when the application has been built to allow serving static files.
+    syslog(LOG_INFO, "%s", translate("The application has been built to serve static files.").str().c_str());
+    std::stringstream msg02;
+    msg02 << format(
+        // Displays the name of the directory that static files will be served from.
+        translate("Static files will be served from the {1} directory.")) %
+      options.doc_root;
+    syslog(LOG_INFO, "%s", msg02.str().c_str());
 #ifdef ALLOW_DIRECTORY_LISTING
-      // Notice output to the terminal when the application has been built to
-      // allow listing the contents of directories.
-      << Logger::endl <<
-      "Additionally, listing directory contents has also been enabled."
+    std::stringstream msg03;
+    msg03 <<
+      // Output when the application has been built to allow listing the
+      // contents of directories.
+      "Additionally, listing directory contents has also been enabled.";
+    syslog(LOG_INFO, "%s", msg03.str().c_str());
 #endif
-      << Logger::endl;
+
 #endif
     const auto finish = std::chrono::system_clock::now();
     const std::chrono::duration<double, std::milli> diff = finish - start;
-    logger << Logger::info
-           << format(translate("Started application in {1} ms"))
-      % diff.count() << Logger::endl;
+    std::stringstream msg04;
+    msg04
+      // Message showing how long the application took to startup in milliseconds
+      << format(translate("Started application in {1} ms"))
+      % diff.count();
+    syslog(LOG_INFO, "%s", msg04.str().c_str());
     auto config = application.get_config();
     application.run();
+    // Text displayed when the application ends
+    syslog(LOG_INFO, "%s", translate("Bye!").str().c_str());
   } catch (const std::exception& e) {
-    logger << Logger::alert
-           << e.what() << Logger::endl;
+    syslog(LOG_EMERG, "Application existing with error: %s", e.what());
+    closelog();
     return EXIT_FAILURE;
   }
-
-  // Text displayed when the application ends
-  logger << Logger::info << translate("Bye!") << Logger::endl;
-
+  // Any Boost translation calls are out of scope here onwards
+  closelog();
   return EXIT_SUCCESS;
 }

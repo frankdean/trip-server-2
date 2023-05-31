@@ -22,6 +22,7 @@
 #include "../config.h"
 #include "tracking_info_handler.hpp"
 #include "tracking_pg_dao.hpp"
+#include "trip_config.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
 #include "../trip-server-common/src/uuid.hpp"
@@ -214,14 +215,12 @@ void TrackingInfoHandler::build_form(
     "\n"
     "    <div class=\"mt-2\">\n"
     "      <p>"
-    // Text about downloading the configuration settings for the TripLogger iOS app
-     << translate("If you use <a href=\"https://www.fdsd.co.uk/triplogger/\" "
-                  "target=\"_blank\">TripLogger</a> as your tracking client, you can "
-                  "download your settings to a file and import the settings into the app "
-                  "from the file.  See the section on "
-                  "<a href=\"https://www.fdsd.co.uk/trip-server-2/latest/docs/user-guide/Download-TripLogger-Settings.html\" "
-                  "target=\"_blank\">Download TripLogger Settings</a> "
-                  "in the TripLogger user documentation for more information.")
+    // Text about downloading the configuration settings for the TripLogger iOS app.  The parameter is replaced with a URL.
+     << format(translate("If you use <a href=\"https://www.fdsd.co.uk/triplogger/\" "
+                         "target=\"_blank\">TripLogger</a> as your tracking client, you can "
+                         "download your settings to a file and import the settings into the app "
+                         "from the file.  See the `Download TripLogger Settings` section "
+                         "in the <a href=\"{1}\" target=\"_blank\">TripLogger user documentation</a> for more information.")) % config->get_user_guide_path()
      << "</p>\n"
     "\n"
     "      <p>\n"

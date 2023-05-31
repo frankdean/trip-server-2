@@ -248,8 +248,9 @@ class TrackingMap extends TripMap {
       }, 200);
     }
 
-    if (data.message) {
+    if (data.message && !this.alert_shown) {
       setTimeout(function() {
+        self.alert_shown = true;
         alert(data.message);
       }, 2000);
     }

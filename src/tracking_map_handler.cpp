@@ -27,6 +27,7 @@
 #include "../trip-server-common/src/http_response.hpp"
 #include <boost/locale.hpp>
 #include <nlohmann/json.hpp>
+#include <syslog.h>
 
 using namespace boost::locale;
 using namespace fdsd::trip;
@@ -83,8 +84,10 @@ void TrackingMapHandler::handle_authenticated_request(
                              SessionPgDao::tracks_query_key,
                              j.dump());
     } catch (const std::exception& e) {
-      std::cerr << "Failed to save query parameters in session\n"
+      std::cerr << "Failed to save query parameters in session: "
                 << e.what() << '\n';
+      syslog(LOG_ERR, "Failed to save query parameters in session: %s",
+             e.what());
       throw;
     }
   }

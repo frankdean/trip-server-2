@@ -27,6 +27,7 @@
 #include <boost/locale.hpp>
 #include <nlohmann/json.hpp>
 #include <map>
+#include <syslog.h>
 
 using namespace boost::locale;
 using namespace fdsd::trip;
@@ -186,6 +187,8 @@ void ItinerariesHandler::handle_authenticated_request(
         std::cerr << "JSON parse error parsing session value for "
                   << SessionPgDao::itinerary_page_key
                   << " key\n";
+        syslog(LOG_ERR, "JSON parse error parsing session value for %s key",
+               SessionPgDao::itinerary_page_key.c_str());
       }
     } else {
       json j;
@@ -208,6 +211,8 @@ void ItinerariesHandler::handle_authenticated_request(
   } catch (const std::exception &e) {
     std::cerr << "Exception handling request for a list of itineraries: "
               << e.what() << '\n';
+    syslog(LOG_NOTICE, "Exception handling request for a list of itineraries: %s",
+           e.what());
     throw;
   }
 }

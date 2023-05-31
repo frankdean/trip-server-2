@@ -29,6 +29,7 @@
 #include <boost/locale.hpp>
 #include <cmark.h>
 #include <vector>
+#include <syslog.h>
 
 using namespace boost::locale;
 using namespace fdsd::trip;
@@ -453,7 +454,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       <<
       "  <div class=\"alert alert-warning\" role=\"alert\">\n"
       // Message displayed when attempting to paste more than the maximum number of items into an itinerary
-      "    <p>" << format(translate("Pasted the maximum of {1} points")) % config->get_maximum_location_tracking_points() << "</p>\n"
+      "    <p>" << as::number << format(translate("Pasted the maximum of {1} points")) % config->get_maximum_location_tracking_points() << as::posix << "</p>\n"
       "  </div>\n";
   }
   if (feature_copy_success) {
@@ -736,6 +737,8 @@ std::pair<bool, TrackPgDao::location_search_query_params>
     } catch (const std::exception& e) {
       std::cerr << "Error parsing location history parameters from session: "
                 << e.what() << '\n';
+      syslog(LOG_ERR, "Error parsing location history parameters from session: %s",
+             e.what());
     }
   }
   return retval;
@@ -756,6 +759,8 @@ std::pair<bool, ItineraryHandler::paste_features>
     } catch (const std::exception& e) {
       std::cerr << "Error parsing itinerary features parameters from session: "
                 << e.what() << '\n';
+      syslog(LOG_ERR, "Error parsing itinerary features parameters from session: %s",
+             e.what());
     }
   }
   return retval;
@@ -769,7 +774,7 @@ void ItineraryHandler::paste_locations()
   location_history_paste_params.second.page_size = max_track_points;
   TrackPgDao::tracked_locations_result
     locations_result =
-    track_dao.get_tracked_locations(location_history_paste_params.second);
+    track_dao.get_tracked_locations(location_history_paste_params.second, max_track_points);
   max_track_paste_exceeded =
     locations_result.total_count > max_track_points;
   std::vector<ItineraryPgDao::waypoint> waypoints;

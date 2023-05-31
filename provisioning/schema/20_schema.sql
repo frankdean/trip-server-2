@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 11.9
--- Dumped by pg_dump version 11.9
+-- Dumped from database version 13.5
+-- Dumped by pg_dump version 13.5
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -17,7 +17,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
@@ -31,7 +31,21 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
 --
--- Name: postgis; Type: EXTENSION; Schema: -; Owner: 
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
+--
+-- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
@@ -46,7 +60,7 @@ COMMENT ON EXTENSION postgis IS 'PostGIS geometry, geography, and raster spatial
 
 SET default_tablespace = '';
 
-SET default_with_oids = false;
+SET default_table_access_method = heap;
 
 --
 -- Name: georef_format; Type: TABLE; Schema: public; Owner: trip
@@ -447,6 +461,32 @@ ALTER SEQUENCE public.role_seq OWNED BY public.role.id;
 
 
 --
+-- Name: session; Type: TABLE; Schema: public; Owner: trip
+--
+
+CREATE TABLE public.session (
+    id uuid NOT NULL,
+    user_id integer NOT NULL,
+    updated timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public.session OWNER TO trip;
+
+--
+-- Name: session_data; Type: TABLE; Schema: public; Owner: trip
+--
+
+CREATE TABLE public.session_data (
+    session_id uuid NOT NULL,
+    key text NOT NULL,
+    value text
+);
+
+
+ALTER TABLE public.session_data OWNER TO trip;
+
+--
 -- Name: tile; Type: TABLE; Schema: public; Owner: trip
 --
 
@@ -714,6 +754,22 @@ ALTER TABLE ONLY public.role
 
 
 --
+-- Name: session_data session_data_pkey; Type: CONSTRAINT; Schema: public; Owner: trip
+--
+
+ALTER TABLE ONLY public.session_data
+    ADD CONSTRAINT session_data_pkey PRIMARY KEY (session_id, key);
+
+
+--
+-- Name: session session_pkey; Type: CONSTRAINT; Schema: public; Owner: trip
+--
+
+ALTER TABLE ONLY public.session
+    ADD CONSTRAINT session_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: tile tile_pkey; Type: CONSTRAINT; Schema: public; Owner: trip
 --
 
@@ -924,6 +980,22 @@ ALTER TABLE ONLY public.location_sharing
 
 ALTER TABLE ONLY public.location
     ADD CONSTRAINT location_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.usertable(id);
+
+
+--
+-- Name: session_data session_data_session_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: trip
+--
+
+ALTER TABLE ONLY public.session_data
+    ADD CONSTRAINT session_data_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.session(id) ON DELETE CASCADE;
+
+
+--
+-- Name: session session_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: trip
+--
+
+ALTER TABLE ONLY public.session
+    ADD CONSTRAINT session_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.usertable(id) ON DELETE CASCADE;
 
 
 --

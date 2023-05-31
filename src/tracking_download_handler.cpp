@@ -30,6 +30,7 @@
 #include <nlohmann/json.hpp>
 #include <pugixml.hpp>
 #include <string>
+#include <syslog.h>
 
 using namespace fdsd::trip;
 using namespace fdsd::web;
@@ -53,8 +54,8 @@ void TrackingDownloadHandler::set_content_headers(HTTPServerResponse& response) 
       std::chrono::system_clock::now());
   std::tm tm = *std::localtime(&now);
   std::ostringstream filename;
-  filename <<
-    std::put_time(&tm, "%FT%T%z") << ".gpx";
+  filename << "trip-track-"
+           << std::put_time(&tm, "%FT%T%z") << ".gpx";
   response.set_header("Content-Disposition", "attachment; filename=\"" +
                       filename.str() + "\"");
 }
@@ -120,8 +121,10 @@ void TrackingDownloadHandler::handle_authenticated_request(
                            SessionPgDao::tracks_query_key,
                            j.dump());
   } catch (const std::exception& e) {
-    std::cerr << "Failed to save query parameters in session\n"
+    std::cerr << "Failed to save query parameters in session: "
               << e.what() << '\n';
+    syslog(LOG_ERR, "Failed to save query parameters in session: %s",
+           e.what());
   }
 
   // std::cout << "Query object: " << q << "\n- - -\n";
@@ -135,7 +138,9 @@ void TrackingDownloadHandler::handle_authenticated_request(
   q.order = dao_helper::ascending;
   q.page_offset = 0;
   q.page_size = -1;
-  locations_result = dao.get_tracked_locations(q);
+  locations_result = dao.get_tracked_locations(
+      q,
+      config->get_maximum_location_tracking_points());
 
   handle_download(response, locations_result);
 }

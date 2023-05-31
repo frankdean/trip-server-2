@@ -25,6 +25,7 @@
 #include "../trip-server-common/src/date_utils.hpp"
 #include <iostream>
 #include <sstream>
+#include <syslog.h>
 
 using namespace pqxx;
 using namespace fdsd::utils;
@@ -129,6 +130,8 @@ void SessionPgDao::create_session_table(bool overwrite)
   } catch (const std::exception& e) {
     std::cerr << "Failure creating session table: "
               << e.what() << '\n';
+    syslog(LOG_EMERG, "Failure creating session table: %s",
+           e.what());
     throw;
   }
 }
@@ -262,8 +265,10 @@ bool SessionPgDao::validate_password_by_user_id(
     tx.commit();
     return retval;
   } catch (const std::exception &e) {
-    std::cerr << "Error validating password by user_id: "
+    std::cerr << "Error validating password by user id: "
               << e.what() << std::endl;
+    syslog(LOG_ERR, "Error validating password by user id: %s",
+           e.what());
     throw;
   }
 }
@@ -281,6 +286,7 @@ void SessionPgDao::change_password(std::string user_id,
     tx.commit();
   } catch (const std::exception &e) {
     std::cerr << "Error changing password: " << e.what() << std::endl;
+    syslog(LOG_ERR, "Error changing password: %s", e.what());
     throw;
   }
 }
@@ -326,6 +332,8 @@ void SessionPgDao::upgrade()
   } catch (const std::exception& e) {
     std::cerr << "Failure creating session table: "
               << e.what() << '\n';
+    syslog(LOG_EMERG, "Failure creating session table: %s",
+           e.what());
     throw;
   }
 

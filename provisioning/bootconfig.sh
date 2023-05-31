@@ -31,7 +31,7 @@ SU_CMD="su vagrant -c"
 if [ -x /bin/freebsd-version ]; then
     SU_CMD="su -l vagrant -c"
 
-    egrep '^\s*:lang=en_GB.UTF-8' /home/vagrant/.login_conf >/dev/null 2>&1
+    grep -E '^\s*:lang=en_GB.UTF-8' /home/vagrant/.login_conf >/dev/null 2>&1
     if [ $? -ne 0 ]; then
 	cat >> /home/vagrant/.login_conf <<"EOF" >/dev/null 2>&1
 me:\
@@ -50,7 +50,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # If key is absent from config, suggests a previous failure to create
-egrep '^\s+signingKey' /usr/local/etc/trip-server.yaml >/dev/null 2>&1
+grep -E '^\s+signingKey' /usr/local/etc/trip-server.yaml >/dev/null 2>&1
 if [ $? -ne 0 ] || [ -L /usr/local/etc/trip-server.yaml ]; then
     rm -f /usr/local/etc/trip-server.yaml
 fi
@@ -68,7 +68,7 @@ su - postgres -c 'createuser -drs vagrant' 2>/dev/null
 cd /vagrant
 
 if [ -d "/etc/postgresql/${PG_VERSION}" ]; then
-	egrep 'local\s+trip\s+trip\s+md5' "/etc/postgresql/${PG_VERSION}/main/pg_hba.conf" >/dev/null 2>&1
+	grep -E 'local\s+trip\s+trip\s+md5' "/etc/postgresql/${PG_VERSION}/main/pg_hba.conf" >/dev/null 2>&1
 	if [ $? -ne 0 ]; then
 		sed -i 's/local\(.*all.*all.*$\)/local   trip          trip                                  md5\nlocal\1/' "/etc/postgresql/${PG_VERSION}/main/pg_hba.conf"
 		systemctl reload postgresql
@@ -133,8 +133,10 @@ fi
 if [ ! -d /home/vagrant/build ]; then
     $SU_CMD 'mkdir /home/vagrant/build'
 fi
-
 cd /home/vagrant/build
+if [ ! -d /home/vagrant/build/provisioning ]; then
+    $SU_CMD 'cp -a /vagrant/provisioning .'
+fi
 # Don't build if we appear to already have an installed version of trip-server
 if [ ! -x /usr/local/bin/trip-server ]; then
     if [ -r /usr/lib/fedora-release ] || [ -x /bin/freebsd-version ]; then
@@ -161,7 +163,7 @@ fi
 
 if [ -x /home/vagrant/build/src/trip-server ]; then
     RESULT=$($SU_CMD "echo 'SELECT count(*) AS session_table_exists FROM session' | psql trip 2>&1") >/dev/null 2>&1
-    echo $RESULT | egrep 'ERROR:\s+relation "session" does not exist' >/dev/null 2>&1
+    echo $RESULT | grep -E 'ERROR:\s+relation "session" does not exist' >/dev/null 2>&1
     if [ $? -eq 0 ]; then
 	echo "Upgrading database"
 	$SU_CMD '/usr/local/bin/trip-server --upgrade'
@@ -169,7 +171,7 @@ if [ -x /home/vagrant/build/src/trip-server ]; then
 fi
 
 # Vi as default editor
-egrep '^export\s+EDITOR' /home/vagrant/.profile >/dev/null 2>&1
+grep -E '^export\s+EDITOR' /home/vagrant/.profile >/dev/null 2>&1
 if [ $? -ne 0 ]; then
 	echo "export EDITOR=/usr/bin/vi" >>/home/vagrant/.profile
 fi
@@ -179,8 +181,8 @@ if [ -d /etc/systemd/system ] && [ ! -e /etc/systemd/system/trip-server-2.servic
     systemctl is-active trip-server-2.service >/dev/null
     if [ $? -ne 0 ]; then
 	cp /vagrant/provisioning/systemd/trip-server-2.service /etc/systemd/system/
-	systemctl enable trip-server-2.service 2>/dev/null
-	systemctl start trip-server-2.service 2>/dev/null
+	# systemctl enable trip-server-2.service 2>/dev/null
+	# systemctl start trip-server-2.service 2>/dev/null
     fi
 fi
 if [ ! -e /var/log/trip.log ]; then
@@ -233,7 +235,7 @@ if [ ! -x /bin/freebsd-version ]; then
     fi
 fi
 if [ "$TRIP_DEV" == "y" ]; then
-	egrep '^export\s+CHROME_BIN' /home/vagrant/.profile >/dev/null 2>&1
+	grep -E '^export\s+CHROME_BIN' /home/vagrant/.profile >/dev/null 2>&1
 	if [ $? -ne 0 ]; then
 		echo "export CHROME_BIN=/usr/bin/chromium" >>/home/vagrant/.profile
 	fi

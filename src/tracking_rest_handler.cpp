@@ -132,7 +132,9 @@ nlohmann::basic_json<nlohmann::ordered_map>
       q.order = dao_helper::ascending;
       q.page_offset = -1;
       q.page_size = config->get_maximum_location_tracking_points();
-      const auto locations_result = dao.get_tracked_locations(q);
+      const auto locations_result = dao.get_tracked_locations(
+          q,
+          config->get_maximum_location_tracking_points());
       const auto track_json =
         get_tracked_locations_as_geojson(locations_result);
       r.push_back({
@@ -231,7 +233,7 @@ nlohmann::basic_json<nlohmann::ordered_map>
           translate(
               // Message displayed to the user when they attempt to exceed the
               // maxmium amount of locations that can be displayed on the map
-              "The {1} locations have been truncated to the first {2}"
+              "The {1} locations have been truncated to the most recent {2}"
             )) % locations_result.total_count % max_result_count;
     j["message"] = message.str();
   }
@@ -270,7 +272,9 @@ void TrackingRestHandler::handle_authenticated_request(
       q.page_offset = -1;
       q.page_size = config->get_maximum_location_tracking_points();
       TrackPgDao::tracked_locations_result locations_result =
-        dao.get_tracked_locations(q);
+        dao.get_tracked_locations(
+            q,
+            config->get_maximum_location_tracking_points());
       if (!locations_result.locations.empty()) {
         const auto j = get_tracked_locations_as_geojson(locations_result);
         // std::cout << j.dump(4) << std::endl;

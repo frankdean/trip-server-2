@@ -25,6 +25,8 @@
 #include "../trip-server-common/src/dao_helper.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include "../trip-server-common/src/uuid.hpp"
+#include <sstream>
+#include <syslog.h>
 
 using namespace fdsd::trip;
 using namespace fdsd::web;

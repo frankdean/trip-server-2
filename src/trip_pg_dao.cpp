@@ -25,6 +25,7 @@
 #include "../trip-server-common/src/pg_pool.hpp"
 #include <boost/locale.hpp>
 #include <iostream>
+#include <syslog.h>
 
 using namespace pqxx;
 using namespace boost::locale;
@@ -55,6 +56,9 @@ TripPgDao::TripPgDao()
   } catch (const std::exception& e) {
     std::cerr << "Failure connecting to the database: "
               << e.what() << '\n';
+    syslog(LOG_EMERG,
+           "Failure connecting to the database: %s",
+           e.what());
     throw;
   }
 }

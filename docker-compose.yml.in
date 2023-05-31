@@ -1,18 +1,17 @@
 # -*- mode: docker-compose; -*- vim: set ft=yaml:
-version: '3.7'
-
 services:
   web:
     build: .
     depends_on:
-      - postgis
+      postgis:
+        condition: service_healthy
     image: fdean/trip-server-2:latest
     deploy:
       replicas: 1
       restart_policy:
         condition: on-failure
-        delay: 5s
-        #max_attempts: 3
+        delay: 10s
+        max_attempts: 3
         window: 90s
       resources:
         limits:
@@ -36,6 +35,11 @@ services:
       shm_size: 256m
     image: fdean/trip-database:latest
     shm_size: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U trip -d trip'"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
     deploy:
       replicas: 1
       restart_policy:

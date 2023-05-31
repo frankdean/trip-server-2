@@ -92,6 +92,14 @@ dist_zxcvbn2_DATA = \
 	resources/static/zxcvbn-$(ZXCVBN_VERSION)/dist/zxcvbn.js \
 	resources/static/zxcvbn-$(ZXCVBN_VERSION)/dist/zxcvbn.js.map
 
+# The leading minus sign tells make to ignore any errors from the shell
+
+install-data-hook:
+	-$(LN_S) $(docdir) $(pkgdatadir)/resources/static/doc
+
+uninstall-local:
+	-rm -f $(pkgdatadir)/trip/resources/static/doc
+
 uninstall-hook:
 	-rmdir -p $(bscssdir)
 	-rmdir -p $(bsjsdir)

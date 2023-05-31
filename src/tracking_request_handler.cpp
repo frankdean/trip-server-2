@@ -22,6 +22,7 @@
 #include "../config.h"
 #include "tracking_request_handler.hpp"
 #include "tracking_download_handler.hpp"
+#include "trip_config.hpp"
 #include "session_pg_dao.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <locale>
@@ -31,6 +32,8 @@
 #include <vector>
 #include <boost/locale.hpp>
 #include <nlohmann/json.hpp>
+#include <syslog.h>
+
 // #ifdef HAVE_CXX17
 // #include <optional>
 // #endif
@@ -285,11 +288,21 @@ void TrackingRequestHandler::build_form(
     "        <button id=\"btn-tracks\" type=\"submit\" name=\"action\" value=\"list\" accesskey=\"l\" class=\"btn btn-lg btn-success\">" << translate("List tracks") << "</button>\n"
     // Label for the button to display a map showing the tracked locations
     "        <button id=\"btn-map\" type=\"submit\" formaction=\"" << get_uri_prefix() << "/map\" name=\"action\" value=\"show_map\" accesskey=\"m\" class=\"btn btn-lg btn-primary\">" << translate("Show map") << "</button>\n"
-    "        <button id=\"btn-download\" type=\"submit\" formaction=\"" << get_uri_prefix() << TrackingDownloadHandler::tracking_download_url << "\" name=\"action\" value=\"download\" accesskey=\"d\" class=\"btn btn-lg btn-success\"\n"
-    // Prompt to confirm the user wished to download a data file with the tracked locations
-    "         onclick=\"return confirm('" << translate("Download tracks?") << "');\">"
+    "        <button id=\"btn-download\" type=\"submit\" formaction=\"" << get_uri_prefix() << TrackingDownloadHandler::tracking_download_url << "\" name=\"action\" value=\"download\" accesskey=\"d\" class=\"btn btn-lg btn-success\"\n";
+
+  const auto maximum_count = config->get_maximum_location_tracking_points();
+  if (locations_result.total_count > maximum_count) {
+    response.content <<
+      // Prompt to confirm the user wished to download a data file with a limited number of tracked locations
+      "         onclick=\"return confirm('" << as::number << format(translate("Download exceeds maximum.  Only the most recent {1} locations will be included.  Continue?")) % maximum_count << "');\">" << as::posix;
+  } else {
+    response.content <<
+      // Prompt to confirm the user wished to download a data file with the tracked locations
+      "         onclick=\"return confirm('" << translate("Download tracks?") << "');\">";
+  }
+  response.content <<
     // Label for the button to download the tracks as an XML data file
-                   << translate("Download tracks") << "</button>\n"
+    translate("Download tracks") << "</button>\n"
     // Label for the button to make a copy of the tracked locations
     "        <button id=\"btn-copy\" type=\"submit\" name=\"action\" value=\"copy\" accesskey=\"y\" class=\"btn btn-lg btn-primary\">" << translate("Copy") << "</button>\n"
     // Label for the button which resets the form's input criteria to that originally displayed
@@ -322,8 +335,10 @@ void TrackingRequestHandler::handle_authenticated_request(
         // std::cout << "Read query from session: " << j.dump(4) << '\n';
       }
     } catch (const std::exception& e) {
-      std::cerr << "Failed to fetch query parameters from session\n"
+      std::cerr << "Failed to fetch query parameters from session: "
                 << e.what() << '\n';
+      syslog(LOG_ERR, "Failed to fetch query parameters from session: %s",
+             e.what());
     }
   } else {
     // std::cout << "Query params\n";
@@ -343,8 +358,10 @@ void TrackingRequestHandler::handle_authenticated_request(
                              SessionPgDao::tracks_query_key,
                              j.dump());
     } catch (const std::exception& e) {
-      std::cerr << "Failed to save query parameters in session\n"
+      std::cerr << "Failed to save query parameters in session: "
                 << e.what() << '\n';
+      syslog(LOG_ERR, "Failed to save query parameters in session: %s",
+             e.what());
     }
   }
 
@@ -361,8 +378,10 @@ void TrackingRequestHandler::handle_authenticated_request(
                              j.dump());
       track_copy_success = true;
     } catch (const std::exception& e) {
-      std::cerr << "Failed to save query parameters in session\n"
+      std::cerr << "Failed to save query parameters in session: "
                 << e.what() << '\n';
+      syslog(LOG_ERR, "Failed to save query parameters in session: %s",
+             e.what());
     }
   } else if (action == "reset") {
     q = TrackPgDao::location_search_query_params{};
@@ -386,7 +405,7 @@ void TrackingRequestHandler::handle_authenticated_request(
     q.page_offset = pagination.get_offset();
     q.page_size = pagination.get_limit();
 
-    locations_result = dao.get_tracked_locations(q);
+    locations_result = dao.get_tracked_locations(q, -1);
     pagination.set_total(locations_result.total_count);
 
     // This occurs where the query parameters are changed and the user selects
@@ -398,7 +417,7 @@ void TrackingRequestHandler::handle_authenticated_request(
       pagination.set_current_page(q.page);
       q.page_offset = pagination.get_offset();
       q.page_size = pagination.get_limit();
-      locations_result = dao.get_tracked_locations(q);
+      locations_result = dao.get_tracked_locations(q, -1);
       pagination.set_total(locations_result.total_count);
     }
 

@@ -22,12 +22,14 @@
 #include "trip_config.hpp"
 #include "../trip-server-common/src/uuid.hpp"
 #include <iostream>
+#include <syslog.h>
 
 using namespace fdsd::trip;
 using namespace fdsd::utils;
 
 TripConfig::TripConfig(std::string filename) :
   root_directory(),
+  user_guide_path("./static/doc/trip-user-guide.html/index.html"),
   application_prefix_url(),
   db_connect_string(),
   worker_count(20),
@@ -42,7 +44,7 @@ TripConfig::TripConfig(std::string filename) :
   default_average_kmh_hiking_speed(4),
   elevation_tile_cache_ms(),
   elevation_tile_path(),
-  maximum_location_tracking_points(1000),
+  maximum_location_tracking_points(10000),
   default_triplogger_configuration()
 {
   try {
@@ -86,6 +88,8 @@ TripConfig::TripConfig(std::string filename) :
         prefix_url.erase(prefix_url.length() -1, 1);
       }
       this->application_prefix_url = prefix_url;
+      if (app["user_guide"])
+        user_guide_path = app["user_guide"].as<std::string>();
     }
     if (auto reporting = yaml["reporting"]) {
       if (auto metrics = reporting["metrics"])
@@ -175,9 +179,15 @@ TripConfig::TripConfig(std::string filename) :
   } catch (const YAML::BadFile& e) {
     std::cerr << "Failure reading \"" << filename << "\"\n"
               << e.what() << '\n';
+    syslog(LOG_EMERG, "Failure reading \"%s\": %s",
+           filename.c_str(),
+           e.what());
   } catch (const YAML::ParserException& e) {
     std::cerr << "Failure parsing \"" << filename << "\"\n"
               << e.what() << '\n';
+    syslog(LOG_EMERG, "Failure parsing \"%s\": %s",
+           filename.c_str(),
+           e.what());
   }
 }
 

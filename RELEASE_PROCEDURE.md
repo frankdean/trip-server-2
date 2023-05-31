@@ -48,22 +48,24 @@ T.B.D.
     server` distribution tarball is required in the root source folder to
     build the Docker image.
 
-		$ docker build --no-cache -t fdean/trip-server-2:latest .
+		$ docker build -t fdean/trip-server-2:latest .
 
 1.	Test the Dockerfile
 
-		$ docker-compose up -d
-		$ docker-compose logs --follow
-
-    To test in a browser, if using `docker-machine`, use port 8080
-    together with the IP address shown by the `ip` command, e.g.:
-
-		$ docker-machine ip
+		$ docker compose up -d
+		$ docker compose logs --follow
 
 	Stop the container with (use the `--volumes` switch to also remove
     the database volume):
 
 		$ docker-compose down --volumes
+
+## Installation
+
+	$ ./configure
+	$ make
+	$ make html pdf
+	$ make install install-html install-pdf
 
 ## Release
 

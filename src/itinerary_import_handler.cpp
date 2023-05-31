@@ -134,7 +134,8 @@ void ItineraryImportHandler::handle_authenticated_request(
       return;
     }
   } catch (const std::out_of_range &e) {
-    std::cerr << "No file uploaded\n";
+    if (GetOptions::verbose_flag)
+      std::cerr << "No file uploaded\n";
   } catch (const std::exception &e) {
     if (GetOptions::verbose_flag)
       std::cerr << "Exception handling file upload: "

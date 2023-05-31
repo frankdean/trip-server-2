@@ -356,7 +356,8 @@ void TrackPgDao::append_location_query_where_clause(
 
 TrackPgDao::tracked_locations_result
     TrackPgDao::get_tracked_locations_for_user(
-        const location_search_query_params& qp) const
+        const location_search_query_params& qp,
+        int maximum) const
 {
   // std::cout << "TrackPgDao::get_tracked_locations_for_user() - "
   //           << "search criteria: " << qp << '\n';
@@ -379,6 +380,11 @@ TrackPgDao::tracked_locations_result
   if (!r.empty())
     r[0][0].to(retval.total_count);
 
+  auto offset = qp.page_offset;
+  // Adjust the offset so that the maximum returned discards the oldest
+  if (maximum >= 0 && retval.total_count > maximum)
+    offset = retval.total_count - maximum;
+
   // Then fetch the page
   std::ostringstream os;
   os.imbue(std::locale("C"));
@@ -397,8 +403,8 @@ TrackPgDao::tracked_locations_result
      << (qp.order == location_search_query_params::ascending ? "ASC" : "DESC")
      << ' ';
   // Then fetch results
-  if (qp.page_offset >= 0)
-    os << "OFFSET " << qp.page_offset << ' ';
+  if (offset >= 0)
+    os << "OFFSET " << offset << ' ';
 
   if (qp.page_size >= 0)
     os << "LIMIT " << qp.page_size;
@@ -768,7 +774,7 @@ TrackPgDao::date_range TrackPgDao::constrain_shared_location_dates(
 }
 
 TrackPgDao::tracked_locations_result TrackPgDao::get_shared_tracked_locations(
-    const location_search_query_params& qp) const
+    const location_search_query_params& qp, int maximum) const
 {
   tracked_locations_result retval;
 
@@ -796,21 +802,22 @@ TrackPgDao::tracked_locations_result TrackPgDao::get_shared_tracked_locations(
 
     // std::cout << "Performing tracked location search with: "
     //           << modified_params << '\n';
-    retval = get_tracked_locations_for_user(modified_params);
+    retval = get_tracked_locations_for_user(modified_params, maximum);
   }
   return retval;
 }
 
 TrackPgDao::tracked_locations_result TrackPgDao::get_tracked_locations(
     const location_search_query_params& location_search,
+    int maximum,
     bool fill_distance_and_elevation_values) const {
 
   TrackPgDao::tracked_locations_result retval =
     (location_search.nickname.empty()) ?
     // std::cout << "Nickname is empty, searching for this user's tracks\n";
-    get_tracked_locations_for_user(location_search) :
+    get_tracked_locations_for_user(location_search, maximum) :
     // std::cout << "Nickname is not empty, searching for the tracks belonging "
-    get_shared_tracked_locations(location_search);
+    get_shared_tracked_locations(location_search, maximum);
 
 #ifdef HAVE_GDAL
   if (fill_distance_and_elevation_values) {

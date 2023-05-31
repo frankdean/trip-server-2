@@ -50,6 +50,7 @@ struct tile_provider : public fdsd::web::HttpOptions {
 
 class TripConfig {
   std::string root_directory;
+  std::string user_guide_path;
   std::string application_prefix_url;
   std::string db_connect_string;
   int worker_count;
@@ -88,6 +89,9 @@ public:
   }
   void set_root_directory(std::string directory) {
     root_directory = directory;
+  }
+  std::string get_user_guide_path() const {
+    return user_guide_path;
   }
   std::string get_application_prefix_url() const {
     return application_prefix_url;

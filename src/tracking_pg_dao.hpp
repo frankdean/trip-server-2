@@ -171,9 +171,14 @@ public:
 
   /**
    * Gets the tracked locations, either for the current user, or for a shared
-   * user, depending on whether nickname is not empty.
+   * user, depending on whether nickname is not empty.  The result set is
+   * limited to the specified maxium number of results, dropping the oldest
+   * results.
    *
-   * \param location_search_query_params the search criteria
+   * \param location_search_query_params the search criteria.
+   *
+   * \param maximum the maximum number of results to return.  Set to -1 for no
+   * maximum.
    *
    * \param fill_distance_and_elevation_values true if any empty distance and
    * elevation values in the locations points are to be calculated and looked
@@ -183,6 +188,7 @@ public:
    */
   tracked_locations_result get_tracked_locations(
       const location_search_query_params& location_search,
+      int maximum,
       bool fill_distance_and_elevation_values = false) const;
 
   /// \return the user_id associated with the passed UUID
@@ -238,9 +244,9 @@ private:
   std::pair<bool, std::time_t>
       get_most_recent_location_time(std::string shared_by_id) const;
   tracked_locations_result get_tracked_locations_for_user(
-      const location_search_query_params& location_search) const;
+      const location_search_query_params& location_search, int maximum) const;
   tracked_locations_result get_shared_tracked_locations(
-      const location_search_query_params& qp) const;
+      const location_search_query_params& qp, int maximum) const;
   void append_location_query_where_clause(
       std::ostringstream& os,
       const pqxx::work& tx,

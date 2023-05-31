@@ -29,6 +29,7 @@
 #include <nlohmann/json.hpp>
 #include <algorithm>
 #include <sstream>
+#include <syslog.h>
 
 using namespace boost::locale;
 using namespace fdsd::trip;
@@ -303,6 +304,9 @@ void ItineraryTrackSegmentEditHandler::delete_points(
     } catch (const std::out_of_range &e) {
       std::cerr << "Error finding segment after deleting points: "
                 << e.what() << '\n';
+      syslog(LOG_ERR,
+             "Error finding segment after deleting points: %s",
+             e.what());
     }
   }
 }
@@ -355,6 +359,7 @@ void ItineraryTrackSegmentEditHandler::split_segment(
     dao.save(get_user_id(), itinerary_id, track);
   } else {
     std::cerr << "Failed to find a segment with id " << segment_id << " in current track\n";
+    syslog(LOG_ERR, "Failed to find a segment with id %ld in current track", segment_id);
   }
 }
 

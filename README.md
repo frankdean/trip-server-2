@@ -234,7 +234,15 @@ Generally the application is built and installed with:
 	$ make
 	$ sudo make install
 
-More detailed build instructions are below.
+Optionally install the HTML and PDF documentation:
+
+	$ make html pdf
+	$ sudo make install-pdf install-html
+
+By default links to the user guide within the application (e.g. the `Help`
+menu option), serve the locally installed user guide.  The location can be
+overridden in the application's configuration file, see the `Configuration`
+section in the `trip-server` info manual.
 
 See the `PostgreSQL Database Configuration` section in the instructions for
 [TripServer v1][trip-server] to install PostgreSQL and create the database.
@@ -244,6 +252,9 @@ Upgrade the database to support Trip Server v2 by running:
 
 The upgrade option is re-runable.  If the `pgcrypto` extension has already
 been created, a warning is issued but can be ignored.
+
+More detailed instructions for building on different platforms are in
+the following sections.
 
 ### Additional Resources
 
@@ -362,7 +373,9 @@ To run Trip Server as a daemon, create a system user, e.g.
 
 For further ideas on configuring your environment, see the scripts and files
 under the `./provisioning` directory, which can be used to create a
-development environment using [Vagrant][].
+development environment using [Vagrant][]. See the `Testing and Developing
+Trip` section of the application manual (`info trip-server`) for more
+information on using and running the application with Vagrant.
 
 [Vagrant]: https://www.vagrantup.com "Development Environments Made Easy"
 

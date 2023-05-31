@@ -28,7 +28,7 @@ vagrant status --machine-readable | grep 'The VM is running' >/dev/null
 if [ $? -ne 0 ]; then
     vagrant up
 fi
-vagrant vbguest --status | egrep '\[default\] GuestAdditions [.[:digit:]]+ running --- OK\.' >/dev/null
+vagrant vbguest --status | egrep -E '\[default\] GuestAdditions [.[:digit:]]+ running --- OK\.' >/dev/null
 if [ $? -eq 0 ]; then
     echo 'Vagrant appears to be running with the guest additions correctly installed'
     exit 0
@@ -47,7 +47,7 @@ fi
 # Going on, assuming VBoxService is correct...
 # [default] GuestAdditions seems to be installed (6.1.30) correctly, but not running.
 
-vagrant vbguest --status | egrep '\[default\] GuestAdditions seems to be installed \([.[:digit:]]+\) correctly, but not running\.' >/dev/null
+vagrant vbguest --status | egrep -E '\[default\] GuestAdditions seems to be installed \([.[:digit:]]+\) correctly, but not running\.' >/dev/null
 if [ $? -eq 0 ]; then
     vagrant vbguest --do install
     vagrant halt

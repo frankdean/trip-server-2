@@ -1,5 +1,6 @@
 # -*- mode: dockerfile; -*- vim: set ft=dockerfile:
 FROM postgres:13.10-bullseye
+LABEL uk.co.fdsd.tripserver.version="@PACKAGE_VERSION@"
 
 ENV POSTGIS_MAJOR 3
 ENV POSTGIS_VERSION 3.3.2+dfsg-1.pgdg110+1

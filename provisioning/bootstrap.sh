@@ -141,7 +141,7 @@ function install_nodejs
 	    fi
 	fi
     fi
-    egrep '^export\s+PATH.*nodejs' /home/vagrant/.profile >/dev/null 2>&1
+    grep -E '^export\s+PATH.*nodejs' /home/vagrant/.profile >/dev/null 2>&1
     if [ $? -ne 0 ]; then
 	echo "export PATH=/usr/local/lib/nodejs/node-current/bin:$PATH" >>/home/vagrant/.profile
     fi
@@ -210,7 +210,7 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 
     if [ -f /etc/rocky-release ]; then
 	if [ ! -r /var/lib/pgsql/13/data/postgresql.conf ]; then
-	    sudo /usr/pgsql-13/bin/postgresql-13-setup initdb
+	    /usr/pgsql-13/bin/postgresql-13-setup initdb
 	fi
 	systemctl is-active postgresql-13 >/dev/null
 	if [ $? -ne 0 ]; then
@@ -312,6 +312,25 @@ if [ -f /etc/debian_version ]; then
 	    libboost-locale-dev libpugixml-dev autopoint intltool gdb \
 	    libyaml-cpp-dev nlohmann-json3-dev libcmark-dev \
 	    docbook2x texlive info texinfo curl libgdal-dev libcairomm-1.0-dev
+
+    if [ ! -d /etc/apt/keyrings ]; then
+	install -m 0755 -d /etc/apt/keyrings
+    fi
+    if [ ! -e /etc/apt/keyrings/docker.gpg ]; then
+	$SU_CMD 'curl -fsSL https://download.docker.com/linux/debian/gpg' | gpg --no-tty --dearmor -o /etc/apt/keyrings/docker.gpg 2>&1 >/dev/null
+	chmod a+r /etc/apt/keyrings/docker.gpg
+    fi
+    if [ ! -e /etc/apt/sources.list.d/docker.list ]; then
+	echo \
+	    "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+	    tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    fi
+    apt-get update
+    apt-get install $DEB_OPTIONS docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+    adduser vagrant docker >/dev/null
 
     if [ "$VB_GUI" == "y" ]; then
 	apt-get install -y lxde

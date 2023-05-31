@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.0.0-rc.4],[frank.dean@fdsd.co.uk])
+AC_INIT([trip],[2.0.0-rc.5],[frank.dean@fdsd.co.uk])
 BOOTSTRAP_VERSION='5.2.3'
 OPENLAYERS_VERSION='7.3.0'
 PROJ4JS_VERSION='2.9.0'
@@ -24,7 +24,7 @@ AC_ARG_ENABLE([keep-alive],
 	[use_keep_alive=${enableval}],
 	[use_keep_alive=no])
 AC_ARG_ENABLE([static-files],
-    AS_HELP_STRING([--enable-static-files],
+    AS_HELP_STRING([--disable-static-files],
 	[Build to allow serving of static files (default yes)]),
 	[use_static_files=${enableval}],
 	[use_static_files=yes])
@@ -34,12 +34,12 @@ AC_ARG_ENABLE([directory-listing],
 	[use_directory_listing=${enableval}],
 	[use_directory_listing=no])
 AC_ARG_ENABLE([boost-geometry],
-    AS_HELP_STRING([--enable-boost-geometry],
+    AS_HELP_STRING([--disable-boost-geometry],
 	[Build using Boost Geometrey headers (default yes)]),
 	[use_boost_geometry=${enableval}],
 	[use_boost_geometry=yes])
 AC_ARG_ENABLE([gdal],
-    AS_HELP_STRING([--enable-gdal],
+    AS_HELP_STRING([--disable-gdal],
 	[Build using GDAL library (default yes)]),
 	[use_gdal=${enableval}],
 	[use_gdal=yes])
@@ -50,10 +50,10 @@ AC_ARG_ENABLE([cairo],
 	[use_cairo=no])
 
 # Checks for programs.
-dnl : ${CXXFLAGS="-g -O0 -std=c++11"}
 AX_CXX_COMPILE_STDCXX(17)
 AC_PROG_CXX
 AC_PROG_INSTALL
+AC_PROG_LN_S
 AC_LANG(C++)
 AC_CHECK_PROGS([DOCBOOK2TEXI],[docbook2texi docbook2x-texi])
 AC_CHECK_PROGS([DOCBOOK2MAN],[docbook2man docbook2x-man])
@@ -81,7 +81,7 @@ if test "x${use_gdal}" = xyes; then
    dnl GDAL_SYSTEM='elevation_tile.$(OBJEXT)'
    dnl AC_SUBST([GDAL_SYSTEM])
 fi
-AM_CONDITIONAL([USE_GDAL], [test x$use_gdal = xyes])
+AM_CONDITIONAL([USE_GDAL], [test "$use_gdal" = yes])
 
 # echo $host
 
@@ -183,6 +183,7 @@ if test "x${use_boost_geometry}" = xyes; then
    AC_CHECK_HEADERS([boost/geometry.hpp boost/range.hpp boost/geometry/algorithms/simplify.hpp],,
 	 [AC_MSG_ERROR([boost/geometry.hpp not found.  Please install the Boost Geometry library headers.])])
    AC_DEFINE([HAVE_BOOST_GEOMETRY], [1], [Build to use Boost Geometry headers])
+   AC_DEFINE([BOOST_ALLOW_DEPRECATED_HEADERS], [1], [Suppress deprecated header warnings in Boost])
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -215,5 +216,8 @@ AC_CONFIG_FILES([Makefile po/Makefile.in
                  src/Makefile
                  tests/Makefile
 		 Dockerfile
+		 Dockerfile-postgis
+		 docker-entrypoint.sh
+		 docker-compose.yml
                  ])
 AC_OUTPUT
