@@ -23,7 +23,6 @@
 #define ELEVATION_TILE_HPP
 
 #include "itinerary_pg_dao.hpp"
-#include "../trip-server-common/src/logger.hpp"
 #include <algorithm>
 #include <chrono>
 #include <stdexcept>
@@ -97,7 +96,6 @@ class ElevationService {
   std::exception_ptr initialization_error;
   void init();
   std::thread* init_thread;
-  static fdsd::utils::Logger logger;
 public:
   ElevationService(std::string directory_path, long tile_cache_ms);
   ~ElevationService();

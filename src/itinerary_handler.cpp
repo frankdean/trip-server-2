@@ -150,14 +150,24 @@ void ItineraryHandler::append_itinerary_content(
     "          <div id=\"itinerary-tab-content\">\n";
   append_heading_content(response, itinerary);
   if (itinerary.description.first) {
-    char *p_html = cmark_markdown_to_html(itinerary.description.second.c_str(),
-                                          itinerary.description.second.length(),
-                                          0);
     response.content
       <<
-      "            <hr>\n"
-      "            <div id=\"div-view-raw\">\n" << p_html << "            </div>\n";
-    free(p_html);
+      "            <hr>\n";
+    if (show_raw_markdown) {
+      response.content
+        <<
+        "            <div id=\"div-view-raw\">\n"
+        "              <textarea id=\"raw-textarea\" class=\"raw-markdown\" rows=\"12\" readonly>\n"
+        << x(itinerary.description.second) <<
+        "              </textarea>\n"
+        "            </div>\n";
+    } else {
+      char *p_html = cmark_markdown_to_html(itinerary.description.second.c_str(),
+                                            itinerary.description.second.length(),
+                                            0);
+      response.content << "            <div id=\"div-view-markdown\">\n" << p_html << "            </div>\n";
+      free(p_html);
+    }
   }
   response.content
     <<
@@ -237,11 +247,11 @@ void ItineraryHandler::append_path(
       <<
       "                          <td>"
       // Shows the total ascent and descent of a path in meters
-      << format(translate("↗{1,num=fixed,precision=0}&nbsp;m ↘{2,num=fixed,precision=0}&nbsp;m")) % ascent % descent
+      << format(translate("&#8599;{1,num=fixed,precision=0}&nbsp;m &#8600;{2,num=fixed,precision=0}&nbsp;m")) % ascent % descent
       << "</td>\n"
       "                          <td>"
       // Shows the total ascent and descent of a path in ft
-      << format(translate("↗{1,num=fixed,precision=0}&nbsp;ft ↘{2,num=fixed,precision=0}&nbsp;ft"))
+      << format(translate("&#8599;{1,num=fixed,precision=0}&nbsp;ft &#8600;{2,num=fixed,precision=0}&nbsp;ft"))
       % (ascent / feet_per_meter) % (descent / feet_per_meter)
       << "</td>\n";
   } else {
@@ -497,16 +507,23 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       "              <a class=\"nav-link\" href=\"" << get_uri_prefix() << "/itinerary-sharing?id=" << itinerary_id << "\">" << translate("Sharing") << "</a> <!-- writable version -->\n"
       "            </li>\n";
   } else {
-    response.content
-      <<
-      "            <li class=\"nav-item d-none\">\n"
-      // Label for a menu item on the general information tab of the itinerary page to show the raw Markdown text
-      "              <a class=\"nav-link\">" << translate("View raw Markdown") << "</a> <!-- read-only version -->\n"
-      "            </li>\n"
-      "            <li class=\"nav-item opacity-50\">\n"
-      // Label for a menu item on the general information tab of the itinerary page to hide the raw Markdown text
-      "              <a class=\"nav-link\">" << translate("Hide raw Markdown") << "</a> <!-- read-only version -->\n"
-      "            </li>\n";
+
+    if (show_raw_markdown) {
+      response.content
+        <<
+        "            <li class=\"nav-item\">\n"
+        // Label for a menu item on the general information tab of the itinerary page to hide the raw Markdown text
+        "              <button class=\"nav-link\" name=\"action\" value=\"hide_raw_markdown\" accesskey=\"h\">" << translate("Hide raw Markdown") << "</button> <!-- read-only version -->\n"
+        "            </li>\n";
+    } else {
+      response.content
+        <<
+        "            <li class=\"nav-item\">\n"
+        // Label for a menu item on the general information tab of the itinerary page to show the raw Markdown text
+        "              <button class=\"nav-link\" name=\"action\" value=\"show_raw_markdown\" accesskey=\"o\">" << translate("View raw Markdown") << "</button> <!-- read-only version -->\n"
+        "            </li>\n";
+    }
+
   }
   response.content
     <<
@@ -614,7 +631,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
   response.content
     <<
     // Label for menu item to create a complete copy of the current Itinerary as a new Itinerary
-    "                <li><button class=\"dropdown-item\" name=\"action\" value=\"duplicate\""
+    "                <li><button class=\"dropdown-item\" name=\"action\" value=\"duplicate\" "
     // Confirmation dialog when creating a duplicating an itinerary
     "onclick=\"return confirm('" << translate("Create a new copy of this itinerary?") << "');\">" << translate("Create duplicate itinerary") << "</button></li>\n"
     "              </ul>\n"
@@ -897,6 +914,10 @@ void ItineraryHandler::handle_authenticated_request(
   } else if (action == "auto-color") {
     active_tab = features_tab;
     auto_color_paths(request);
+  } else if (action == "show_raw_markdown") {
+    show_raw_markdown = true;
+  } else if (action == "hide_raw_markdown") {
+    show_raw_markdown = false;
   } else if (action == "copy") {
     SessionPgDao session_dao;
     session_dao.clear_copy_buffers(get_session_id());

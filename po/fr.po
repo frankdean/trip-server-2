@@ -6,9 +6,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
-"Report-Msgid-Bugs-To: frank.dean@fdsd.co.uk\n"
-"POT-Creation-Date: 2023-05-28 16:08+0100\n"
-"PO-Revision-Date: 2023-05-28 16:08+0100\n"
+"Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
+"POT-Creation-Date: 2023-06-02 12:02+0100\n"
+"PO-Revision-Date: 2023-06-02 11:30+0100\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -16,6 +16,1252 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#. Message displayed when no tile downloads have been recorded
+#: src/admin_status_handler.cpp:42
+msgid "No tile usage data has been collected yet"
+msgstr ""
+
+#. Formatted count of the total number of map tiles downloaded
+#: src/admin_status_handler.cpp:55
+msgid ""
+"Fetched a total of {1,number} tiles, as at {2,ftime='%R %a'} {2,date=medium}"
+msgstr ""
+
+#. Column heading for admin status report for years
+#: src/admin_status_handler.cpp:62
+msgid "Year"
+msgstr ""
+
+#. Column heading for admin status report for months
+#: src/admin_status_handler.cpp:64
+msgid "Month"
+msgstr ""
+
+#. Column heading for admin status report for the monthly tile download
+#: src/admin_status_handler.cpp:66
+msgid "Monthly Usage"
+msgstr ""
+
+#. Column heading for admin status report for the cumulate total tile downloads
+#: src/admin_status_handler.cpp:68
+msgid "Cumulative Total"
+msgstr ""
+
+#. Page title of the admin user's User Management page
+#: src/admin_status_handler.cpp:94
+msgid "System Status"
+msgstr "État du système"
+
+#. Message show when a user cannot be found for edit
+#: src/admin_user_edit_handler.cpp:47
+msgid "User not found"
+msgstr ""
+
+#. Label for the user's nickname field
+#. "      <div class=\"mb-3\">\n"
+#. // Radio button grouping label for user search by either nickname or email
+#. "        " << translate("Search by") << "&nbsp;\n"
+#. "        <input id=\"radio-nickname\" type=\"radio\" name=\"search-by\" value=\"nickname\" >\n"
+#. // Label for user search by nickname
+#. "        <label for=\"radio-nickname\">&nbsp;" << translate("Nickname") << "&nbsp;</label>\n"
+#. "        <input id=\"radio-email\" type=\"radio\" name=\"search-by\" value=\"email\" >\n"
+#. // Label for user search by email
+#. "        <label for=\"radio-email\">&nbsp;" << translate("Email") << "&nbsp;</label>\n"
+#. "      </div>\n"
+#. Label prompting input of nickname for user search
+#. Column heading for nickname in list of users
+#. Label for input of nickname when sharing an itinerary
+#. Nickname column heading in itinerary sharing list
+#. The column heading for the nickname of the user tracks may be shared with
+#: src/admin_user_edit_handler.cpp:59 src/admin_user_management_handler.cpp:55
+#: src/admin_user_management_handler.cpp:98
+#: src/itinerary_sharing_edit_handler.cpp:70
+#: src/itinerary_sharing_handler.cpp:60 src/track_sharing_handler.cpp:68
+msgid "Nickname"
+msgstr ""
+
+#. Label for the user's email field
+#. Column heading for email in list of users
+#: src/admin_user_edit_handler.cpp:64 src/admin_user_management_handler.cpp:100
+msgid "Email"
+msgstr ""
+
+#. Label for the user's firstname field
+#: src/admin_user_edit_handler.cpp:69
+msgid "First name"
+msgstr ""
+
+#. Label for the user's lastname field
+#: src/admin_user_edit_handler.cpp:74
+msgid "Last name"
+msgstr ""
+
+#. Instructions on using change password fields
+#: src/admin_user_edit_handler.cpp:80
+msgid "Leave password fields blank, unless changing password."
+msgstr ""
+
+#. Label for input new password for a user
+#: src/admin_user_edit_handler.cpp:85
+#: trip-server-common/src/http_request_handler.cpp:686
+#: trip-server-common/src/http_request_handler.cpp:696
+msgid "Password"
+msgstr "Mot de passe"
+
+#. Label prompting to repeat the new password during password change
+#: src/admin_user_edit_handler.cpp:93 src/password_change_handler.cpp:89
+msgid "Repeat password"
+msgstr "Répétez mot de passe"
+
+#. Warning message displayed when the two new passwords do not match during password change
+#: src/admin_user_edit_handler.cpp:102 src/password_change_handler.cpp:50
+msgid "New passwords do not match"
+msgstr ""
+
+#. Label for the user's administration role checkbox
+#: src/admin_user_edit_handler.cpp:108
+msgid "Administrator"
+msgstr ""
+
+#. Error message shown when saving a new user fails, probably due to non-unique email or nickname
+#: src/admin_user_edit_handler.cpp:116
+msgid ""
+"Failed to save user.  Make sure that the email and nickname values are "
+"unique."
+msgstr ""
+
+#. Label to save user details
+#. Label for the save itinerary button
+#. Label of button to save an edited route or track name
+#. Label to save changes when simplifying a track
+#. Label of button to save an itinerary waypoint
+#. Label to save password change
+#. Label for a save button
+#: src/admin_user_edit_handler.cpp:121 src/itinerary_edit_handler.cpp:100
+#: src/itinerary_path_name_edit.cpp:75
+#: src/itinerary_sharing_edit_handler.cpp:92
+#: src/itinerary_simplify_handler.cpp:76
+#: src/itinerary_waypoint_edit_handler.cpp:294
+#: src/password_change_handler.cpp:95 src/track_sharing_edit_handler.cpp:157
+msgid "Save"
+msgstr ""
+
+#. Label to cancel saving user details
+#. Button label to cancel editing and itinerary description
+#. Label for button to cancel uploading a file containing a full itinerary
+#. Label to cancel joining a set of paths
+#. Label of button to cancel changes when editing a route or track name
+#. Label of button to cancel editing or creating an individual itinerary share
+#. Button label to cancel simplifying a track
+#. Label for button to cancel uploading a GPX (XML) file containing routes, waypoints and tracks
+#. Label of button to cancel changes to an itinerary waypoint
+#. Label to cancel changing password
+#. Label for a cancel button
+#: src/admin_user_edit_handler.cpp:123 src/itinerary_edit_handler.cpp:116
+#: src/itinerary_import_handler.cpp:53 src/itinerary_path_join_handler.cpp:159
+#: src/itinerary_path_name_edit.cpp:78
+#: src/itinerary_sharing_edit_handler.cpp:95
+#: src/itinerary_simplify_handler.cpp:79 src/itinerary_upload_handler.cpp:175
+#: src/itinerary_waypoint_edit_handler.cpp:298
+#: src/password_change_handler.cpp:97 src/track_sharing_edit_handler.cpp:159
+msgid "Cancel"
+msgstr ""
+
+#. Page title of the admin user's User Management page
+#: src/admin_user_edit_handler.cpp:137
+msgid "User Edit"
+msgstr ""
+
+#. Label prompting input of email for user search
+#: src/admin_user_management_handler.cpp:60
+msgid "Email address"
+msgstr ""
+
+#. Radio button grouping label for user search by either exact or partial match
+#: src/admin_user_management_handler.cpp:65
+msgid "Search type"
+msgstr ""
+
+#. Radio button label for exact match when searching users
+#: src/admin_user_management_handler.cpp:68
+msgid "Exact"
+msgstr ""
+
+#. Radio button label for partial match when searching users
+#: src/admin_user_management_handler.cpp:71
+msgid "Partial match"
+msgstr ""
+
+#. Label for button used for user search
+#. Button title for searching for something
+#. Label of button to execute an itinerary search by distance radius
+#: src/admin_user_management_handler.cpp:75 src/itineraries_handler.cpp:139
+#: src/itinerary_search_handler.cpp:108
+msgid "Search"
+msgstr ""
+
+#. Message shown when user search yields no results
+#: src/admin_user_management_handler.cpp:82
+msgid "No matching users found"
+msgstr ""
+
+#. Message shown when deleting one or more users failed, probably due to existence of associated data
+#: src/admin_user_management_handler.cpp:89
+msgid ""
+"Failed to delete users, probably because there is data associated with one "
+"of the users, e.g. itineraries or recorded locations."
+msgstr ""
+
+#. Column heading for firstname in list of users
+#: src/admin_user_management_handler.cpp:102
+msgid "First Name"
+msgstr ""
+
+#. Column heading for lastname in list of users
+#: src/admin_user_management_handler.cpp:104
+msgid "Last Name"
+msgstr ""
+
+#. Column heading for UUID in list of users
+#: src/admin_user_management_handler.cpp:106
+msgid "uuid"
+msgstr ""
+
+#. Column heading indicating whether a user has the admin role in list of users
+#: src/admin_user_management_handler.cpp:108
+msgid "Admin"
+msgstr ""
+
+#. Title of button which goes to a specified page number
+#: src/admin_user_management_handler.cpp:145 src/itineraries_handler.cpp:121
+#: src/itinerary_route_edit_handler.cpp:203
+#: src/itinerary_search_results_handler.cpp:112
+#: src/itinerary_sharing_handler.cpp:91
+#: src/itinerary_sharing_report_handler.cpp:99
+#: src/itinerary_track_edit_handler.cpp:177
+#: src/itinerary_track_segment_edit_handler.cpp:179
+#: src/track_sharing_handler.cpp:123 src/tracking_request_handler.cpp:208
+msgid "Go"
+msgstr "Aller"
+
+#. Confirmation to delete a list of selected users
+#: src/admin_user_management_handler.cpp:152
+msgid "Delete the selected users?"
+msgstr ""
+
+#. Label for button to delete a list of selected users
+#. Label for the delete itinerary button
+#: src/admin_user_management_handler.cpp:154 src/itinerary_edit_handler.cpp:107
+msgid "Delete"
+msgstr ""
+
+#. Label for button to edit a selected user
+#. Label for a menu item on the general information tab of the itinerary
+#. page that allows the general information to be viewed
+#. Label for drop-down menu item containing 'edit' type menu links
+#: src/admin_user_management_handler.cpp:156 src/itinerary_handler.cpp:503
+#: src/itinerary_handler.cpp:570
+msgid "Edit"
+msgstr ""
+
+#. Label for button to reset the password of the selected user
+#: src/admin_user_management_handler.cpp:158
+msgid "Password reset"
+msgstr "Réinitialisez mot de passe"
+
+#. Label for button to create a new user
+#. Button title for creating something new
+#. Label for button to create a new itinerary share
+#. Name of button to create a new track sharing record
+#: src/admin_user_management_handler.cpp:165 src/itineraries_handler.cpp:130
+#: src/itinerary_sharing_handler.cpp:112 src/track_sharing_handler.cpp:148
+msgid "New"
+msgstr ""
+
+#. Page title of the admin user's User Management page
+#: src/admin_user_management_handler.cpp:178
+msgid "User Management"
+msgstr ""
+
+#. Message displayed after loading elevation tiles
+#: src/elevation_tile.cpp:237
+msgid "Loaded {1} elevation tiles in {2} ms"
+msgstr ""
+
+#. Page title of the itenerary list page
+#. Menu item to select the list of itineraries page
+#: src/itineraries_handler.cpp:46 src/itineraries_handler.cpp:155
+#: src/trip_request_handler.cpp:205
+msgid "Itineraries"
+msgstr "Itinéraires"
+
+#. Message displayed when there uploading an itinerary failed
+#: src/itineraries_handler.cpp:52
+msgid "Itinerary upload failed"
+msgstr ""
+
+#. Message displayed when there are no itineries belonging to or shared to a user
+#: src/itineraries_handler.cpp:60
+msgid "There are no itineraries to display"
+msgstr ""
+
+#. Column heading showing the start dates of each itinerary in the list
+#: src/itineraries_handler.cpp:69 src/itinerary_search_results_handler.cpp:61
+#: src/itinerary_sharing_report_handler.cpp:53
+msgid "Start Date"
+msgstr ""
+
+#. Column heading showing the title of each each itinerary in the list
+#. Label for entering the itinerary title
+#. Column heading showing the title of each each itinerary in the list
+#: src/itineraries_handler.cpp:71 src/itinerary_edit_handler.cpp:64
+#: src/itinerary_search_results_handler.cpp:63
+#: src/itinerary_sharing_report_handler.cpp:55
+msgid "Title"
+msgstr ""
+
+#. Column heading showing the owner's nickname of each itinerary in the list
+#: src/itineraries_handler.cpp:73 src/itinerary_search_results_handler.cpp:65
+msgid "Owner"
+msgstr ""
+
+#. Colunn heading indicating whether the itinerary is shared with one or more other users
+#. Label for a menu item on the general information tab of the itinerary page to show the itinerary sharing page
+#. Colunn heading indicating whether the itinerary is shared with one or more other users
+#: src/itineraries_handler.cpp:75 src/itinerary_handler.cpp:507
+#: src/itinerary_search_results_handler.cpp:67
+msgid "Sharing"
+msgstr ""
+
+#. Button title for importing something
+#: src/itineraries_handler.cpp:132
+msgid "Import"
+msgstr ""
+
+#. Button title for navigating to the Itinerary Sharing Report
+#: src/itineraries_handler.cpp:141
+msgid "Itinerary shares report"
+msgstr ""
+
+#. Title of the itinerary page when it is being edited
+#: src/itinerary_edit_handler.cpp:43
+msgid "Edit Itinerary"
+msgstr ""
+
+#. Message displayed when no value has been input for the mandatory title
+#: src/itinerary_edit_handler.cpp:49
+msgid "You must enter a title"
+msgstr ""
+
+#. Label for entering the start date for an itinerary
+#. "      <div class=\"row\">\n"
+#. The input start date to search for location tracks
+#: src/itinerary_edit_handler.cpp:69 src/tracking_request_handler.cpp:220
+msgid "Date from"
+msgstr "Date après"
+
+#. Label for entering the end date for an itinerary
+#. The input end date to search for location tracks
+#: src/itinerary_edit_handler.cpp:79 src/tracking_request_handler.cpp:226
+msgid "Date to"
+msgstr "Date avant"
+
+#. Title for the itinerary description field when being edited
+#. Column heading for route description
+#. Label for input of a waypoint's description
+#: src/itinerary_edit_handler.cpp:89 src/itinerary_route_edit_handler.cpp:146
+#: src/itinerary_waypoint_edit_handler.cpp:227
+msgid "Description"
+msgstr ""
+
+#. Confirmation dialog text when deleting an itinerary
+#: src/itinerary_edit_handler.cpp:105
+msgid "Delete this itinerary and ALL uploaded GPX items?"
+msgstr ""
+
+#. Confirmation dialog text when cancelling editing an itinerary
+#. Text to confirm when cancelling editing an itinerary
+#. Confirmation dialog when canceling creating or editing an itinerary waypoint
+#: src/itinerary_edit_handler.cpp:114
+#: src/itinerary_waypoint_edit_handler.cpp:296
+msgid "Cancel?"
+msgstr ""
+
+#. Confirmation dialog text when performing a form reset whilst editing an itinerary
+#: src/itinerary_edit_handler.cpp:118
+msgid "Reset form to original state, losing all your changes"
+msgstr ""
+
+#. Form reset label
+#. Label for the button which resets the form's input criteria to that originally displayed
+#: src/itinerary_edit_handler.cpp:120 src/tracking_request_handler.cpp:309
+msgid "Reset"
+msgstr "Remettre"
+
+#. Title for the page when creating and editing a new itinerary
+#: src/itinerary_edit_handler.cpp:134
+msgid "Itinerary Description&mdash;New"
+msgstr ""
+
+#. Title for the page when editing an existing itinerary
+#: src/itinerary_edit_handler.cpp:137
+msgid "Itinerary Description&mdash;Edit"
+msgstr ""
+
+#. Shows when an itineray with no end date starts
+#: src/itinerary_handler.cpp:118
+#, c-format
+msgid "From: {1,ftime='%a'} {1,date=medium}"
+msgstr ""
+
+#. Shows when an itineray with no start date ends
+#: src/itinerary_handler.cpp:124
+#, c-format
+msgid "Until: {1,ftime='%a'} {1,date=medium}"
+msgstr ""
+
+#: src/itinerary_handler.cpp:130
+#, c-format
+msgid ""
+"Between: {1,ftime='%a'} {1,date=medium} and {2,ftime='%a'} {2,date=medium}"
+msgstr ""
+
+#. Database ID of an item, typically a route, track or waypoint
+#. Database ID or an item, typically a route, track or waypoint
+#. Database ID of an item, typically a path, track or waypoint
+#: src/itinerary_handler.cpp:203 src/itinerary_handler.cpp:297
+#: src/itinerary_path_join_handler.cpp:74
+msgid "ID:&nbsp;{1,number=left}"
+msgstr ""
+
+#. Shows distance in kilometers
+#. Shows the total distance for a route or track in kilometers, when editing the name
+#: src/itinerary_handler.cpp:214 src/itinerary_path_join_handler.cpp:83
+#: src/itinerary_path_name_edit.cpp:51 src/itinerary_route_edit_handler.cpp:77
+#: src/itinerary_track_edit_handler.cpp:83
+msgid "{1,num=fixed,precision=2}&nbsp;km"
+msgstr ""
+
+#. Shows distance in miles
+#. Shows the total distance for a route or track in miles, when editing the name
+#. Shows the total distance for a route or route in miles
+#. Shows the total distance for a route or track in miles
+#: src/itinerary_handler.cpp:223 src/itinerary_path_join_handler.cpp:93
+#: src/itinerary_path_name_edit.cpp:53 src/itinerary_route_edit_handler.cpp:79
+#: src/itinerary_track_edit_handler.cpp:85
+msgid "{1,num=fixed,precision=2}&nbsp;mi"
+msgstr ""
+
+#. abbreviation for showing a period of time in hours and minutes
+#: src/itinerary_handler.cpp:238
+msgid "{1,num=fixed,precision=0}&nbsp;hrs {2,num=fixed,precision=0}&nbsp;mins"
+msgstr ""
+
+#. Shows the total ascent and descent of a path in meters
+#: src/itinerary_handler.cpp:250 src/itinerary_path_join_handler.cpp:103
+msgid ""
+"&#8599;{1,num=fixed,precision=0}&nbsp;m &#8600;{2,num=fixed,precision=0}"
+"&nbsp;m"
+msgstr ""
+
+#. Shows the total ascent and descent of a path in ft
+#: src/itinerary_handler.cpp:254 src/itinerary_path_join_handler.cpp:107
+msgid ""
+"&#8599;{1,num=fixed,precision=0}&nbsp;ft &#8600;{2,num=fixed,precision=0}"
+"&nbsp;ft"
+msgstr ""
+
+#. Shows the total highest and lowest points of a path in meters
+#: src/itinerary_handler.cpp:267 src/itinerary_path_join_handler.cpp:120
+msgid "{1,num=fixed,precision=0}&#x21c5;{2,num=fixed,precision=0}&nbsp;m"
+msgstr ""
+
+#. Shows the total highest and lowest points of a path in ft
+#: src/itinerary_handler.cpp:271 src/itinerary_path_join_handler.cpp:124
+msgid "{1,num=fixed,precision=0}&#x21c5;{2,num=fixed,precision=0}&nbsp;ft"
+msgstr ""
+
+#. Message displayed when there are no routes, tracks or waypoints to display on the Itinerary page
+#: src/itinerary_handler.cpp:339
+msgid "There are no features to display"
+msgstr ""
+
+#. Checkbox label shown to select all items on a page
+#: src/itinerary_handler.cpp:346
+msgid "Select all"
+msgstr ""
+
+#. Title of the Routes section on the Itinerary page showing the count of routes
+#: src/itinerary_handler.cpp:352
+msgid "Routes ({1,num})"
+msgstr ""
+
+#. Checkbox label shown to select all routes on the itinerary page
+#: src/itinerary_handler.cpp:366
+msgid "Select all routes"
+msgstr ""
+
+#. Title of the Waypoints section on the Itinerary page showing the count of waypoints
+#: src/itinerary_handler.cpp:386
+msgid "Waypoints ({1,num})"
+msgstr ""
+
+#. Checkbox label shown to select all waypoints on the itinerary page
+#: src/itinerary_handler.cpp:400
+msgid "Select all waypoints"
+msgstr ""
+
+#. Title of the Tracks section on the Itinerary page showing the count of tracks
+#: src/itinerary_handler.cpp:420
+msgid "Tracks ({1,num})"
+msgstr ""
+
+#. Checkbox label shown to select all tracks on the itinerary page
+#: src/itinerary_handler.cpp:434
+msgid "Select all tracks"
+msgstr ""
+
+#. Message displayed when attempting to paste more than the maximum number of items into an itinerary
+#: src/itinerary_handler.cpp:467
+msgid "Pasted the maximum of {1} points"
+msgstr ""
+
+#. Message displayed when copying one or more features into the copy buffer on the itinerary page is successful
+#: src/itinerary_handler.cpp:474
+msgid ""
+"Features copied.  Use the paste button to copy the features to an itinerary "
+"you own."
+msgstr ""
+
+#. Label of the tab on the itinerary page that shows general information about the itinerary
+#. Label for button to return to the itinerary when viewing a list of itinerary shares
+#: src/itinerary_handler.cpp:486 src/itinerary_handler.cpp:693
+#: src/itinerary_sharing_handler.cpp:116
+msgid "Itinerary"
+msgstr "Itinéraire"
+
+#. Label of the tab on the itinerary page that shows routes, tracks and waypoints belonging to the itinerary
+#: src/itinerary_handler.cpp:490
+msgid "Features"
+msgstr ""
+
+#. Label for a menu item on the general information tab of the itinerary page to hide the raw Markdown text
+#: src/itinerary_handler.cpp:516
+msgid "Hide raw Markdown"
+msgstr ""
+
+#. Label for a menu item on the general information tab of the itinerary page to show the raw Markdown text
+#: src/itinerary_handler.cpp:523
+msgid "View raw Markdown"
+msgstr ""
+
+#. Label for a link to the Markdown syntax help page
+#: src/itinerary_handler.cpp:532
+msgid "What is Markdown?"
+msgstr ""
+
+#. Label for a menu item that closes a page
+#. Label for button to return to the itinerary when viewing a list of route points
+#. Label for button to return to the itinerary when viewing a list of track segments
+#. Label for button to return to the itinerary track when viewing a list of track segment points
+#. Label of button to close a read-only view of itinerary waypoint details
+#: src/itinerary_handler.cpp:536 src/itinerary_route_edit_handler.cpp:226
+#: src/itinerary_sharing_handler.cpp:127
+#: src/itinerary_track_edit_handler.cpp:201
+#: src/itinerary_track_segment_edit_handler.cpp:201
+#: src/itinerary_waypoint_edit_handler.cpp:306
+msgid "Close"
+msgstr ""
+
+#. Label for drop-down menu item containing 'view' type menu links
+#: src/itinerary_handler.cpp:549
+msgid "View"
+msgstr ""
+
+#. Label for menu item to view waypoint details
+#: src/itinerary_handler.cpp:555
+msgid "Waypoint"
+msgstr ""
+
+#. Label for menu item to view details of a path, which is either a selected route or track
+#. Label for menu item to edit the segments and points belonging to a route or track
+#: src/itinerary_handler.cpp:557 src/itinerary_handler.cpp:581
+msgid "Path"
+msgstr ""
+
+#. Label for menu item to re-fetch the page with updated data
+#: src/itinerary_handler.cpp:562
+msgid "Refresh"
+msgstr ""
+
+#. Label for menu item to display the map page showing the selected routes, tracks and waypoints
+#. Label for the button to display a map showing the tracked locations
+#: src/itinerary_handler.cpp:565 src/tracking_request_handler.cpp:290
+msgid "Show map"
+msgstr "Affiche la carte"
+
+#. Label for menu item to create a new itinerary waypoint
+#: src/itinerary_handler.cpp:576
+msgid "Add waypoint"
+msgstr ""
+
+#. Label for menu item to edit some or all of the details of a single selected route, track or waypoint
+#: src/itinerary_handler.cpp:579
+msgid "Attributes"
+msgstr ""
+
+#. Label for menu item to join together selected routes or tracks
+#: src/itinerary_handler.cpp:584
+msgid "Join paths"
+msgstr ""
+
+#. Label for menu item to copy the selected items, similarly to copy and paste functions
+#: src/itinerary_handler.cpp:590
+msgid "Copy selected items"
+msgstr ""
+
+#. Confirmation dialog text when converting one or more tracks to routes or vice-versa
+#: src/itinerary_handler.cpp:597
+msgid "Automatically assign colors to selected tracks and routes?"
+msgstr ""
+
+#. Label for menu item to set a sequence of colors to the selected routes and tracks
+#: src/itinerary_handler.cpp:600
+msgid "Assign colors to routes and tracks"
+msgstr ""
+
+#. Confirmation dialog text when pasting features to itinerary
+#: src/itinerary_handler.cpp:609
+msgid "Paste items?"
+msgstr ""
+
+#. Label for menu item to set paste selected items into an itinerary
+#: src/itinerary_handler.cpp:612
+msgid "Paste"
+msgstr ""
+
+#. Confirmation dialog text when converting one or more tracks to routes or vice-versa
+#: src/itinerary_handler.cpp:619
+msgid "Convert selected tracks and routes?"
+msgstr ""
+
+#. Label for menu item to convert the selected tracks to routes
+#: src/itinerary_handler.cpp:621
+msgid "Convert tracks and routes"
+msgstr ""
+
+#. Label for menu item to reduce the number of points in a track using a simplification algorithm
+#: src/itinerary_handler.cpp:623
+msgid "Simplify track"
+msgstr ""
+
+#. Label for menu item to permanently delete the selected items
+#. Confirmation dialog text when deleting a one or more selected itinerary featues
+#: src/itinerary_handler.cpp:628
+msgid "Delete the selected waypoints, routes and tracks?"
+msgstr ""
+
+#: src/itinerary_handler.cpp:628
+msgid "Delete selected items"
+msgstr ""
+
+#. Label for menu item to create a complete copy of the current Itinerary as a new Itinerary
+#. Confirmation dialog when creating a duplicating an itinerary
+#: src/itinerary_handler.cpp:636
+msgid "Create a new copy of this itinerary?"
+msgstr ""
+
+#: src/itinerary_handler.cpp:636
+msgid "Create duplicate itinerary"
+msgstr ""
+
+#. Label for drop-down menu item containing 'data transfer' type menu links, e.g. download, upload
+#: src/itinerary_handler.cpp:641
+msgid "Transfer"
+msgstr ""
+
+#. Label for menu item to upload a GPX (GPS data) file containing routes, tracks and waypoints
+#: src/itinerary_handler.cpp:647
+msgid "Upload GPX"
+msgstr ""
+
+#. Label for menu item to download the selected routes, tracks and waypoints as a GPX format (GPS data) file
+#: src/itinerary_handler.cpp:653
+msgid "Download GPX"
+msgstr "Télécharge GPX"
+
+#. Label for menu item to download the selected routes, tracks and waypoints as a KML format (GPS data) file
+#: src/itinerary_handler.cpp:655
+msgid "Download KML"
+msgstr "Télécharge KML"
+
+#. Label for menu item to download the entire Itinerary in a YAML formatted text file
+#: src/itinerary_handler.cpp:658
+msgid "Download full itinerary"
+msgstr "Télécharger l'itinéraire complet"
+
+#. Title of the page for importing a YAML file contain a full itinerary
+#: src/itinerary_import_handler.cpp:41
+msgid "Itinerary Import"
+msgstr ""
+
+#. Instructions for uploading a YAML file contain a full itinerary
+#: src/itinerary_import_handler.cpp:45
+msgid "Select the YAML file to be uploaded, then click the upload button."
+msgstr ""
+
+#. Label for button to upload a YAML file containing a full itinerary
+#. Label for button to upload a GPX (XML) file containing routes, waypoints and tracks
+#. Label for button to initiate upload of a YAML file containing settings for the TripLogger app
+#: src/itinerary_import_handler.cpp:51 src/itinerary_upload_handler.cpp:173
+#: src/my_account_handler.cpp:68
+msgid "Upload"
+msgstr ""
+
+#: src/itinerary_import_handler.cpp:69
+msgid "{1}—Copy of {2}"
+msgstr ""
+
+#. Text displayed to user after clicking on map exit button to exit map
+#: src/itinerary_map_handler.cpp:87 src/tracking_map_handler.cpp:108
+msgid "Click to exit"
+msgstr ""
+
+#. Formatted default name when creating a joined path with a parameter of
+#. an existing path name
+#: src/itinerary_path_join_handler.cpp:46
+msgid "{1} (joined)"
+msgstr ""
+
+#. Label for moving a track or path up in a list of paths being joined
+#: src/itinerary_path_join_handler.cpp:65
+msgid "Up"
+msgstr ""
+
+#. Label for moving a track or path down in a list of paths being joined
+#: src/itinerary_path_join_handler.cpp:67
+msgid "Down"
+msgstr ""
+
+#. label prompting for input of a new name for a joined path
+#: src/itinerary_path_join_handler.cpp:139
+msgid "New path name"
+msgstr ""
+
+#. Label for selecting a color for a joined path
+#: src/itinerary_path_join_handler.cpp:144
+msgid "New path color"
+msgstr ""
+
+#. Label of button to join a set of paths
+#: src/itinerary_path_join_handler.cpp:157
+msgid "Join"
+msgstr ""
+
+#. The label for the name field of a route or track
+#. Column heading for route name
+#. Label for input of a waypoint name
+#: src/itinerary_path_name_edit.cpp:46 src/itinerary_route_edit_handler.cpp:142
+#: src/itinerary_simplify_handler.cpp:62
+#: src/itinerary_waypoint_edit_handler.cpp:99
+msgid "Name"
+msgstr ""
+
+#. Label for HTML select dropdown to pick a color for a route or track
+#: src/itinerary_path_name_edit.cpp:59
+msgid "Color"
+msgstr ""
+
+#. Confirmation dialog when resetting changes when editing a route or track name
+#. Confirmation dialog when resetting changes to an itinerary waypoint
+#: src/itinerary_path_name_edit.cpp:80
+#: src/itinerary_waypoint_edit_handler.cpp:300
+msgid "Reset changes?"
+msgstr ""
+
+#. Label when editing a route or track name, for a checkbox indicating that
+#. a copy of the route should be made instead of changing the current route
+#. or track
+#: src/itinerary_path_name_edit.cpp:94
+msgid "Save as copy"
+msgstr ""
+
+#: src/itinerary_path_name_edit.cpp:107
+msgid "Itinerary Route"
+msgstr ""
+
+#: src/itinerary_path_name_edit.cpp:153
+msgid "Itinerary Track"
+msgstr ""
+
+#. A note appended to a path name which has been simplified
+#: src/itinerary_rest_handler.cpp:435 src/itinerary_rest_handler.cpp:463
+msgid "(simplified)"
+msgstr ""
+
+#. Information alert shown when a route has no points
+#: src/itinerary_route_edit_handler.cpp:56
+msgid "Route has no points"
+msgstr ""
+
+#. Formatted output of label and route name
+#. Formatted output of label and track name
+#: src/itinerary_route_edit_handler.cpp:63
+#: src/itinerary_track_edit_handler.cpp:68
+msgid "<strong>Name:</strong>&nbsp;{1}"
+msgstr ""
+
+#. Database ID of an item, typically a route, track or waypoint
+#: src/itinerary_route_edit_handler.cpp:66
+#: src/itinerary_track_edit_handler.cpp:71
+msgid "<strong>ID:</strong>&nbsp;{1,number=left}"
+msgstr ""
+
+#. Formatted output of label and route color
+#. Formatted output of label and track color
+#: src/itinerary_route_edit_handler.cpp:71
+#: src/itinerary_track_edit_handler.cpp:77
+msgid "<strong>Color:</strong>&nbsp;{1}"
+msgstr ""
+
+#. Shows the total ascent for a route or route in meters
+#. Shows the total descent for a route or route in kilometers
+#. Shows the highest point of a route or route in meters
+#. Shows the lowest point of a route or route in meters
+#. Shows the total ascent for a route or track in meters
+#. Shows the total descent for a route or track in kilometers
+#. Shows the highest point of a route or track in meters
+#. Shows the lowest point of a route or track in meters
+#. Displays segment ascent in meters
+#. Displays segment descent in meters
+#. Displays segment lowest point in meters
+#: src/itinerary_route_edit_handler.cpp:83
+#: src/itinerary_route_edit_handler.cpp:87
+#: src/itinerary_route_edit_handler.cpp:100
+#: src/itinerary_route_edit_handler.cpp:107
+#: src/itinerary_track_edit_handler.cpp:89
+#: src/itinerary_track_edit_handler.cpp:93
+#: src/itinerary_track_edit_handler.cpp:106
+#: src/itinerary_track_edit_handler.cpp:113
+#: src/itinerary_track_segment_edit_handler.cpp:83
+#: src/itinerary_track_segment_edit_handler.cpp:86
+#: src/itinerary_track_segment_edit_handler.cpp:98
+msgid "{1,num=fixed,precision=0}&nbsp;m"
+msgstr ""
+
+#. Shows the total ascent for a route or route in feet
+#. Shows the total descent for a route or route in feet
+#. Shows the highest point of a route or route in meters
+#. Shows the lowest point of a route or route in meters
+#. Shows the total ascent for a route or track in feet
+#. Shows the total descent for a route or track in feet
+#. Shows the highest point of a route or track in meters
+#. Shows the lowest point of a route or track in meters
+#. Displays segment ascent in feet
+#. Displays segment descent in feet
+#. Displays segment lowest point in feet
+#: src/itinerary_route_edit_handler.cpp:91
+#: src/itinerary_route_edit_handler.cpp:95
+#: src/itinerary_route_edit_handler.cpp:112
+#: src/itinerary_route_edit_handler.cpp:119
+#: src/itinerary_track_edit_handler.cpp:97
+#: src/itinerary_track_edit_handler.cpp:101
+#: src/itinerary_track_edit_handler.cpp:118
+#: src/itinerary_track_edit_handler.cpp:125
+#: src/itinerary_track_segment_edit_handler.cpp:89
+#: src/itinerary_track_segment_edit_handler.cpp:92
+#: src/itinerary_track_segment_edit_handler.cpp:102
+msgid "{1,num=fixed,precision=0}&nbsp;ft"
+msgstr ""
+
+#. Column heading for route point IDs
+#. Column heading for track segment point IDs
+#. The column heading for the database unique numeric identifier of a tracked location point
+#: src/itinerary_route_edit_handler.cpp:133
+#: src/itinerary_track_segment_edit_handler.cpp:115
+#: src/tracking_request_handler.cpp:100
+msgid "ID"
+msgstr "Identifiant"
+
+#. Column heading for route point latitudes
+#. Column heading for track segment point latitudes
+#. The column heading for the latitude coordinate of a tracked location point
+#: src/itinerary_route_edit_handler.cpp:136
+#: src/itinerary_track_segment_edit_handler.cpp:120
+#: src/tracking_request_handler.cpp:104
+msgid "Latitude"
+msgstr "Latitude"
+
+#. Column heading for route point longitudes
+#. Column heading for track segment point longitudes
+#. The column heading for the longitude coordinate of a tracked location point
+#: src/itinerary_route_edit_handler.cpp:138
+#: src/itinerary_track_segment_edit_handler.cpp:122
+#: src/tracking_request_handler.cpp:106
+msgid "Longitude"
+msgstr "Longitude"
+
+#. Column heading for route point altitudes
+#. Column heading for track segment point altitudes
+#. Label for input of an altitude value
+#. Description of 'altitude' parameter in table of parameters
+#. The column heading for the altitude of a tracked location point
+#: src/itinerary_route_edit_handler.cpp:140
+#: src/itinerary_track_segment_edit_handler.cpp:124
+#: src/itinerary_waypoint_edit_handler.cpp:171
+#: src/tracking_info_handler.cpp:162 src/tracking_request_handler.cpp:108
+msgid "Altitude"
+msgstr "Altitude"
+
+#. Column heading for route comment
+#. Label for input of a comment for a waypoint
+#: src/itinerary_route_edit_handler.cpp:144
+#: src/itinerary_waypoint_edit_handler.cpp:241
+msgid "Comment"
+msgstr ""
+
+#. Column heading for route symbol
+#. "        <div ng-show=\"form.$submitted || form.altitude.$touched\">\n"
+#. "          <div id=\"range-error-altitude\" class=\"alert alert-warning\" role=\"alert\" ng-show=\"form.altitude.$error.min || form.atitude.$error.max\">Altitude out of range.  Must be between -9,999,999 and 99,999,999</div>\n"
+#. "        </div>\n"
+#. Label for selection of GPS symbol value
+#: src/itinerary_route_edit_handler.cpp:148
+#: src/itinerary_waypoint_edit_handler.cpp:187
+msgid "Symbol"
+msgstr ""
+
+#. Confirmation to delete one or more selected points from a route
+#. Label for button to delete one or more selected points from a track segment
+#: src/itinerary_route_edit_handler.cpp:213
+#: src/itinerary_track_segment_edit_handler.cpp:191
+msgid "Delete the selected points?"
+msgstr ""
+
+#. Button label for deleting a seletion of points in a route
+#. Button label for deleting a seletion of points in a track segment
+#: src/itinerary_route_edit_handler.cpp:215
+#: src/itinerary_track_segment_edit_handler.cpp:193
+msgid "Delete points"
+msgstr ""
+
+#. Confirmation to split a route by selected point
+#: src/itinerary_route_edit_handler.cpp:217
+msgid "Split route before selected point?"
+msgstr ""
+
+#. Button label to split a route at a selected point
+#: src/itinerary_route_edit_handler.cpp:219
+msgid "Split route"
+msgstr ""
+
+#. Button label to reverse a route
+#: src/itinerary_route_edit_handler.cpp:222
+msgid "Reverse"
+msgstr ""
+
+#. Name given to new section of a split route.  The parameter is the name of
+#. the original route.
+#. Name given to new section of a split track.  The parameter is the name of
+#. the original track.
+#: src/itinerary_route_edit_handler.cpp:293
+#: src/itinerary_track_edit_handler.cpp:301
+msgid "{1} (split)"
+msgstr ""
+
+#. Name given to new section of a split route which has no name.  The
+#. parameter is the ID of the original route
+#. Name given to new section of a split track which has no name.  The
+#. parameter is the ID of the original track
+#: src/itinerary_route_edit_handler.cpp:298
+#: src/itinerary_track_edit_handler.cpp:306
+msgid "ID: {1,number=left} (split)"
+msgstr ""
+
+#. title of the itinerary route editing page
+#: src/itinerary_route_edit_handler.cpp:350
+msgid "Itinerary Route Edit"
+msgstr ""
+
+#. Title of the page for joining itinerary routes
+#: src/itinerary_route_join_handler.cpp:42
+msgid "Join Itinerary Routes"
+msgstr ""
+
+#. Label for input of a location in a variety of formats
+#: src/itinerary_search_handler.cpp:50
+#: src/itinerary_waypoint_edit_handler.cpp:112
+msgid "Position"
+msgstr ""
+
+#. Label for selecting the coordinate formatting of a location
+#. "        <div id=\"position-required\" class=\"alert alert-warning\" role=\"alert\" ng-show=\"form.position.$error.required\">Enter the position for the itinerary waypoint</div>\n"
+#. "        <div id=\"position-invalid\" class=\"alert alert-warning\" role=\"alert\">Invalid latitude/longitude.  Many common formats are recognised, but try entering numeric only values, separated by a comma, e.g. 51.3,-2.3 for N5.31&deg; W2.3&deg;.  Then look at the various supported formats by changing the Display position format below.  You can use a letter 'd' instead of the &deg; symbol.  Single and double quotes are accepted for minutes and seconds.  Latitudes must be between -90 and 90 degrees.  Longitudes must be between -180 and 180 degrees.</div>\n"
+#. Label for selecting the coordinate formatting of a location
+#: src/itinerary_search_handler.cpp:59
+#: src/itinerary_waypoint_edit_handler.cpp:127
+msgid "Display position format"
+msgstr ""
+
+#. "      <div ng-show=\"coordFormat !== 'plus+code' && coordFormat !== 'osgb36' && coordFormat !== 'IrishGrid' && coordFormat !== 'ITM'\">\n"
+#. Label for selecting the formatting style for a location
+#: src/itinerary_search_handler.cpp:78
+#: src/itinerary_waypoint_edit_handler.cpp:146
+msgid "Position ordering and separator"
+msgstr ""
+
+#. Label for of the radius distance to perform an itinerary search with
+#: src/itinerary_search_handler.cpp:102
+msgid "Distance (kilometers)"
+msgstr ""
+
+#. Page title of the itinerary search by location page
+#: src/itinerary_search_handler.cpp:131
+msgid "Itinerary Search by Location"
+msgstr ""
+
+#. Message displayed when no itineries match the itinerary search by radius criteria
+#: src/itinerary_search_results_handler.cpp:52
+msgid "No itineraries found."
+msgstr ""
+
+#. Page title of the itinerary search results page
+#: src/itinerary_search_results_handler.cpp:129
+msgid "Itinerary Search Results"
+msgstr ""
+
+#. Message displayed when an entered nickname does not exist
+#: src/itinerary_sharing_edit_handler.cpp:46
+msgid "That nickname does not exist.  Nicknames are case-sensitive."
+msgstr ""
+
+#. Label for checkbox indicating whether itinerary sharing is active for a specific nickname
+#. Column heading indicating sharing is active in itinerary sharing list
+#. Label for checkbox indicating whether location sharing for a particular nickname is active
+#. The column heading showing whether track sharing is active with another user
+#: src/itinerary_sharing_edit_handler.cpp:83
+#: src/itinerary_sharing_handler.cpp:62 src/track_sharing_edit_handler.cpp:147
+#: src/track_sharing_handler.cpp:74
+msgid "Active"
+msgstr ""
+
+#. Title for the page when creating an itinerary share
+#. Title for the page when editing an existing itinerary share
+#: src/itinerary_sharing_edit_handler.cpp:114
+#: src/itinerary_sharing_edit_handler.cpp:117
+msgid "Share Itinerary&mdash;New"
+msgstr ""
+
+#: src/itinerary_sharing_handler.cpp:40 src/itinerary_sharing_handler.cpp:153
+msgid "Itinerary Sharing"
+msgstr "Partage d'itinéraire"
+
+#. Message displayed when there are no itinerary sharing records to show
+#: src/itinerary_sharing_handler.cpp:51
+msgid "You are not currently sharing your itinerary with anyone"
+msgstr ""
+
+#. Label for button to activate an itinerary share
+#. Name of button to activate track sharing with selected users
+#: src/itinerary_sharing_handler.cpp:103 src/track_sharing_handler.cpp:135
+msgid "Activate"
+msgstr ""
+
+#. Label for button to deactivate an itinerary share
+#. Name of button to de-activate track sharing with selected users
+#: src/itinerary_sharing_handler.cpp:105 src/track_sharing_handler.cpp:137
+msgid "Deactivate"
+msgstr ""
+
+#. Label for button to delete selected list of itinerary shares
+#: src/itinerary_sharing_handler.cpp:107
+msgid "Delete selected nicknames?"
+msgstr ""
+
+#. Name of button to delete track sharing with selected users
+#: src/itinerary_sharing_handler.cpp:107 src/track_sharing_handler.cpp:141
+msgid "Delete selected"
+msgstr ""
+
+#. Message shown when there are no itineraries for the itinerary sharing report
+#: src/itinerary_sharing_report_handler.cpp:45
+msgid "You are not currently sharing any itineraries"
+msgstr ""
+
+#. Colunn heading showing which nicknames and itinerary is shared with
+#: src/itinerary_sharing_report_handler.cpp:57
+msgid "Sharing with"
+msgstr ""
+
+#. Page title of the itinerary shares report page
+#: src/itinerary_sharing_report_handler.cpp:115
+msgid "Itinerary Shares Report"
+msgstr ""
+
+#. Page title for the simplify track page
+#: src/itinerary_simplify_handler.cpp:39 src/itinerary_simplify_handler.cpp:57
+msgid "Simplify Track"
+msgstr ""
+
+#. Label for a tolerance slider control to set a tolerance value when simplifying a track
+#: src/itinerary_simplify_handler.cpp:66
+msgid "Tolerance"
+msgstr ""
+
+#. Label for how many locations there are in the original track when simplifying it
+#: src/itinerary_simplify_handler.cpp:71
+msgid "Original points"
+msgstr ""
+
+#. Label for how many locations there are in the simplified track while simplifying a track
+#: src/itinerary_simplify_handler.cpp:73
+msgid "Current points"
+msgstr ""
+
+#. Information alert shown when a track has no segments
+#: src/itinerary_track_edit_handler.cpp:60
+msgid "Track has no segments"
+msgstr ""
+
+#. Column heading showing track segment IDs
+#: src/itinerary_track_edit_handler.cpp:138
+msgid "Segment ID"
+msgstr ""
+
+#. Confirmation message to delete one or more selected segments from a track
+#: src/itinerary_track_edit_handler.cpp:187
+msgid "Delete the selected segments?"
+msgstr ""
+
+#. Button label for deleting a selection of track segments from a track
+#: src/itinerary_track_edit_handler.cpp:189
+msgid "Delete segments"
+msgstr ""
+
+#. Confirmation message to split a track by selected segment
+#: src/itinerary_track_edit_handler.cpp:191
+msgid "Split track before selected segment?"
+msgstr ""
+
+#. Button label for splitting a track at a selected segment
+#: src/itinerary_track_edit_handler.cpp:193
+msgid "Split track"
+msgstr ""
+
+#. Confirmation message to merge one or more segments
+#: src/itinerary_track_edit_handler.cpp:195
+msgid "Merge selected segments?"
+msgstr ""
+
+#. Button label to merge one or more segments
+#: src/itinerary_track_edit_handler.cpp:197
+msgid "Merge segments"
+msgstr ""
+
+#. Page title of the itinerary track editing page
+#: src/itinerary_track_edit_handler.cpp:248
+msgid "Itinerary Track Edit"
+msgstr ""
+
+#. Title of the page for joining itinerary tracks
+#: src/itinerary_track_join_handler.cpp:42
+msgid "Join Itinerary Tracks"
+msgstr ""
+
+#. Label showing the ID of a itinerary track segment on the page listing its points
+#: src/itinerary_track_segment_edit_handler.cpp:52
+msgid "<strong>Segment ID:</strong>&nbsp;{1,number=left}"
+msgstr ""
+
+#. Information alert shown when a track segment has no points
+#: src/itinerary_track_segment_edit_handler.cpp:65
+msgid "Track segment has no points"
+msgstr ""
+
+#. Displays segment distance in kilometers
+#: src/itinerary_track_segment_edit_handler.cpp:77
+msgid "{1,num=fixed,precision=2} km"
+msgid_plural "{1,num=fixed,precision=2} kms"
+msgstr[0] ""
+msgstr[1] ""
+
+#. Displays segment distance in miles
+#: src/itinerary_track_segment_edit_handler.cpp:79
+msgid "{1,num=fixed,precision=2} mile"
+msgid_plural "{1,num=fixed,precision=2} miles"
+msgstr[0] ""
+msgstr[1] ""
+
+#. Displays segment highest point in meters
+#. Displays segment highest point in feet
+#: src/itinerary_track_segment_edit_handler.cpp:96
+#: src/itinerary_track_segment_edit_handler.cpp:100
+msgid "{1,num=fixed,precision=0}"
+msgstr ""
+
+#. Column heading for track segment point times
+#. Label for input of a waypoint's time and date
+#. The column heading for the date and time of a tracked location point
+#: src/itinerary_track_segment_edit_handler.cpp:118
+#: src/itinerary_waypoint_edit_handler.cpp:212
+#: src/tracking_request_handler.cpp:102
+msgid "Time"
+msgstr "Temps"
+
+#. Column heading for track segment point HDOPs
+#. The column heading for the Horizontal Dilution Of Precision (estimated accuracy in metres) of a tracked location point
+#: src/itinerary_track_segment_edit_handler.cpp:126
+#: src/tracking_request_handler.cpp:110
+msgid "HDOP"
+msgstr "HDOP"
+
+#. Label for button to split a track segment by selected point
+#: src/itinerary_track_segment_edit_handler.cpp:195
+msgid "Split segment before selected point?"
+msgstr ""
+
+#. Button label to split a track segment at a selected point
+#: src/itinerary_track_segment_edit_handler.cpp:197
+msgid "Split segment"
+msgstr ""
+
+#. page title of the itinerary track segment editing page
+#: src/itinerary_track_segment_edit_handler.cpp:247
+msgid "Itinerary Track Segment Edit"
+msgstr ""
+
+#. Title of the page for uploading a GPX (XML) file containing routes, waypoints and tracks
+#: src/itinerary_upload_handler.cpp:163 src/itinerary_upload_handler.cpp:185
+msgid "Itinerary Upload"
+msgstr ""
+
+#. Instructions for uploading a GPX (XML) file containing routes, waypoints and tracks
+#: src/itinerary_upload_handler.cpp:167
+msgid "Select the GPX file to be uploaded, then click the upload button."
+msgstr ""
+
+#. The title of the Itinerary Waypoint page
+#: src/itinerary_waypoint_edit_handler.cpp:50
+#: src/itinerary_waypoint_edit_handler.cpp:86
+msgid "Itinerary Waypoint"
+msgstr ""
+
+#. Select choice entry when no item has been chosen
+#: src/itinerary_waypoint_edit_handler.cpp:194
+msgid "-- not set --"
+msgstr ""
+
+#: src/itinerary_waypoint_edit_handler.cpp:254
+msgid "Garmin averaging sample count"
+msgstr ""
+
+#: src/itinerary_waypoint_edit_handler.cpp:265
+msgid "OsmAnd category (type)"
+msgstr ""
+
+#: src/itinerary_waypoint_edit_handler.cpp:276
+msgid "OsmAnd color"
+msgstr ""
 
 #. Message output when the database is being upgraded
 #: src/main.cpp:102
@@ -50,7 +1296,386 @@ msgstr "Application démarrée en {1} ms"
 #. Text displayed when the application ends
 #: src/main.cpp:150
 msgid "Bye!"
-msgstr "au revoir"
+msgstr "Au revoir!"
+
+#. Error message displayed when uploading YAML file containing TripLogger settings fails
+#: src/my_account_handler.cpp:42
+msgid ""
+"Upload failed - the most likely reason is that the file is not a valid "
+"TripLogger YAML formatted settings file."
+msgstr ""
+
+#. Message displayed after successfully uploading YAML file containing TripLogger settings
+#: src/my_account_handler.cpp:49
+msgid "Upload succeeded"
+msgstr ""
+
+#. Label for link to change password
+#: src/my_account_handler.cpp:57
+msgid "Change password"
+msgstr "Changez mot de passe"
+
+#. Describes what the upload settings section of the My Account page can be used for
+#: src/my_account_handler.cpp:62
+msgid "Upload settings from TripLogger."
+msgstr ""
+
+#. Instructions for uploading a YAML formatted file containing TripLogger settings to be saved
+#: src/my_account_handler.cpp:65
+msgid ""
+"Select the TripLogger settings file to be uploaded, then click the upload "
+"button."
+msgstr ""
+
+#. Title of the My Account page
+#: src/my_account_handler.cpp:81
+msgid "My Account"
+msgstr "Mon Compte"
+
+#. Warning message displayed when the current password is incorrect during password change
+#: src/password_change_handler.cpp:40
+msgid "Incorrect current password"
+msgstr ""
+
+#. Warning message displayed when a new password is too week
+#: src/password_change_handler.cpp:45
+msgid ""
+"The new password is too week.  Try choosing a password with more characters."
+msgstr ""
+
+#. Label prompting for current password during password change
+#: src/password_change_handler.cpp:58
+msgid "Current password"
+msgstr "Mot de passe actuel"
+
+#. / Advice on choosing a password
+#: src/password_change_handler.cpp:64
+msgid ""
+"Strong passwords should avoid real words, be at least 9 characters and use a "
+"mixture of uppercase, lowercase, numeric and symbolic characters.  The "
+"strongest passwords will usually be a minimum of 11 characters"
+msgstr ""
+
+#. Label prompting for new password during password change
+#: src/password_change_handler.cpp:67
+msgid "New password"
+msgstr "Nouveau mot de passe"
+
+#. "          <span id=\"pw-meter\" class=\"d-block\" role=\"progressBar\">&nbsp;</span>\n"
+#. "          <span ng-show=\"passwordStrength == null || passwordStrength == 0\">&nbsp;</span>\n"
+#. "          <span ng-show=\"passwordStrength == 1\">Very weak</span>\n"
+#. "          <span ng-show=\"passwordStrength == 2\">Weak</span>\n"
+#. "          <span ng-show=\"passwordStrength == 3\">Strong</span>\n"
+#. "          <span ng-show=\"passwordStrength == 4\">Very strong</span>\n"
+#. Displays estimate password crack time.  HTML span element is replaced with value at runtime.
+#: src/password_change_handler.cpp:83
+msgid ""
+"Estimated <span id=\"crack-time\"></span> seconds to crack with ten attempts "
+"per second."
+msgstr ""
+
+#. Title of the Password Change page
+#: src/password_change_handler.cpp:116
+msgid "Change Password"
+msgstr "Changer mot de passe"
+
+#. Title of the page when creating the sharing of tracked locations with another user
+#: src/track_sharing_edit_handler.cpp:43
+msgid "Track Sharing&mdash;New"
+msgstr "Traces Partage&mdash;Nouveau"
+
+#. Title of the page when editing the sharing of tracked locations with another user
+#: src/track_sharing_edit_handler.cpp:46
+msgid "Track Sharing&mdash;Edit"
+msgstr "Traces Partage&mdash;Éditer"
+
+#. Prompt to input the nickname to share location tracking with
+#: src/track_sharing_edit_handler.cpp:70
+msgid "Share location with nickname"
+msgstr ""
+
+#. Prompt when entering recent tracking criteria when sharing locations
+#: src/track_sharing_edit_handler.cpp:81
+msgid "Share locations within last"
+msgstr ""
+
+#. Label for input of days
+#: src/track_sharing_edit_handler.cpp:90 src/track_sharing_edit_handler.cpp:123
+msgid "days"
+msgstr ""
+
+#. Label for input of hours
+#: src/track_sharing_edit_handler.cpp:99 src/track_sharing_edit_handler.cpp:132
+msgid "hours"
+msgstr ""
+
+#. Label for input of minutes
+#: src/track_sharing_edit_handler.cpp:108
+#: src/track_sharing_edit_handler.cpp:141
+msgid "minutes"
+msgstr ""
+
+#. label describing the meaning of a recently logged location
+#: src/track_sharing_edit_handler.cpp:110
+msgid ""
+"of most recently logged location (Set to zero or leave blank for no "
+"restriction)"
+msgstr ""
+
+#. Prompt when entering maximum recent tracking criteria when sharing locations
+#: src/track_sharing_edit_handler.cpp:114
+msgid "Limit sharing to a maximum period of"
+msgstr ""
+
+#. label describing the meaning of a maximum recently logged location
+#: src/track_sharing_edit_handler.cpp:143
+msgid "in any event. (Set to zero, or leave blank for no restriction)"
+msgstr ""
+
+#: src/track_sharing_edit_handler.cpp:235
+msgid "Nickname does not exist"
+msgstr ""
+
+#. Title for the track sharing page
+#. The title of the track sharing page
+#. Menu item to select the track sharing page
+#: src/track_sharing_handler.cpp:40 src/track_sharing_handler.cpp:53
+#: src/trip_request_handler.cpp:198
+msgid "Track Sharing"
+msgstr "Traces Partage"
+
+#. Message displayed when there are no track sharing records to show
+#: src/track_sharing_handler.cpp:59
+msgid "You are not currently sharing your location with anyone else"
+msgstr ""
+
+#. The column heading for the recent time period tracks may be shared with
+#: src/track_sharing_handler.cpp:70
+msgid "Recent Limit"
+msgstr ""
+
+#. The column heading for the maximum time period tracks may be shared with
+#: src/track_sharing_handler.cpp:72
+msgid "Maximum Limit"
+msgstr ""
+
+#. Abbreviated expression for days, hours and minutes
+#: src/track_sharing_handler.cpp:87 src/track_sharing_handler.cpp:96
+msgid "{1}d {2}h {3}m"
+msgstr ""
+
+#. Prompt to confirm the user wishes to delete track sharing for the selected users.
+#: src/track_sharing_handler.cpp:139
+msgid "Delete the selected location shares?"
+msgstr ""
+
+#. Name of button to edit the track sharing criteria of a selected user
+#: src/track_sharing_handler.cpp:143
+msgid "Edit selected"
+msgstr ""
+
+#. The title of the Tracker Info page which describes configuring a client
+#. track logging page
+#: src/tracking_info_handler.cpp:55
+msgid "Tracker URL"
+msgstr ""
+
+#. Message displayed after generating a new track logging key which is shown following this message
+#: src/tracking_info_handler.cpp:61
+msgid "New key generated."
+msgstr ""
+
+#. Message displayed after generating a new track logging key
+#: src/tracking_info_handler.cpp:64
+msgid ""
+"Previous keys will no longer work.  You must configure your tracker client "
+"app(s) to use the new key."
+msgstr ""
+
+#: src/tracking_info_handler.cpp:71
+msgid ""
+"Use one of the following online tracking applications to log your journeys:"
+msgstr ""
+
+#: src/tracking_info_handler.cpp:83
+msgid ""
+"To construct a custom URL for a tracker client, use the parameter names "
+"listed below to pass appropriate values.  The parameter names must all be in "
+"lower-case."
+msgstr ""
+
+#. The column heading for parameter keys and values when configuring a tracking logger
+#: src/tracking_info_handler.cpp:88
+msgid "Parameter"
+msgstr ""
+
+#: src/tracking_info_handler.cpp:89
+msgid "Value"
+msgstr ""
+
+#. The column heading for mandatory parameters when configuring a tracking logger
+#: src/tracking_info_handler.cpp:91
+msgid "Mandatory"
+msgstr ""
+
+#. Description of 'lat' parameter in table of parameters
+#: src/tracking_info_handler.cpp:95
+msgid "Decimal degrees latitude"
+msgstr ""
+
+#. Description of 'lon' parameter in table of parameters
+#: src/tracking_info_handler.cpp:97
+msgid "Decimal degrees longitude"
+msgstr ""
+
+#. Description of 'time' parameter in table of parameters.  The example shows an ISO 8601 formatted date
+#. e.g. 2022-10-20T18:13:13.124Z
+#: src/tracking_info_handler.cpp:102
+msgid ""
+"Time in <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</"
+"a> e.g. {1}"
+msgstr ""
+
+#. Description of 'unixtime' parameter in table of parameters
+#: src/tracking_info_handler.cpp:108
+msgid ""
+"<a href=\"https://en.wikipedia.org/wiki/Unix_time\">Unix time</a> e.g.  {1}"
+msgstr ""
+
+#. Description of 'mstime' parameter in table of parameters
+#: src/tracking_info_handler.cpp:114
+msgid ""
+"Unix time in <a href=\"https://en.wikipedia.org/wiki/"
+"Millisecond\">milliseconds</a> e.g. {1}"
+msgstr ""
+
+#. Description of 'offset' parameter in table of parameters
+#: src/tracking_info_handler.cpp:121
+msgid ""
+"Offset to apply to the time value being passed in seconds. e.g. 3600 to add "
+"one hour.  This is a workaround to situations where it is known that the "
+"time value is consistently incorrectly reported. e.g. A bug causing the GPS "
+"time to be one hour slow.  Can be a comma separated list of the same length "
+"as the 'offsetprovs' parameter."
+msgstr ""
+
+#. Description of 'offsetprovs' parameter in table of parameters
+#: src/tracking_info_handler.cpp:134
+msgid ""
+"Used in conjunction with the 'prov' parameter to apply offsets per location "
+"provider.  E.g. setting 'offset' to '3600' and 'offsetprovs' to 'gps' will "
+"only apply the offset to locations submitted with the prov parameter "
+"matching 'gps'.  To apply offset to more than one provider, use comma "
+"separated lists of the same length.  E.g. set 'offset' to '3600,7200' and "
+"'offsetprovs' to 'gps,network' to add 1 hour to gps times and 2 hours to "
+"network times."
+msgstr ""
+
+#. Description of 'msoffset' parameter in table of parameters
+#: src/tracking_info_handler.cpp:149
+msgid ""
+"Same as the offset parameter above, but in milliseconds.  e.g. 1000 to add "
+"one second."
+msgstr ""
+
+#. Description of 'hdop' parameter in table of parameters
+#: src/tracking_info_handler.cpp:156
+msgid ""
+"<a href=\"https://en.wikipedia.org/wiki/"
+"Dilution_of_precision_(navigation)\">Horizontal Dilution of Precision</a> "
+"(accuracy)"
+msgstr ""
+
+#. Description of 'speed' parameter in table of parameters
+#. The column heading for the speed of a tracked location point
+#: src/tracking_info_handler.cpp:168 src/tracking_request_handler.cpp:112
+msgid "Speed"
+msgstr "Vitesse"
+
+#. Description of 'bearing' parameter in table of parameters
+#: src/tracking_info_handler.cpp:174
+msgid "Bearing in decimal degrees"
+msgstr ""
+
+#. Description of 'sat' parameter in table of parameters
+#: src/tracking_info_handler.cpp:180
+msgid "Numeric count of satellites with fixes"
+msgstr ""
+
+#. Description of 'prov' parameter in table of parameters
+#: src/tracking_info_handler.cpp:186
+msgid "Type of location provider as text.  E.g. GPS or Network"
+msgstr ""
+
+#. Description of 'batt' parameter in table of parameters
+#: src/tracking_info_handler.cpp:192
+msgid "Numeric remaining battery percentage"
+msgstr ""
+
+#. Description of 'note' parameter in table of parameters
+#: src/tracking_info_handler.cpp:198
+msgid "Free text description related to the specified location"
+msgstr ""
+
+#. Note displayed beneath the table of location tracking parameters
+#: src/tracking_info_handler.cpp:204
+msgid ""
+"<strong>Note:</strong> Where none of the time parameters are included, the "
+"server will record the time it <em>receives</em> the location using the "
+"server's time zone.  As the time received may vary greatly from the actual "
+"time the location was recorded in the device, it is highly recommended to "
+"include a time parameter if at all possible."
+msgstr ""
+
+#. Text displayed on the button to generate a new tracking ID
+#: src/tracking_info_handler.cpp:214
+msgid "Generate new tracking ID"
+msgstr ""
+
+#. Text about downloading the configuration settings for the TripLogger iOS app.  The parameter is replaced with a URL.
+#: src/tracking_info_handler.cpp:219
+msgid ""
+"If you use <a href=\"https://www.fdsd.co.uk/triplogger/\" "
+"target=\"_blank\">TripLogger</a> as your tracking client, you can download "
+"your settings to a file and import the settings into the app from the file.  "
+"See the `Download TripLogger Settings` section in the <a href=\"{1}\" "
+"target=\"_blank\">TripLogger user documentation</a> for more information."
+msgstr ""
+
+#. Text about uploading the configuration settings for the TripLogger iOS app
+#: src/tracking_info_handler.cpp:228
+msgid ""
+"After <a href=\"account\">uploading your settings</a>, when you subsequently "
+"download them using this page, they are automatically updated to contain the "
+"current tracking&nbsp;ID, a potentially easier method than cut-and-paste for "
+"updating the tracking&nbsp;ID in TripLogger after generating a new "
+"tracking&nbsp;ID."
+msgstr ""
+
+#. Text about using the Traccar Client iOS app the replacement parameter shows a UUID string e.g. 2b3e8d99-0d8b-450a-a716-1ba13c89a129
+#: src/tracking_info_handler.cpp:235
+msgid ""
+"For the <a href=\"https://www.traccar.org/client/\" "
+"target=\"_blank\">Traccar Client</a> app, enter the 'Device identifier' as "
+"{1} and set the host and port values in the normal way.  As there is no "
+"option on the app to specify a URL prefix, this tracker client may not be "
+"supported on some implementations of TRIP."
+msgstr ""
+
+#. Text shown on the button used to download the file containing the TripLogger configuration settings
+#: src/tracking_info_handler.cpp:244
+msgid "Download TripLogger Settings"
+msgstr ""
+
+#. Message shown above text showing configuration for the GPSLogger Android app
+#: src/tracking_info_handler.cpp:248
+msgid "Use the text below to configure GPSLogger"
+msgstr ""
+
+#. Message shown above text showing configuration for the OsmAnd Android/iOS app
+#: src/tracking_info_handler.cpp:252
+msgid "Use the text below to configure OsmAnd"
+msgstr ""
 
 #. Title tor the location tracking page
 #. The title of the location tracking page
@@ -77,41 +1702,6 @@ msgstr[1] "A reçu {1} points"
 msgid "Between {1} and {2}"
 msgstr "Entre {1} et {2}"
 
-#. The column heading for the database unique numeric identifier of a tracked location point
-#: src/tracking_request_handler.cpp:100
-msgid "ID"
-msgstr "Identifiant"
-
-#. The column heading for the date and time of a tracked location point
-#: src/tracking_request_handler.cpp:102
-msgid "Time"
-msgstr "Temps"
-
-#. The column heading for the latitude coordinate of a tracked location point
-#: src/tracking_request_handler.cpp:104
-msgid "Latitude"
-msgstr "Latitude"
-
-#. The column heading for the longitude coordinate of a tracked location point
-#: src/tracking_request_handler.cpp:106
-msgid "Longitude"
-msgstr "Longitude"
-
-#. The column heading for the altitude of a tracked location point
-#: src/tracking_request_handler.cpp:108
-msgid "Altitude"
-msgstr "Altitude"
-
-#. The column heading for the Horizontal Dilution Of Precision (estimated accuracy in metres) of a tracked location point
-#: src/tracking_request_handler.cpp:110
-msgid "HDOP"
-msgstr "HDOP"
-
-#. The column heading for the speed of a tracked location point
-#: src/tracking_request_handler.cpp:112
-msgid "Speed"
-msgstr "Vitesse"
-
 #. The column heading for the bearing (angle of heading) of a tracked location point
 #: src/tracking_request_handler.cpp:114
 msgid "Bearing"
@@ -136,22 +1726,6 @@ msgstr "Satellites"
 #: src/tracking_request_handler.cpp:122
 msgid "Battery"
 msgstr "Pile"
-
-#. Title of button which goes to a specified page number
-#: src/tracking_request_handler.cpp:208
-msgid "Go"
-msgstr "Aller"
-
-#. "      <div class=\"row\">\n"
-#. The input start date to search for location tracks
-#: src/tracking_request_handler.cpp:220
-msgid "Date from"
-msgstr "Date après"
-
-#. The input end date to search for location tracks
-#: src/tracking_request_handler.cpp:226
-msgid "Date to"
-msgstr "Date avant"
 
 #. The input to select another user's nickname to view their shared location tracks
 #: src/tracking_request_handler.cpp:237
@@ -178,11 +1752,6 @@ msgstr "Affiche les notes seulement"
 msgid "List tracks"
 msgstr "Afficher une liste des points"
 
-#. Label for the button to display a map showing the tracked locations
-#: src/tracking_request_handler.cpp:290
-msgid "Show map"
-msgstr "Affiche la carte"
-
 #. Prompt to confirm the user wished to download a data file with a limited number of tracked locations
 #: src/tracking_request_handler.cpp:297
 msgid ""
@@ -205,10 +1774,11 @@ msgstr "Télécharge les points"
 msgid "Copy"
 msgstr "Copie"
 
-#. Label for the button which resets the form's input criteria to that originally displayed
-#: src/tracking_request_handler.cpp:309
-msgid "Reset"
-msgstr "Remettre"
+#. Message displayed to the user when they attempt to exceed the
+#. maxmium amount of locations that can be displayed on the map
+#: src/tracking_rest_handler.cpp:236
+msgid "The {1} locations have been truncated to the most recent {2}"
+msgstr ""
 
 #. Heading before showing command line usage and options with the program name as the parameter
 #: src/trip_get_options.cpp:102
@@ -283,6 +1853,10 @@ msgstr "Options: {1} <adresse> <port>"
 msgid "Example:\n"
 msgstr "Exemple:\n"
 
+#: src/trip_pg_dao.cpp:73
+msgid "User is not authorized for the requested operation"
+msgstr ""
+
 #. Title for the login page
 #: src/trip_request_handler.cpp:74
 #: trip-server-common/src/http_request_handler.cpp:708
@@ -298,16 +1872,6 @@ msgstr "Suit"
 #: src/trip_request_handler.cpp:191
 msgid "Tracker Info"
 msgstr "Information de suivi"
-
-#. Menu item to select the track sharing page
-#: src/trip_request_handler.cpp:198
-msgid "Track Sharing"
-msgstr "Traces Partage"
-
-#. Menu item to select the list of itineraries page
-#: src/trip_request_handler.cpp:205
-msgid "Itineraries"
-msgstr "Itinéraires"
 
 #. Menu item for an admin user to administer user accounts, create, delete, reset password
 #: src/trip_request_handler.cpp:213
@@ -325,17 +1889,17 @@ msgid "Account"
 msgstr "Compte"
 
 #. Menu item linking to the user guide
-#: src/trip_request_handler.cpp:232
+#: src/trip_request_handler.cpp:231
 msgid "Help"
 msgstr "Aide"
 
 #. Menu item for the user to logout
-#: src/trip_request_handler.cpp:235
+#: src/trip_request_handler.cpp:234
 msgid "Logout"
 msgstr "Déconnecter"
 
 #. Warning issued to terminal if no map tile providers have been configured
-#: src/trip_request_handler.cpp:325
+#: src/trip_request_handler.cpp:324
 msgid "Warning: no map tile providers have been configured"
 msgstr ""
 
@@ -360,11 +1924,6 @@ msgstr[1] "Crée {1} ouvriers"
 #: trip-server-common/src/http_request_handler.cpp:674
 msgid "Username"
 msgstr "Nom d'utilisateur"
-
-#: trip-server-common/src/http_request_handler.cpp:686
-#: trip-server-common/src/http_request_handler.cpp:696
-msgid "Password"
-msgstr "Mot de passe"
 
 #. Shows how many database connections are being created for the application
 #: trip-server-common/src/pg_pool.cpp:43

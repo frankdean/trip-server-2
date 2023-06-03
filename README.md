@@ -462,8 +462,6 @@ older than that in [MacPorts][].  See the 'libpqxx' section below for
 instructions on installing `libpqxx`.  Tested on macOS with `libpqxx` version
 6.4.8.
 
-Add `CXXFLAGS='-g -O0'` to disable compiler optimisation.
-
 To build from a Git clone, install the following ports from [MacPorts][]:
 
 - autoconf
@@ -511,6 +509,8 @@ When running the `./configure` command to build this application, define the
 e.g.:
 
 	./configure PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig"
+
+Add `CXXFLAGS='-g -O0'` to disable compiler optimisation.
 
 #### nlohmann/json
 

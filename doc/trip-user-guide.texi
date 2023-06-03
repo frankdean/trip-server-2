@@ -33,7 +33,7 @@ Copyright @copyright{} 2021-2023 Frank Dean
 @contents
 
 @ifnottex
-@node Top, Introduction
+@node Top, Introduction, (dir), (dir)
 @top Trip Server User Guide
 @insertcopying
 @end ifnottex
@@ -45,10 +45,10 @@ Copyright @copyright{} 2021-2023 Frank Dean
 * Tracking::                    Location tracking
 * Tracker Info::                Information about tracking configuration
 * Track Sharing::               Controlling sharing of tracking information
-* My Location::                 Recording specific location information
 * Itineraries::                 Itinerary management
 * Itinerary Search::            Searching itineraries
 * My Account::                  Account management
+* Shortcut Keys::
 * Concept Index::               Index
 
 @detailmenu
@@ -71,12 +71,6 @@ Track Sharing
 * Activating and Deactivating Shares::
 * Deleting Shares::
 
-My Location
-
-* Recording Your Current Location::
-* Adjusting Your Location::
-* Copying Your Current Location to an Itinerary::
-
 Itineraries
 
 * Itinerary Notes::
@@ -84,7 +78,7 @@ Itineraries
 * Live Map::
 * Sharing::
 * GPX Upload::
-* GPX Downloads::
+* GPX and KML Downloads::
 * Download Full Itinerary::
 * Add Waypoint::
 * Creating a New Route::
@@ -106,6 +100,27 @@ My Account
 
 * Change Password::
 * Upload TripLogger Settings::
+
+Shortcut Keys
+
+* Tracking Page Shortcut Keys::
+* Tracker Info Shortcut Keys::
+* Track Sharing Shortcut Keys::
+* Itinerary List Shortcut Keys::
+* My Account Shortcut Keys::
+
+Track Sharing Shortcut Keys
+
+* Location Sharing Form Shortcut Keys::
+
+Itinerary List Shortcut Keys
+
+* Itinerary Edit Shortcut Keys::
+* Itinerary Shortcut Keys::
+
+Itinerary Shortcut Keys
+
+* Itinerary Import Shortcut Keys::
 
 @end detailmenu
 @end menu
@@ -222,7 +237,8 @@ nickname.
 
 @node Remote Logging, Tracking, Overview, Top
 @chapter Remote Logging
-@cindex Remote Logging, Logging
+@cindex Remote Logging
+@cindex Logging
 
 Currently, there are three remote logging applications known to work
 with @url{@value{tripserverurl}, TRIP}.
@@ -430,7 +446,7 @@ format.
 
 @node Tracker Info, Track Sharing, Tracking, Top
 @chapter Tracker Info
-@cindex Tracker Info, Sharing
+@cindex Tracker Info
 
 Select @code{Tracker Info} from the menu to display information on
 setting up a tracker client application.
@@ -488,7 +504,7 @@ share the file with someone else, you should generate a new tracking
 UUID and import that into @url{@value{triploggerurl},,TripLogger} before
 passing the previous file containing the old UUID to anyone else.
 
-@node Track Sharing, My Location, Tracker Info, Top
+@node Track Sharing, Itineraries, Tracker Info, Top
 @chapter Track Sharing
 @cindex Track Sharing
 
@@ -552,109 +568,7 @@ your location history, you can delete the location sharing altogether.  The
 effect is the same, other than the nickname is no longer shown in the list.
 Select one or more users and click the @code{Delete selected} button.
 
-@ignore
-TODO - Remove the 'My Location' section once updated new behaviour in
-itinerary section.
-@end ignore
-
-@node My Location, Itineraries, Track Sharing, Top
-@chapter My Location
-@cindex My Location, Location
-
-To view your own location using the browser, select @code{Location} from
-the menu.
-
-The browser is asked to provide your current location.  You may need to
-allow permission before the location is provided.  After a short delay,
-you location details are displayed at the top of the page and a marker
-showing you location is displayed on the map.  You location information
-remains private and is not automatically recorded anywhere else at this
-stage.
-
-There is a checkbox titled @code{Request high accuracy location}.
-Selecting this option potentially provides a more accurate location.
-Some browsers will not provide a location at all without this option
-selected.
-
-Click the @code{Update position} button to request a new location.
-
-You can choose to display your location in a variety of formats by
-selecting different values in the @code{Display position format}
-selection list.  The chosen format is displayed directly beneath the
-selection list.
-
-@menu
-* Recording Your Current Location::
-* Adjusting Your Location::
-* Copying Your Current Location to an Itinerary::
-@end menu
-
-@node Recording Your Current Location, Adjusting Your Location, My Location, My Location
-@section Recording Your Current Location
-@cindex Recording Your Current Location, Location
-
-If you wish, you can manually record the current location in your track
-log.  If you want to include a note together with your location, type it
-into the @code{Note} field.  To save your current location in your track
-log, click the @code{Record this position} button.  When the track log
-is viewed, the @code{Provider} column shows @code{web-browser}
-indicating how the location was determined.
-
-This can be a useful fallback in the event that the remote logging
-application is not working or that you are somewhere without GPS
-reception but can indicate on a map where you are.
-
-
-@node Adjusting Your Location, Copying Your Current Location to an Itinerary, Recording Your Current Location, My Location
-@section Adjusting Your Location
-@cindex Adjusting Your Location, Location
-
-If you known the location shown is wrong on the map for some reason, you
-can adjust your location manually.
-
-@enumerate
-@item
-Click the @code{Edit icon} displayed at the top right-hand side of the
-map.
-
-@item
-The marker icon displays a red dotted outline.  Drag the marker to the
-desired location.
-
-@item
-Click the @code{Save} button that is adjacent to the @code{Edit icon} at
-the top right-hand side of the map.
-
-@item
-The location at the top of the page is updated with the coordinates of
-the marker position.
-
-@item
-Record this position in your track log by clicking the @code{Record this
-position} button.  When the track log is viewed, the @code{Provider}
-column shows @code{manual} indicating the location was specified
-manually.
-@end enumerate
-
-@node Copying Your Current Location to an Itinerary,  , Adjusting Your Location, My Location
-@section Copying Your Current Location to an Itinerary
-@cindex Copying Your Current Location to an Itinerary
-
-@enumerate
-@item
-Click the @code{Copy} button.
-
-@item
-Navigate to an itinerary.
-
-@item
-Click the paste button.
-
-@item
-A waypoint is created for the copied location.
-@end enumerate
-
-@node Itineraries, Itinerary Search, My Location, Top
+@node Itineraries, Itinerary Search, Track Sharing, Top
 @chapter Itineraries
 @cindex Itineraries
 
@@ -696,7 +610,7 @@ edit itineraries shared with you by others.
 * Live Map::
 * Sharing::
 * GPX Upload::
-* GPX Downloads::
+* GPX and KML Downloads::
 * Download Full Itinerary::
 * Add Waypoint::
 * Creating a New Route::
@@ -733,16 +647,13 @@ is a wonderful way of being able to write markup in a format that is
 very presentable in its original text form and also efficiently
 displayed as formatted HTML on the web.
 
-@ignore
-TODO Update once links to Markdown or CommonMark help pages have been added to
-the Edit Itinerary page.
-
-Click the question mark icon at the top right hand side of the edit area
-for help on the Markdown syntax.  Clicking on the other edit area icons
-provide shortcuts for common formatting syntax.  Unfortunately the
-Markdown editor used by the application is not a perfect implementation
-of the Markdown standards but is usefully close.
-@end ignore
+There are various flavours of the Markdown syntax and whilst the current
+implementation uses the @url{https://github.com/commonmark/cmark, cmark}
+library which follows the @url{https://commonmark.org, CommonMark}
+standard, it is advised that you don't use the extended features beyond
+that of the original @url{@value{markdownurl}, Markdown} specification,
+in case this application needs to employ a different implementation in
+the future.
 
 @node Map, Live Map, Itinerary Notes, Itineraries
 @section Map
@@ -764,7 +675,7 @@ One or more live tracks can be viewed on an itinerary map.  From the
 itinerary page, optionally select any routes, waypoints and tracks and
 click the @code{Show map} button.
 
-To see live track logs on the map, click the @code{lightening} control
+To see live track logs on the map, click the @code{settings (gear)} control
 displayed near the top right of the map.  A list of users who are sharing
 their tracks with you are displayed, including yourself.  You can modify
 the start range date and time for displaying locations and also filter
@@ -814,14 +725,9 @@ additionally removes the nickname from the list.
 Click the @code{New} button to start sharing the itinerary with someone else.
 Enable the @code{Active} checkbox to actually enable sharing.
 
-@node GPX Upload, GPX Downloads, Sharing, Itineraries
+@node GPX Upload, GPX and KML Downloads, Sharing, Itineraries
 @section GPX Upload
 @cindex GPX Upload
-
-@ignore
-TODO update section title when KML download format available.
-See below for a KML paragraph to be updated.
-@end ignore
 
 You can import waypoints, tracks and routes from a standard GPX file.  Not all
 the possible attributes within the GPX file are supported, so keep the
@@ -839,9 +745,13 @@ functionality to copy the desired contents to the ultimately intended
 itinerary.
 @end quotation
 
-@node GPX Downloads, Download Full Itinerary, GPX Upload, Itineraries
-@section GPX Downloads
-@cindex GPX Downloads, GPX, GIS
+@node GPX and KML Downloads, Download Full Itinerary, GPX Upload, Itineraries
+@section GPX and KML Downloads
+@cindex GPX Downloads
+@cindex KML Downloads
+@cindex GPX
+@cindex KML
+@cindex GIS
 
 Select one or more routes, tracks and waypoints, then select the
 @code{Features > Transfer > Download GPX} menu option from the itinerary page,
@@ -850,16 +760,14 @@ to download the chosen items in the @url{@value{gpxurl},,GPX} format.
 The GPX file format can be imported into many Geographic Information
 System (@url{@value{gisurl},,GIS}) based applications.
 
-@ignore
-TODO update when KML download format available
 The KML file
 format is recognised by some GIS based applications, in particular
 @url{https://earth.google.com/,Google Earth.}
-@end ignore
 
-@node Download Full Itinerary, Add Waypoint, GPX Downloads, Itineraries
+@node Download Full Itinerary, Add Waypoint, GPX and KML Downloads, Itineraries
 @section Download Full Itinerary
-@cindex Download Full Itinerary, YAML
+@cindex Download Full Itinerary
+@cindex YAML
 
 @c [YAML]: https://yaml.org "YAML Ain't Markup Language"
 @set yamlurl https://yaml.org "YAML Ain't Markup Language"
@@ -1009,7 +917,8 @@ displayed at the time the copy was initiated.
 
 @node Moving Waypoints, Joining Routes and Tracks, Copying and Pasting between Itineraries, Itineraries
 @section Moving Waypoints
-@cindex Moving Waypoints, Waypoints
+@cindex Moving Waypoints
+@cindex Waypoints
 
 To move a waypoint to a different position, select it in the itinerary
 page, then select the @code{Features > View > Show map} menu option.  To
@@ -1032,7 +941,9 @@ the map.
 
 @node Joining Routes and Tracks, Editing Tracks, Moving Waypoints, Itineraries
 @section Joining Routes and Tracks
-@cindex Joining Routes and Tracks, Routes, Tracks
+@cindex Joining Routes and Tracks
+@cindex Routes
+@cindex Tracks
 
 Two different itinerary routes or itinerary tracks can be joined together to
 create a single route or track.  Tracks cannot be joined to routes and vice
@@ -1059,7 +970,8 @@ the combined paths.
 
 @node Editing Tracks, Split Track, Joining Routes and Tracks, Itineraries
 @section Editing Tracks
-@cindex Editing Tracks, Tracks
+@cindex Editing Tracks
+@cindex Tracks
 
 Tracks can be edited by;
 
@@ -1087,7 +999,9 @@ selected and following segments are moved from the current track to a
 new one.
 
 @subsection Split Segment
-@cindex Split Segment, Segment
+@cindex Split Segment
+@cindex Segment
+@cindex Track segment
 
 Click on the segment ID to display the track segment points.
 
@@ -1131,7 +1045,8 @@ Editing routes is very similar to editing tracks as described above.
 
 @node Duplicating the Itinerary, Assigning Colours to Routes and Tracks, Editing Route Points, Itineraries
 @section Duplicating the Itinerary
-@cindex Duplicating the Itinerary, Itinerary
+@cindex Duplicating the Itinerary
+@cindex Itinerary, duplicating
 
 The @code{Features > Edit > Create duplicate itinerary} menu option of the
 itinerary page creates a duplicate of the current itinerary.  The new
@@ -1139,7 +1054,10 @@ itinerary is displayed once it has been created.
 
 @node Assigning Colours to Routes and Tracks, Convert Tracks to Routes, Duplicating the Itinerary, Itineraries
 @section Assigning Colours to Routes and Tracks
-@cindex Assigning Colours to Routes and Tracks, Colours, Routes, Tracks
+@cindex Assigning Colours to Routes and Tracks
+@cindex Colours, assigning colours to routes and tracks
+@cindex Routes, assigning colours
+@cindex Tracks, assigning colours
 
 This option is intended to make it easy to quickly give routes and
 tracks different colours, to more easily identify them on the map.
@@ -1153,7 +1071,9 @@ from the beginning again.
 
 @node Convert Tracks to Routes, Simplify Track, Assigning Colours to Routes and Tracks, Itineraries
 @section Convert Tracks to Routes
-@cindex  Convert Tracks to Routes, Routes, Tracks, Conversion
+@cindex  Convert Tracks to Routes
+@cindex Routes, converting to tracks
+@cindex Tracks, converting to routes
 
 To create routes from tracks or vice versa, select the routes and tracks you
 wish to convert and choose the @code{Features > Edit > Convert tracks and
@@ -1170,7 +1090,8 @@ information.
 
 @node Simplify Track,  , Convert Tracks to Routes, Itineraries
 @section Simplify Track
-@cindex Simplify Track, Track
+@cindex Simplify Track
+@cindex Track, simplifying
 
 Sometimes, a track log has a high frequency of points.  You might wish
 to reduce the number of points, (simplifying the path), perhaps before
@@ -1220,6 +1141,7 @@ lost when converting to a track.
 @node Itinerary Search, My Account, Itineraries, Top
 @chapter Itinerary Search
 @cindex Itinerary Search
+@cindex Search, itinerary
 
 Itineraries can be searched for by their location and a radius.  Click
 the @code{Search} button at the bottom of the @code{Itineraries} list
@@ -1248,9 +1170,10 @@ window to examine their contents without losing your search results.
 actually have a point within it, is excluded from the results.
 @end quotation
 
-@node My Account, Concept Index, Itinerary Search, Top
+@node My Account, Shortcut Keys, Itinerary Search, Top
 @chapter My Account
 @cindex My Account
+@cindex Account
 
 @menu
 * Change Password::
@@ -1259,7 +1182,8 @@ actually have a point within it, is excluded from the results.
 
 @node Change Password, Upload TripLogger Settings, My Account, My Account
 @section Change Password
-@cindex  Change Password, Password
+@cindex  Change Password
+@cindex Password, change
 
 Click on the @code{Change password} option of the Account page to change your
 current password.  You need to enter your current password before any changes
@@ -1274,6 +1198,7 @@ a strong password.
 @node Upload TripLogger Settings,  , Change Password, My Account
 @section Upload TripLogger Settings
 @cindex Upload TripLogger Settings
+@cindex Settings, TripLogger uploading
 
 If you are using the @url{@value{triploggerurl},,TripLogger Remote for iOS
 app}, you can export your settings from TripLogger, save them to a file, then
@@ -1283,7 +1208,316 @@ in the database.  This can act as a quick backup of your settings, but can
 also make it easier to update your unique user @url{@value{uuidurl},,UUID.}
 @xref{Download TripLogger Settings}
 
-@node Concept Index,  , My Account, Top
+@node Shortcut Keys, Concept Index, My Account, Top
+@chapter Shortcut Keys
+@cindex Shortcut keys
+@cindex Access keys
+@cindex Keys, access keys, shortcut keys
+
+The application implments shortcut keys (also known as access keys) for most
+options.  Unfortunately, whilst the HTML specification allows such keys to be
+defined, it does not specify a method for indicating where they exist.
+
+See
+@url{https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/accesskey,accesskey}
+in the MDN developer documentation for a list of the key combinations to use
+to activate a shortcut key.
+
+The implemented shortcuts keys are listed in the following sub-sections.
+
+@menu
+* Tracking Page Shortcut Keys::
+* Tracker Info Shortcut Keys::
+* Track Sharing Shortcut Keys::
+* Itinerary List Shortcut Keys::
+* My Account Shortcut Keys::
+@end menu
+
+@node Tracking Page Shortcut Keys, Tracker Info Shortcut Keys, Shortcut Keys, Shortcut Keys
+@section Tracking Page Shortcut Keys
+@cindex Tracking Page Shortcut Keys
+
+@table @code
+
+@item l
+
+List tracks
+
+@item m
+
+Show map
+
+@item d
+
+Download tracks
+
+@item y
+
+Copy
+
+@item r
+
+Reset
+
+@end table
+
+@node Tracker Info Shortcut Keys, Track Sharing Shortcut Keys, Tracking Page Shortcut Keys, Shortcut Keys
+@section Tracker Info Shortcut Keys
+@cindex Tracker Info Shortcut Keys
+
+@table @code
+
+@item g
+
+Generate new tracking ID
+
+@item d
+
+Download TripLogger Settings
+
+@end table
+
+@node Track Sharing Shortcut Keys, Itinerary List Shortcut Keys, Tracker Info Shortcut Keys, Shortcut Keys
+@section Track Sharing Shortcut Keys
+
+@table @code
+
+@item l
+
+Toggles checkboxes in list of shares
+
+@item a
+
+Activate
+
+@item d
+
+Deactivate
+
+@item x
+
+Delete selected
+
+@item e
+
+Edit selected
+
+@item w
+
+New
+
+@end table
+
+@menu
+* Location Sharing Form Shortcut Keys::
+@end menu
+
+@node Location Sharing Form Shortcut Keys,  , Track Sharing Shortcut Keys, Track Sharing Shortcut Keys
+@subsection Location Sharing Form Shortcut Keys
+@cindex Location Sharing Form Shortcut Keys
+
+@table @code
+
+@item s
+
+Save
+
+@item c
+
+Cancel
+
+@item r
+
+Reset
+
+@end table
+
+@node Itinerary List Shortcut Keys, My Account Shortcut Keys, Track Sharing Shortcut Keys, Shortcut Keys
+@section Itinerary List Shortcut Keys
+@cindex Itinerary List Shortcut Keys
+
+@table @code
+
+@item n
+
+next page
+
+@item p
+
+previous page
+
+@item g
+
+goto page
+
+@item w
+
+New itinerary
+
+@item i
+
+Import itinerary
+
+@item s
+
+Search
+
+@item r
+
+Itinerary shares report
+
+@end table
+
+@menu
+* Itinerary Edit Shortcut Keys::
+* Itinerary Shortcut Keys::
+@end menu
+
+@node Itinerary Edit Shortcut Keys, Itinerary Shortcut Keys, Itinerary List Shortcut Keys, Itinerary List Shortcut Keys
+@subsection Itinerary Edit Shortcut Keys
+@cindex Itinerary Edit Shortcut Keys
+
+@table @code
+
+@item s
+
+Save
+
+@item c
+
+Cancel
+
+@item r
+
+Reset
+
+@end table
+
+@node Itinerary Shortcut Keys,  , Itinerary Edit Shortcut Keys, Itinerary List Shortcut Keys
+@subsection Itinerary Shortcut Keys
+@cindex Itinerary Shortcut Keys
+
+@table @code
+
+@item i
+
+select itinerary tab
+
+@item f
+
+select features tab
+
+@item e
+
+Edit
+
+@item c
+
+Close
+
+@item m
+
+Show map
+
+@item a
+
+toggle selecting all checkboxes
+
+@item r
+
+toggle selecting all routes
+
+@item w
+
+toggle selecting all waypoints
+
+@item t
+
+toggle selecting all tracks
+
+@item y
+
+Copy
+
+@item l
+
+Assign colours to routes and tracks
+
+@item p
+
+Paste
+
+@item v
+
+Convert tracks and routes
+
+@item s
+
+Simplify track
+
+@item d
+
+delete selected items
+
+@item u
+
+Upload GPX
+
+@item g
+
+Download GPX
+
+@item k
+
+Download KML
+
+@item n
+
+Download full itinerary
+
+@end table
+
+@menu
+* Itinerary Import Shortcut Keys::
+@end menu
+
+@node Itinerary Import Shortcut Keys,  , Itinerary Shortcut Keys, Itinerary Shortcut Keys
+@subsubsection Itinerary Import Shortcut Keys
+@cindex Itinerary Import Shortcut Keys
+
+@table @code
+
+@item f
+
+Choose file
+
+@item u
+
+Upload
+
+@item c
+
+Cancel
+
+@end table
+
+@node My Account Shortcut Keys,  , Itinerary List Shortcut Keys, Shortcut Keys
+@section My Account Shortcut Keys
+@cindex My Account Shortcut Keys
+
+@table @code
+
+@item f
+
+Choose File
+
+@item u
+
+Upload
+
+@end table
+
+@node Concept Index,  , Shortcut Keys, Top
 @unnumbered Index
 
 @printindex cp

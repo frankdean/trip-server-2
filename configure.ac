@@ -15,9 +15,6 @@ AC_CONFIG_HEADERS([config.h])
 
 AC_CONFIG_TESTDIR([tests])
 
-dnl https://www.gnu.org/software/automake/manual/automake.html#maintainer_002dmode
-AM_MAINTAINER_MODE([enable])
-
 AC_ARG_ENABLE([keep-alive],
     AS_HELP_STRING([--enable-keep-alive],
 	[Build to enable HTTP keep-alive (default no)]),

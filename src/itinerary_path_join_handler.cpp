@@ -100,11 +100,11 @@ void ItineraryPathJoinHandler::build_form(
         <<
         "        <td>"
         // Shows the total ascent and descent of a path in meters
-        << format(translate("↗{1,num=fixed,precision=0}&nbsp;m ↘{2,num=fixed,precision=0}&nbsp;m")) % ascent % descent
+        << format(translate("&#8599;{1,num=fixed,precision=0}&nbsp;m &#8600;{2,num=fixed,precision=0}&nbsp;m")) % ascent % descent
         << "</td>\n"
         "        <td>"
         // Shows the total ascent and descent of a path in ft
-        << format(translate("↗{1,num=fixed,precision=0}&nbsp;ft ↘{2,num=fixed,precision=0}&nbsp;ft"))
+        << format(translate("&#8599;{1,num=fixed,precision=0}&nbsp;ft &#8600;{2,num=fixed,precision=0}&nbsp;ft"))
         % (ascent / feet_per_meter) % (descent / feet_per_meter)
         << "</td>\n";
     } else {

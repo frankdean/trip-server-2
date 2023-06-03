@@ -33,7 +33,7 @@ Copyright @copyright{} 2021-2023 Frank Dean
 @contents
 
 @ifnottex
-@node Top, Overview
+@node Top, Overview, (dir), (dir)
 @top Trip Server Application Manual
 @insertcopying
 @end ifnottex
@@ -121,6 +121,7 @@ Apache
 Testing and Developing Trip
 
 * Vagrant::
+* Docker::
 * Testing with Curl::
 * Load Testing::
 
@@ -134,6 +135,15 @@ Quick Start Using Vagrant
 
 * Trouble-shooting::
 * Vagrant Errors::
+
+Docker
+
+* Building the Docker Containers::
+* Running the Application with docker-compose::
+
+Running the Application with docker-compose
+
+* OpenStreetMap Tile Server::
 
 Miscellaneous
 
@@ -367,16 +377,20 @@ This is also executed when running @code{trip-server} with the
 @chapter PostgreSQL Setup
 @cindex PostgreSQL Setup
 
+@set postgresqlurl https://www.postgresql.org
+
 The following packages are required to run the application with
-PostgreSQL:
+@url{@value{postgresqlurl},PostgreSQL}:
 
 @itemize
 @item
 postgis
 @end itemize
 
-On a Debian distribution, install the @code{postgis} and
-@code{postgresql} packages.
+@set debianurl https://www.debian.org
+
+On a @url{@value{debianurl},Debian distribution}, install the @code{postgis}
+and @code{postgresql} packages.
 
 @menu
 * Creating a Database User::
@@ -479,7 +493,9 @@ trip=> CREATE EXTENSION pgcrypto;
 
 @node Creating Tables and Roles, Creating an Initial Admin User, Creating the trip Database, PostgreSQL Setup
 @section Creating Tables and Roles
-@cindex Creating Tables and Roles, Tables, Roles
+@cindex Creating Tables and Roles
+@cindex Tables, creating
+@cindex Roles, creating
 
 As a Unix user who is also a postgresql superuser:
 
@@ -633,8 +649,8 @@ installation prefix (usually @code{/usr/local}) named
 The configuration file should be readable by the user running
 @code{trip-server}, e.g. @code{trip}, but not world-readable.
 
-On a Debian system, you can create a system user to run the application as
-follows:
+On a @url{@value{debianurl},Debian system}, you can create a system user to
+run the application as follows:
 
 @example
 sudo adduser trip --system --group --home /nonexistent --no-create-home
@@ -666,13 +682,14 @@ configuring and running the application as a daemon under @code{systemd}.
 
 @c [Tile Usage Policy]: https://operations.osmfoundation.org/policies/tiles/ "OSM Tile Usage Policy"
 @set osmtileusageurl https://operations.osmfoundation.org/policies/tiles/
+@set osmurl https://www.openstreetmap.org/
 
-Most if not all tile server providers have policies that you must comply
-with and there may be sanctions if you fail to do so.  E.g. If you are
-using the OpenStreetMap tile server, read and comply with their
-@url{@value{osmtileusageurl},Tile Usage Policy}.  Please ensure you
-configure the following entries correctly for the appropriate element of
-the @code{tile.providers} section(s) of @code{config.yaml}.
+Most if not all tile server providers have policies that you must comply with
+and there may be sanctions if you fail to do so.  E.g. If you are using the
+@url{@value{osmurl},OpenStreetMap} tile server, read and comply with their
+@url{@value{osmtileusageurl},Tile Usage Policy}.  Please ensure you configure
+the following entries correctly for the appropriate element of the
+@code{tile.providers} section(s) of @code{config.yaml}.
 
 @table @code
 @item userAgentInfo
@@ -707,18 +724,19 @@ If a link is included, the text will be wrapped in HTML link tags and
 included in the map attribution.  The entries are displayed in the
 sequence they have been defined.
 
+@set dockerurl https://www.docker.com
+
 For development, if no map tile provider is configured, dummy tiles are
 displayed showing the x, y & z coordinates of the tile.  Alternatively, you
-can use @url{Docker,https://www.docker.com} to run a small tile server.  See
+can use @url{@value{dockerurl},Docker} to run a small tile server.  See
 the section on Docker in this application's README in the source distribution
 and the various @code{docker-compose-map-*.yaml} configuration files for
 hints.
 
-@c TODO more information on running Docker
-
 @node Elevation Data,  , Tile Server Configuration, Configuration
 @section Elevation Data
-@cindex Elevation Data, Altitude Data
+@cindex Elevation Data
+@cindex Altitude Data
 
 The @url{http://srtm.csi.cgiar.org/, Consortium for Spatial Information}
 (CGIAR CSI) make
@@ -860,6 +878,7 @@ SquashFS HOWTO} for more information
 @node Internationalisation and Localisation, Proxy Web Servers, Configuration, Top
 @chapter Internationalisation and Localisation
 @cindex Internationalisation and Localisation
+@cindex Localisation, internationalisation
 
 A quick way to test localisation is to temporarily set the environment
 variable @code{LC_ALL} when running the server, e.g.
@@ -991,7 +1010,8 @@ RedirectMatch ^/trip/app/(.*)$ https://$@{MY_HOST@}/trip/app/$1
 
 @node Redirecting Traccar Client URLs,  , Redirecting to HTTPS, Apache
 @subsection Redirecting Traccar Client URLs
-@cindex Redirecting Traccar Client URLs, Traccar
+@cindex Redirecting Traccar Client URLs
+@cindex Traccar, redirecting URLs
 
 The @url{https://www.traccar.org/client/, Traccar Client app} does not
 provide a facility to define a URL prefix.  All calls are to the server
@@ -1019,11 +1039,12 @@ the Apache @code{<VirtualHost/>} sections:
 
 @menu
 * Vagrant::
+* Docker::
 * Testing with Curl::
 * Load Testing::
 @end menu
 
-@node Vagrant, Testing with Curl, Testing and Developing Trip, Testing and Developing Trip
+@node Vagrant, Docker, Testing and Developing Trip, Testing and Developing Trip
 @section Vagrant
 @cindex Vagrant
 
@@ -1078,8 +1099,8 @@ $ vagrant up debian
 
 The first time this is run, it will download a
 @url{https://www.vagrantup.com/docs/boxes.html,Vagrant box} containing a
-Debian Linux distribution, then install the required Debian packages,
-modify the default configuration and start the TRIP server.
+@url{@value{debianurl},Debian Linux distribution}, then install the required
+Debian packages, modify the default configuration and start the TRIP server.
 
 @item
 Use your browser to navigate to @url{http://localhost:8080/} on the host
@@ -1237,7 +1258,143 @@ This can occur after deleting the project's @code{.vagrant} sub-folder
 Vagrant instance.  Web searches suggest there are other scenarios that
 result in a similarly confusing error message.
 
-@node Testing with Curl, Load Testing, Vagrant, Testing and Developing Trip
+@node Docker, Testing with Curl, Vagrant, Testing and Developing Trip
+@section Docker
+@cindex Docker
+
+As a convenience, @url{@value{dockerurl},Docker} is installed in the
+@url{@value{debianurl},Debian} flavour of Vagrant.  See the @ref{Vagrant}
+section for more information on using Vagrant for testing this application.
+
+A minimum of two Docker containers are required to run the application.  One
+for the @url{@value{postgresqlurl},PostgreSQL database} and another for the
+application.  A third container can be run to provide a map tile server.
+
+@menu
+* Building the Docker Containers::
+* Running the Application with docker-compose::
+@end menu
+
+@node Building the Docker Containers, Running the Application with docker-compose, Docker, Docker
+@subsection Building the Docker Containers
+@cindex Building the Docker Containers
+@cindex Containers, Docker building
+
+This section describes building the docker containers from this project's
+source.
+
+To build the database container:
+
+@example
+$ cd ./trip-server-2
+$ docker build -f Dockerfile-postgis -t fdean/trip-database:latest .
+@end example
+
+The application container is built from a source tarball which needs to be in
+the root directory of the project and match the version number in
+`configure.ac`.
+
+@example
+$ cd ./trip-server-2
+$ make dist
+$ docker build -t fdean/trip-server-2:latest .
+@end example
+
+@node Running the Application with docker-compose,  , Building the Docker Containers, Docker
+@subsection Running the Application with docker-compose
+@cindex Running the Application with docker-compose
+@cindex docker-compose, running the application
+
+To run the application with the database:
+
+@example
+$ docker compose up -d
+$ docker compose logs --follow
+@end example
+
+Stop the container with (and wipe the database):
+
+@example
+$ docker-compose down --volumes
+@end example
+
+Leave off the @code{--volumes} switch if you wish to keep the database.
+
+@menu
+* OpenStreetMap Tile Server::
+@end menu
+
+@node OpenStreetMap Tile Server,  , Running the Application with docker-compose, Running the Application with docker-compose
+@subsubsection OpenStreetMap Tile Server
+@cindex OpenStreetMap Tile Server
+@cindex Map tile server
+@cindex Tile Server, maps
+
+Two other @code{docker-compose} files can be used to create a map tile server
+using the @url{https://github.com/Overv/openstreetmap-tile-server,Docker
+container for OpenStreetMap tile server}
+
+One imports the @url{@value{osmurl},OpenStreetMap} data.  The other runs the
+tile server after the data has been imported.
+
+It is unlikely there would be sufficient memory or disk space in the Vagrant
+VM to run the Tile Server.  It would be best to use a dedicated server for
+this process.
+
+@enumerate
+@item
+The import process temporarily requires a lot of memory.  You may need to
+create and mount a swap file:
+
+@example
+$ sudo dd if=/dev/zero of=/swap bs=1G count=2
+$ sudo chmod 0600 /swap
+$ sudo mkswap /swap
+$ sudo swapon /swap
+@end example
+
+@item
+Create Docker volumes for storing the database and caching map tiles:
+
+@example
+$ docker volume create osm-data
+$ docker volume create osm-tiles
+@end example
+
+@item
+It is recommended to use a small region to minimise resource usage.
+
+Import OSM data for Monaco:
+
+@example
+$ docker compose -f docker-compose-map-import.yaml up
+@end example
+
+The process must complete without error.  Check the final output carefully.
+If it fails, it is necessary to delete and re-create the Docker
+@code{osm-data} volume.
+
+@example
+$ docker volume rm osm-data
+$ docker volume create osm-data
+@end example
+
+@item
+Once the import completes successfully, run the map tile server:
+
+@example
+$ docker compose -f docker-compose-map-server.yml up -d
+@end example
+
+To stop the tile server:
+
+@example
+$ docker compose -f docker-compose-map-server.yml down
+@end example
+
+@end enumerate
+
+@node Testing with Curl, Load Testing, Docker, Testing and Developing Trip
 @section Testing with Curl
 @cindex Testing with Curl
 
@@ -1337,7 +1494,8 @@ maintenance and application development.
 
 @node Map Tiles, Useful Queries for Testing, Useful Queries, Useful Queries
 @subsection Map Tiles
-@cindex Map Tiles, Tiles
+@cindex Map Tiles
+@cindex Tiles, map
 
 Monthly cumulative totals of map tile usage for the last year:
 
@@ -1487,7 +1645,8 @@ INSERT INTO location SELECT * FROM temp_location;
 
 @node Database Backup, Concept Index, Miscellaneous, Top
 @chapter Database Backup
-@cindex Database Backup, Backup
+@cindex Database Backup
+@cindex Backup, database
 
 Backup just the schema, no data:
 

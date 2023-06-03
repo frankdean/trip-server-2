@@ -2,6 +2,7 @@
 .DS_Store
 /.vagrant/
 /Dockerfile
+/Dockerfile-postgis
 /INSTALL
 /Makefile
 /Makefile.in
@@ -32,6 +33,8 @@
 /doc/trip-user-guide.t2p/
 /doc/version-ug.texi
 /doc/version.texi
+/docker-compose.yml
+/docker-entrypoint.sh
 /install-sh
 /missing
 /po/*.gmo
@@ -40,9 +43,14 @@
 /po/Makefile.in
 /po/Makevars.template
 /po/POTFILES
+/po/en@boldquot.insert-header
+/po/en@boldquot.po
+/po/en@quot.insert-header
+/po/en@quot.po
 /po/remove-potcdate.sed
 /po/stamp-it
 /po/stamp-po
+/po/trip.pot
 /provisioning/downloads/
 /resources/static/bootstrap-*
 /resources/static/open-location-code-*
@@ -74,3 +82,4 @@
 /tests/testsuite
 /tests/testsuite.log
 /trip-*.tar.?z
+/trip-*.tar.sha256sums

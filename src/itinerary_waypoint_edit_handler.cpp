@@ -251,7 +251,7 @@ void ItineraryWaypointEditHandler::build_form(
     "</textarea>\n"
     "      </div>\n"
     "      <div class=\"col-md-8 col-lg-4\">\n"
-    "        <label for=\"input-samples\">Garmin averaging sample count</label>\n"
+    "        <label for=\"input-samples\">" << translate("Garmin averaging sample count") << "</label>\n"
     "        <input id=\"input-samples\" name=\"samples\" type=\"number\" min=\"1\" max=\"99999\" value=\"";
   append_value(response.content,
                waypoint->id.first && waypoint->avg_samples.first,
@@ -262,7 +262,7 @@ void ItineraryWaypointEditHandler::build_form(
     "\">\n"
     "      </div>\n"
     "      <div class=\"col-md-6 col-lg-4\">\n"
-    "        <label for=\"input-type\">OsmAnd category (type):</label>\n"
+    "        <label for=\"input-type\">" << translate("OsmAnd category (type)") << "</label>\n"
     "        <input id=\"input-type\" name=\"type\" type=\"text\" value=\"";
   append_value(response.content,
                waypoint->id.first && waypoint->type.first,
@@ -273,7 +273,7 @@ void ItineraryWaypointEditHandler::build_form(
     "\">\n"
     "      </div>\n"
     "      <div class=\"col-md-6 col-lg-4\">\n"
-    "        <label for=\"input-color\">OsmAnd colour:</label>\n"
+    "        <label for=\"input-color\">" << translate("OsmAnd color") << "</label>\n"
     "        <input id=\"input-color\" name=\"color\" type=\"text\" placeholder=\"#001122\" pattern=\"^#[0-9a-fA-F]{1,6}$\" value=\"";
   append_value(response.content,
                waypoint->id.first && waypoint->color.first,

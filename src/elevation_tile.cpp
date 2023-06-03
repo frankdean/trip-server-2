@@ -26,7 +26,8 @@
 #include <boost/locale.hpp>
 #include <gdal_priv.h>
 #include "../trip-server-common/src/file_utils.hpp"
-#include "syslog.h"
+#include <syslog.h>
+#include <sstream>
 
 using namespace boost::locale;
 using namespace fdsd::trip;
@@ -181,8 +182,6 @@ std::pair<bool, double>
   return retval;
 }
 
-Logger ElevationService::logger("ElevationService", std::clog, Logger::info);
-
 /**
  * \param directory_path path to the directory containing the elevation tile tif
  * files.  \param tile_cache_ms the period of time to cache elevation tiles for.
@@ -196,6 +195,7 @@ ElevationService::ElevationService(std::string directory_path, long tile_cache_m
     initialization_error(),
     init_thread()
 {
+  syslog(LOG_DEBUG, "Initializing elevation service\n");
   init_thread = new std::thread(&ElevationService::init, this);
 }
 
@@ -232,12 +232,12 @@ void ElevationService::init()
     }
     auto finish = std::chrono::system_clock::now();
     std::chrono::duration<double, std::milli> diff = finish - start;
-    logger << Logger::info
-           << format(translate("Loaded {1} elevation tiles in {2} ms"))
-      % tiles.size() % diff.count() << Logger::endl;
+    std::stringstream msg;
+    // Message displayed after loading elevation tiles
+    msg << format(translate("Loaded {1} elevation tiles in {2} ms"))
+      % tiles.size() % diff.count();
+    syslog(LOG_INFO, "%s", msg.str().c_str());
   } catch (const std::exception &e) {
-    std::cerr << "Exception initializing elevation tiles: "
-              << e.what() << '\n';
     syslog(LOG_ERR, "Exception initializing elevation tiles: %s",
            e.what());
     initialization_error = std::current_exception();
@@ -247,7 +247,7 @@ void ElevationService::init()
 
 ElevationService::~ElevationService()
 {
-  // std::cout << "~ElevationService()\n";
+  syslog(LOG_DEBUG, "Closing elevation service\n");
   if (init_thread) {
     init_thread->join();
     delete init_thread;

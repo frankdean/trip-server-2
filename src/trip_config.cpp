@@ -146,6 +146,7 @@ TripConfig::TripConfig(std::string filename) :
               for (const auto &a : tile_attributions) {
                 std::string link;
                 std::string text;
+                std::string title;
                 if (a["link"])
                   link = a["link"].as<std::string>();
                 if (a["text"])
@@ -153,8 +154,16 @@ TripConfig::TripConfig(std::string filename) :
                 if (link.empty()) {
                   p.tile_attributions_html.append(text);
                 } else if (!text.empty()) {
+                  if (a["title"])
+                    title = a["title"].as<std::string>();
                   p.tile_attributions_html.append("<a href=\"").append(link)
-                    .append("\" target=\"_blank\">").append(text).append("</a>");
+                    .append("\" target=\"_blank\"");
+                  if (!title.empty()) {
+                    p.tile_attributions_html.append(" title=\"").append(title)
+                      .append("\"");
+                  }
+                  p.tile_attributions_html.append(">").append(text).
+                    append("</a>");
                 }
               }
             }

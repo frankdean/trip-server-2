@@ -54,6 +54,7 @@ public:
 private:
   bool feature_copy_success;
   bool read_only;
+  bool show_raw_markdown;
   bool max_track_paste_exceeded;
   long itinerary_id;
   enum active_tab_type {
@@ -128,6 +129,7 @@ public:
     TripAuthenticatedRequestHandler(config),
     feature_copy_success(false),
     read_only(true),
+    show_raw_markdown(false),
     max_track_paste_exceeded(false),
     itinerary_id(),
     active_tab(itinerary_tab),
