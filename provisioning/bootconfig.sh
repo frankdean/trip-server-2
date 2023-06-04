@@ -135,12 +135,12 @@ if [ ! -d /home/vagrant/build ]; then
 fi
 cd /home/vagrant/build
 if [ ! -d /home/vagrant/build/provisioning ]; then
-    $SU_CMD 'cp -a /vagrant/provisioning .'
+    $SU_CMD 'cp -a /vagrant/provisioning /home/vagrant/build/'
 fi
 # Don't build if we appear to already have an installed version of trip-server
 if [ ! -x /usr/local/bin/trip-server ]; then
     if [ -r /usr/lib/fedora-release ] || [ -x /bin/freebsd-version ]; then
-	$SU_CMD "pwd && /vagrant/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
+	$SU_CMD "cd /home/vagrant/build && pwd && /vagrant/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
     elif [ -f /etc/rocky-release ]; then
 	# Weirdly, pkg-config was appending a spurious '-L' with the '--libs'
 	# parameter for 'libpqxx', proven with the following command:

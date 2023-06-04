@@ -58,14 +58,14 @@ T.B.D.
 	Stop the container with (use the `--volumes` switch to also remove
     the database volume):
 
-		$ docker-compose down --volumes
+		$ docker compose down --volumes
 
 ## Installation
 
 	$ ./configure
 	$ make
 	$ make html pdf
-	$ make install install-html install-pdf
+	$ sudo make install install-html install-pdf
 
 ## Release
 

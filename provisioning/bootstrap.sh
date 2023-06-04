@@ -35,6 +35,10 @@ NLOHMANN_JSON_DOWNLOAD_URL="https://github.com/nlohmann/json/releases/download/$
 
 SU_CMD="su vagrant -c"
 
+if [ ! -d "$DOWNLOAD_CACHE_DIR" ]; then
+    mkdir -p "$DOWNLOAD_CACHE_DIR"
+fi
+
 function install_libpqxx_6
 {
     # Download and install libpqxx if it does not exist
@@ -155,17 +159,17 @@ function install_nodejs
 
 ##############################################################################
 #
-# Fedora provisioning
+# Fedora & Rocky Linux provisioning
 #
 ##############################################################################
 
 if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
     DNF_OPTIONS="--assumeyes"
     dnf $DNF_OPTIONS install gcc gawk boost-devel libpq-devel \
-	libpq-devel yaml-cpp-devel pugixml-devel libuuid-devel \
+	libpq-devel libuuid-devel \
 	curl libX11 libXt libXmu \
-	screen vim autoconf automake info libtool \
-	intltool gdb valgrind git cmark-devel \
+	vim autoconf automake info libtool \
+	intltool gdb valgrind git \
 	nodejs
 
     if [ -f /etc/rocky-release ]; then
@@ -184,7 +188,8 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 	dnf $DNF_OPTIONS config-manager --set-enabled crb
 	dnf $DNF_OPTIONS install gcc gcc-c++ make perl kernel-devel kernel-headers \
 	    bzip2 dkms boost-locale autoconf-archive info yarnpkg \
-	    texinfo apg
+	    texinfo apg \
+	    yaml-cpp-devel pugixml-devel screen cmark-devel
 	dnf $DNF_OPTIONS update 'kernel-*'
 
 	# postgresql & postgis - https://postgis.net/install/
@@ -199,7 +204,8 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 	dnf $DNF_OPTIONS mark install linux-firmware-whence
 	dnf $DNF_OPTIONS install postgresql-server postgresql-contrib postgis \
 	    autoconf-archive texinfo texinfo-tex \
-	    yarnpkg gdal-devel cairomm-devel apg
+	    yarnpkg gdal-devel cairomm-devel apg \
+	    yaml-cpp-devel pugixml-devel screen cmark-devel
     fi
 
     install_libpqxx_6

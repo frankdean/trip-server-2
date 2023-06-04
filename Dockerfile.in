@@ -1,6 +1,5 @@
 # -*- mode: dockerfile; -*- vim: set ft=dockerfile:
 FROM  debian:bullseye-slim AS build
-LABEL uk.co.fdsd.tripserver.version="@PACKAGE_VERSION@"
 RUN groupadd --gid 1000 trip \
     && useradd --uid 1000 --gid trip --shell /bin/bash --create-home trip
 RUN apt-get update \
@@ -47,6 +46,7 @@ RUN make install install-html install-pdf
 WORKDIR /usr/local/etc
 
 FROM  debian:bullseye-slim
+LABEL uk.co.fdsd.tripserver.version="@PACKAGE_VERSION@"
 
 RUN groupadd --gid 1000 trip \
     && useradd --uid 1000 --gid trip --shell /bin/bash --create-home trip

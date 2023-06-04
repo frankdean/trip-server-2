@@ -1,7 +1,12 @@
 SUBDIRS = src po tests doc
 
 EXTRA_DIST = m4/ChangeLog  .gitignore \
+	CHANGELOG.md \
+	RELEASE_PROCEDURE.md \
 	Vagrantfile \
+	doc/trip-server-ref.sgml \
+	docker-compose-map-import.yml \
+	docker-compose-map-server.yml \
 	provisioning/bootconfig.sh \
 	provisioning/bootstrap.sh \
 	provisioning/init.sh \
@@ -11,8 +16,18 @@ EXTRA_DIST = m4/ChangeLog  .gitignore \
 	provisioning/nginx/index.html \
 	provisioning/nginx/sites-available/trip \
 	provisioning/nginx/trip.conf \
+	provisioning/schema/10_init-trip-db.sh \
+	provisioning/schema/10_trip_role.sql \
+	provisioning/schema/20_schema.sql \
+	provisioning/schema/30_permissions.sql \
+	provisioning/schema/40_path_colors.sql \
+	provisioning/schema/50_georef_formats.sql \
+	provisioning/schema/60_waypoint_symbols.sql \
+	provisioning/schema/90_test-data.sql \
+	provisioning/schema/revoke_all.sql \
 	provisioning/systemd/trip-server-2.service \
-	resources
+	resources \
+	valgrind.supp
 
 ACLOCAL_AMFLAGS = -I m4
 
@@ -95,10 +110,11 @@ dist_zxcvbn2_DATA = \
 # The leading minus sign tells make to ignore any errors from the shell
 
 install-data-hook:
-	-$(LN_S) $(docdir) $(pkgdatadir)/resources/static/doc
+	-test ! -L $(pkgdatadir)/resources/static/doc && \
+	$(LN_S) $(docdir) $(pkgdatadir)/resources/static/doc
 
 uninstall-local:
-	-rm -f $(pkgdatadir)/trip/resources/static/doc
+	-rm -f $(pkgdatadir)/resources/static/doc
 
 uninstall-hook:
 	-rmdir -p $(bscssdir)
@@ -113,3 +129,5 @@ uninstall-hook:
 	-rmdir -p $(olcdir)
 	-rmdir -p $(zxcvbndir)
 	-rmdir -p $(zxcvbn2dir)
+	-rmdir $(docdir)
+	-rmdir $(pkgdatadir)

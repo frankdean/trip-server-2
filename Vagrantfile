@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
     # https://wiki.debian.org/Teams/Cloud/VagrantBaseBoxes
     # Boxes: https://app.vagrantup.com/debian
     debian.vm.box = "debian/bullseye64"
-    #debian.vm.box_version = "11.20221219.1"
+    #debian.vm.box_version = "11.20230602.1"
 
     # Share an additional folder to the guest VM. The first argument is
     # the path on the host to the actual folder. The second argument is
@@ -48,6 +48,10 @@ Vagrant.configure("2") do |config|
     debian.vm.network "forwarded_port", guest: 8081, host: 8081
   end
 
+  # It may take multiple attempts to fully succeed in provisioning a working
+  # system:
+  #
+  #   vagrant reload fedora --provision
   config.vm.define "fedora", autostart: false do |fedora|
     # boxes at https://app.vagrantup.com/fedora/
     fedora.vm.box = "fedora/36-cloud-base"
@@ -81,7 +85,7 @@ Vagrant.configure("2") do |config|
   # However, it can be useful to manually test a distribution tarball before
   # release.
   #
-  # If may take multiple attempts to fully succeed in provisioning a working
+  # It may take multiple attempts to fully succeed in provisioning a working
   # system:
   #
   #   vagrant reload freebsd --provision
@@ -115,6 +119,8 @@ Vagrant.configure("2") do |config|
     freebsd.vm.network "forwarded_port", guest: 8080, host: 8084
     freebsd.vm.network "forwarded_port", guest: 8081, host: 8085
 
+    freebsd.ssh.password = "vagrant"
+
     # Export the following environment variable to enable specifying the disk size
     # export VAGRANT_EXPERIMENTAL="disks"
     # FreeBSD needs more disk space than the default.  Suggest a minimum of
@@ -125,12 +131,14 @@ Vagrant.configure("2") do |config|
     freebsd.vm.disk :disk, size: "28GB", primary: true
   end
 
+  # Rocky Linux is tricky to get up and running.  Multiple restarts and manual
+  # intervention may be required.
   config.vm.define "rockylinux", autostart: false do |rockylinux|
     # https://app.vagrantup.com/rockylinux
-    #rockylinux.vm.box = "rockylinux/9"
+    rockylinux.vm.box = "rockylinux/9"
     #
     # Using Bento box:
-    rockylinux.vm.box = "bento/rockylinux-9"
+    #rockylinux.vm.box = "bento/rockylinux-9"
     # VirtualBox 7.0.6
     #rockylinux.vm.box_version = "202303.13.0"
     # if myEnv[:ROCKY_INIT] == "y"
