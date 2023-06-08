@@ -270,7 +270,7 @@ locations.
 - [zxcvbn][]
 
 [Bootstrap]: https://getbootstrap.com "Powerful, extensible, and feature-packed frontend toolkit"
-[open-location-code]: https://github.com/google/open-location-code "a library to generate short codes, called "plus codes", that can be used as digital addresses where street addresses don't exist"
+[open-location-code]: https://github.com/google/open-location-code "a library to generate short codes, called “plus codes”, that can be used as digital addresses where street addresses don't exist"
 [OpenLayers]: https://openlayers.org "OpenLayers makes it easy to put a dynamic map in any web page"
 [proj4js]: https://github.com/proj4js/proj4js "JavaScript library to transform coordinates from one coordinate system to another, including datum transformations"
 [zxcvbn]: https://github.com/dropbox/zxcvbn "Low-Budget Password Strength Estimation"
