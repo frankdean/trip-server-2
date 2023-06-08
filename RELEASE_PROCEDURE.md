@@ -2,11 +2,13 @@
 
 ## Changelog
 
-T.B.D.
+1.  Update `./CHANGELOG.md` with the changes in this release.
 
 ## Version Control
 
 1.  Update `master` branch in `trip-server-common` sub-project
+
+1.  Push `master` branch in `trip-server-common` sub-project
 
 1.  Checkin the updated `master` branch from the `trip-server-common` sub-project
 
@@ -32,6 +34,28 @@ T.B.D.
 
 ## Docker
 
+1.  Build the `trip-server-2` image:
+
+	1.  Check the `Dockerfile` has been updated to the use the correct release
+        version number.  The version information is updated by `configure`
+        when `Dockerfile` is created from `Dockerfile.in`.
+
+            $ grep 'ARG TRIP_SERVER_VERSION' Dockerfile
+            $ grep LABEL Dockerfile Dockerfile-postgis
+
+    1.  If necessary, copy the `trip server` distribution tarball to the root
+        source folder to build the Docker image. E.g.
+
+            $ vagrant upload trip-${VERSION}.tar.xz /home/vagrant/build/
+
+    1.  Run the Docker build:
+
+		    $ cd ./trip-server-2
+		    $ docker build -t fdean/trip-server-2:latest .
+
+	    The `--no-cache` option may be required if Docker skips the `COPY`
+        command for the distribution tarball.
+
 1.  Optionally, build the database image.  This only needs updating if
     there have been any database schema changes.
 
@@ -40,15 +64,6 @@ T.B.D.
 
 		$ cd ./trip-server-2
 		$ docker build -f Dockerfile-postgis -t fdean/trip-database:latest .
-
-1.  Build the `trip-server-2` image:
-
-	Update `Dockerfile` and the various docker-compose files to use the latest
-    appropriate [node](https://hub.docker.com/_/node) build.  The `trip
-    server` distribution tarball is required in the root source folder to
-    build the Docker image.
-
-		$ docker build -t fdean/trip-server-2:latest .
 
 1.	Test the Dockerfile
 

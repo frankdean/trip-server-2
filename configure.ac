@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.0.0-rc.5],[frank.dean@fdsd.co.uk])
+AC_INIT([trip],[2.0.0],[frank.dean@fdsd.co.uk])
 BOOTSTRAP_VERSION='5.2.3'
 OPENLAYERS_VERSION='7.3.0'
 PROJ4JS_VERSION='2.9.0'
@@ -133,9 +133,9 @@ LIBS="${LIBS} ${LIBPQXX_LIBS} ${LIBYAML_LIBS} ${LIBUUID_LIBS} ${BOOST_LDFLAGS} $
 dnl echo "Host_os: ${host_os}"
 dnl echo "Host: ${host}"
 dnl
+AC_HEADER_ASSERT
 dnl The following headers check is just to ensure the headers have been
 dnl installed in addition to the actual library
-AC_HEADER_ASSERT
 AC_CHECK_HEADERS([pqxx/config-public-compiler.h], [have_pqxx_h=yes])
 case $host in
   *-*-linux-*)

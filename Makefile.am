@@ -1,7 +1,6 @@
 SUBDIRS = src po tests doc
 
 EXTRA_DIST = m4/ChangeLog  .gitignore \
-	CHANGELOG.md \
 	RELEASE_PROCEDURE.md \
 	Vagrantfile \
 	doc/trip-server-ref.sgml \
@@ -26,8 +25,7 @@ EXTRA_DIST = m4/ChangeLog  .gitignore \
 	provisioning/schema/90_test-data.sql \
 	provisioning/schema/revoke_all.sql \
 	provisioning/systemd/trip-server-2.service \
-	resources \
-	valgrind.supp
+	resources
 
 ACLOCAL_AMFLAGS = -I m4
 
@@ -35,7 +33,7 @@ dist-hook:
 	rm -f `find $(distdir)/resources -type f '(' -name '.*' -o -name '*~' ')'`
 
 dist_sysconf_DATA = conf/trip-server-dist.yaml
-dist_doc_DATA = README.md
+dist_doc_DATA = README.md CHANGELOG.md
 
 # nobase_dist_pkgdata_DATA = resources/static/css/trip.css \
 # 	resources/static/js/map.js

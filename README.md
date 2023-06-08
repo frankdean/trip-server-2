@@ -521,6 +521,10 @@ Download the appropriate version of `json.hpp` from
 	$ sudo mkdir nlohmann
 	$ sudo cp ~/Downloads/json.hpp /usr/local/include/nlohmann
 
+## Changelog
+
+See [CHANGELOG](./CHANGELOG.md)
+
 [AngularJS]: https://angularjs.org
 [Apache]: http://httpd.apache.org/ "an open-source HTTP server for modern operating systems including UNIX and Windows"
 [Debian]: https://www.debian.org "a free operating system (OS) for your computer"

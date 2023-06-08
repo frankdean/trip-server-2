@@ -140,7 +140,7 @@ fi
 # Don't build if we appear to already have an installed version of trip-server
 if [ ! -x /usr/local/bin/trip-server ]; then
     if [ -r /usr/lib/fedora-release ] || [ -x /bin/freebsd-version ]; then
-	$SU_CMD "cd /home/vagrant/build && pwd && /vagrant/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
+	$SU_CMD "cd /home/vagrant/build && pwd && /vagrant/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' --disable-gdal --enable-cairo"
     elif [ -f /etc/rocky-release ]; then
 	# Weirdly, pkg-config was appending a spurious '-L' with the '--libs'
 	# parameter for 'libpqxx', proven with the following command:
@@ -151,10 +151,10 @@ if [ ! -x /usr/local/bin/trip-server ]; then
 	# SUCCESS -> $SU_CMD "pwd && /vagrant/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
 	$SU_CMD "pwd && /vagrant/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
     else
-	$SU_CMD "/vagrant/configure CXXFLAGS='-g -O0' --disable-gdal"
+	$SU_CMD "/vagrant/configure CXXFLAGS='-g -O0' --disable-gdal --enable-cairo"
     fi
 
-    $SU_CMD 'pwd && make -j4 -C /home/vagrant/build check'
+    $SU_CMD 'pwd && make -C /home/vagrant/build check'
     if [ $? -eq 0 ] && [ -x /home/vagrant/build/src/trip-server ]; then
 	echo "Installing trip-server"
 	make install
@@ -195,7 +195,7 @@ if [ ! -e /etc/logrotate.d/trip ] && [ -d /etclogrotate.d ]; then
 fi
 
 ## Additional configuration to support developing with Trip Server version 1 series.
-if [ -d /vagrant-trip-server ]; then
+if [ -f /vagrant-trip-server/package.json ]; then
     cd /vagrant-trip-server
     if [ ! -e config.yaml ]; then
 	if [ -f /usr/local/etc/trip-server.yaml ]; then

@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
   #
   # Set :WIPE_DB to 'y' (lower-case) to WIPE the database each time
   # the VM is started.
-  myEnv = { :TRIP_DEV => "y",
+  myEnv = { :TRIP_DEV => "n",
             :VB_GUI => "n",
             :WIPE_DB => "n" }
 
@@ -190,7 +190,7 @@ Vagrant.configure("2") do |config|
     if myEnv[:TRIP_DEV] == "y"
       v.memory = "4196"
     else
-      v.memory = "1024"
+      v.memory = "2048"
     end
 
     # Whether to use a master VM and linked clones
