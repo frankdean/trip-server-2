@@ -87,9 +87,8 @@ int main(int argc, char *argv[])
 #endif // ALLOW_STATIC_FILES
     // Initialize the global database pool and user session managers
     const std::string db_connect_str = application.get_db_connect_string();
-    // logger << Logger::debug
-    //        << "Connecting to database with connect string: \""
-    //        << db_connect_str << "\"\n";
+    // std::cout << "Connecting to database with connect string: \""
+    //           << db_connect_str << "\"\n";
     PgPoolManager pool_manager(
         db_connect_str,
         application.get_pg_pool_size()
@@ -149,7 +148,7 @@ int main(int argc, char *argv[])
     // Text displayed when the application ends
     syslog(LOG_INFO, "%s", translate("Bye!").str().c_str());
   } catch (const std::exception& e) {
-    syslog(LOG_EMERG, "Application existing with error: %s", e.what());
+    syslog(LOG_EMERG, "Application exiting with error: %s", e.what());
     closelog();
     return EXIT_FAILURE;
   }

@@ -31,7 +31,7 @@ TripConfig::TripConfig(std::string filename) :
   root_directory(),
   user_guide_path("./static/doc/trip-user-guide.html/index.html"),
   application_prefix_url(),
-  db_connect_string(),
+  db_connect_string("postgresql://%2Fvar%2Frun%2Fpostgresql/trip"),
   worker_count(20),
   pg_pool_size(24),
   maximum_request_size(1024 * 1024 * 12),
@@ -48,7 +48,7 @@ TripConfig::TripConfig(std::string filename) :
   default_triplogger_configuration()
 {
   try {
-    // std::cout << "Reading config from \"" << config_filename << "\"\n";
+    // std::cout << "Reading config from \"" << filename << "\"\n";
     auto yaml = YAML::LoadFile(filename);
     if (auto db = yaml["db"]) {
       db_connect_string = db["uri"].as<std::string>();
@@ -186,15 +186,11 @@ TripConfig::TripConfig(std::string filename) :
         elevation_tile_path = elevation_tiles["datasetDir"].as<std::string>();
     }
   } catch (const YAML::BadFile& e) {
-    std::cerr << "Failure reading \"" << filename << "\"\n"
-              << e.what() << '\n';
-    syslog(LOG_EMERG, "Failure reading \"%s\": %s",
+    syslog(LOG_ERR, "Failure reading \"%s\": %s",
            filename.c_str(),
            e.what());
   } catch (const YAML::ParserException& e) {
-    std::cerr << "Failure parsing \"" << filename << "\"\n"
-              << e.what() << '\n';
-    syslog(LOG_EMERG, "Failure parsing \"%s\": %s",
+    syslog(LOG_ALERT, "Failure parsing \"%s\": %s",
            filename.c_str(),
            e.what());
   }

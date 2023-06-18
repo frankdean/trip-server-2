@@ -21,11 +21,6 @@
 # Uncomment the following to debug the script
 #set -x
 
-##Debian 10
-#PG_VERSION=11
-# Debian 11
-PG_VERSION=13
-
 SU_CMD="su vagrant -c"
 
 if [ -x /bin/freebsd-version ]; then
@@ -67,13 +62,6 @@ fi
 su - postgres -c 'createuser -drs vagrant' 2>/dev/null
 cd /vagrant
 
-if [ -d "/etc/postgresql/${PG_VERSION}" ]; then
-	grep -E 'local\s+trip\s+trip\s+md5' "/etc/postgresql/${PG_VERSION}/main/pg_hba.conf" >/dev/null 2>&1
-	if [ $? -ne 0 ]; then
-		sed -i 's/local\(.*all.*all.*$\)/local   trip          trip                                  md5\nlocal\1/' "/etc/postgresql/${PG_VERSION}/main/pg_hba.conf"
-		systemctl reload postgresql
-	fi
-fi
 if [ "$WIPE_DB" == "y" ]; then
 	su - postgres -c 'dropdb trip' 2>/dev/null
 	su - postgres -c 'dropuser trip' 2>/dev/null

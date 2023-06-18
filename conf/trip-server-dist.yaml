@@ -29,7 +29,7 @@ app:
   worker_count: 10 # For trip v2 only
   pg_pool_size: 12 # For trip v2 only
   prefix_url: /trip2/app # For trip v2 only
-  # defualt - user_guide: ./static/doc/trip-user-guide.html/index.html # For trip v2 only
+  # default value - user_guide: ./static/doc/trip-user-guide.html/index.html # For trip v2 only
   #user_guide: https://www.fdsd.co.uk/trip-server-2/latest/trip-user-guide.html/ # For trip v2 only
 jwt:
   signingKey: secret # Ignored in trip v2

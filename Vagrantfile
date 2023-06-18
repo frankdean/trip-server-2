@@ -48,6 +48,17 @@ Vagrant.configure("2") do |config|
     debian.vm.network "forwarded_port", guest: 8081, host: 8081
   end
 
+  config.vm.define "debian12", primary: false do |debian12|
+    debian12.vm.box = "debian/bookworm64"
+    #debian12.vm.box_version = "12.20230602.1"
+    if myEnv[:TRIP_DEV] == "y"
+      debian12.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client"
+      debian12.vm.synced_folder "../trip-server", "/vagrant-trip-server"
+    end
+    debian12.vm.network "forwarded_port", guest: 8080, host: 8090
+    debian12.vm.network "forwarded_port", guest: 8081, host: 8091
+  end
+
   # It may take multiple attempts to fully succeed in provisioning a working
   # system:
   #

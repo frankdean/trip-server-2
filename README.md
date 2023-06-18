@@ -283,7 +283,7 @@ Minimal packages required to build from the source distribution tarball:
 
 - g++
 - gawk
-- libboost-locale-dev
+- libboost-dev
 - libcairomm-1.0-dev (optional)
 - libcmark-dev
 - libgdal-dev (optional)
@@ -292,6 +292,10 @@ Minimal packages required to build from the source distribution tarball:
 - libyaml-cpp-dev
 - make
 - nlohmann-json3-dev
+- postgis (optional)
+- postgresql (optional)
+- texinfo (optional for building HTML documentation)
+- texlive (optional for building PDF documentation)
 - uuid-dev
 
 To build the application:
@@ -328,10 +332,14 @@ install it under `/usr/local/include`
 	$ sudo mkdir /usr/local/include/nlohmann
 	$ sudo cp ~/Downloads/json.hpp /usr/local/include/nlohmann/
 
-Building on Debian 10 (Buster) also produces warnings about an ABI change in
-GCC 7.1.
-See
+Building with GCC on ARM devices (e.g. Raspberry Pi) produces warnings about
+an ABI change in GCC 7.1.
 
+Optionally, disable the warning by passing `-Wno-psabi` in `CXXFLAGS`, e.g.:
+
+	$ ./configure 'CXXFLAGS=-Wno-psabi'
+
+- <https://gcc.gnu.org/gcc-7/changes.html>
 - <https://stackoverflow.com/questions/48149323/what-does-the-gcc-warning-project-parameter-passing-for-x-changed-in-gcc-7-1-m>
 - <https://stackoverflow.com/questions/52020305/what-exactly-does-gccs-wpsabi-option-do-what-are-the-implications-of-supressi>
 

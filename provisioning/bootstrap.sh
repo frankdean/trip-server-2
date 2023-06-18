@@ -302,6 +302,7 @@ if [ -f /etc/debian_version ]; then
     locale-gen
     #export LC_ALL=en_GB.utf8
     localedef -i en_GB -c -f UTF-8 -A /usr/share/locale/locale.alias en_GB.UTF-8
+    # Set locale to 'none' - locale will default to that of SSH user
     update-locale LANG LANGUAGE
 
     ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime
@@ -317,7 +318,8 @@ if [ -f /etc/debian_version ]; then
 	    libtool gettext valgrind uuid-dev uuid-runtime make nginx apg \
 	    libboost-locale-dev libpugixml-dev autopoint intltool gdb \
 	    libyaml-cpp-dev nlohmann-json3-dev libcmark-dev \
-	    docbook2x texlive info texinfo curl libgdal-dev libcairomm-1.0-dev
+	    docbook2x texlive info texinfo curl libgdal-dev libcairomm-1.0-dev \
+	    vim
 
     if [ ! -d /etc/apt/keyrings ]; then
 	install -m 0755 -d /etc/apt/keyrings
@@ -344,8 +346,13 @@ if [ -f /etc/debian_version ]; then
 
     ## Additional configuration to also support developing with Trip Server version 1 series.
     if [ "$TRIP_DEV" == "y" ]; then
-	apt-get install -y openjdk-11-jdk chromium chromium-l10n firefox-esr-l10n-en-gb vim
-	install_nodejs
+	grep -E '^11\.' /etc/debian_version
+	if [ $? -eq 0 ]; then
+	    apt-get install -y openjdk-11-jdk chromium chromium-l10n firefox-esr-l10n-en-gb
+	    install_nodejs
+	else
+	    apt-get install -y openjdk-17-jdk chromium chromium-l10n firefox-esr-l10n-en-gb
+	    install_nodejs
+	fi
     fi
-    ## END Additional configuration to also support developing with Trip Server version 1 series.
 fi

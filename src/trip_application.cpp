@@ -67,12 +67,6 @@ TripApplication::~TripApplication()
 #endif
 }
 
-std::string TripApplication::get_config_filename() const
-{
-  // TODO super class shouldn't enforce opening a configuration file
-  return "";
-}
-
 std::string TripApplication::get_db_connect_string() const {
   return config->get_db_connect_string();
 }
@@ -87,8 +81,6 @@ std::string TripApplication::get_application_prefix_url() const {
 }
 
 void TripApplication::set_root_directory(std::string directory) {
-  // TODO remove document_root from super class
-  document_root = directory;
   config->set_root_directory(directory);
 }
 
