@@ -21,6 +21,7 @@
 */
 #include "../config.h"
 #include "session_pg_dao.hpp"
+#include "trip_config.hpp"
 #include "trip_session_manager.hpp"
 #include "trip_pg_dao.hpp"
 
@@ -57,6 +58,11 @@ void TripSessionManager::load_sessions()
   dao.load_sessions(sessions);
   session_mutex.unlock();
   expire_sessions();
+}
+
+int TripSessionManager::get_max_session_minutes()
+{
+  return config->get_session_timeout();
 }
 
 void TripSessionManager::persist_invalidated_session(const std::string session_id)

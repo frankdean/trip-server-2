@@ -3,6 +3,7 @@
 /.vagrant/
 /Dockerfile
 /Dockerfile-postgis
+/Dockerfile-tile-server
 /INSTALL
 /Makefile
 /Makefile.in

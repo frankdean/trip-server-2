@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
         application.get_pg_pool_size()
       );
     TripPgDao::set_pool_manager(&pool_manager);
-    TripSessionManager session_manager;
+    TripSessionManager session_manager(application.get_config());
     TripSessionManager::set_session_manager(&session_manager);
     if (options.upgrade_flag) {
       // Message output when the database is being upgraded

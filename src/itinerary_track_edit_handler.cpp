@@ -184,7 +184,7 @@ void ItineraryTrackEditHandler::build_form(
   if (!read_only && !track.segments.empty()) {
     os <<
       // Confirmation message to delete one or more selected segments from a track
-      "        <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"x\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected segments?") << "');\">"
+      "        <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"d\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected segments?") << "');\">"
       // Button label for deleting a selection of track segments from a track
        << translate("Delete segments") << "</button>\n"
       // Confirmation message to split a track by selected segment

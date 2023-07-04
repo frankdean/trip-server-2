@@ -53,6 +53,7 @@ class SimplifyMap extends TripMap {
   handleUpdate(data) {
     const self = this;
     // console.debug('data:', data);
+    const name_element = document.getElementById('path-name');
     if (data.tracks.features.length > 0) {
       // Using EPSG:4326 for WGS 84 from the GeoJSON format
       const trackFeatures = new GeoJSON().readFeatures(data.tracks,{
@@ -67,7 +68,15 @@ class SimplifyMap extends TripMap {
         style: this.styleFunction.bind(self),
         opacity: 0.5,
       });
-      const simplifiedFeature = this.trackSource.getFeatures()[0].clone();
+      const f = this.trackSource.getFeatures()[0];
+      const simplifiedFeature = f.clone();
+      let name = f.get('name');
+      if (!name) {
+        const id = f.get('id');
+        if (id)
+          name = 'ID: ' + f.get('id');
+      }
+      name_element.textContent = name;
       this.simplifiedSource = new VectorSource({
         features: [simplifiedFeature],
       });
@@ -86,10 +95,17 @@ class SimplifyMap extends TripMap {
       this.currentPointsEle.innerHTML = pointCount;
       const size = ol.extent.getSize(this.trackSource.getExtent());
       this.toleranceMax = Math.max(size[0], size[1]) / 2000000;
-      this.toleranceStep = this.toleranceMax / 1000;
-      // console.debug('Initial tolerance max and step', this.toleranceMax, this.toleranceStep);
-      this.toleranceInput.step = this.toleranceStep;
-      this.toleranceInput.max = this.toleranceMax;
+      this.toleranceMin = this.toleranceMax / 100000;
+      this.toleranceInput.step = 1;
+      this.toleranceInput.min = 0;
+      this.toleranceInput.max = 250;
+      // Calculate a logarithmic range
+      this.logRangeBegin = Math.log(this.toleranceMin);
+      this.logRangeEnd = Math.log(this.toleranceMax);
+      this.logStep =
+        (this.logRangeEnd - this.logRangeBegin) /
+        (this.toleranceInput.max - this.toleranceInput.min + 1);
+      // console.debug('Initial tolerance min, max and step', this.toleranceMin, this.toleranceMax);
     }
 
     if (data.routes.features.length > 0) {
@@ -136,6 +152,11 @@ class SimplifyMap extends TripMap {
     if (this.waypointLayer)
       ol.extent.extend(totalExtent, this.waypointLayer.getSource().getExtent());
     this.map.getView().fit(totalExtent);
+    this.toleranceChangeEvent(new CustomEvent('startup'));
+  }
+
+  calculateTolerance() {
+    return Math.exp(this.logRangeBegin + this.logStep * this.toleranceInput.value);
   }
 
   toleranceChangeEvent(event) {
@@ -148,7 +169,7 @@ class SimplifyMap extends TripMap {
       dataProjection: 'EPSG:4326',
       featureProjection: 'EPSG:3857',
     });
-    const epsilon = this.toleranceInput.value;
+    const epsilon = this.calculateTolerance();
     const geotype = geoJson.geometry.type;
     // console.debug('GeoJSON', geoJson);
     if (geotype === 'LineString') {
@@ -182,7 +203,7 @@ class SimplifyMap extends TripMap {
       'action': 'save_simplified',
       'itinerary_id': this.options.itinerary_id,
       'track': geoJson,
-      'tolerance': Number.parseFloat(this.toleranceInput.value),
+      'tolerance': Number.parseFloat(self.calculateTolerance()),
     });
     // console.debug('simplified feature:', data);
     const myHeaders = new Headers([

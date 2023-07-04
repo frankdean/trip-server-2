@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2023-06-08 11:31+0100\n"
+"POT-Creation-Date: 2023-07-04 14:26+0100\n"
 "PO-Revision-Date: 2023-06-02 11:13+0100\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: English (British) <(nothing)>\n"
@@ -1276,37 +1276,37 @@ msgid "OsmAnd color"
 msgstr "OsmAnd colour"
 
 #. Message output when the database is being upgraded
-#: src/main.cpp:102
+#: src/main.cpp:101
 msgid "Upgrading the database"
 msgstr "Upgrading the database"
 
 #. Label for the version text of the application
-#: src/main.cpp:114
+#: src/main.cpp:113
 msgid "version"
 msgstr "version"
 
 #. Label for the web address the application is listening at
-#: src/main.cpp:116
+#: src/main.cpp:115
 msgid "listening at"
 msgstr "listening at"
 
 #. Output when the application has been built to allow serving static files.
-#: src/main.cpp:122
+#: src/main.cpp:121
 msgid "The application has been built to serve static files."
 msgstr "The application has been built to serve static files."
 
 #. Displays the name of the directory that static files will be served from.
-#: src/main.cpp:126
+#: src/main.cpp:125
 msgid "Static files will be served from the {1} directory."
 msgstr "Static files will be served from the {1} directory."
 
 #. Message showing how long the application took to startup in milliseconds
-#: src/main.cpp:144
+#: src/main.cpp:143
 msgid "Started application in {1} ms"
 msgstr "Started application in {1} ms"
 
 #. Text displayed when the application ends
-#: src/main.cpp:150
+#: src/main.cpp:149
 msgid "Bye!"
 msgstr "Bye!"
 
@@ -1980,17 +1980,17 @@ msgid "Warning: no map tile providers have been configured"
 msgstr "Warning: no map tile providers have been configured"
 
 #. Error message shown when a configuration filename has not been specified
-#: trip-server-common/src/application.cpp:104
+#: trip-server-common/src/application.cpp:102
 msgid "Configuration filename not specified\n"
 msgstr "Configuration filename not specified\n"
 
 #. Shows which configuration filename is being read
-#: trip-server-common/src/application.cpp:114
+#: trip-server-common/src/application.cpp:112
 msgid "Reading configuration from {1}"
 msgstr "Reading configuration from {1}"
 
 #. Shows how many worker processes are being created for the application
-#: trip-server-common/src/application.cpp:164
+#: trip-server-common/src/application.cpp:160
 msgid "Creating {1} worker"
 msgid_plural "Creating {1} workers"
 msgstr[0] "Creating {1} worker"

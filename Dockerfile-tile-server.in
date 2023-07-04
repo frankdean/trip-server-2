@@ -1,0 +1,86 @@
+# -*- mode: dockerfile; -*- vim: set ft=dockerfile:
+FROM alpine AS scratch
+WORKDIR /scratch
+ADD https://github.com/gravitystorm/openstreetmap-carto/archive/refs/tags/v5.7.0.tar.gz openstreetmap-carto-5.7.0.tar.gz
+ADD https://github.com/openstreetmap/mod_tile/archive/refs/tags/0.6.1.tar.gz mod_tile-0.6.1.tar.gz
+# ADD https://download.geofabrik.de/europe/monaco-latest.osm.pbf monaco-latest.osm.pbf
+# ADD https://download.geofabrik.de/europe/monaco-latest.osm.pbf monaco-latest.osm.pbf
+# ADD https://download.geofabrik.de/europe/monaco-latest.osm.pbf.md5 monaco-latest.osm.pbf.md5
+# ADD https://download.geofabrik.de/europe/monaco.poly monaco.poly
+RUN tar -xf openstreetmap-carto-5.7.0.tar.gz \
+    && tar -xf mod_tile-0.6.1.tar.gz
+
+FROM postgres:15-bookworm AS build
+LABEL uk.co.fdsd.osm-mod-tile.version="@PACKAGE_VERSION@"
+
+ENV POSTGIS_MAJOR 3
+ENV POSTGIS_VERSION 3.3.3+dfsg-1.pgdg120+1
+RUN apt-get update \
+    && apt-cache showpkg postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR \
+    && apt-get install -y --force-yes --no-install-recommends \
+    postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR=$POSTGIS_VERSION \
+    postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR-scripts=$POSTGIS_VERSION \
+    procps locales coreutils \
+#    tar xz-utils ca-certificates tzdata \
+    apache2 libapache2-mod-tile renderd openstreetmap-carto sudo \
+    fonts-hanazono \
+    fonts-noto-extra \
+    python3-yaml python3-psycopg2 \
+#    node-carto osm2pgsql \
+    libjs-leaflet \
+    && rm -rf /var/lib/apt/lists/*
+ENV POSTGRES_USER _renderd
+ENV POSTGRES_DB gis
+RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen \
+    # && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+    # && sed -i -e 's/# es_ES.UTF-8 UTF-8/es_ES.UTF-8 UTF-8/' /etc/locale.gen \
+    # && sed -i -e 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen \
+    && locale-gen \
+    && localedef -i en_GB -c -f UTF-8 -A /usr/share/locale/locale.alias en_GB.UTF-8 \
+    && update-locale LANG LANGUAGE
+    # && ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime && \
+    # && dpkg-reconfigure tzdata
+ENV LANG en_GB.utf8
+# ENV LC_ALL ${LANG}
+
+RUN mkdir /var/www/example-map
+COPY --from=scratch /scratch/openstreetmap-carto-5.7.0/patterns /usr/share/openstreetmap-carto-common/patterns/
+COPY --from=scratch /scratch/mod_tile-0.6.1/utils/example-map/index.html /var/www/example-map/
+COPY provisioning/apache2/etc-apache2-conf-available-renderd.conf /etc/apache2/conf-available/renderd.conf
+RUN ln -s /usr/share/javascript/leaflet /var/www/example-map/leaflet
+
+RUN mkdir -p /run/renderd \
+    && chown _renderd:_renderd /run/renderd
+
+RUN set -eux; \
+    echo '[ajt]\n\
+URI=/tile/\n\
+TILEDIR=/var/cache/renderd/tiles\n\
+XML=/usr/share/openstreetmap-carto-common/style.xml\n\
+HOST=localhost\n\
+TILESIZE=256\n\
+MAXZOOM=20' >> /etc/renderd.conf \
+    && sed -i 's,/usr/share/fonts/truetype,/usr/share/fonts,g' /etc/renderd.conf \
+    && sed -i -e 's~/renderd-example/tiles~/tile~' -e 's/maxZoom: 12/maxZoom: 20/' \
+    /var/www/example-map/index.html \
+    && sed -i -e 's~<Font face-name="Noto Emoji Regular" />~~g' \
+    -e 's~<Font face-name="Noto Emoji Bold" />~~g' \
+    /usr/share/openstreetmap-carto-common/style.xml
+
+RUN a2enmod tile headers
+RUN a2enconf renderd
+
+WORKDIR /downloads
+COPY provisioning/downloads/gis.dmp .
+
+WORKDIR /docker-entrypoint-initdb.d
+COPY provisioning/schema/11_init-gis-db.sh .
+COPY provisioning/docker/tile_server_run.sh /
+
+ENTRYPOINT ["/tile_server_run.sh"]
+
+STOPSIGNAL SIGINT
+
+CMD ["postgres"]
+
+EXPOSE 80

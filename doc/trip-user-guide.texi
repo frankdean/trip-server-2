@@ -120,7 +120,19 @@ Itinerary List Shortcut Keys
 
 Itinerary Shortcut Keys
 
+* Itinerary Sharing Shortcut Keys::
 * Itinerary Import Shortcut Keys::
+* Itinerary Track Edit Shortcut Keys::
+* Itinerary Track Segement Edit Shortcut Keys::
+* Itinerary Route Edit Shortcut Keys::
+* Itinerary Join Path Shortcut Keys::
+
+Itinerary Sharing Shortcut Keys
+
+* Itinerary Import Shortcut Keys::
+* Itinerary Track Edit Shortcut Keys::
+* Itinerary Track Segement Edit Shortcut Keys::
+* Itinerary Route Edit Shortcut Keys::
 
 @end detailmenu
 @end menu
@@ -1282,19 +1294,19 @@ Download TripLogger Settings
 
 @table @code
 
-@item l
+@item a
 
 Toggles checkboxes in list of shares
 
-@item a
+@item v
 
 Activate
 
-@item d
+@item x
 
 Deactivate
 
-@item x
+@item d
 
 Delete selected
 
@@ -1317,6 +1329,10 @@ New
 @cindex Location Sharing Form Shortcut Keys
 
 @table @code
+
+@item a
+
+Activate
 
 @item s
 
@@ -1439,6 +1455,10 @@ toggle selecting all tracks
 
 Copy
 
+@item b
+
+Edit Attributes
+
 @item l
 
 Assign colours to routes and tracks
@@ -1446,6 +1466,10 @@ Assign colours to routes and tracks
 @item p
 
 Paste
+
+@item q
+
+Add waypoint
 
 @item v
 
@@ -1457,7 +1481,11 @@ Simplify track
 
 @item d
 
-delete selected items
+Delete selected items
+
+@item j
+
+Join paths
 
 @item u
 
@@ -1475,13 +1503,65 @@ Download KML
 
 Download full itinerary
 
+@item o (read-only mode)
+
+Show Markdown
+
+@item h (read-only mode)
+
+Hide Markdown
+
+@item x
+
+Create duplicate itinerary
+
+@end table
+
+@menu
+* Itinerary Sharing Shortcut Keys::
+* Itinerary Import Shortcut Keys::
+* Itinerary Track Edit Shortcut Keys::
+* Itinerary Track Segement Edit Shortcut Keys::
+* Itinerary Route Edit Shortcut Keys::
+* Itinerary Join Path Shortcut Keys::
+@end menu
+
+@node Itinerary Sharing Shortcut Keys, Itinerary Import Shortcut Keys, Itinerary Shortcut Keys, Itinerary Shortcut Keys
+@subsubsection Itinerary Sharing Shortcut Keys
+@cindex Itinerary Sharing Shortcut Keys
+
+@table @code
+
+@item v
+
+Activate
+
+@item x
+
+Deactivate
+
+@item d
+
+Delete selected
+
+@item w
+
+New
+
+@item c
+
+Close
+
 @end table
 
 @menu
 * Itinerary Import Shortcut Keys::
+* Itinerary Track Edit Shortcut Keys::
+* Itinerary Track Segement Edit Shortcut Keys::
+* Itinerary Route Edit Shortcut Keys::
 @end menu
 
-@node Itinerary Import Shortcut Keys,  , Itinerary Shortcut Keys, Itinerary Shortcut Keys
+@node Itinerary Import Shortcut Keys, Itinerary Track Edit Shortcut Keys, Itinerary Sharing Shortcut Keys, Itinerary Shortcut Keys
 @subsubsection Itinerary Import Shortcut Keys
 @cindex Itinerary Import Shortcut Keys
 
@@ -1494,6 +1574,154 @@ Choose file
 @item u
 
 Upload
+
+@item c
+
+Cancel
+
+@end table
+
+@node Itinerary Track Edit Shortcut Keys, Itinerary Track Segement Edit Shortcut Keys, Itinerary Import Shortcut Keys, Itinerary Shortcut Keys
+@subsubsection Itinerary Track Edit Shortcut Keys
+@cindex Itinerary Track Edit Shortcut Keys
+
+@table @code
+
+@item a
+
+toggle selecting all checkboxes
+
+@item g
+
+Go
+
+@item n
+
+next page
+
+@item p
+
+previous page
+
+@item d
+
+Delete segments
+
+@item s
+
+Split track
+
+@item m
+
+Merge segments
+
+@item c
+
+Close
+
+@end table
+
+@node Itinerary Track Segement Edit Shortcut Keys, Itinerary Route Edit Shortcut Keys, Itinerary Track Edit Shortcut Keys, Itinerary Shortcut Keys
+@subsubsection Itinerary Track Segment Edit Shortcut Keys
+@cindex Itinerary Track Segment Edit Shortcut Keys
+
+@table @code
+
+@item a
+
+toggle selecting all checkboxes
+
+@item g
+
+Go
+
+@item n
+
+next page
+
+@item p
+
+previous page
+
+@item d
+
+Delete points
+
+@item s
+
+Split segment
+
+@item c
+
+Close
+
+@end table
+
+@node Itinerary Route Edit Shortcut Keys, Itinerary Join Path Shortcut Keys, Itinerary Track Segement Edit Shortcut Keys, Itinerary Shortcut Keys
+@subsubsection Itinerary Route Edit Shortcut Keys
+@cindex Itinerary Route Edit Shortcut Keys
+
+@table @code
+
+@item a
+
+toggle selecting all checkboxes
+
+@item g
+
+Go
+
+@item n
+
+next page
+
+@item p
+
+previous page
+
+@item d
+
+Delete points
+
+@item s
+
+Split route
+
+@item r
+
+Reverse
+
+@item c
+
+Close
+
+@item u
+
+Up (first path)
+
+@item d
+
+Down (first path)
+
+@end table
+
+@node Itinerary Join Path Shortcut Keys,  , Itinerary Route Edit Shortcut Keys, Itinerary Shortcut Keys
+@subsubsection Itinerary Join Path Shortcut Keys
+@cindex Itinerary Join Path Shortcut Keys
+
+@table @code
+
+@item n
+
+Name
+
+@item l
+
+Colour
+
+@item j
+
+Join
 
 @item c
 

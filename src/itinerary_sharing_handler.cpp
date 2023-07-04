@@ -60,7 +60,7 @@ void ItinerarySharingHandler::build_form(HTTPServerResponse& response,
       "          <th>" << translate("Nickname") << "</th>\n"
       // Column heading indicating sharing is active in itinerary sharing list
       "          <th>" << translate("Active") << "</th>\n"
-      "          <th><input id=\"select-all\" accesskey=\"l\" type=\"checkbox\" class=\"form-check-input\" onclick=\"select_all(this)\"></th>\n"
+      "          <th><input id=\"select-all\" accesskey=\"a\" type=\"checkbox\" class=\"form-check-input\" onclick=\"select_all(this)\"></th>\n"
       "        </tr>\n";
     for (const auto &share : itinerary_shares) {
       response.content
@@ -100,11 +100,11 @@ void ItinerarySharingHandler::build_form(HTTPServerResponse& response,
     response.content
       <<
       // Label for button to activate an itinerary share
-      "      <button id=\"btn-activate\" name=\"action\" value=\"activate\" accesskey=\"a\" class=\"my-1 btn btn-lg btn-success\">" << translate("Activate") << "</button>\n"
+      "      <button id=\"btn-activate\" name=\"action\" value=\"activate\" accesskey=\"v\" class=\"my-1 btn btn-lg btn-success\">" << translate("Activate") << "</button>\n"
       // Label for button to deactivate an itinerary share
-      "      <button id=\"btn-deactivate\" name=\"action\" value=\"deactivate\" accesskey=\"d\" class=\"my-1 btn btn-lg btn-primary\">" << translate("Deactivate") << "</button>\n"
+      "      <button id=\"btn-deactivate\" name=\"action\" value=\"deactivate\" accesskey=\"x\" class=\"my-1 btn btn-lg btn-primary\">" << translate("Deactivate") << "</button>\n"
       // Label for button to delete selected list of itinerary shares
-      "      <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"x\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete selected nicknames?") << "');\">" << translate("Delete selected") << "</button>\n";
+      "      <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"d\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete selected nicknames?") << "');\">" << translate("Delete selected") << "</button>\n";
   }
   response.content
     <<

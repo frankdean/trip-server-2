@@ -56,6 +56,7 @@ class TripConfig {
   int worker_count;
   int pg_pool_size;
   long maximum_request_size;
+  int session_timeout;
   std::vector<tile_provider> providers;
   int tile_cache_max_age;
   int tile_count_frequency;
@@ -107,6 +108,9 @@ public:
   }
   long get_maximum_request_size() const {
     return maximum_request_size;
+  }
+  int get_session_timeout() const {
+    return session_timeout;
   }
   int get_tile_cache_max_age() const {
     return tile_cache_max_age;

@@ -4,10 +4,13 @@ EXTRA_DIST = m4/ChangeLog  .gitignore \
 	RELEASE_PROCEDURE.md \
 	Vagrantfile \
 	doc/trip-server-ref.sgml \
+	docker-compose-map-demo.yml \
 	docker-compose-map-import.yml \
 	docker-compose-map-server.yml \
+	provisioning/apache2/etc-apache2-conf-available-renderd.conf \
 	provisioning/bootconfig.sh \
 	provisioning/bootstrap.sh \
+	provisioning/docker/tile_server_run.sh \
 	provisioning/init.sh \
 	provisioning/logrotate.d/trip \
 	provisioning/nginx/LICENSE \
@@ -17,12 +20,14 @@ EXTRA_DIST = m4/ChangeLog  .gitignore \
 	provisioning/nginx/trip.conf \
 	provisioning/schema/10_init-trip-db.sh \
 	provisioning/schema/10_trip_role.sql \
+	provisioning/schema/11_init-gis-db.sh \
 	provisioning/schema/20_schema.sql \
 	provisioning/schema/30_permissions.sql \
 	provisioning/schema/40_path_colors.sql \
 	provisioning/schema/50_georef_formats.sql \
 	provisioning/schema/60_waypoint_symbols.sql \
 	provisioning/schema/90_test-data.sql \
+	provisioning/schema/create_gis_indexes.sh \
 	provisioning/schema/revoke_all.sql \
 	provisioning/systemd/trip-server-2.service \
 	resources

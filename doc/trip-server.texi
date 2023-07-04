@@ -1367,7 +1367,7 @@ It is recommended to use a small region to minimise resource usage.
 Import OSM data for Monaco:
 
 @example
-$ docker compose -f docker-compose-map-import.yaml up
+$ docker compose -f docker-compose-map-import.yml up
 @end example
 
 The process must complete without error.  Check the final output carefully.

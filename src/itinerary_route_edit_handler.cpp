@@ -210,7 +210,7 @@ void ItineraryRouteEditHandler::build_form(std::ostream &os,
   if (!read_only && !route.points.empty()) {
     os <<
       // Confirmation to delete one or more selected points from a route
-      "      <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"x\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected points?") << "');\">"
+      "      <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"d\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected points?") << "');\">"
       // Button label for deleting a seletion of points in a route
        << translate("Delete points") << "</button>\n"
       // Confirmation to split a route by selected point

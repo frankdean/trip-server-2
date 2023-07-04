@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.0.0],[frank.dean@fdsd.co.uk])
+AC_INIT([trip],[2.1.0-rc.1],[frank.dean@fdsd.co.uk])
 BOOTSTRAP_VERSION='5.2.3'
 OPENLAYERS_VERSION='7.3.0'
 PROJ4JS_VERSION='2.9.0'
@@ -212,6 +212,7 @@ AC_CONFIG_FILES([Makefile po/Makefile.in
                  tests/Makefile
 		 Dockerfile
 		 Dockerfile-postgis
+		 Dockerfile-tile-server
 		 docker-entrypoint.sh
 		 docker-compose.yml
                  ])

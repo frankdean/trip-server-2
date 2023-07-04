@@ -188,7 +188,7 @@ void ItineraryTrackSegmentEditHandler::build_form(
   if (!read_only && !segment.points.empty()) {
     os <<
       // Label for button to delete one or more selected points from a track segment
-      "      <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"x\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected points?") << "');\">"
+      "      <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"d\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected points?") << "');\">"
       // Button label for deleting a seletion of points in a track segment
        << translate("Delete points") << "</button>\n"
       // Label for button to split a track segment by selected point

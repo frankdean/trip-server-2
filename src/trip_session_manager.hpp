@@ -23,6 +23,7 @@
 #define TRIP_SESSION_HPP
 
 class SessionManager;
+class TripConfig;
 
 namespace fdsd {
 
@@ -35,16 +36,18 @@ namespace trip {
 class TripSessionManager : public fdsd::web::SessionManager
 {
 protected:
+  std::shared_ptr<TripConfig> config;
   virtual void session_updated(std::string session_id,
                                const fdsd::web::Session& session) const override;
   virtual void persist_invalidated_session(const std::string session_id) override;
   void create_session_table(bool overwrite = false);
 public:
-  TripSessionManager() : SessionManager() {}
+  TripSessionManager(std::shared_ptr<TripConfig> config) : SessionManager(), config(config) {}
   virtual ~TripSessionManager() {}
   static const std::string session_id_cookie_name;
   virtual void persist_sessions() override;
   virtual void load_sessions() override;
+  virtual int get_max_session_minutes() override;
 };
 
 } // namespace trip

@@ -35,6 +35,7 @@ TripConfig::TripConfig(std::string filename) :
   worker_count(20),
   pg_pool_size(24),
   maximum_request_size(1024 * 1024 * 12),
+  session_timeout(3600),
   providers(),
   tile_cache_max_age(),
   tile_count_frequency(),
@@ -71,6 +72,8 @@ TripConfig::TripConfig(std::string filename) :
           app["maximum_location_tracking_points"].as<int>();
       if (app["maxFileUploadSize"])
         maximum_request_size = app["maxFileUploadSize"].as<long>();
+      if (app["session_timeout"])
+        session_timeout = app["session_timeout"].as<int>();
       if (app["averageFlatSpeedKph"])
         default_average_kmh_hiking_speed =
           app["averageFlatSpeedKph"].as<double>();

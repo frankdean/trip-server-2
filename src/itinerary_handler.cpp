@@ -554,7 +554,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       // Label for menu item to view waypoint details
       "                <li><button class=\"dropdown-item\" name=\"action\" value=\"attributes\" formmethod=\"post\">" << translate("Waypoint") << "</button></li> <!-- read-only version -->\n"
       // Label for menu item to view details of a path, which is either a selected route or track
-      "                <li><button class=\"dropdown-item\" name=\"action\" value=\"edit-path\">" << translate("Path") << "</button></li> <!-- read-only version -->\n";
+      "                <li><button class=\"dropdown-item\" name=\"action\">" << translate("Path") << "</button></li> <!-- read-only version -->\n";
   }
   response.content
     <<
@@ -573,15 +573,15 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
     response.content
       <<
       // Label for menu item to create a new itinerary waypoint
-      "                <li><a class=\"dropdown-item\" href=\"" << get_uri_prefix() << "/itinerary-wpt-edit?itineraryId=" << itinerary_id << "\">" << translate("Add waypoint") << "</a></li> <!-- writable version -->\n"
+      "                <li><a class=\"dropdown-item\" href=\"" << get_uri_prefix() << "/itinerary-wpt-edit?itineraryId=" << itinerary_id << "\" accesskey=\"q\">" << translate("Add waypoint") << "</a></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n"
       // Label for menu item to edit some or all of the details of a single selected route, track or waypoint
-      "                <li><button class=\"dropdown-item\" formmethod=\"post\" name=\"action\" value=\"attributes\">" << translate("Attributes") << "</button></li> <!-- writable version -->\n"
+      "                <li><button class=\"dropdown-item\" formmethod=\"post\" name=\"action\" value=\"attributes\" accesskey=\"b\">" << translate("Attributes") << "</button></li> <!-- writable version -->\n"
       // Label for menu item to edit the segments and points belonging to a route or track
-      "                <li><button class=\"dropdown-item\" name=\"action\" value=\"edit-path\">" << translate("Path") << "</button></li> <!-- writable version -->\n"
+      "                <li><button class=\"dropdown-item\" name=\"action\" value=\"edit-path\" value=\"edit-path\" accesskey=\"z\">" << translate("Path") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n"
       // Label for menu item to join together selected routes or tracks
-      "                <li><button class=\"dropdown-item\" name=\"action\" value=\"join-path\">" << translate("Join paths") << "</button></li> <!-- writable version -->\n"
+      "                <li><button class=\"dropdown-item\" name=\"action\" value=\"join-path\" accesskey=\"j\">" << translate("Join paths") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n";
   }
   response.content
@@ -631,7 +631,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
   response.content
     <<
     // Label for menu item to create a complete copy of the current Itinerary as a new Itinerary
-    "                <li><button class=\"dropdown-item\" name=\"action\" value=\"duplicate\" "
+    "                <li><button class=\"dropdown-item\" name=\"action\" value=\"duplicate\" accesskey=\"x\" "
     // Confirmation dialog when creating a duplicating an itinerary
     "onclick=\"return confirm('" << translate("Create a new copy of this itinerary?") << "');\">" << translate("Create duplicate itinerary") << "</button></li>\n"
     "              </ul>\n"

@@ -11,6 +11,7 @@ app:
     pretty: true
     indent: 2
   maxFileUploadSize: 12582912 # 12MB - For trip v2 only
+  session_timeout: 3600 # For trip v2 only
   autoQuit: # Ignored in trip v2
     timeOut: 300 # Ignored in trip v2
     nonSystemd: # Ignored in trip 2v

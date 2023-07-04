@@ -144,7 +144,7 @@ void TrackSharingEditHandler::build_form(
     "      </div>\n"
     "      <div id=\"div-active\" class=\"container-fluid bg-light py-3 my-3\">\n"
     // Label for checkbox indicating whether location sharing for a particular nickname is active
-    "        <label for=\"input-active\" class=\"pe-1\">" << translate("Active") << "</label><input id=\"input-active\" type=\"checkbox\" name=\"active\"";
+    "        <label for=\"input-active\" class=\"pe-1\">" << translate("Active") << "</label><input id=\"input-active\" type=\"checkbox\" name=\"active\" accesskey=\"a\"";
   if (share.active.first && share.active.second)
     response.content << " checked";
   response.content

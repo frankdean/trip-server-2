@@ -16,52 +16,8 @@ adventurer.
 
 Trip Server 2 is a port of [Trip Server v1][trip-server], written mostly in
 C++. It can be run alongside an existing Trip Server version 1.11.x
-installation.
-
-The original Trip v1 application consists of two primary components, [a server
-application][trip-server], written in [ECMAScript][] (a JavaScript standard),
-running under [Node.js][] and [a browser application][trip-web-client], also
-written in ECMAScript using [AngularJS][], a web framework.
-
-Subsequently, Google's support for AngularJS has ended with a recommendation
-of migration to [Angular 2+](https://angular.io/).
-
-Maintaining support for Trip v1 required a not inconsiderable amount of work,
-mostly relating to upgrading dependencies, frequently due to security
-vulnerabilities in underlying components.  Coupled with supply-chain attacks
-within the [npm](https://www.npmjs.com) eco-system, I'm of the view that the
-ongoing support impact of development in such an architecture is unacceptably
-high.
-
-As migrating to Angular 2+ is not trivial and with no reassurance that a
-similar upgrade will not be necessary in the future, I was extremely
-reluctant to simply follow the upgrade path.
-
-Consequently, I want a solution that has as few dependencies as practical,
-ideally with those minimal dependencies being on widely used libraries which are
-unlikely to force much re-work of any application code.  I've used many
-languages and experimented with some of the more popular modern languages, but
-I don't see any meeting my desire for something that will remain largely
-backward compatible, well supported for years to come and with low maintenance
-overheads.
-
-Reviewing the version history of a GUI application I previously wrote in C++,
-I've only had one occasion where I *needed* to make a change in over a decade,
-caused by the deprecation of [GConf](https://en.wikipedia.org/wiki/GConf)
-(used for holding configuration settings).  It was a trivial change, and an
-improvement to replace it with a [YAML](https://yaml.org) configuration file.
-
-C++ scores highly on backwards compatibility, is governed by a good standards
-committee process (ISO) and has steadily evolved into a powerful and widely
-supported development language.  Using modern C++ practices *can* produce
-stable, reliable, easy to maintain code.  With plenty of mature, stable
-libraries for the more significant things we need; primarily support for
-[PostgreSQL database][PostgreSQL], [PostGIS][], XML, JSON and YAML.  So far,
-I am very satisfied with the results.
-
-Trip Server version 2 maintains database compatibility with version 1, with an
-`--upgrade` option to upgrade a version 1 database to version 2.  Also, the
-desire is to keep the YAML configuration file requiring minimal changes.
+installation, as version 2 maintains database compatibility with version 1,
+with an `--upgrade` option to upgrade a version 1 database to version 2.
 
 ### Features
 
@@ -116,10 +72,11 @@ The user guide can also be viewed with:
 
 	$ info trip-user-guide
 
-The [user guide](https://www.fdsd.co.uk/trip-server-2/latest/docs/user-guide/) and
-[application
-manual](https://www.fdsd.co.uk/trip-server-2/latest/docs/application-guide/)
+The [user guide][trip user guide] and [application manual][trip application manual]
 are available online.
+
+[trip user guide]: https://www.fdsd.co.uk/trip-server-2/latest/docs/user-guide/
+[trip application manual]: https://www.fdsd.co.uk/trip-server-2/latest/docs/application-guide/
 
 ## Source Control
 
@@ -130,6 +87,42 @@ The source is maintained in a Git repository which can be cloned with:
 	$ git submodule update --init --recursive
 
 ## Demo Options
+
+### Docker
+
+[Docker]: https://www.docker.com "Develop faster.  Run anywhere."
+
+You can use [Docker][] to run the application, using `docker compose`.
+
+- `docker-compose.yml` runs the application without a tile server.
+- `docker-compose-map-demo.yml` runs the application with a tile server
+  containing map data for Luxembourg.
+
+1.  Navigate to a directory containing one of those docker compose files.
+
+2.  If you're running the tile server option, create the following docker
+    volumes:
+
+        $ docker volume create osm-data
+		$ docker volume create osm-tiles
+
+3.  Start the containers with:
+
+        $ docker compose -f docker-compose-map-demo.yml up -d
+
+    On the first occasion the tile server is started, it'll take a little
+    while to create the initial database.  It will also probably be quiet slow
+    to both startup and also render the tiles.  Use the `docker container
+    logs` command to view the progress.
+
+4.  Use a browser to navigate to `http://<docker-host>:8080/trip/app` to view
+    the application.  Login with the credentials listed below in the 'Play
+    with Docker' section.  Refer to the [user guide][trip user guide] and
+    [application manual][trip application manual] for more information.
+
+5.  Stop the containers with:
+
+        $ docker compose -f docker-compose-map-demo.yml down
 
 ### Play with Docker
 
@@ -156,6 +149,8 @@ The source is maintained in a Git repository which can be cloned with:
 	sometimes randomly failed and otherwise failed importing
 	`water-polygons-split` which uses a lot of resources.  Nonetheless, the
 	process is documented here as it may be useful in other environments.
+	Also, 'Play with Docker' doesn't seem to have sufficient resources to run
+	the `fdean/tile-server` image.
 
 	1.  The import process temporarily requires a lot of memory.  We need to
 		create and mount a swap file:

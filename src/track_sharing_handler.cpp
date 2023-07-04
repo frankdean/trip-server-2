@@ -72,7 +72,7 @@ void TrackSharingHandler::build_form(
       "        <th>" << translate("Maximum Limit") << "</th>\n"
       // The column heading showing whether track sharing is active with another user
       "        <th>" << translate("Active") << "</th>\n"
-      "        <th><input id=\"select-all\" accesskey=\"l\" type=\"checkbox\" class=\"form-check-input\" onclick=\"select_all(this)\"></th>\n"
+      "        <th><input id=\"select-all\" accesskey=\"a\" type=\"checkbox\" class=\"form-check-input\" onclick=\"select_all(this)\"></th>\n"
       "      </tr>\n";
     int c = 0;
     for (auto const &share : track_shares) {
@@ -132,11 +132,11 @@ void TrackSharingHandler::build_form(
     response.content
       <<
       // Name of button to activate track sharing with selected users
-      "      <button id=\"btn-activate\" name=\"action\" value=\"activate\" accesskey=\"a\" class=\"my-1 btn btn-lg btn-success\">" << translate("Activate") << "</button>\n"
+      "      <button id=\"btn-activate\" name=\"action\" value=\"activate\" accesskey=\"v\" class=\"my-1 btn btn-lg btn-success\">" << translate("Activate") << "</button>\n"
       // Name of button to de-activate track sharing with selected users
-      "      <button id=\"btn-deactivate\" name=\"action\" value=\"de-activate\" accesskey=\"d\" class=\"my-1 btn btn-lg btn-primary\">" << translate("Deactivate") << "</button>\n"
+      "      <button id=\"btn-deactivate\" name=\"action\" value=\"de-activate\" accesskey=\"x\" class=\"my-1 btn btn-lg btn-primary\">" << translate("Deactivate") << "</button>\n"
       // Prompt to confirm the user wishes to delete track sharing for the selected users.
-      "      <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"x\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected location shares?") << "');\">"
+      "      <button id=\"btn-delete\" name=\"action\" value=\"delete\" accesskey=\"d\" class=\"my-1 btn btn-lg btn-danger\" onclick=\"return confirm('" << translate("Delete the selected location shares?") << "');\">"
       // Name of button to delete track sharing with selected users
       << translate("Delete selected") << "</button>\n"
       // Name of button to edit the track sharing criteria of a selected user

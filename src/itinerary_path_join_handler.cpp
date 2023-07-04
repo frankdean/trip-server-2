@@ -62,9 +62,9 @@ void ItineraryPathJoinHandler::build_form(
         "        <td>\n"
         "        <input type=\"hidden\" name=\"path_id[" << position << "]\" value=\"" << path.id.second << "\">\n"
         // Label for moving a track or path up in a list of paths being joined
-        "          <button class=\"btn btn-info mb-2\" name=\"up[" << position << "]\" value=\"" << path.id.second << "\">" << translate("Up") << "</button>\n"
+        "          <button class=\"btn btn-info mb-2\" name=\"up[" << position << "]\" value=\"" << path.id.second << "\" accesskey=\"u\">" << translate("Up") << "</button>\n"
         // Label for moving a track or path down in a list of paths being joined
-        "          <button class=\"btn btn-info mb-2\" name=\"down[" << position << "]\" value=\"" << path.id.second << "\">" << translate("Down") << "</button>\n"
+        "          <button class=\"btn btn-info mb-2\" name=\"down[" << position << "]\" value=\"" << path.id.second << "\" accesskey=\"d\">" << translate("Down") << "</button>\n"
         "        </td>\n"
         "        <td><span>";
       if (path.name.first) {
@@ -136,13 +136,13 @@ void ItineraryPathJoinHandler::build_form(
     "    </table>\n"
     "    <div>\n"
     // label prompting for input of a new name for a joined path
-    "      <label for=\"input-name\">" << translate("New path name") << "</label>\n"
+    "      <label for=\"input-name\" accesskey=\"n\">" << translate("New path name") << "</label>\n"
     "      <input id=\"input-name\" name=\"name\" value=\"" << x(joined_path_name) << "\" size=\"30\">\n"
     "    </div>\n"
     "    <div class=\"mb-3\">\n"
     // Label for selecting a color for a joined path
     "      <label for=\"input-color\">" << translate("New path color") << "</label>\n"
-    "      <select id=\"input-color\" name=\"color_key\">\n"
+    "      <select id=\"input-color\" name=\"color_key\" accesskey=\"l\">\n"
     // Option displayed in an HTML select dropdown to indicate that no color is selected
     "        <option value=\"\">-- not set --</option>\n";
   for (const auto &c : colors) {
@@ -154,9 +154,9 @@ void ItineraryPathJoinHandler::build_form(
     "      </select>\n"
     "    </div>\n"
     // Label of button to join a set of paths
-    "    <button id=\"btn-join\" class=\"btn btn-lg btn-success\" name=\"action\" value=\"join\">" << translate("Join") << "</button>\n"
+    "    <button id=\"btn-join\" class=\"btn btn-lg btn-success\" name=\"action\" value=\"join\" accesskey=\"j\">" << translate("Join") << "</button>\n"
     // Label to cancel joining a set of paths
-    "    <button id=\"btn-cancel\" class=\"btn btn-lg btn-danger\" name=\"action\" value=\"cancel\">" << translate("Cancel") << "</button>\n"
+    "    <button id=\"btn-cancel\" class=\"btn btn-lg btn-danger\" name=\"action\" value=\"cancel\" accesskey=\"c\">" << translate("Cancel") << "</button>\n"
     "  </form>\n"
     "</div>\n";
   if (!path_ids.empty()) {

@@ -2,6 +2,16 @@
 
 # Changelog
 
+## 2.1.0-rc.1
+
+Improved slider control for simplifying paths making it appear more linear.
+
+- Session timeout can be modified in the configuration file
+- Modified HTML access keys to be more consistent
+- Separate configuration file implementation of from shared code-base
+- Minor updates to Vagrant configuration and documentation
+- Created a Docker configuration to use pre-imported database for quick demo
+
 ## 2.0.0
 
 - Initial Release
