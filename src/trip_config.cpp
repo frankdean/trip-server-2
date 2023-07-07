@@ -35,7 +35,8 @@ TripConfig::TripConfig(std::string filename) :
   worker_count(20),
   pg_pool_size(24),
   maximum_request_size(1024 * 1024 * 12),
-  session_timeout(3600),
+  /// Default session timeout in minutes
+  session_timeout(60),
   providers(),
   tile_cache_max_age(),
   tile_count_frequency(),
