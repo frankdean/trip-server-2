@@ -42,7 +42,7 @@ tile:
   providers_READ_TILE_USAGE_POLICY_BELOW_AND_SET_USER_AGENT_AND_REFERRER_INFO_BEFORE_USING:
     - cache: true
       prune: true
-      # see http://wiki.openstreetmap.org/wiki/Tile_usage_policy
+      # see https://operations.osmfoundation.org/policies/tiles/
       userAgentInfo: (mailto:your.contact@email.address)
       refererInfo: http://link_to_deployed_application_information
       options:
