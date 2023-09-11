@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
     # https://wiki.debian.org/Teams/Cloud/VagrantBaseBoxes
     # Boxes: https://app.vagrantup.com/debian
     debian.vm.box = "debian/bullseye64"
-    #debian.vm.box_version = "11.20230602.1"
+    debian.vm.box_version = "11.20230615.1"
 
     # Share an additional folder to the guest VM. The first argument is
     # the path on the host to the actual folder. The second argument is
@@ -147,6 +147,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "rockylinux", autostart: false do |rockylinux|
     # https://app.vagrantup.com/rockylinux
     rockylinux.vm.box = "rockylinux/9"
+    rockylinux.vm.box_version = "2.0.0"
     #
     # Using Bento box:
     #rockylinux.vm.box = "bento/rockylinux-9"

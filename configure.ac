@@ -2,9 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.1.0],[frank.dean@fdsd.co.uk])
-BOOTSTRAP_VERSION='5.2.3'
-OPENLAYERS_VERSION='7.3.0'
+AC_INIT([trip],[2.1.1-rc.1],[frank.dean@fdsd.co.uk])
+BOOTSTRAP_VERSION='5.3.1'
+OPENLAYERS_VERSION='7.5.2'
 PROJ4JS_VERSION='2.9.0'
 OLC_VERSION='1.0.4'
 ZXCVBN_VERSION='4.4.2'
@@ -183,6 +183,8 @@ fi
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
+AC_CHECK_HEADER([string],,
+    [AC_MSG_ERROR([Standard C++ library not found])])
 AC_C_INLINE
 
 # Checks for library functions.

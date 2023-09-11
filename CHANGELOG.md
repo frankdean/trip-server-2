@@ -2,6 +2,11 @@
 
 # Changelog
 
+## 2.1.1-rc.1
+
+- Upgrade OpenLayers to 7.5.1
+- Upgrade Bootstrap to 5.3.1
+
 ## 2.1.0
 
 Improved slider control for simplifying paths making it appear more linear.

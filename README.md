@@ -229,6 +229,10 @@ Generally the application is built and installed with:
 	$ make
 	$ sudo make install
 
+Add `CXXFLAGS='-g -O0'` to disable compiler optimisation.  E.g.
+
+	$ ./configure 'cxxflags=-g -o0'
+
 Optionally install the HTML and PDF documentation:
 
 	$ make html pdf
@@ -508,12 +512,16 @@ refence documentation and tutorial.  Pass `--disable-documentation` to the
 `./configure` command if you wish to skip building the documentation.
 
 When running the `./configure` command to build this application, define the
-`PKG_CONFIG_PATH` to include where `libpqxx.pc` and d`libpq.pc` are installed,
+`PKG_CONFIG_PATH` to include where `libpqxx.pc` and d`libpq.pc` are installed.
+Also, if your default compiler is not `clang`, you should specify the `clang`
+compiler by defining the `CXX` environment variable when building both
+`libpqxx` and Trip.
+
 e.g.:
 
-	./configure PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig"
-
-Add `CXXFLAGS='-g -O0'` to disable compiler optimisation.
+	./configure \
+	PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
+	CXX=/usr/bin/g++
 
 #### nlohmann/json
 
