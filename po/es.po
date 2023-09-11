@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2023-07-14 11:53+0100\n"
+"POT-Creation-Date: 2023-09-11 16:12+0100\n"
 "PO-Revision-Date: 2023-06-02 11:29+0100\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
@@ -1264,38 +1264,42 @@ msgstr ""
 msgid "OsmAnd color"
 msgstr ""
 
+#: src/main.cpp:106
+msgid "The database is not ready for use.  Cannot find the \"{1}\" table."
+msgstr ""
+
 #. Message output when the database is being upgraded
-#: src/main.cpp:101
+#: src/main.cpp:113
 msgid "Upgrading the database"
 msgstr "Acutaliza el base de datos"
 
 #. Label for the version text of the application
-#: src/main.cpp:113
+#: src/main.cpp:125
 msgid "version"
 msgstr "versión"
 
 #. Label for the web address the application is listening at
-#: src/main.cpp:115
+#: src/main.cpp:127
 msgid "listening at"
 msgstr "está escuchando en"
 
 #. Output when the application has been built to allow serving static files.
-#: src/main.cpp:121
+#: src/main.cpp:133
 msgid "The application has been built to serve static files."
 msgstr "La aplicación ha sido construida para servir los archivos estáticos."
 
 #. Displays the name of the directory that static files will be served from.
-#: src/main.cpp:125
+#: src/main.cpp:137
 msgid "Static files will be served from the {1} directory."
 msgstr "Archivos estático se servirá de la carpeta {1}"
 
 #. Message showing how long the application took to startup in milliseconds
-#: src/main.cpp:143
+#: src/main.cpp:155
 msgid "Started application in {1} ms"
 msgstr "La aplicación se inició en {1} ms"
 
 #. Text displayed when the application ends
-#: src/main.cpp:149
+#: src/main.cpp:161
 msgid "Bye!"
 msgstr "¡Adiós!"
 
@@ -1854,7 +1858,7 @@ msgstr "utilización: {1} <dirreción> <puerto>"
 msgid "Example:\n"
 msgstr "Ejemplar:\n"
 
-#: src/trip_pg_dao.cpp:73
+#: src/trip_pg_dao.cpp:74
 msgid "User is not authorized for the requested operation"
 msgstr ""
 

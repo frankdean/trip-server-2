@@ -196,7 +196,7 @@ You can use [Docker][] to run the application, using `docker compose`.
 
 			$ docker run --network trip-server -e TRIP_SIGNING_KEY=secret \
 			-e TRIP_RESOURCE_SIGNING_KEY=secret -e POSTGRES_PASSWORD=secret \
-			CONFIGURE_TILE_SERVER=no \
+			-e CONFIGURE_TILE_SERVER=no \
 			--publish 8080:8080 -d fdean/trip-server-2
 
 	Set `CONFIGURE_TILE_SERVER` to `yes` if you have the map tile
@@ -283,6 +283,7 @@ Minimal packages required to build from the source distribution tarball:
 - g++
 - gawk
 - libboost-dev
+- libboost-locale-dev
 - libcairomm-1.0-dev (optional)
 - libcmark-dev
 - libgdal-dev (optional)

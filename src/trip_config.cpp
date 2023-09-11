@@ -194,7 +194,7 @@ TripConfig::TripConfig(std::string filename) :
            filename.c_str(),
            e.what());
   } catch (const YAML::ParserException& e) {
-    syslog(LOG_ALERT, "Failure parsing \"%s\": %s",
+    syslog(LOG_ERR, "Failure parsing \"%s\": %s",
            filename.c_str(),
            e.what());
   }

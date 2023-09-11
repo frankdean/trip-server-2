@@ -130,7 +130,7 @@ void SessionPgDao::create_session_table(bool overwrite)
   } catch (const std::exception& e) {
     std::cerr << "Failure creating session table: "
               << e.what() << '\n';
-    syslog(LOG_EMERG, "Failure creating session table: %s",
+    syslog(LOG_ERR, "Failure creating session table: %s",
            e.what());
     throw;
   }
@@ -332,7 +332,7 @@ void SessionPgDao::upgrade()
   } catch (const std::exception& e) {
     std::cerr << "Failure creating session table: "
               << e.what() << '\n';
-    syslog(LOG_EMERG, "Failure creating session table: %s",
+    syslog(LOG_ERR, "Failure creating session table: %s",
            e.what());
     throw;
   }

@@ -96,13 +96,25 @@ int main(int argc, char *argv[])
     TripPgDao::set_pool_manager(&pool_manager);
     TripSessionManager session_manager(application.get_config());
     TripSessionManager::set_session_manager(&session_manager);
-    if (options.upgrade_flag) {
-      // Message output when the database is being upgraded
-      syslog(LOG_INFO, "%s", translate("Upgrading the database").str().c_str());
+    {
       SessionPgDao session_dao;
-      session_dao.upgrade();
-      closelog();
-      return EXIT_SUCCESS;
+      const std::string test_table_name = "session";
+      if (!session_dao.is_ready(test_table_name)) {
+        // Message output when the database is not ready for use
+        syslog(LOG_ERR, "%s",
+               (format(
+                   translate("The database is not ready for use.  Cannot find the \"{1}\" table.")) % test_table_name
+                 ).str().c_str());
+        closelog();
+        return EXIT_FAILURE;
+      }
+      if (options.upgrade_flag) {
+        // Message output when the database is being upgraded
+        syslog(LOG_INFO, "%s", translate("Upgrading the database").str().c_str());
+        session_dao.upgrade();
+        closelog();
+        return EXIT_SUCCESS;
+      }
     }
     application.initialize_user_sessions(options.expire_sessions);
 
@@ -148,7 +160,7 @@ int main(int argc, char *argv[])
     // Text displayed when the application ends
     syslog(LOG_INFO, "%s", translate("Bye!").str().c_str());
   } catch (const std::exception& e) {
-    syslog(LOG_EMERG, "Application exiting with error: %s", e.what());
+    syslog(LOG_ERR, "Application exiting with error: %s", e.what());
     closelog();
     return EXIT_FAILURE;
   }

@@ -35,11 +35,13 @@ services:
       shm_size: 256m
     image: fdean/trip-database:latest
     shm_size: 512m
+    # https://docs.docker.com/compose/compose-file/05-services/#healthcheck
+    # https://docs.docker.com/engine/reference/builder/#healthcheck
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready -U trip -d trip'"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
+      test: ["CMD-SHELL", "sh -c 'pg_isready -h postgis -U trip -d trip'"]
+      timeout: 5s
+      # Initial test failures ignored for length of start_period after startup
+      start_period: 60s
     deploy:
       replicas: 1
       restart_policy:

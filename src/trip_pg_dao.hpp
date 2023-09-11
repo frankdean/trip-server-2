@@ -52,6 +52,9 @@ public:
   };
 
   static void set_pool_manager(fdsd::utils::PgPoolManager* pool_manager);
+  bool is_ready(std::string test_table_name,
+                int retry_interval_secs = 10,
+                int max_retries = 6);
 };
 
 } // namespace trip

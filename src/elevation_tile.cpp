@@ -279,7 +279,7 @@ std::pair<bool, double>
   }
   if (initialization_error) {
     std::cerr << "FAILURE INIT\n";
-    syslog(LOG_ALERT, "Failed to initialize elevation service");
+    syslog(LOG_ERR, "Failed to initialize elevation service");
     std::rethrow_exception(initialization_error);
   }
     // throw std::runtime_error("Failed to initialize elevation tiles service");

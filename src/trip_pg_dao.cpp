@@ -26,6 +26,7 @@
 #include <boost/locale.hpp>
 #include <iostream>
 #include <syslog.h>
+#include <thread>
 
 using namespace pqxx;
 using namespace boost::locale;
@@ -56,7 +57,7 @@ TripPgDao::TripPgDao()
   } catch (const std::exception& e) {
     std::cerr << "Failure connecting to the database: "
               << e.what() << '\n';
-    syslog(LOG_EMERG,
+    syslog(LOG_ERR,
            "Failure connecting to the database: %s",
            e.what());
     throw;
@@ -91,4 +92,31 @@ void TripPgDao::create_table(transaction_base &tx,
     tx.exec("DROP TABLE IF EXISTS " + table_name + " CASCADE");
   }
   tx.exec(create_table_sql);
+}
+
+bool TripPgDao::is_ready(std::string test_table_name,
+                         int retry_interval_secs,
+                         int max_retries)
+{
+  int retry_count = max_retries;
+  while (retry_count-- > 0) {
+    try {
+      work tx(*connection);
+      auto row = tx.exec_params1(
+          "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name=$1 AND table_schema='public' AND table_type='BASE TABLE')",
+          test_table_name);
+      return row[0].as<bool>();
+    } catch (const failure& e) {
+      syslog(LOG_DEBUG,
+             "Error checking whether database is ready: %s",
+             e.what());
+      std::this_thread::sleep_for(std::chrono::seconds(retry_interval_secs));
+    } catch (const std::exception& e) {
+      syslog(LOG_DEBUG,
+             "Exception connecting to the database: %s",
+             e.what());
+      std::this_thread::sleep_for(std::chrono::seconds(retry_interval_secs));
+    }
+  }
+  return false;
 }
