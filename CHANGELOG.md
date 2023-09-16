@@ -2,6 +2,11 @@
 
 # Changelog
 
+## 2.1.1-rc.3
+
+- Clicking on a track point time in location search sets the `date from`
+  parameter to the selected point's time
+
 ## 2.1.1-rc.2
 
 - Test database is ready on startup with retries
