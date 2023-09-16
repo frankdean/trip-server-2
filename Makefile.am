@@ -29,8 +29,7 @@ EXTRA_DIST = m4/ChangeLog  .gitignore \
 	provisioning/schema/90_test-data.sql \
 	provisioning/schema/create_gis_indexes.sh \
 	provisioning/schema/revoke_all.sql \
-	provisioning/systemd/trip-server-2.service \
-	resources
+	provisioning/systemd/trip-server-2.service
 
 ACLOCAL_AMFLAGS = -I m4
 
