@@ -369,6 +369,8 @@ Additional packages required to build from a Git clone:
 
 To re-create the required Gnu autotools files:
 
+	$ aclocal
+	$ autoheader
 	$ autoreconf -i
 	$ automake --add-missing --copy
 
