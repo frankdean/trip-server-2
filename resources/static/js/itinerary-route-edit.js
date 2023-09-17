@@ -64,16 +64,17 @@ class FeatureMap extends TripMap {
         opacity: 0.5,
       });
       this.map.addLayer(this.routeLayer);
-      this.updateMapLayer();
       let totalExtent = ol.extent.createEmpty();
-      // console.debug('exent before', totalExtent);
-      ol.extent.extend(totalExtent, routeSource.getExtent());
-      if (totalExtent[0] != Infinity)
+      this.updateMapLayer(totalExtent);
+      // ol.extent.extend(totalExtent, routeSource.getExtent());
+      if (totalExtent[0] != Infinity) {
         this.map.getView().fit(totalExtent);
+        this.map.getView().adjustResolution(2);
+      }
     }
   }
 
-  updateMapLayer() {
+  updateMapLayer(extent) {
     const self = this;
     if (this.waypointLayer) {
       this.map.removeLayer(this.waypointLayer);
@@ -81,6 +82,8 @@ class FeatureMap extends TripMap {
     }
     const selectedFeatures = new Array();
     this.waypointFeatures.forEach((feature) => {
+      if (extent !== undefined)
+        ol.extent.extend(extent, feature.getGeometry().getExtent());
       const id = feature.get('id');
       if (this.pointIdMap.has(id)) {
         const point = this.pointIdMap.get(id);
