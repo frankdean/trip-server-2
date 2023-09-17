@@ -1463,6 +1463,10 @@ Edit Attributes
 
 Assign colours to routes and tracks
 
+@item z
+
+Edit Path
+
 @item p
 
 Paste
