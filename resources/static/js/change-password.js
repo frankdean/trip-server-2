@@ -62,8 +62,24 @@ pwinput.addEventListener('input', (event) => {
       break;
     }
     const span = document.getElementById('crack-time');
-    span.innerHTML = '' + crackTime;
-    // console.log(result.feedback);
+    const seconds_per_year = 31557600;
+    const seconds_per_century = seconds_per_year * 100;
+    const seconds_per_month = seconds_per_year / 12;
+    if (crackTime >= seconds_per_century)
+      span.innerHTML = (crackTime / seconds_per_century).toFixed(1) + ' centuries';
+    else if (crackTime >= seconds_per_year)
+      span.innerHTML = (crackTime / seconds_per_year).toFixed(1) + ' years';
+    else if (crackTime >= seconds_per_month)
+      span.innerHTML = (crackTime / seconds_per_month).toFixed(1) + ' months';
+    else if (crackTime >= 86400)
+      span.innerHTML = (crackTime / 86400).toFixed(1) + ' days';
+    else if (crackTime >= 3600)
+      span.innerHTML = (crackTime / 3600).toFixed(1) + ' hours';
+    else if (crackTime >= 60)
+      span.innerHTML = (crackTime / 60).toFixed(1) + ' minutes';
+    else
+      span.innerHTML = crackTime + ' seconds';
+    // console.log(result.score, result.feedback);
     if (result.score <= 2) {
       if (result.feedback.warning.length > 0) {
         warning.innerHTML = '<p>' + result.feedback.warning + '</p>';

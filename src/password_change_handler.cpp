@@ -80,7 +80,7 @@ void PasswordChangeHandler::build_form(std::ostream &os)
     "      </div>\n"
     "      <div id=\"crack-time-div\" class=\"d-none\">\n"
     // Displays estimate password crack time.  HTML span element is replaced with value at runtime.
-    "        <p>" << translate("Estimated <span id=\"crack-time\"></span> seconds to crack with ten attempts per second.") << "</p>\n"
+    "        <p>" << translate("Estimated <span id=\"crack-time\"></span> to crack with ten attempts per second.") << "</p>\n"
     "      </div>\n"
     "      <div id=\"feedback-warning\" class=\"d-none\"></div>\n"
     "      <div id=\"feedback-suggestions\" class=\"d-none\"></div>\n"
