@@ -2,21 +2,18 @@
 
 # Changelog
 
-## 2.1.1-rc.3
+## 2.1.1
 
-- Clicking on a track point time in location search sets the `date from`
-  parameter to the selected point's time
-
-## 2.1.1-rc.2
-
-- Test database is ready on startup with retries
-
-	This is needed where systems (e.g. `podman-compose`) start the web
-	container before database container is ready, failing to respect the
-	`depends_on` configuration option
-
-## 2.1.1-rc.1
-
+- Bug fix - password change suggestions are now hidden when no longer relevant
+- Show password cracking time with more sensible units
+- Clicking on a track point time in the location search sets the `date from`
+  field parameter to the selected point's time
+- Render path arrows relative to the path's total distance
+- When editing paths, zoom to cover the area of the current list of points
+- Test database is ready on startup with retries.  This is needed where
+  systems (e.g. `podman-compose`) start the web container before the database
+  container is ready, failing to respect the `depends_on` configuration
+  option.
 - Upgrade OpenLayers to 7.5.1
 - Upgrade Bootstrap to 5.3.1
 
