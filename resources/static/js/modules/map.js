@@ -239,8 +239,6 @@ class TripMap {
   constructor(providers, opt_options) {
     this.options = opt_options || {};
     this.options.mapDivId = this.options.mapDivId === undefined ? 'map' : this.options.mapDivId;
-    this.options.trackArrowFrequency = this.options.trackArrowFrequency === undefined ? 25 : this.options.trackArrowFrequency;
-    this.options.routeArrowFrequency = this.options.routeArrowFrequency === undefined ? 10 : this.options.routeArrowFrequency;
     this.options.showExitControl = this.options.showExitControl === undefined ? true : this.options.showExitControl;
     this.providers = providers;
     this.currentProviderIndex = 0;
@@ -341,7 +339,6 @@ class TripMap {
     }
     let featureColor = feature.get('html_color_code');
     const isTrack = featureType == 'track';
-    const frequency = isTrack ? self.options.trackArrowFrequency : self.options.routeArrowFrequency;
     if (!featureColor)
       featureColor = isTrack ? 'red' : 'magenta';
     const width = isTrack ? 2 : 4;
@@ -354,23 +351,35 @@ class TripMap {
         })
       })
     ];
-    if (frequency > 0) {
-      const arrowRadius = isTrack ? 5 : 8;
-      if (geometryType == 'LineString') {
+    const arrowRadius = isTrack ? 5 : 8;
+    const totalDistance = ol.sphere.getLength(feature.getGeometry());
+    let leg_count = 0;
+    const coords = geometry.getCoordinates();
+    if (geometryType == 'MultiLineString') {
+      coords.forEach((s) => {
+        leg_count += s.length;
+      });
+    } else {
+      leg_count = coords.length;
+    }
+    const target_interval_distance = (totalDistance > 50000) ? 4000 : 500;
+    const f = Math.round(leg_count / totalDistance * target_interval_distance);
+    const frequency = (f < 1) ? 1 : f;
+    // console.debug('frequency', frequency, leg_count);
+    if (geometryType == 'LineString') {
+      let count = 0;
+      geometry.forEachSegment(function(start, end) {
+        self.renderSegmentArrows(start, end, count, frequency, styles, featureColor, arrowRadius);
+        count++;
+      });
+    } else if (geometryType == 'MultiLineString') {
+      geometry.getLineStrings().forEach(lineString => {
         let count = 0;
-        geometry.forEachSegment(function(start, end) {
+        lineString.forEachSegment(function(start, end) {
           self.renderSegmentArrows(start, end, count, frequency, styles, featureColor, arrowRadius);
           count++;
         });
-      } else if (geometryType == 'MultiLineString') {
-        geometry.getLineStrings().forEach(lineString => {
-          let count = 0;
-          lineString.forEachSegment(function(start, end) {
-            self.renderSegmentArrows(start, end, count, frequency, styles, featureColor, arrowRadius);
-            count++;
-          });
-        });
-      }
+      });
     }
     return styles;
   }
