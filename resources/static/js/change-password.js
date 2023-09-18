@@ -80,6 +80,7 @@ pwinput.addEventListener('input', (event) => {
         suggestions.className = 'alert alert-warning d-block';
       }
     } else {
+      suggestions.className = 'd-none';
       warning.className = 'd-none';
     }
   } else {
