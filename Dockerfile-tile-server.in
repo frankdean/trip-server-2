@@ -1,5 +1,5 @@
 # -*- mode: dockerfile; -*- vim: set ft=dockerfile:
-FROM alpine AS scratch
+FROM alpine:3.18.3 AS scratch
 WORKDIR /scratch
 ADD https://github.com/gravitystorm/openstreetmap-carto/archive/refs/tags/v5.7.0.tar.gz openstreetmap-carto-5.7.0.tar.gz
 ADD https://github.com/openstreetmap/mod_tile/archive/refs/tags/0.6.1.tar.gz mod_tile-0.6.1.tar.gz
@@ -10,11 +10,11 @@ ADD https://github.com/openstreetmap/mod_tile/archive/refs/tags/0.6.1.tar.gz mod
 RUN tar -xf openstreetmap-carto-5.7.0.tar.gz \
     && tar -xf mod_tile-0.6.1.tar.gz
 
-FROM postgres:15-bookworm AS build
+FROM postgres:15.4-bookworm AS build
 LABEL uk.co.fdsd.osm-mod-tile.version="@PACKAGE_VERSION@"
 
 ENV POSTGIS_MAJOR 3
-ENV POSTGIS_VERSION 3.3.3+dfsg-1.pgdg120+1
+ENV POSTGIS_VERSION 3.4.0+dfsg-1.pgdg120+1
 RUN apt-get update \
     && apt-cache showpkg postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR \
     && apt-get install -y --force-yes --no-install-recommends \
@@ -71,6 +71,30 @@ RUN a2enmod tile headers
 RUN a2enconf renderd
 
 WORKDIR /downloads
+# gis.dmp is a pg_dump of the gis database after importing a map.  It can be
+# copied from a previous version of the container:
+#
+#     $ docker run --rm -p 8080:80 --name tile-server -d fdean/tile-server
+#     $ docker cp tile-server:/downloads/gis.dmp provisioning/downloads/
+#
+# Alternatively, after import, run the map container, e.g.:
+#
+#     $ docker run -p 8080:80 --rm --name osm \
+#       -v osm-data:/data/database/ \
+#       -v osm-tiles:/data/tiles/ \
+#       -v $(pwd)/provisioning/downloads:/backup \
+#       -d overv/openstreetmap-tile-server:2.3.0 run
+#
+# connect to the running container:
+#
+#     $ docker exec -it osm bash
+#
+# dump the database contents using the default password:
+#
+#     $ docker exec --env=PGPASSWORD=renderer -it osm \
+#       pg_dump --no-owner --format=c -h localhost -U renderer \
+#       -f /backup/gis.dmp gis
+#
 COPY provisioning/downloads/gis.dmp .
 
 WORKDIR /docker-entrypoint-initdb.d

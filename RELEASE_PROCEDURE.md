@@ -34,6 +34,15 @@
 
 ## Docker
 
+1.  Optionally, build the database image.  This only needs updating if
+    there have been any database schema changes.
+
+	Update `Dockerfile-postgis` to use the latest
+	[PostgreSQL build](https://hub.docker.com/_/postgres).
+
+		$ cd ./trip-server-2
+		$ docker build -f Dockerfile-postgis -t fdean/trip-database:latest .
+
 1.  Build the `trip-server-2` image:
 
 	1.  Check the `Dockerfile` has been updated to the use the correct release
@@ -48,6 +57,13 @@
 
             $ vagrant upload trip-${VERSION}.tar.xz /home/vagrant/build/
 
+	1.  Optionally, check the image labels with:
+
+			$ docker image inspect --format='{{println .Config.Labels}}' \
+			  fdean/trip-server-2:latest
+			$ docker image inspect --format='{{println .Config.Labels}}' \
+			  fdean/trip-database:latest
+
     1.  Run the Docker build:
 
 		    $ cd ./trip-server-2
@@ -55,15 +71,6 @@
 
 	    The `--no-cache` option may be required if Docker skips the `COPY`
         command for the distribution tarball.
-
-1.  Optionally, build the database image.  This only needs updating if
-    there have been any database schema changes.
-
-	Update `Dockerfile-postgis` to use the latest
-	[PostgreSQL build](https://hub.docker.com/_/postgres).
-
-		$ cd ./trip-server-2
-		$ docker build -f Dockerfile-postgis -t fdean/trip-database:latest .
 
 1.	Test the Dockerfile
 

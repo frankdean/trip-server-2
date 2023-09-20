@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 2.1.1
+## 2.2.0
 
 - Bug fix - password change suggestions are now hidden when no longer relevant
 - Show password cracking time with more sensible units

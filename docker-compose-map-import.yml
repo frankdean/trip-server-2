@@ -14,15 +14,15 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 2048M
+          memory: 4096M
         reservations:
           cpus: '0.25'
           memory: 400M
     environment:
-      DOWNLOAD_PBF: https://download.geofabrik.de/europe/monaco-latest.osm.pbf
-      DOWNLOAD_POLY: https://download.geofabrik.de/europe/monaco.poly
+      # DOWNLOAD_PBF: https://download.geofabrik.de/europe/monaco-latest.osm.pbf
+      # DOWNLOAD_POLY: https://download.geofabrik.de/europe/monaco.poly
       # https://osm2pgsql.org/doc/manual.html
-      # OSM2PGSQL_EXTRA_ARGS: "-C 4096 --slim"
+      OSM2PGSQL_EXTRA_ARGS: "-C 3072 --slim"
     volumes:
       - osm-data:/data/database
     command: "import"

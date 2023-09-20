@@ -14,7 +14,7 @@ import_database() {
 	echo "Importing database..."
 	sed -i -e 's/max_wal_size = 1GB/max_wal_size = 2GB/' $PGDATA/postgresql.conf
 	sudo -u postgres /usr/lib/postgresql/15/bin/pg_ctl reload -D "$PGDATA"
-	sudo -u postgres pg_restore -d $POSTGRES_DB --no-owner --username=$POSTGRES_USER /downloads/gis.dmp
+	sudo -u postgres pg_restore -d $POSTGRES_DB --no-owner --no-privileges --username=$POSTGRES_USER /downloads/gis.dmp
     fi
 }
 
