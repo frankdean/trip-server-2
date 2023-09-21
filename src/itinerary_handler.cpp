@@ -578,7 +578,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       // Label for menu item to edit some or all of the details of a single selected route, track or waypoint
       "                <li><button class=\"dropdown-item\" formmethod=\"post\" name=\"action\" value=\"attributes\" accesskey=\"b\">" << translate("Attributes") << "</button></li> <!-- writable version -->\n"
       // Label for menu item to edit the segments and points belonging to a route or track
-      "                <li><button class=\"dropdown-item\" name=\"action\" value=\"edit-path\" value=\"edit-path\" accesskey=\"z\">" << translate("Path") << "</button></li> <!-- writable version -->\n"
+      "                <li><button class=\"dropdown-item\" name=\"action\" value=\"edit-path\" accesskey=\"z\">" << translate("Path") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n"
       // Label for menu item to join together selected routes or tracks
       "                <li><button class=\"dropdown-item\" name=\"action\" value=\"join-path\" accesskey=\"j\">" << translate("Join paths") << "</button></li> <!-- writable version -->\n"

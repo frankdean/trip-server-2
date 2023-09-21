@@ -22,6 +22,7 @@
 #ifndef TRACKING_REQUEST_HANDLER_HPP
 #define TRACKING_REQUEST_HANDLER_HPP
 
+#include "session_pg_dao.hpp"
 #include "tracking_pg_dao.hpp"
 #include "trip_request_handler.hpp"
 #include "../trip-server-common/src/pagination.hpp"
@@ -45,6 +46,9 @@ private:
       const TrackPgDao::location_search_query_params& query_params,
       const TrackPgDao::nickname_result& nickname_result,
       const TrackPgDao::tracked_locations_result& locations_result) const;
+  TrackPgDao::location_search_query_params
+      get_session_query_defaults(
+          SessionPgDao& session_dao, bool& first_time) const;
 protected:
   virtual void do_preview_request(
       const web::HTTPServerRequest& request,

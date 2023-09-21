@@ -23,7 +23,6 @@
 #include "tracking_request_handler.hpp"
 #include "tracking_download_handler.hpp"
 #include "trip_config.hpp"
-#include "session_pg_dao.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <locale>
@@ -318,6 +317,29 @@ void TrackingRequestHandler::build_form(
     ;
 }
 
+TrackPgDao::location_search_query_params
+    TrackingRequestHandler::get_session_query_defaults(
+        SessionPgDao& session_dao, bool& first_time) const
+{
+  TrackPgDao::location_search_query_params q;
+  try {
+    std::string json_str =
+      session_dao.get_value(get_session_id(), SessionPgDao::tracks_query_key);
+    if (!json_str.empty()) {
+      json j = json::parse(json_str);
+      q = j.get<TrackPgDao::location_search_query_params>();
+      first_time = false;
+      // std::cout << "Read query from session: " << j.dump(4) << '\n';
+    }
+  } catch (const std::exception& e) {
+    std::cerr << "Failed to fetch query parameters from session: "
+              << e.what() << '\n';
+    syslog(LOG_ERR, "Failed to fetch query parameters from session: %s",
+           e.what());
+  }
+  return q;
+}
+
 void TrackingRequestHandler::handle_authenticated_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
@@ -329,21 +351,7 @@ void TrackingRequestHandler::handle_authenticated_request(
 
   SessionPgDao session_dao;
   if (first_time) {
-    try {
-      std::string json_str =
-        session_dao.get_value(get_session_id(), SessionPgDao::tracks_query_key);
-      if (!json_str.empty()) {
-        json j = json::parse(json_str);
-        q = j.get<TrackPgDao::location_search_query_params>();
-        first_time = false;
-        // std::cout << "Read query from session: " << j.dump(4) << '\n';
-      }
-    } catch (const std::exception& e) {
-      std::cerr << "Failed to fetch query parameters from session: "
-                << e.what() << '\n';
-      syslog(LOG_ERR, "Failed to fetch query parameters from session: %s",
-             e.what());
-    }
+    q = get_session_query_defaults(session_dao, first_time);
   } else {
     // std::cout << "Query params\n";
     // for (auto const& p : request.get_query_params()) {
@@ -356,7 +364,8 @@ void TrackingRequestHandler::handle_authenticated_request(
                                                    query_params);
       // std::cout << "Fetched query from URL as: " << q << '\n';
     } else {
-      // Update default query parameters with the new 'date from'
+      q = get_session_query_defaults(session_dao, first_time);
+      // Update default/session query parameters with the new 'date from'
       DateTime dt(new_from);
       q.date_from = dt.get_time();
       // std::cout << "Updated query params: " << q << '\n';

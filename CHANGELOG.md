@@ -2,6 +2,10 @@
 
 # Changelog
 
+## 2.2.1
+
+- Bug Fix - use session defaults for location search when setting `date from`
+
 ## 2.2.0
 
 - Bug fix - password change suggestions are now hidden when no longer relevant
