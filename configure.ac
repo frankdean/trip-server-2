@@ -2,10 +2,10 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.2.1],[frank.dean@fdsd.co.uk])
-BOOTSTRAP_VERSION='5.3.1'
+AC_INIT([trip],[2.2.2-rc.1],[frank.dean@fdsd.co.uk])
+BOOTSTRAP_VERSION='5.3.2'
 OPENLAYERS_VERSION='7.5.2'
-PROJ4JS_VERSION='2.9.0'
+PROJ4JS_VERSION='2.9.1'
 OLC_VERSION='1.0.4'
 ZXCVBN_VERSION='4.4.2'
 AC_COPYRIGHT([Copyright (C) 2022-2023 Frank Dean])

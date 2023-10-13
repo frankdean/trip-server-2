@@ -432,6 +432,8 @@ To build from source other than a tarball release, e.g. a git clone, examine
 the contents of `./provisioning/bootstrap.sh` to see which packages are
 installed using `dnf`.
 
+[fedora_download]: https://fedoraproject.org/server/download/
+
 ### FreeBSD
 
 Minimal packages required to build from the source distribution tarball, for
@@ -464,6 +466,8 @@ Enable it with:
 To build from source other than a tarball release, e.g. a git clone, examine
 the contents of `./provisioning/bootstrap.sh` to see which packages are
 installed using `pkg`.
+
+[FreeBSD_download]: https://www.freebsd.org/where/
 
 ### macOS
 
