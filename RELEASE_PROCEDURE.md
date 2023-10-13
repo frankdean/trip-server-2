@@ -57,13 +57,6 @@
 
             $ vagrant upload trip-${VERSION}.tar.xz /home/vagrant/build/
 
-	1.  Optionally, check the image labels with:
-
-			$ docker image inspect --format='{{println .Config.Labels}}' \
-			  fdean/trip-server-2:latest
-			$ docker image inspect --format='{{println .Config.Labels}}' \
-			  fdean/trip-database:latest
-
     1.  Run the Docker build:
 
 		    $ cd ./trip-server-2
@@ -71,6 +64,13 @@
 
 	    The `--no-cache` option may be required if Docker skips the `COPY`
         command for the distribution tarball.
+
+	1.  Optionally, check the image labels with:
+
+			$ docker image inspect --format='{{println .Config.Labels}}' \
+			  fdean/trip-server-2:latest
+			$ docker image inspect --format='{{println .Config.Labels}}' \
+			  fdean/trip-database:latest
 
 1.	Test the Dockerfile
 
