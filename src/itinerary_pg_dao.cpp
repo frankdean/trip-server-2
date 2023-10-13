@@ -575,7 +575,7 @@ std::vector<ItineraryPgDao::route>
       "LEFT JOIN path_color rc ON r.color=rc.key "
       "LEFT JOIN itinerary_route_point p ON r.id=p.itinerary_route_id "
       "LEFT JOIN itinerary_sharing sh "
-      "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
+      "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1 "
       "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
       "AND r.itinerary_id = $2 AND r.id=ANY($3) "
       "ORDER BY r.id, p.id",
@@ -640,7 +640,7 @@ std::vector<ItineraryPgDao::route>
       "LEFT JOIN path_color rc ON r.color=rc.key "
       "LEFT JOIN itinerary_route_point p ON r.id=p.itinerary_route_id "
       "LEFT JOIN itinerary_sharing sh "
-      "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
+      "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1 "
       "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
       "AND r.itinerary_id = $2 "
       "ORDER BY r.id, p.id",
@@ -721,7 +721,7 @@ std::vector<ItineraryPgDao::track>
     "LEFT JOIN itinerary_track_segment ts ON t.id=ts.itinerary_track_id "
     "LEFT JOIN itinerary_track_point p ON ts.id=p.itinerary_track_segment_id "
     "LEFT JOIN itinerary_sharing sh "
-    "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
+    "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1 "
     "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
     "AND t.itinerary_id=$2 AND t.id=ANY($3) ORDER BY t.id, ts.id, p.id";
   // std::cout << "SQL: \n" << sql << '\n' << "track ids: " << ids_sql << '\n';
@@ -820,7 +820,7 @@ std::vector<ItineraryPgDao::track>
     "LEFT JOIN itinerary_track_segment ts ON t.id=ts.itinerary_track_id "
     "LEFT JOIN itinerary_track_point p ON ts.id=p.itinerary_track_segment_id "
     "LEFT JOIN itinerary_sharing sh "
-    "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
+    "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1 "
     "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
     "AND t.itinerary_id=$2 ORDER BY t.id, ts.id, p.id";
   // std::cout << "SQL: \n" << sql << '\n';
@@ -927,7 +927,7 @@ std::vector<ItineraryPgDao::waypoint>
       "FROM itinerary_waypoint w "
       "JOIN itinerary i ON i.id=w.itinerary_id "
       "LEFT JOIN itinerary_sharing sh "
-      "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
+      "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1 "
       "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
       "AND w.itinerary_id=$2 AND w.id=ANY($3) "
       "ORDER BY name, symbol, id",
@@ -972,7 +972,7 @@ std::vector<ItineraryPgDao::waypoint>
       "FROM itinerary_waypoint w "
       "JOIN itinerary i ON i.id=w.itinerary_id "
       "LEFT JOIN itinerary_sharing sh "
-      "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1"
+      "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1 "
       "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
       "AND w.itinerary_id=$2"
       "ORDER BY name, symbol, id",
