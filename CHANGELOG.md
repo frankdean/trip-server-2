@@ -2,6 +2,14 @@
 
 # Changelog
 
+## 2.2.2
+
+- Update versions of Bootstrap and Proj4js
+- Bug fix - invalid SQL
+
+	Version 13 of PostgreSQL is tolerant of a missing space after a parameter,
+	but not PostgreSQL 15.
+
 ## 2.2.1
 
 - Bug Fix - use session defaults for location search when setting `date from`

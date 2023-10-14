@@ -1,5 +1,5 @@
 # -*- mode: dockerfile; -*- vim: set ft=dockerfile:
-FROM  debian:11.7-slim AS build
+FROM  debian:12.2-slim AS build
 RUN groupadd --gid 1000 trip \
     && useradd --uid 1000 --gid trip --shell /bin/bash --create-home trip
 RUN apt-get update \
@@ -45,7 +45,7 @@ RUN make install install-html install-pdf
 
 WORKDIR /usr/local/etc
 
-FROM  debian:11.7-slim
+FROM  debian:12.2-slim
 LABEL uk.co.fdsd.tripserver.version="@PACKAGE_VERSION@"
 
 RUN groupadd --gid 1000 trip \
@@ -54,8 +54,8 @@ RUN groupadd --gid 1000 trip \
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     locales tzdata \
-    libboost-locale1.74.0 libpugixml1v5 libyaml-cpp0.6 \
-    uuid libpqxx-6.4 libcairomm-1.0-1v5 libcmark0.29.0 \
+    libboost-locale1.74.0 libpugixml1v5 libyaml-cpp0.7 \
+    uuid libpqxx-6.4 libcairomm-1.0-1v5 libcmark0.30.2 \
     postgresql postgresql-contrib postgis
 
 RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \

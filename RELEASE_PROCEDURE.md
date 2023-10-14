@@ -34,6 +34,13 @@
 
 ## Docker
 
+1.  Check the `Dockerfile` has been updated to the use the correct release
+	version number.  The version information is updated by `configure`
+	when `Dockerfile` is created from `Dockerfile.in`.
+
+		$ grep 'ARG TRIP_SERVER_VERSION' Dockerfile
+		$ grep LABEL Dockerfile Dockerfile-postgis
+
 1.  Optionally, build the database image.  This only needs updating if
     there have been any database schema changes.
 
@@ -44,13 +51,6 @@
 		$ docker build -f Dockerfile-postgis -t fdean/trip-database:latest .
 
 1.  Build the `trip-server-2` image:
-
-	1.  Check the `Dockerfile` has been updated to the use the correct release
-        version number.  The version information is updated by `configure`
-        when `Dockerfile` is created from `Dockerfile.in`.
-
-            $ grep 'ARG TRIP_SERVER_VERSION' Dockerfile
-            $ grep LABEL Dockerfile Dockerfile-postgis
 
     1.  If necessary, copy the `trip server` distribution tarball to the root
         source folder to build the Docker image. E.g.
