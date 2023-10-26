@@ -39,6 +39,8 @@ Copyright @copyright{} 2021-2023 Frank Dean
 @end ifnottex
 
 @c @setchapternewpage off
+@codequoteundirected on
+@codequotebacktick on
 
 @menu
 * Overview::
@@ -122,6 +124,7 @@ Testing and Developing Trip
 
 * Vagrant::
 * Docker::
+* Using QEMU for Development and Testing::
 * Testing with Curl::
 * Load Testing::
 
@@ -1040,6 +1043,7 @@ the Apache @code{<VirtualHost/>} sections:
 @menu
 * Vagrant::
 * Docker::
+* Using QEMU for Development and Testing::
 * Testing with Curl::
 * Load Testing::
 @end menu
@@ -1258,7 +1262,7 @@ This can occur after deleting the project's @code{.vagrant} sub-folder
 Vagrant instance.  Web searches suggest there are other scenarios that
 result in a similarly confusing error message.
 
-@node Docker, Testing with Curl, Vagrant, Testing and Developing Trip
+@node Docker, Using QEMU for Development and Testing, Vagrant, Testing and Developing Trip
 @section Docker
 @cindex Docker
 
@@ -1292,7 +1296,7 @@ $ docker build -f Dockerfile-postgis -t fdean/trip-database:latest .
 
 The application container is built from a source tarball which needs to be in
 the root directory of the project and match the version number in
-`configure.ac`.
+@code{configure.ac}.
 
 @example
 $ cd ./trip-server-2
@@ -1394,7 +1398,175 @@ $ docker compose -f docker-compose-map-server.yml down
 
 @end enumerate
 
-@node Testing with Curl, Load Testing, Docker, Testing and Developing Trip
+@node Using QEMU for Development and Testing, Testing with Curl, Docker, Testing and Developing Trip
+@section Using QEMU for Development and Testing
+@cindex Using QEMU for Development and Testing
+@cindex QEMU
+
+@url{https://www.qemu.org,QEMU} can be used directly instead of using
+Vagrant for creating development and test environments, by setting up
+the QEMU image similarly to how the Vagrant setup scripts expect the
+environment to be configured.
+
+@enumerate
+
+@item
+Download and startup the QEMU @code{qcow2} image.  Ideally download a
+version that corresponds with the Vagrant box version referenced within
+the @code{Vagrantfile} in the Trip Server source distribution tarball
+being used.
+
+Example command to create and start a
+@url{https://fedoraproject.org/server/download/,Fedora server QEMU
+instance} on macOS:
+
+@enumerate a
+
+@item
+Create the @code{qcow2} image.  This example creates the image based on
+the downloaded @code{qcow2} image as a backing file. (Note that
+specifying a size is optional.  The Fedora base was 6G and the system
+install completed with 1.5G to spare):
+
+@example
+$ qemu-img create -b Fedora-Server-KVM-38-1.6.x86_64.qcow2 \
+-F qcow2 -f qcow2 fedora-38.qcow2 6G
+@end example
+
+@item
+Start the image...
+
+Fedora example on a Linux host:
+
+@example
+$ sudo qemu-system-x86_64 -name Fedora_38 -M accel=kvm \
+-cpu host -m 2G \
+-drive file=fedora-38.qcow2,if=none,id=hd -device \
+virtio-blk-pci,drive=hd \
+-nic user,hostfwd=tcp::2222-:22,hostfwd=tcp::8080-8080 \
+-nographic
+@end example
+
+The above example uses the @code{-nographic} option which runs the
+server headless.  It also forwards port 2222 on the host to port 22 on
+the guest, allowing you to SSH into the guest, e.g.:
+
+@example
+$ ssh -p 2222 vagrant@@localhost
+@end example
+
+Fedora example on a macOS host:
+
+@example
+$ sudo qemu-system-x86_64 \
+-name Fedora_38 -M accel=hvf -cpu host -smp cpus=2 -m 2G \
+-drive file=fedora-38.qcow2,if=none,id=hd \
+-vga virtio \
+-device virtio-blk-pci,drive=hd \
+-usb -device usb-tablet -device usb-audio \
+-display cocoa,show-cursor=on \
+-nic vmnet-bridged,ifname=en1
+@end example
+
+The last line creates a bridged network for the Wi-Fi device named
+@code{en1}.  This setting requires the command to be run as root to
+create the network bridge on the host.
+
+@item
+The version of Fedora in the above example uses
+@url{https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux),LVM}
+to manage logical partitions.  If you created the image with a larger
+size than the original backing file, we now need to resize the LVM
+partition in the container, then resize the file system on the
+@code{/dev/mapper/sysvg-root} partition.  Resizing is only required if
+you specified a size when creating the image and need the additional
+space.
+
+If you want to increase the image size subsequently, shutdown the
+instance and resize it with e.g. @code{qemu-img resize fedora-38.qcow2
++5G} to increase the image size by 5G.  Then follow these instructions
+to resize the underlying file system.
+
+Run @code{sudo parted /dev/vda} interactively.  The interactive command
+@code{help} provides help on the available commands.  Use @code{print
+free} to see the available space.  Resize the @code{lvm} partition,
+e.g. @code{resizepart 3 10GB} with the third @code{END} parameter being
+whatever then @code{End} column shows for the end of the free space.
+Exit @code{parted} with @code{quit}.  Alternatively, use @code{sudo
+cfdisk /dev/sda} for another interactive command line tool to resize the
+partition.
+
+Resize the LVM physical volume with @code{sudo pvresize /dev/vda3}.
+Then resize the volume with @code{sudo lvresize -l100%VG sysvg
+/dev/vda3}.  Finally, resize the root file system with @code{sudo
+xfs_growfs /}.
+
+@end enumerate
+
+@item
+Create a @code{vagrant} user in the QEMU instance.  On most systems,
+this will be by using the @code{adduser} command.
+
+On Debian:
+
+@example
+$ sudo adduser vagrant
+@end example
+
+On FreeBSD, install the @code{bash} package with @code{pkg install bash} then
+run @code{adduser} interactively with.
+
+@item
+Create the @code{vagrant} folder that would normally be mapped to the
+Trip Server source folder.
+
+@example
+# mkdir /vagrant
+# chown vagrant:vagrant /vagrant
+@end example
+
+@item
+Upload the @code{trip-server} source distribution tarball to the QEMU
+instance.
+
+@item
+Extract the source to the @code{/vagrant} folder, e.g.:
+
+@example
+# cd /vagrant
+# su - vagrant -c 'tar -C /vagrant --strip-components=1 \
+  -xf /home/vagrant/trip-2.2.2.tar.gz'
+@end example
+
+@item
+Execute the Vagrant scripts:
+
+@example
+# bash -x /vagrant/provisioning/bootstrap.sh
+# bash -x /vagrant/provisioning/bootconfig.sh
+@end example
+
+If all has gone well, @code{trip-server} will have been built in the
+@code{/home/vagrant/build} folder and installed at
+@code{/usr/local/bin/trip-server}.
+
+@item
+To test the server, open the firewall in the Fedora guest with:
+
+@example
+$ sudo firewall-cmd --add-port=8080/tcp
+$ sudo firewall-cmd --list-ports
+@end example
+
+You can make the firewall change survive reboots with @code{sudo
+firewall-cmd --runtime-to-permanent}.
+
+Run @code{trip-server} and navigate to the host's IP address and port
+8080 using a browser and the login page should be shown.
+
+@end enumerate
+
+@node Testing with Curl, Load Testing, Using QEMU for Development and Testing, Testing and Developing Trip
 @section Testing with Curl
 @cindex Testing with Curl
 

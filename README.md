@@ -385,9 +385,7 @@ For further ideas on configuring your environment, see the scripts and files
 under the `./provisioning` directory, which can be used to create a
 development environment using [Vagrant][]. See the `Testing and Developing
 Trip` section of the application manual (`info trip-server`) for more
-information on using and running the application with Vagrant.
-
-[Vagrant]: https://www.vagrantup.com "Development Environments Made Easy"
+information on using and running the application with Vagrant and [Qemu][].
 
 ### Fedora
 
@@ -560,6 +558,7 @@ See [CHANGELOG](./CHANGELOG.md)
 [PostGIS]: https://postgis.net "Spatial and Geographic objects for PostgreSQL"
 [PostgreSQL]: https://www.postgresql.org "A powerful, open source object-relational database system"
 [PostgreSQL]: https://www.postgresql.org "A powerful, open source object-relational database system"
+[Qemu]: https://www.qemu.org "A generic and open source machine emulator and virtualizer"
 [RaspberryPi]: https://www.raspberrypi.org
 [Traccar Client]: https://www.traccar.org/client/
 [TripLogger]: https://www.fdsd.co.uk/triplogger/ "TripLogger Remote for iOS"

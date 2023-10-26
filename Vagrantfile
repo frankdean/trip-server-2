@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
     # https://wiki.debian.org/Teams/Cloud/VagrantBaseBoxes
     # Boxes: https://app.vagrantup.com/debian
     debian.vm.box = "debian/bullseye64"
-    debian.vm.box_version = "11.20230615.1"
+    debian.vm.box_version = "11.20231009.1"
 
     # Share an additional folder to the guest VM. The first argument is
     # the path on the host to the actual folder. The second argument is
@@ -48,9 +48,9 @@ Vagrant.configure("2") do |config|
     debian.vm.network "forwarded_port", guest: 8081, host: 8081
   end
 
-  config.vm.define "debian12", primary: false do |debian12|
+  config.vm.define "debian12", autostart: false do |debian12|
     debian12.vm.box = "debian/bookworm64"
-    #debian12.vm.box_version = "12.20230602.1"
+    debian12.vm.box_version = "12.20231009.1"
     if myEnv[:TRIP_DEV] == "y"
       debian12.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client"
       debian12.vm.synced_folder "../trip-server", "/vagrant-trip-server"
@@ -65,8 +65,8 @@ Vagrant.configure("2") do |config|
   #   vagrant reload fedora --provision
   config.vm.define "fedora", autostart: false do |fedora|
     # boxes at https://app.vagrantup.com/fedora/
-    fedora.vm.box = "fedora/36-cloud-base"
-    #fedora.vm.box_version = "36-20220504.1"
+    fedora.vm.box = "fedora/38-cloud-base"
+    fedora.vm.box_version = "38.20230413.1"
 
     # If the VirtualBox guest additions fail to install, first try:
     #
@@ -103,9 +103,8 @@ Vagrant.configure("2") do |config|
   #
   config.vm.define "freebsd", autostart: false do |freebsd|
     # https://app.vagrantup.com/freebsd
-    freebsd.vm.box = "freebsd/FreeBSD-13.1-STABLE"
-    #freebsd.vm.box_version = "2022.10.14"
-    freebsd.vm.box_version = "2023.01.27"
+    freebsd.vm.box = "freebsd/FreeBSD-13.2-STABLE"
+    freebsd.vm.box_version = "2023.10.19"
 
     # Bento box does not have bash shell:
     #freebsd.vm.box = "bento/freebsd-13"
@@ -130,10 +129,11 @@ Vagrant.configure("2") do |config|
     freebsd.vm.network "forwarded_port", guest: 8080, host: 8084
     freebsd.vm.network "forwarded_port", guest: 8081, host: 8085
 
-    freebsd.ssh.password = "vagrant"
-
-    # Export the following environment variable to enable specifying the disk size
-    # export VAGRANT_EXPERIMENTAL="disks"
+    # Export the following environment variable to enable specifying the disk
+    # size:
+    #
+    #     $ export VAGRANT_EXPERIMENTAL="disks"
+    #
     # FreeBSD needs more disk space than the default.  Suggest a minimum of
     # 13GB or 28GB if installing textlive-full, which is only needed for
     # building the PDF documentation.  This will only grow the disk space on a
@@ -159,9 +159,36 @@ Vagrant.configure("2") do |config|
     #   #rockylinux.vm.synced_folder ".", "/vagrant", type: "rsync"
     #   rockylinux.vm.synced_folder ".", "/vagrant", type: "virtualbox", automount: false
     # end
+
+    rockylinux.vm.synced_folder ".", "/vagrant", type: "rsync"
+
     if myEnv[:TRIP_DEV] == "y"
-      rockylinux.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client"
-      rockylinux.vm.synced_folder "../trip-server", "/vagrant-trip-server"
+      rockylinux.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client", type: "rsync"
+      rockylinux.vm.synced_folder "../trip-server", "/vagrant-trip-server", type: "rsync"
+
+      # Export the following environment variable to enable specifying the
+      # disk size:
+      #
+      #     $ export VAGRANT_EXPERIMENTAL="disks"
+      #
+      rockylinux.vm.disk :disk, size: "28GB", primary: true
+      #
+      # Vagrant will expand the size of the underlying disk, but not the
+      # partition or filesystem.  Use `sudo fdisk -l` to see which partition
+      # needs expanding.  It's probably easiest to use `parted` to resize the
+      # partition, e.g. expanding `/dev/sda5` (in the Vagrant guest):
+      #
+      #     $ sudo parted /dev/sda resizepart 5
+      #
+      # `parted` will prompt for the `END` position.  Accept the default.
+      # Then resize the file system on the newly expanded root partition with:
+      #
+      #     $ sudo xfs_grow /
+      #
+      # Force a recheck of the file system on next boot with:
+      #
+      #     $ sudo touch /forcefsck
+      #
     end
     rockylinux.vm.network "forwarded_port", guest: 8080, host: 8086
     rockylinux.vm.network "forwarded_port", guest: 8081, host: 8087

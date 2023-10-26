@@ -33,8 +33,12 @@ LIBPQXX_DOWNLOAD="libpqxx-${LIBPQXX_VERSION}.tar.gz"
 LIBPQXX_DOWNLOAD_URL="https://github.com/jtv/libpqxx/archive/refs/tags/${LIBPQXX_VERSION}.tar.gz"
 NLOHMANN_JSON_DOWNLOAD_URL="https://github.com/nlohmann/json/releases/download/${NLOHMANN_JSON_VERSION}/json.hpp"
 
+SHASUM=shasum
 SU_CMD="su vagrant -c"
 
+if [ -f /usr/lib/fedora-release ]; then
+    SHASUM=sha256sum
+fi
 if [ ! -d "$DOWNLOAD_CACHE_DIR" ]; then
     mkdir -p "$DOWNLOAD_CACHE_DIR"
 fi
@@ -53,13 +57,17 @@ function install_libpqxx_6
 	    fi
 	fi
 	if [ -r "${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD}" ]; then
-	    echo "$LIBPQXX_SHA256  ${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD}" | shasum -c -
+	    echo "$LIBPQXX_SHA256  ${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD}" | $SHASUM -c -
 	    if [ $? -ne "0" ]; then
 		2>&1 echo "Checksum of ${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD} does not match expected value of ${LIBPQXX_SHA256}"
 		exit 1
 	    fi
+	fi
+	if [ ! -f /usr/local/include/pqxx/pqxx ]; then
 	    cd /usr/local/src
-	    mkdir "libpqxx-${LIBPQXX_VERSION}"
+	    if [ ! -d "libpqxx-${LIBPQXX_VERSION}" ]; then
+		mkdir "libpqxx-${LIBPQXX_VERSION}"
+	    fi
 	    chown vagrant:vagrant "libpqxx-${LIBPQXX_VERSION}"
 	    $SU_CMD "tar -C /usr/local/src -xf ${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD}"
 	    cd "libpqxx-${LIBPQXX_VERSION}"
@@ -96,7 +104,7 @@ function install_nlohmann_json
 	    curl -L --output "${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" $NLOHMANN_JSON_DOWNLOAD_URL
 	fi
 	if [ -r "${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" ]; then
-	    echo "$NLOHMANN_JSON_SHA256  ${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" | shasum -c -
+	    echo "$NLOHMANN_JSON_SHA256  ${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" | $SHASUM -c -
 	    if [ $? -ne "0" ]; then
 		>&2 echo "Checksum of ${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp does not match expected value of ${NLOHMANN_JSON_SHA256}"
 		exit 1
@@ -124,7 +132,7 @@ function install_nodejs
 	    curl --location --remote-name --output-dir ${DOWNLOAD_CACHE_DIR} $NODE_DOWNLOAD_URL
 	fi
 	if [ -e "${DOWNLOAD_CACHE_DIR}/$NODE_TAR_FILENAME" ]; then
-	    echo "$NODE_SHA256  ${DOWNLOAD_CACHE_DIR}/$NODE_TAR_FILENAME" | shasum -c -
+	    echo "$NODE_SHA256  ${DOWNLOAD_CACHE_DIR}/$NODE_TAR_FILENAME" | $SHASUM -c -
 	    if [ $? -ne "0" ]; then
 		>&2 echo "Checksum of downloaded file does not match expected value of ${NODE_SHA256}"
 		exit 1
@@ -165,7 +173,7 @@ function install_nodejs
 
 if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
     DNF_OPTIONS="--assumeyes"
-    dnf $DNF_OPTIONS install gcc gawk boost-devel libpq-devel \
+    dnf $DNF_OPTIONS install gcc gcc-c++ gawk boost-devel libpq-devel \
 	libpq-devel libuuid-devel \
 	curl libX11 libXt libXmu \
 	vim autoconf automake info libtool \
@@ -186,9 +194,9 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 	dnf $DNF_OPTIONS install epel-release
 	# https://forums.rockylinux.org/t/how-do-i-install-powertools-on-rocky-linux-9/7427/3
 	dnf $DNF_OPTIONS config-manager --set-enabled crb
-	dnf $DNF_OPTIONS install gcc gcc-c++ make perl kernel-devel kernel-headers \
+	dnf $DNF_OPTIONS install make perl kernel-devel kernel-headers \
 	    bzip2 dkms boost-locale autoconf-archive info yarnpkg \
-	    texinfo apg \
+	    texinfo texinfo-tex cairomm-devel apg \
 	    yaml-cpp-devel pugixml-devel screen cmark-devel
 	dnf $DNF_OPTIONS update 'kernel-*'
 
@@ -245,7 +253,7 @@ fi
 if [ -x /bin/freebsd-version ]; then
     FREEBSD_PKG_OPTIONS='--yes'
     pkg install $FREEBSD_PKG_OPTIONS pkgconf git boost-all yaml-cpp \
-	postgresql13-client postgresql13-contrib postgresql13-server \
+	postgresql15-client postgresql15-contrib postgresql15-server \
 	postgis33 \
 	python3 pugixml e2fsprogs-libuuid nlohmann-json \
 	texinfo vim python3 valgrind apg \

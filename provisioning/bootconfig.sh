@@ -38,7 +38,7 @@ fi
 
 # Create trip-server configuration file from distribution file
 # signingKey and resourceSigningKey only needed for trip v1
-SIGNING_KEY=$(apg  -m 12 -x 14 -M NC -t -n 20 | tail -n 1 | cut -d ' ' -f 1 -)
+SIGNING_KEY=$(apg  -m 12 -x 14 -M s -t -n 20 | tail -n 1 | cut -d ' ' -f 1 -)
 if [ $? -ne 0 ]; then
     echo "apg is not installed"
     exit 1
@@ -137,7 +137,7 @@ if [ ! -x /usr/local/bin/trip-server ]; then
 	PG_LIBDIR=$(/usr/pgsql-13/bin/pg_config --libdir)
 	# SUCCESS -> $SU_CMD "pwd && /vagrant/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
 	# SUCCESS -> $SU_CMD "pwd && /vagrant/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
-	$SU_CMD "pwd && /vagrant/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
+	$SU_CMD "pwd && /vagrant/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal --enable-cairo"
     else
 	$SU_CMD "/vagrant/configure CXXFLAGS='-g -O0' --disable-gdal --enable-cairo"
     fi
