@@ -2,6 +2,14 @@
 
 # Changelog
 
+## Next release
+
+- Fix reading and writing OSMAnd `color` XML attribute
+
+	This is a partial fix just for the `color` attribute as OSMAnd has
+	introduced additional GPX extended attributes, e.g. `icon` and
+	`background`.
+
 ## 2.2.2
 
 - Update versions of Bootstrap and Proj4js

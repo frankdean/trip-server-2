@@ -274,7 +274,7 @@ void ItineraryWaypointEditHandler::build_form(
     "      </div>\n"
     "      <div class=\"col-md-6 col-lg-4\">\n"
     "        <label for=\"input-color\">" << translate("OsmAnd color") << "</label>\n"
-    "        <input id=\"input-color\" name=\"color\" type=\"text\" placeholder=\"#001122\" pattern=\"^#[0-9a-fA-F]{1,6}$\" value=\"";
+    "        <input id=\"input-color\" name=\"color\" type=\"text\" placeholder=\"#ff001122\" pattern=\"^#[0-9a-fA-F]{1,8}$\" value=\"";
   append_value(response.content,
                waypoint->id.first && waypoint->color.first,
                x(waypoint->color.second));

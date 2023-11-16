@@ -207,7 +207,9 @@ void ItineraryUploadHandler::add_waypoint(
   wpt.type = child_node_as_string(node, "type");
   auto exts = node.child("extensions");
   if (exts.type() != node_null) {
-    wpt.color = child_node_as_string(exts, "color");
+    // OSMAnd source for extension types:
+    // https://github.com/osmandapp/OsmAnd/blob/master/OsmAnd-java/src/main/java/net/osmand/gpx/GPXUtilities.java#L59
+    wpt.color = child_node_as_string(exts, "osmand:color");
     auto ext = exts.child("wptx1:WaypointExtension");
     if (ext.type() != node_null)
       wpt.avg_samples = child_node_as_long(ext, "wptx1:Samples");

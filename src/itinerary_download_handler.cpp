@@ -59,19 +59,27 @@ void ItineraryDownloadHandler::handle_gpx_download(
   //   }
   // }
 
+  const auto trip_config = std::static_pointer_cast<TripConfig>(config);
+  // allow_invalid_xsd now effectively means include OSMAnd attributes
+  const bool allow_invalid_xsd = trip_config->get_allow_invalid_xsd();
+  std::stringstream gpx_attributes;
+  gpx_attributes <<
+    "<gpx xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+    "creator=\"TRIP\" version=\"1.1\" "
+    "xmlns=\"http://www.topografix.com/GPX/1/1\" ";
+  if (allow_invalid_xsd)
+    gpx_attributes << "xmlns:osmand=\"https://osmand.net\" ";
+  gpx_attributes <<
+    "xmlns:gpxx=\"http://www.garmin.com/xmlschemas/GpxExtensions/v3\" "
+    "xmlns:wptx1=\"http://www.garmin.com/xmlschemas/WaypointExtension/v1\" "
+    "xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 "
+    "http://www.topografix.com/GPX/1/1/gpx.xsd "
+    "http://www.garmin.com/xmlschemas/GpxExtensions/v3 "
+    "http://www8.garmin.com/xmlschemas/GpxExtensionsv3.xsd "
+    "http://www.garmin.com/xmlschemas/WaypointExtension/v1 "
+    "http://www8.garmin.com/xmlschemas/WaypointExtensionv1.xsd\"></gpx>";
   xml_document doc;
-  doc.load_string(
-      "<gpx xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-      "creator=\"TRIP\" version=\"1.1\" "
-      "xmlns=\"http://www.topografix.com/GPX/1/1\" "
-      "xmlns:gpxx=\"http://www.garmin.com/xmlschemas/GpxExtensions/v3\" "
-      "xmlns:wptx1=\"http://www.garmin.com/xmlschemas/WaypointExtension/v1\" "
-      "xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 "
-      "http://www.topografix.com/GPX/1/1/gpx.xsd "
-      "http://www.garmin.com/xmlschemas/GpxExtensions/v3 "
-      "http://www8.garmin.com/xmlschemas/GpxExtensionsv3.xsd "
-      "http://www.garmin.com/xmlschemas/WaypointExtension/v1 "
-      "http://www8.garmin.com/xmlschemas/WaypointExtensionv1.xsd\"></gpx>");
+  doc.load(gpx_attributes);
   xml_node decl = doc.prepend_child(node_declaration);
   decl.append_attribute("version") = "1.0";
   decl.append_attribute("encoding") = "UTF-8";
@@ -112,13 +120,10 @@ void ItineraryDownloadHandler::handle_gpx_download(
     if (wpt.type.first)
       wpt_node.append_child("type").append_child(node_pcdata)
         .set_value(wpt.type.second.c_str());
-    const auto trip_config = std::static_pointer_cast<TripConfig>(config);
-    // The 'color' element used by OsmAnd is not valid in the XSDs, so optional config
-    const bool allow_invalid_xsd = trip_config->get_allow_invalid_xsd();
     if ((allow_invalid_xsd && wpt.color.first) || wpt.avg_samples.first) {
       xml_node ext_node = wpt_node.append_child("extensions");
       if (allow_invalid_xsd && wpt.color.first)
-        ext_node.append_child("color").append_child(node_pcdata)
+        ext_node.append_child("osmand:color").append_child(node_pcdata)
           .set_value(wpt.color.second.c_str());
       if (wpt.avg_samples.first)
         ext_node.append_child("wptx1:WaypointExtension")
