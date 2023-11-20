@@ -27,6 +27,8 @@
 #include "../trip-server-common/src/get_options.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include <boost/locale.hpp>
+#include <nlohmann/json.hpp>
+#include <map>
 
 using namespace fdsd::trip;
 using namespace fdsd::web;
@@ -37,6 +39,10 @@ using namespace pugi;
 #ifdef HAVE_GDAL
 extern ElevationService *elevation_service;
 #endif
+
+std::string ItineraryUploadHandler::xml_osmand_namespace = "osmand";
+std::string ItineraryUploadHandler::xml_osmand_color =
+  xml_osmand_namespace + ":color";
 
 /**
  * Fetches an XML node element's value as an optional pair containing a
@@ -195,6 +201,7 @@ void ItineraryUploadHandler::add_waypoint(
     ItineraryPgDao::itinerary_features &features,
     const pugi::xml_node &node)
 {
+  const std::string osmand_ns_prefix = xml_osmand_namespace + ":";
   ItineraryPgDao::waypoint wpt;
   wpt.longitude = node.attribute("lon").as_double();
   wpt.latitude = node.attribute("lat").as_double();
@@ -207,9 +214,23 @@ void ItineraryUploadHandler::add_waypoint(
   wpt.type = child_node_as_string(node, "type");
   auto exts = node.child("extensions");
   if (exts.type() != node_null) {
+    // Read all the OSMAnd extended types into a map
     // OSMAnd source for extension types:
     // https://github.com/osmandapp/OsmAnd/blob/master/OsmAnd-java/src/main/java/net/osmand/gpx/GPXUtilities.java#L59
-    wpt.color = child_node_as_string(exts, "osmand:color");
+    std::map<std::string, std::string> extended_attributes;
+    for (auto i = exts.begin(); i != exts.end(); i++) {
+      const std::string name = i->name();
+      if (name.rfind(osmand_ns_prefix, 0) == 0)
+        extended_attributes[name] = i->child_value();
+    }
+    wpt.extended_attributes.first = extended_attributes.size() > 0;
+    if (wpt.extended_attributes.first) {
+      nlohmann::json j_extended_attributes(extended_attributes);
+      wpt.extended_attributes.second = j_extended_attributes.dump();
+    }
+
+    // Only handle the sample count for Garmin extensions - room to enhance in
+    // the future by handling similarly to the OSMAnd extended attributes.
     auto ext = exts.child("wptx1:WaypointExtension");
     if (ext.type() != node_null)
       wpt.avg_samples = child_node_as_long(ext, "wptx1:Samples");

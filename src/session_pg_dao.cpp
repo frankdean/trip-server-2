@@ -23,10 +23,12 @@
 #include "session_pg_dao.hpp"
 #include "../trip-server-common/src/dao_helper.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
+#include <boost/locale.hpp>
 #include <iostream>
 #include <sstream>
 #include <syslog.h>
 
+using namespace boost::locale;
 using namespace pqxx;
 using namespace fdsd::utils;
 using namespace fdsd::web;
@@ -339,10 +341,32 @@ void SessionPgDao::upgrade()
 
   try {
     work tx(*connection);
-    tx.exec("CREATE EXTENSION pgcrypto");
+    auto r = tx.exec("SELECT COUNT(*) FROM information_schema.columns "
+                      "WHERE table_name='itinerary_waypoint' AND "
+                      "column_name = 'color'");
+    if (r[0][0].as<int>() == 1) {
+      syslog(LOG_INFO, "%s", translate("Converting OSMAnd `color` column to new `extended_attributes` column").str().c_str());
+      tx.exec("ALTER TABLE itinerary_waypoint ADD COLUMN IF NOT EXISTS extended_attributes TEXT");
+      tx.exec("UPDATE itinerary_waypoint "
+              "SET extended_attributes='{\"osmand:color\":\"' || color || '\"}' "
+              "WHERE color IS NOT NULL");
+      tx.exec("ALTER TABLE itinerary_waypoint DROP COLUMN color");
+    }
     tx.commit();
   } catch (const std::exception& e) {
-    std::cerr << "Failure creating pgcrypto extension: "
+    std::cerr << "Failure upgrading database schema: "
+              << e.what() << '\n';
+    syslog(LOG_ERR, "Failure upgrading database schema: %s",
+           e.what());
+    throw;
+  }
+
+  try {
+    work tx(*connection);
+    tx.exec("CREATE EXTENSION IF NOT EXISTS pgcrypto");
+    tx.commit();
+  } catch (const std::exception& e) {
+    std::cerr << "Error creating pgcrypto extension: "
               << e.what() << '\n';
   }
 }

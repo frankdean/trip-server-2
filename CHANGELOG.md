@@ -2,13 +2,17 @@
 
 # Changelog
 
-## Next release
+## 2.3.0
 
-- Fix reading and writing OSMAnd `color` XML attribute
+- Updated the upload and download of GPX files to include the OSMAnd XML
+  namespace (only if required) and updated the format of the OSMAnd waypoint
+  `color` attribute.  The `color` and additional OSMAnd extended waypoint
+  attributes are now stored as JSON in a new `external_attributes` column in
+  `itinerary_waypoint`.  The database schema must be updated using the
+  `trip-server --upgrade` option, which also converts and removes the existing
+  `color` column.  Make a backup before running the upgrade.
 
-	This is a partial fix just for the `color` attribute as OSMAnd has
-	introduced additional GPX extended attributes, e.g. `icon` and
-	`background`.
+  Consequently the `allowInvalidXsd` configuration option is now redundant.
 
 ## 2.2.2
 

@@ -40,7 +40,6 @@ TripConfig::TripConfig(std::string filename) :
   providers(),
   tile_cache_max_age(),
   tile_count_frequency(),
-  allow_invalid_xsd(false),
   gpx_pretty(false),
   gpx_indent(2),
   default_average_kmh_hiking_speed(4),
@@ -61,8 +60,6 @@ TripConfig::TripConfig(std::string filename) :
       if (app["pg_pool_size"])
         pg_pool_size = app["pg_pool_size"].as<int>();
       if (auto gpx = app["gpx"]) {
-        if (gpx["allowInvalidXsd"])
-          allow_invalid_xsd = gpx["allowInvalidXsd"].as<bool>();
         if (gpx["pretty"])
           gpx_pretty = gpx["pretty"].as<bool>();
         if (gpx["indent"])

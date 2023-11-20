@@ -22,6 +22,7 @@
 #include "../config.h"
 #include "itinerary_waypoint_edit_handler.hpp"
 #include "itinerary_handler.hpp"
+#include "itinerary_upload_handler.hpp"
 #include "session_pg_dao.hpp"
 #ifdef HAVE_GDAL
 #include "elevation_tile.hpp"
@@ -273,11 +274,25 @@ void ItineraryWaypointEditHandler::build_form(
     "\">\n"
     "      </div>\n"
     "      <div class=\"col-md-6 col-lg-4\">\n"
+    "        <input id=\"input-ext-attrs\" name=\"ext-attrs\" type=\"hidden\" value=\"";
+  append_value(response.content,
+               waypoint->id.first && waypoint->extended_attributes.first,
+               x(waypoint->extended_attributes.second));
+  response.content
+    <<
+    "\">\n"
     "        <label for=\"input-color\">" << translate("OsmAnd color") << "</label>\n"
     "        <input id=\"input-color\" name=\"color\" type=\"text\" placeholder=\"#ff001122\" pattern=\"^#[0-9a-fA-F]{1,8}$\" value=\"";
-  append_value(response.content,
-               waypoint->id.first && waypoint->color.first,
-               x(waypoint->color.second));
+  // Extract OSMAnd color attribute from JSON
+  if (waypoint->extended_attributes.first) {
+    const json j_extended_attributes = json::parse(waypoint->extended_attributes.second);
+    if (j_extended_attributes.contains(ItineraryUploadHandler::xml_osmand_color)) {
+      const std::string osmand_color = j_extended_attributes.at(ItineraryUploadHandler::xml_osmand_color);
+      append_value(response.content,
+                   waypoint->id.first && !osmand_color.empty(),
+                   x(osmand_color));
+    }
+  }
   append_element_disabled_flag(response.content, read_only);
   response.content
     <<
@@ -373,21 +388,33 @@ void ItineraryWaypointEditHandler::handle_authenticated_request(
     wpt.description = request.get_optional_post_param("description");
     if (wpt.description.first)
       dao_helper::trim(wpt.description.second);
-    wpt.color = request.get_optional_post_param("color");
-    if (wpt.color.first)
-      dao_helper::trim(wpt.color.second);
+    auto color = request.get_optional_post_param("color");
+    if (color.first) dao_helper::trim(color.second);
+    const auto attrs = request.get_optional_post_param("ext-attrs");
+    json j_extended_attributes;
+    if (attrs.first && !attrs.second.empty())
+      j_extended_attributes = json::parse(attrs.second);
+    if (color.first && !color.second.empty()) {
+      j_extended_attributes[ItineraryUploadHandler::xml_osmand_color]
+        = color.second;
+    } else if (!j_extended_attributes.empty()) {
+      j_extended_attributes.erase(ItineraryUploadHandler::xml_osmand_color);
+    }
+    wpt.extended_attributes.first = !j_extended_attributes.empty();
+    if (wpt.extended_attributes.first)
+      wpt.extended_attributes.second = j_extended_attributes.dump();
     wpt.type = request.get_optional_post_param("type");
     if (wpt.type.first)
       dao_helper::trim(wpt.type.second);
     wpt.avg_samples = request.get_optional_post_param_long("samples");
 #ifdef HAVE_GDAL
-  if (elevation_service) {
-    auto altitude = elevation_service->get_elevation(
-        wpt.longitude,
-        wpt.latitude);
-    if (!wpt.altitude.first)
-      wpt.altitude = altitude;
-  }
+    if (elevation_service) {
+      auto altitude = elevation_service->get_elevation(
+          wpt.longitude,
+          wpt.latitude);
+      if (!wpt.altitude.first)
+        wpt.altitude = altitude;
+    }
 #endif
     dao.save(get_user_id(), itinerary_id, wpt);
     redirect(request, response,

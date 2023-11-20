@@ -96,6 +96,9 @@ public:
     return std::unique_ptr<ItineraryUploadHandler>(
         new ItineraryUploadHandler(config));
   }
+  static std::string xml_osmand_namespace;
+  static std::string xml_osmand_color;
+
 };
 
 } // namespace trip

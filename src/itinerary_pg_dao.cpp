@@ -922,8 +922,8 @@ std::vector<ItineraryPgDao::waypoint>
   auto result = tx.exec_params(
       "SELECT w.id, w.name, "
       "ST_X(geog::geometry) as lng, ST_Y(geog::geometry) as lat, "
-      "w.time, w.altitude, w.symbol, w.comment, w.description, w.color, w.type, "
-      "w.avg_samples "
+      "w.time, w.altitude, w.symbol, w.comment, w.description, "
+      "w.extended_attributes, w.type, w.avg_samples "
       "FROM itinerary_waypoint w "
       "JOIN itinerary i ON i.id=w.itinerary_id "
       "LEFT JOIN itinerary_sharing sh "
@@ -949,7 +949,7 @@ std::vector<ItineraryPgDao::waypoint>
     wpt.symbol.first = r["symbol"].to(wpt.symbol.second);
     wpt.comment.first = r["comment"].to(wpt.comment.second);
     wpt.description.first = r["description"].to(wpt.description.second);
-    wpt.color.first = r["color"].to(wpt.color.second);
+    wpt.extended_attributes.first = r["extended_attributes"].to(wpt.extended_attributes.second);
     wpt.type.first = r["type"].to(wpt.type.second);
     wpt.avg_samples.first = r["avg_samples"].to(wpt.avg_samples.second);
     waypoints.push_back(wpt);
@@ -967,8 +967,8 @@ std::vector<ItineraryPgDao::waypoint>
   auto result = tx.exec_params(
       "SELECT w.id, w.name, "
       "ST_X(geog::geometry) as lng, ST_Y(geog::geometry) as lat, "
-      "w.time, w.altitude, w.symbol, w.comment, w.description, w.color, w.type, "
-      "w.avg_samples "
+      "w.time, w.altitude, w.symbol, w.comment, w.description, "
+      "w.extended_attributes, w.type, w.avg_samples "
       "FROM itinerary_waypoint w "
       "JOIN itinerary i ON i.id=w.itinerary_id "
       "LEFT JOIN itinerary_sharing sh "
@@ -993,7 +993,8 @@ std::vector<ItineraryPgDao::waypoint>
     wpt.symbol.first = r["symbol"].to(wpt.symbol.second);
     wpt.comment.first = r["comment"].to(wpt.comment.second);
     wpt.description.first = r["description"].to(wpt.description.second);
-    wpt.color.first = r["color"].to(wpt.color.second);
+    wpt.extended_attributes.first = r["extended_attributes"]
+      .to(wpt.extended_attributes.second);
     wpt.type.first = r["type"].to(wpt.type.second);
     wpt.avg_samples.first = r["avg_samples"].to(wpt.avg_samples.second);
     waypoints.push_back(wpt);
@@ -1022,7 +1023,7 @@ void ItineraryPgDao::create_waypoints(
   const std::string sql =
     "INSERT INTO itinerary_waypoint ("
     "itinerary_id, name, geog, altitude, time, comment, description, symbol, "
-    "color, type, avg_samples) "
+    "extended_attributes, type, avg_samples) "
     "VALUES ($1, $2, ST_SetSRID(ST_POINT($3, $4),4326), $5, $6, $7, $8, $9, "
     "$10, $11, $12)";
   connection->prepare(
@@ -1043,7 +1044,7 @@ void ItineraryPgDao::create_waypoints(
         w.comment.first ? &w.comment.second : nullptr,
         w.description.first ? &w.description.second : nullptr,
         w.symbol.first ? &w.symbol.second : nullptr,
-        w.color.first ? &w.color.second : nullptr,
+        w.extended_attributes.first ? &w.extended_attributes.second : nullptr,
         w.type.first ? &w.type.second : nullptr,
         w.avg_samples.first ? &w.avg_samples.second : nullptr);
   }
@@ -1484,7 +1485,8 @@ ItineraryPgDao::waypoint ItineraryPgDao::get_waypoint(
     const std::string sql =
       "SELECT id, name, "
       "ST_X(geog::geometry) as lng, ST_Y(geog::geometry) as lat, altitude, "
-      "time, symbol, comment, description, color, type, avg_samples "
+      "time, symbol, comment, description, extended_attributes, type, "
+      "avg_samples "
       "FROM itinerary_waypoint WHERE itinerary_id=$1 AND id=$2";
     row r = tx.exec_params1(sql,
                                itinerary_id,
@@ -1503,7 +1505,7 @@ ItineraryPgDao::waypoint ItineraryPgDao::get_waypoint(
     wpt.symbol.first = r["symbol"].to(wpt.symbol.second);
     wpt.comment.first = r["comment"].to(wpt.comment.second);
     wpt.description.first = r["description"].to(wpt.description.second);
-    wpt.color.first = r["color"].to(wpt.color.second);
+    wpt.extended_attributes.first = r["extended_attributes"].to(wpt.extended_attributes.second);
     wpt.type.first = r["type"].to(wpt.type.second);
     wpt.avg_samples.first = r["avg_samples"].to(wpt.avg_samples.second);
     tx.commit();
@@ -1532,7 +1534,7 @@ void ItineraryPgDao::save(std::string user_id,
           "UPDATE itinerary_waypoint SET name=$3, "
           "geog=ST_SetSRID(ST_POINT($4, $5),4326), altitude=$6, time=$7, "
           "symbol=$8, comment=$9, description=$10, avg_samples=$11, type=$12, "
-          "color=$13 WHERE itinerary_id=$1 AND id=$2",
+          "extended_attributes=$13 WHERE itinerary_id=$1 AND id=$2",
           itinerary_id,
           wpt.id.second,
           wpt.name.first && !wpt.name.second.empty() ? &wpt.name.second : nullptr ,
@@ -1545,11 +1547,11 @@ void ItineraryPgDao::save(std::string user_id,
           wpt.description.first && !wpt.description.second.empty() ? &wpt.description.second : nullptr,
           wpt.avg_samples.first ? &wpt.avg_samples.second : nullptr,
           wpt.type.first && !wpt.type.second.empty() ? &wpt.type.second : nullptr,
-          wpt.color.first && !wpt.color.second.empty() ? &wpt.color.second : nullptr);
+          wpt.extended_attributes.first && !wpt.extended_attributes.second.empty() ? &wpt.extended_attributes.second : nullptr);
     } else {
       auto r = tx.exec_params1(
           "INSERT INTO itinerary_waypoint (itinerary_id, name, geog, altitude, "
-          "time, symbol, comment, description, avg_samples, type, color) "
+          "time, symbol, comment, description, avg_samples, type, extended_attributes) "
           "VALUES ($1, $2, ST_SetSRID(ST_POINT($3, $4),4326), $5, $6, $7, $8, "
           "$9, $10, $11, $12) RETURNING id",
           itinerary_id,
@@ -1563,7 +1565,7 @@ void ItineraryPgDao::save(std::string user_id,
           wpt.description.first && !wpt.description.second.empty() ? &wpt.description.second : nullptr,
           wpt.avg_samples.first ? &wpt.avg_samples.second : nullptr,
           wpt.type.first && !wpt.type.second.empty() ? &wpt.type.second : nullptr,
-          wpt.color.first && !wpt.color.second.empty() ? &wpt.color.second : nullptr);
+          wpt.extended_attributes.first && !wpt.extended_attributes.second.empty() ? &wpt.extended_attributes.second : nullptr);
       wpt.id = std::make_pair(true, r["id"].as<long>());
     }
     tx.commit();
@@ -2103,10 +2105,10 @@ YAML::Node ItineraryPgDao::waypoint::encode(const ItineraryPgDao::waypoint& rhs)
     node["description"] = rhs.description.second;
   else
     node["description"] = YAML::Null;
-  if (rhs.color.first)
-    node["color"] = rhs.color.second;
+  if (rhs.extended_attributes.first)
+    node["extended_attributes"] = rhs.extended_attributes.second;
   else
-    node["color"] = YAML::Null;
+    node["extended_attributes"] = YAML::Null;
   if (rhs.type.first)
     node["type"] = rhs.type.second;
   else
@@ -2128,8 +2130,8 @@ bool ItineraryPgDao::waypoint::decode(
   if ((rhs.description.first = node["description"] &&
        !node["description"].IsNull()))
     rhs.description.second = node["description"].as<std::string>();
-  if ((rhs.color.first = node["color"] && !node["color"].IsNull()))
-    rhs.color.second = node["color"].as<std::string>();
+  if ((rhs.extended_attributes.first = node["extended_attributes"] && !node["extended_attributes"].IsNull()))
+    rhs.extended_attributes.second = node["extended_attributes"].as<std::string>();
   if ((rhs.type.first = node["type"] && !node["type"].IsNull()))
     rhs.type.second = node["type"].as<std::string>();
   if ((rhs.avg_samples.first = node["samples"] && !node["samples"].IsNull()))

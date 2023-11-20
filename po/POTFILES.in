@@ -26,6 +26,7 @@ src/itinerary_waypoint_edit_handler.cpp
 src/main.cpp
 src/my_account_handler.cpp
 src/password_change_handler.cpp
+src/session_pg_dao.cpp
 src/track_sharing_edit_handler.cpp
 src/track_sharing_handler.cpp
 src/tracking_info_handler.cpp

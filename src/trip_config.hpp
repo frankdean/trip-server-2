@@ -60,15 +60,6 @@ class TripConfig {
   std::vector<tile_provider> providers;
   int tile_cache_max_age;
   int tile_count_frequency;
-  /**
-   * The waypoint color attribute used by OsmAnd is not valid according to the
-   * GPX XSD.  Setting this attribute to true allows the waypoint color
-   * attribute to be included in the GPX download, otherwise it is ignored and
-   * not included.  This should only matter if usage of the GPX download must
-   * pass XSD validation, perhaps because of the requirements of another
-   * application.
-   */
-  bool allow_invalid_xsd;
   /// Pretty output of XML
   bool gpx_pretty;
   /// How many spaces to indent GPX file's XML when gpx_pretty is true
@@ -120,9 +111,6 @@ public:
   }
   int get_tile_count_frequency() const {
     return tile_count_frequency;
-  }
-  bool get_allow_invalid_xsd() const {
-    return allow_invalid_xsd;
   }
   bool get_gpx_pretty() const {
     return gpx_pretty;

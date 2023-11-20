@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2023-10-14 15:36+0100\n"
+"POT-Creation-Date: 2023-11-20 15:52+0000\n"
 "PO-Revision-Date: 2023-06-02 11:30+0100\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: French <traduc@traduc.org>\n"
@@ -142,7 +142,7 @@ msgstr ""
 #: src/itinerary_path_name_edit.cpp:75
 #: src/itinerary_sharing_edit_handler.cpp:92
 #: src/itinerary_simplify_handler.cpp:76
-#: src/itinerary_waypoint_edit_handler.cpp:294
+#: src/itinerary_waypoint_edit_handler.cpp:309
 #: src/password_change_handler.cpp:95 src/track_sharing_edit_handler.cpp:157
 msgid "Save"
 msgstr ""
@@ -162,8 +162,8 @@ msgstr ""
 #: src/itinerary_import_handler.cpp:53 src/itinerary_path_join_handler.cpp:159
 #: src/itinerary_path_name_edit.cpp:78
 #: src/itinerary_sharing_edit_handler.cpp:95
-#: src/itinerary_simplify_handler.cpp:79 src/itinerary_upload_handler.cpp:175
-#: src/itinerary_waypoint_edit_handler.cpp:298
+#: src/itinerary_simplify_handler.cpp:79 src/itinerary_upload_handler.cpp:181
+#: src/itinerary_waypoint_edit_handler.cpp:313
 #: src/password_change_handler.cpp:97 src/track_sharing_edit_handler.cpp:159
 msgid "Cancel"
 msgstr ""
@@ -371,7 +371,7 @@ msgstr "Date avant"
 #. Column heading for route description
 #. Label for input of a waypoint's description
 #: src/itinerary_edit_handler.cpp:89 src/itinerary_route_edit_handler.cpp:146
-#: src/itinerary_waypoint_edit_handler.cpp:227
+#: src/itinerary_waypoint_edit_handler.cpp:228
 msgid "Description"
 msgstr ""
 
@@ -384,7 +384,7 @@ msgstr ""
 #. Text to confirm when cancelling editing an itinerary
 #. Confirmation dialog when canceling creating or editing an itinerary waypoint
 #: src/itinerary_edit_handler.cpp:114
-#: src/itinerary_waypoint_edit_handler.cpp:296
+#: src/itinerary_waypoint_edit_handler.cpp:311
 msgid "Cancel?"
 msgstr ""
 
@@ -570,7 +570,7 @@ msgstr ""
 #: src/itinerary_sharing_handler.cpp:127
 #: src/itinerary_track_edit_handler.cpp:201
 #: src/itinerary_track_segment_edit_handler.cpp:201
-#: src/itinerary_waypoint_edit_handler.cpp:306
+#: src/itinerary_waypoint_edit_handler.cpp:321
 msgid "Close"
 msgstr ""
 
@@ -714,7 +714,7 @@ msgstr ""
 #. Label for button to upload a YAML file containing a full itinerary
 #. Label for button to upload a GPX (XML) file containing routes, waypoints and tracks
 #. Label for button to initiate upload of a YAML file containing settings for the TripLogger app
-#: src/itinerary_import_handler.cpp:51 src/itinerary_upload_handler.cpp:173
+#: src/itinerary_import_handler.cpp:51 src/itinerary_upload_handler.cpp:179
 #: src/my_account_handler.cpp:68
 msgid "Upload"
 msgstr ""
@@ -764,7 +764,7 @@ msgstr ""
 #. Label for input of a waypoint name
 #: src/itinerary_path_name_edit.cpp:46 src/itinerary_route_edit_handler.cpp:142
 #: src/itinerary_simplify_handler.cpp:62
-#: src/itinerary_waypoint_edit_handler.cpp:99
+#: src/itinerary_waypoint_edit_handler.cpp:100
 msgid "Name"
 msgstr ""
 
@@ -776,7 +776,7 @@ msgstr ""
 #. Confirmation dialog when resetting changes when editing a route or track name
 #. Confirmation dialog when resetting changes to an itinerary waypoint
 #: src/itinerary_path_name_edit.cpp:80
-#: src/itinerary_waypoint_edit_handler.cpp:300
+#: src/itinerary_waypoint_edit_handler.cpp:315
 msgid "Reset changes?"
 msgstr ""
 
@@ -909,7 +909,7 @@ msgstr "Longitude"
 #. The column heading for the altitude of a tracked location point
 #: src/itinerary_route_edit_handler.cpp:140
 #: src/itinerary_track_segment_edit_handler.cpp:124
-#: src/itinerary_waypoint_edit_handler.cpp:171
+#: src/itinerary_waypoint_edit_handler.cpp:172
 #: src/tracking_info_handler.cpp:162 src/tracking_request_handler.cpp:108
 msgid "Altitude"
 msgstr "Altitude"
@@ -917,7 +917,7 @@ msgstr "Altitude"
 #. Column heading for route comment
 #. Label for input of a comment for a waypoint
 #: src/itinerary_route_edit_handler.cpp:144
-#: src/itinerary_waypoint_edit_handler.cpp:241
+#: src/itinerary_waypoint_edit_handler.cpp:242
 msgid "Comment"
 msgstr ""
 
@@ -927,7 +927,7 @@ msgstr ""
 #. "        </div>\n"
 #. Label for selection of GPS symbol value
 #: src/itinerary_route_edit_handler.cpp:148
-#: src/itinerary_waypoint_edit_handler.cpp:187
+#: src/itinerary_waypoint_edit_handler.cpp:188
 msgid "Symbol"
 msgstr ""
 
@@ -990,7 +990,7 @@ msgstr ""
 
 #. Label for input of a location in a variety of formats
 #: src/itinerary_search_handler.cpp:50
-#: src/itinerary_waypoint_edit_handler.cpp:112
+#: src/itinerary_waypoint_edit_handler.cpp:113
 msgid "Position"
 msgstr ""
 
@@ -999,14 +999,14 @@ msgstr ""
 #. "        <div id=\"position-invalid\" class=\"alert alert-warning\" role=\"alert\">Invalid latitude/longitude.  Many common formats are recognised, but try entering numeric only values, separated by a comma, e.g. 51.3,-2.3 for N5.31&deg; W2.3&deg;.  Then look at the various supported formats by changing the Display position format below.  You can use a letter 'd' instead of the &deg; symbol.  Single and double quotes are accepted for minutes and seconds.  Latitudes must be between -90 and 90 degrees.  Longitudes must be between -180 and 180 degrees.</div>\n"
 #. Label for selecting the coordinate formatting of a location
 #: src/itinerary_search_handler.cpp:59
-#: src/itinerary_waypoint_edit_handler.cpp:127
+#: src/itinerary_waypoint_edit_handler.cpp:128
 msgid "Display position format"
 msgstr ""
 
 #. "      <div ng-show=\"coordFormat !== 'plus+code' && coordFormat !== 'osgb36' && coordFormat !== 'IrishGrid' && coordFormat !== 'ITM'\">\n"
 #. Label for selecting the formatting style for a location
 #: src/itinerary_search_handler.cpp:78
-#: src/itinerary_waypoint_edit_handler.cpp:146
+#: src/itinerary_waypoint_edit_handler.cpp:147
 msgid "Position ordering and separator"
 msgstr ""
 
@@ -1203,7 +1203,7 @@ msgstr ""
 #. Label for input of a waypoint's time and date
 #. The column heading for the date and time of a tracked location point
 #: src/itinerary_track_segment_edit_handler.cpp:118
-#: src/itinerary_waypoint_edit_handler.cpp:212
+#: src/itinerary_waypoint_edit_handler.cpp:213
 #: src/tracking_request_handler.cpp:102
 msgid "Time"
 msgstr "Temps"
@@ -1231,35 +1231,35 @@ msgid "Itinerary Track Segment Edit"
 msgstr ""
 
 #. Title of the page for uploading a GPX (XML) file containing routes, waypoints and tracks
-#: src/itinerary_upload_handler.cpp:163 src/itinerary_upload_handler.cpp:185
+#: src/itinerary_upload_handler.cpp:169 src/itinerary_upload_handler.cpp:191
 msgid "Itinerary Upload"
 msgstr ""
 
 #. Instructions for uploading a GPX (XML) file containing routes, waypoints and tracks
-#: src/itinerary_upload_handler.cpp:167
+#: src/itinerary_upload_handler.cpp:173
 msgid "Select the GPX file to be uploaded, then click the upload button."
 msgstr ""
 
 #. The title of the Itinerary Waypoint page
-#: src/itinerary_waypoint_edit_handler.cpp:50
-#: src/itinerary_waypoint_edit_handler.cpp:86
+#: src/itinerary_waypoint_edit_handler.cpp:51
+#: src/itinerary_waypoint_edit_handler.cpp:87
 msgid "Itinerary Waypoint"
 msgstr ""
 
 #. Select choice entry when no item has been chosen
-#: src/itinerary_waypoint_edit_handler.cpp:194
+#: src/itinerary_waypoint_edit_handler.cpp:195
 msgid "-- not set --"
 msgstr ""
 
-#: src/itinerary_waypoint_edit_handler.cpp:254
+#: src/itinerary_waypoint_edit_handler.cpp:255
 msgid "Garmin averaging sample count"
 msgstr ""
 
-#: src/itinerary_waypoint_edit_handler.cpp:265
+#: src/itinerary_waypoint_edit_handler.cpp:266
 msgid "OsmAnd category (type)"
 msgstr ""
 
-#: src/itinerary_waypoint_edit_handler.cpp:276
+#: src/itinerary_waypoint_edit_handler.cpp:284
 msgid "OsmAnd color"
 msgstr ""
 
@@ -1382,6 +1382,10 @@ msgstr ""
 #: src/password_change_handler.cpp:116
 msgid "Change Password"
 msgstr "Changer mot de passe"
+
+#: src/session_pg_dao.cpp:348
+msgid "Converting OSMAnd `color` column to new `extended_attributes` column"
+msgstr ""
 
 #. Title of the page when creating the sharing of tracked locations with another user
 #: src/track_sharing_edit_handler.cpp:43

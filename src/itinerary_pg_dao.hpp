@@ -202,14 +202,14 @@ public:
   struct waypoint : public location, public waypoint_base {
     std::pair<bool, std::chrono::system_clock::time_point> time;
     std::pair<bool, std::string> description;
-    std::pair<bool, std::string> color;
+    std::pair<bool, std::string> extended_attributes;
     std::pair<bool, std::string> type;
     std::pair<bool, long> avg_samples;
     waypoint() : location(),
                  waypoint_base(),
                  time(),
                  description(),
-                 color(),
+                 extended_attributes(),
                  type(),
                  avg_samples() {}
     waypoint(location loc)
@@ -217,7 +217,7 @@ public:
         waypoint_base(),
         time(),
         description(),
-        color(),
+        extended_attributes(),
         type(),
         avg_samples() {}
     waypoint(TrackPgDao::tracked_location loc)
@@ -225,7 +225,7 @@ public:
         waypoint_base(),
         time(std::make_pair(true, loc.time_point)),
         description(),
-        color(),
+        extended_attributes(),
         type(),
         avg_samples() {
       comment = loc.note;

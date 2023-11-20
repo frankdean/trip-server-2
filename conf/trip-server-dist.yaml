@@ -3,11 +3,6 @@ app:
     indent:
       level: 0
   gpx:
-    # This option allows the waypoint color attribute used by OsmAnd to be
-    # included in the downloaded GPX file.  When it is included, the GPX file
-    # will fail XSD validation, which *might* be required by some
-    # applications.
-    allowInvalidXsd: false
     pretty: true
     indent: 2
   maxFileUploadSize: 12582912 # 12MB - For trip v2 only

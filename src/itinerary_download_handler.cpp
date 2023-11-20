@@ -21,6 +21,7 @@
 */
 #include "../config.h"
 #include "itinerary_download_handler.hpp"
+#include "itinerary_upload_handler.hpp"
 #include "itinerary_handler.hpp"
 #include "trip_config.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
@@ -60,30 +61,14 @@ void ItineraryDownloadHandler::handle_gpx_download(
   // }
 
   const auto trip_config = std::static_pointer_cast<TripConfig>(config);
-  // allow_invalid_xsd now effectively means include OSMAnd attributes
-  const bool allow_invalid_xsd = trip_config->get_allow_invalid_xsd();
-  std::stringstream gpx_attributes;
-  gpx_attributes <<
-    "<gpx xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-    "creator=\"TRIP\" version=\"1.1\" "
-    "xmlns=\"http://www.topografix.com/GPX/1/1\" ";
-  if (allow_invalid_xsd)
-    gpx_attributes << "xmlns:osmand=\"https://osmand.net\" ";
-  gpx_attributes <<
-    "xmlns:gpxx=\"http://www.garmin.com/xmlschemas/GpxExtensions/v3\" "
-    "xmlns:wptx1=\"http://www.garmin.com/xmlschemas/WaypointExtension/v1\" "
-    "xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 "
-    "http://www.topografix.com/GPX/1/1/gpx.xsd "
-    "http://www.garmin.com/xmlschemas/GpxExtensions/v3 "
-    "http://www8.garmin.com/xmlschemas/GpxExtensionsv3.xsd "
-    "http://www.garmin.com/xmlschemas/WaypointExtension/v1 "
-    "http://www8.garmin.com/xmlschemas/WaypointExtensionv1.xsd\"></gpx>";
+  bool include_osmand_ns = false;
+  bool include_gpxx_ext = false;
+  bool include_wptx1_ext = false;
   xml_document doc;
-  doc.load(gpx_attributes);
   xml_node decl = doc.prepend_child(node_declaration);
   decl.append_attribute("version") = "1.0";
   decl.append_attribute("encoding") = "UTF-8";
-  xml_node gpx = doc.last_child();
+  xml_node gpx = doc.append_child("gpx");
   xml_node metadata = gpx.append_child("metadata");
   xml_node time = metadata.append_child("time");
   time.append_child(node_pcdata).set_value(
@@ -120,14 +105,24 @@ void ItineraryDownloadHandler::handle_gpx_download(
     if (wpt.type.first)
       wpt_node.append_child("type").append_child(node_pcdata)
         .set_value(wpt.type.second.c_str());
-    if ((allow_invalid_xsd && wpt.color.first) || wpt.avg_samples.first) {
+    if (wpt.extended_attributes.first || wpt.avg_samples.first) {
       xml_node ext_node = wpt_node.append_child("extensions");
-      if (allow_invalid_xsd && wpt.color.first)
-        ext_node.append_child("osmand:color").append_child(node_pcdata)
-          .set_value(wpt.color.second.c_str());
-      if (wpt.avg_samples.first)
+      if (wpt.extended_attributes.first) {
+        const json j_extended_attributes =
+          json::parse(wpt.extended_attributes.second);
+        if (!j_extended_attributes.empty()) {
+          include_osmand_ns = true;
+          for (auto& [key, value] : j_extended_attributes.items())
+            ext_node.append_child(key.c_str())
+              .append_child(node_pcdata)
+              .set_value(value.get<std::string>().c_str());
+        }
+      }
+      if (wpt.avg_samples.first) {
         ext_node.append_child("wptx1:WaypointExtension")
           .append_child("wptx1:Samples").text() = wpt.avg_samples.second;
+        include_wptx1_ext = true;
+      }
     }
   }
   // Routes
@@ -148,6 +143,7 @@ void ItineraryDownloadHandler::handle_gpx_download(
         .set_value("false");
       rt_ext_node.append_child("gpxx:DisplayColor").append_child(node_pcdata)
         .set_value(rte.color_key.second.c_str());
+      include_gpxx_ext = true;
     }
     int rtept_count = 0;
     for (const auto &p : rte.points) {
@@ -192,6 +188,7 @@ void ItineraryDownloadHandler::handle_gpx_download(
         .append_child("gpxx:TrackExtension");
       ext_node.append_child("gpxx:DisplayColor").append_child(node_pcdata)
         .set_value(trk.color_key.second.c_str());
+      include_gpxx_ext = true;
     }
     for (const auto &trkseg : trk.segments) {
       xml_node trkseg_node = trk_node.append_child("trkseg");
@@ -213,6 +210,37 @@ void ItineraryDownloadHandler::handle_gpx_download(
       }
     }
   }
+
+  gpx.append_attribute("xmlns:xsi")
+    .set_value("http://www.w3.org/2001/XMLSchema-instance");
+  gpx.append_attribute("creator").set_value("TRIP");
+  gpx.append_attribute("version").set_value("1.1");
+  gpx.append_attribute("xmlns").set_value("http://www.topografix.com/GPX/1/1");
+
+  if (include_osmand_ns)
+    gpx.append_attribute("xmlns:osmand").set_value("https://osmand.net");
+  if (include_gpxx_ext || include_wptx1_ext)
+    gpx.append_attribute("xmlns:gpxx")
+      .set_value("http://www.garmin.com/xmlschemas/GpxExtensions/v3");
+  if (include_wptx1_ext)
+    gpx.append_attribute("xmlns:wptx1")
+      .set_value("http://www.garmin.com/xmlschemas/WaypointExtension/v1");
+
+  std::ostringstream schema_locations(
+      "http://www.topografix.com/GPX/1/1"
+      " http://www.topografix.com/GPX/1/1/gpx.xsd");
+  if (include_gpxx_ext)
+    schema_locations <<
+      " http://www.garmin.com/xmlschemas/GpxExtensions/v3"
+      " http://www8.garmin.com/xmlschemas/GpxExtensionsv3.xsd";
+  if (include_wptx1_ext)
+    schema_locations <<
+      " http://www.garmin.com/xmlschemas/WaypointExtension/v1"
+      " http://www8.garmin.com/xmlschemas/WaypointExtensionv1.xsd";
+
+  gpx.append_attribute("xsi:schemaLocation")
+    .set_value(schema_locations.str().c_str());
+
   if (config->get_gpx_pretty()) {
     std::string indent;
     int level = config->get_gpx_indent();
