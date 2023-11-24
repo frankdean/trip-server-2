@@ -30,6 +30,7 @@
 #include <boost/locale.hpp>
 #include <chrono>
 #include <csignal>
+#include <memory>
 #include <sstream>
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -89,11 +90,11 @@ int main(int argc, char *argv[])
     const std::string db_connect_str = application.get_db_connect_string();
     // std::cout << "Connecting to database with connect string: \""
     //           << db_connect_str << "\"\n";
-    PgPoolManager pool_manager(
+    auto pool_manager = std::make_shared<PgPoolManager>(
         db_connect_str,
         application.get_pg_pool_size()
       );
-    TripPgDao::set_pool_manager(&pool_manager);
+    TripPgDao::set_pool_manager(pool_manager);
     TripSessionManager session_manager(application.get_config());
     TripSessionManager::set_session_manager(&session_manager);
     {
@@ -118,7 +119,8 @@ int main(int argc, char *argv[])
     }
     application.initialize_user_sessions(options.expire_sessions);
 
-    application.initialize_workers(application.get_worker_count());
+    application.initialize_workers(application.get_worker_count(),
+                                   pool_manager);
     std::stringstream msg01;
     msg01
       // Label for the version text of the application

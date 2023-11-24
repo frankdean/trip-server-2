@@ -111,6 +111,7 @@ trip_server_SOURCES = \
 	../trip-server-common/src/dao_helper.hpp \
 	../trip-server-common/src/date_utils.cpp \
 	../trip-server-common/src/date_utils.hpp \
+	../trip-server-common/src/db_error_handler.hpp \
 	../trip-server-common/src/debug_utils.cpp \
 	../trip-server-common/src/debug_utils.hpp \
 	../trip-server-common/src/file_utils.cpp \

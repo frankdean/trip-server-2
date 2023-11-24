@@ -1,5 +1,5 @@
 # -*- mode: dockerfile; -*- vim: set ft=dockerfile:
-FROM  debian:12.2-slim AS build
+FROM  debian:bookworm-slim AS build
 RUN groupadd --gid 1000 trip \
     && useradd --uid 1000 --gid trip --shell /bin/bash --create-home trip
 RUN apt-get update \
@@ -45,13 +45,14 @@ RUN make install install-html install-pdf
 
 WORKDIR /usr/local/etc
 
-FROM  debian:12.2-slim
+FROM  debian:bookworm-slim
 LABEL uk.co.fdsd.tripserver.version="@PACKAGE_VERSION@"
 
 RUN groupadd --gid 1000 trip \
     && useradd --uid 1000 --gid trip --shell /bin/bash --create-home trip
 
 RUN apt-get update \
+    && apt-get full-upgrade --yes --allow-change-held-packages \
     && apt-get install -y --no-install-recommends \
     locales tzdata \
     libboost-locale1.74.0 libpugixml1v5 libyaml-cpp0.7 \

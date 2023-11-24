@@ -52,11 +52,6 @@
 
 1.  Build the `trip-server-2` image:
 
-    1.  If necessary, copy the `trip server` distribution tarball to the root
-        source folder to build the Docker image. E.g.
-
-            $ vagrant upload trip-${VERSION}.tar.xz /home/vagrant/build/
-
     1.  Run the Docker build:
 
 		    $ cd ./trip-server-2

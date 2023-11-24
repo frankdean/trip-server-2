@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2023-11-20 15:52+0000\n"
-"PO-Revision-Date: 2023-06-02 11:30+0100\n"
+"POT-Creation-Date: 2023-11-24 14:41+0000\n"
+"PO-Revision-Date: 2023-11-22 17:02+0000\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -104,8 +104,8 @@ msgstr ""
 
 #. Label for input new password for a user
 #: src/admin_user_edit_handler.cpp:85
-#: trip-server-common/src/http_request_handler.cpp:686
-#: trip-server-common/src/http_request_handler.cpp:696
+#: trip-server-common/src/http_request_handler.cpp:694
+#: trip-server-common/src/http_request_handler.cpp:704
 msgid "Password"
 msgstr "Mot de passe"
 
@@ -1263,42 +1263,42 @@ msgstr ""
 msgid "OsmAnd color"
 msgstr ""
 
-#: src/main.cpp:106
+#: src/main.cpp:107
 msgid "The database is not ready for use.  Cannot find the \"{1}\" table."
 msgstr ""
 
 #. Message output when the database is being upgraded
-#: src/main.cpp:113
+#: src/main.cpp:114
 msgid "Upgrading the database"
 msgstr "Enrichit la base de données"
 
 #. Label for the version text of the application
-#: src/main.cpp:125
+#: src/main.cpp:127
 msgid "version"
 msgstr "version"
 
 #. Label for the web address the application is listening at
-#: src/main.cpp:127
+#: src/main.cpp:129
 msgid "listening at"
 msgstr "écoute à"
 
 #. Output when the application has been built to allow serving static files.
-#: src/main.cpp:133
+#: src/main.cpp:135
 msgid "The application has been built to serve static files."
 msgstr "L'application a été conçue pour servir des fichiers statiques"
 
 #. Displays the name of the directory that static files will be served from.
-#: src/main.cpp:137
+#: src/main.cpp:139
 msgid "Static files will be served from the {1} directory."
 msgstr "Les fichiers statiques seront servis à partir du répertoire {1}"
 
 #. Message showing how long the application took to startup in milliseconds
-#: src/main.cpp:155
+#: src/main.cpp:157
 msgid "Started application in {1} ms"
 msgstr "Application démarrée en {1} ms"
 
 #. Text displayed when the application ends
-#: src/main.cpp:161
+#: src/main.cpp:163
 msgid "Bye!"
 msgstr "Au revoir!"
 
@@ -1867,7 +1867,7 @@ msgstr ""
 
 #. Title for the login page
 #: src/trip_request_handler.cpp:74
-#: trip-server-common/src/http_request_handler.cpp:708
+#: trip-server-common/src/http_request_handler.cpp:716
 msgid "Login"
 msgstr "Login"
 
@@ -1921,20 +1921,27 @@ msgstr "Nom du fichier de configuration non spécifié\n"
 msgid "Reading configuration from {1}"
 msgstr "Lecture de la configuration du {1}"
 
+#. Shows how many worker processes are still running when the application is stopping
+#: trip-server-common/src/application.cpp:148
+msgid "Stopping {1} worker"
+msgid_plural "Stopping {1} workers"
+msgstr[0] "Arrête {1} ouvrier"
+msgstr[1] "Arrête {1} ouvriers"
+
 #. Shows how many worker processes are being created for the application
-#: trip-server-common/src/application.cpp:160
+#: trip-server-common/src/application.cpp:177
 msgid "Creating {1} worker"
 msgid_plural "Creating {1} workers"
 msgstr[0] "Crée {1} ouvrier"
 msgstr[1] "Crée {1} ouvriers"
 
-#: trip-server-common/src/http_request_handler.cpp:664
-#: trip-server-common/src/http_request_handler.cpp:674
+#: trip-server-common/src/http_request_handler.cpp:672
+#: trip-server-common/src/http_request_handler.cpp:682
 msgid "Username"
 msgstr "Nom d'utilisateur"
 
 #. Shows how many database connections are being created for the application
-#: trip-server-common/src/pg_pool.cpp:43
+#: trip-server-common/src/pg_pool.cpp:44
 msgid "Creating database pool with {1} connection"
 msgid_plural "Creating database pool with {1} connections"
 msgstr[0] "Création d'un pool de bases de données avec {1} connexion"

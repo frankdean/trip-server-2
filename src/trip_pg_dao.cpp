@@ -33,7 +33,7 @@ using namespace boost::locale;
 using namespace fdsd::utils;
 using namespace fdsd::trip;
 
-fdsd::utils::PgPoolManager* TripPgDao::pool_manager = nullptr;
+std::shared_ptr<fdsd::utils::PgPoolManager> TripPgDao::pool_manager = nullptr;
 
 TripPgDao::TripPgDao()
 {
@@ -69,14 +69,14 @@ TripPgDao::~TripPgDao()
   TripPgDao::pool_manager->free_connection(connection);
 }
 
-    // Error message displayed when a user attempts an operation they are not authorized for
+// Error message displayed when a user attempts an operation they are not authorized for
 TripPgDao::NotAuthorized::NotAuthorized()
   : BadRequestException(translate("User is not authorized for the requested operation"))
 {
 }
 
 void TripPgDao::set_pool_manager(
-    fdsd::utils::PgPoolManager* pool_manager)
+    std::shared_ptr<fdsd::utils::PgPoolManager> pool_manager)
 {
   TripPgDao::pool_manager = pool_manager;
 }

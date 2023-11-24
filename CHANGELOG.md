@@ -4,11 +4,13 @@
 
 ## 2.3.0
 
+- Refresh database connection pool after a broken connection exception
+
 - Updated the upload and download of GPX files to include the OSMAnd XML
   namespace (only if required) and updated the format of the OSMAnd waypoint
   `color` attribute.  The `color` and additional OSMAnd extended waypoint
   attributes are now stored as JSON in a new `external_attributes` column in
-  `itinerary_waypoint`.  The database schema must be updated using the
+  `itinerary_waypoint`.  The **database schema must be updated** using the
   `trip-server --upgrade` option, which also converts and removes the existing
   `color` column.  Make a backup before running the upgrade.
 

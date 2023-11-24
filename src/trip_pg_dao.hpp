@@ -25,6 +25,7 @@
 #include "../trip-server-common/src/pg_pool.hpp"
 #include "../trip-server-common/src/http_request_handler.hpp"
 #include <exception>
+#include <memory>
 #include <string>
 #include <pqxx/pqxx>
 
@@ -34,7 +35,7 @@ namespace trip {
 class TripPgDao {
 protected:
   std::shared_ptr<pqxx::lazyconnection> connection;
-  static fdsd::utils::PgPoolManager* pool_manager;
+  static std::shared_ptr<fdsd::utils::PgPoolManager> pool_manager;
   void create_table(pqxx::transaction_base &tx, std::string table_name,
                     std::string create_table_sql, bool overwrite);
 public:
@@ -51,7 +52,8 @@ public:
     }
   };
 
-  static void set_pool_manager(fdsd::utils::PgPoolManager* pool_manager);
+  static void set_pool_manager
+      (std::shared_ptr<fdsd::utils::PgPoolManager> pool_manager);
   bool is_ready(std::string test_table_name,
                 int retry_interval_secs = 10,
                 int max_retries = 6);
