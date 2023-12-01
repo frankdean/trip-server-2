@@ -130,10 +130,13 @@ void TrackingRequestHandler::build_form(
           ).count();
         const DateTime date_time(location.time_point);
         response.content <<
-          "        <td><a href=\"" << get_uri_prefix() << "/tracks?new_from="
-                                   << date_time.get_time_as_iso8601_gmt() << "\">"
-                                   << as::ftime("%a") << date << " "
-                                   << as::date_medium << as::datetime << date << "</a></td>\n";
+          "        <td><a href=\"";
+        pagination.append_page_url(response.content, pagination.get_current_page());
+        response.content << "&new_from="
+                         << date_time.get_time_as_iso8601_gmt()
+                         << "\">"
+                         << as::ftime("%a") << date << " "
+                         << as::date_medium << as::datetime << date << "</a></td>\n";
         response.content << as::posix <<
           "        <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << std::fixed << std::setprecision(6) << location.latitude << "&lng=" << location.longitude << "\">" << location.latitude << "</a></td>\n"
           "        <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << location.latitude << "&lng=" << location.longitude << "\">" << location.longitude << "</a></td>\n"
@@ -358,14 +361,12 @@ void TrackingRequestHandler::handle_authenticated_request(
     //   std::cout << p.first << " -> " << p.second << '\n';
     // }
 
+    q = TrackPgDao::location_search_query_params(get_user_id(),
+                                                 query_params);
+    // std::cout << "Fetched query from URL as: " << q << '\n';
+
     const auto new_from = request.get_query_param("new_from");
-    if (new_from.empty()) {
-      q = TrackPgDao::location_search_query_params(get_user_id(),
-                                                   query_params);
-      // std::cout << "Fetched query from URL as: " << q << '\n';
-    } else {
-      q = get_session_query_defaults(session_dao, first_time);
-      // Update default/session query parameters with the new 'date from'
+    if (!new_from.empty()) {
       DateTime dt(new_from);
       q.date_from = dt.get_time();
       // std::cout << "Updated query params: " << q << '\n';

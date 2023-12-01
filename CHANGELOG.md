@@ -2,6 +2,12 @@
 
 # Changelog
 
+## 2.3.1
+
+- Fix exception when setting new `date from` tracking query parameter after
+  session timeout.
+- Log to syslog when an exception is caught when handling a request.
+
 ## 2.3.0
 
 - Refresh database connection pool after a broken connection exception

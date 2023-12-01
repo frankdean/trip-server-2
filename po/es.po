@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2023-11-24 14:41+0000\n"
+"POT-Creation-Date: 2023-12-01 15:22+0000\n"
 "PO-Revision-Date: 2023-11-22 17:00+0000\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
@@ -105,8 +105,8 @@ msgstr ""
 
 #. Label for input new password for a user
 #: src/admin_user_edit_handler.cpp:85
-#: trip-server-common/src/http_request_handler.cpp:694
-#: trip-server-common/src/http_request_handler.cpp:704
+#: trip-server-common/src/http_request_handler.cpp:700
+#: trip-server-common/src/http_request_handler.cpp:710
 msgid "Password"
 msgstr "Contraseña"
 
@@ -242,7 +242,7 @@ msgstr ""
 #: src/itinerary_sharing_report_handler.cpp:99
 #: src/itinerary_track_edit_handler.cpp:177
 #: src/itinerary_track_segment_edit_handler.cpp:179
-#: src/track_sharing_handler.cpp:123 src/tracking_request_handler.cpp:211
+#: src/track_sharing_handler.cpp:123 src/tracking_request_handler.cpp:214
 msgid "Go"
 msgstr "Ir"
 
@@ -358,13 +358,13 @@ msgstr ""
 #. Label for entering the start date for an itinerary
 #. "      <div class=\"row\">\n"
 #. The input start date to search for location tracks
-#: src/itinerary_edit_handler.cpp:69 src/tracking_request_handler.cpp:223
+#: src/itinerary_edit_handler.cpp:69 src/tracking_request_handler.cpp:226
 msgid "Date from"
 msgstr "Fecha de"
 
 #. Label for entering the end date for an itinerary
 #. The input end date to search for location tracks
-#: src/itinerary_edit_handler.cpp:79 src/tracking_request_handler.cpp:229
+#: src/itinerary_edit_handler.cpp:79 src/tracking_request_handler.cpp:232
 msgid "Date to"
 msgstr "Fecha para"
 
@@ -396,7 +396,7 @@ msgstr ""
 
 #. Form reset label
 #. Label for the button which resets the form's input criteria to that originally displayed
-#: src/itinerary_edit_handler.cpp:120 src/tracking_request_handler.cpp:312
+#: src/itinerary_edit_handler.cpp:120 src/tracking_request_handler.cpp:315
 msgid "Reset"
 msgstr "Reajusta"
 
@@ -598,7 +598,7 @@ msgstr ""
 
 #. Label for menu item to display the map page showing the selected routes, tracks and waypoints
 #. Label for the button to display a map showing the tracked locations
-#: src/itinerary_handler.cpp:565 src/tracking_request_handler.cpp:293
+#: src/itinerary_handler.cpp:565 src/tracking_request_handler.cpp:296
 msgid "Show map"
 msgstr "Mostra el mapa"
 
@@ -1737,49 +1737,49 @@ msgid "Battery"
 msgstr "Batería"
 
 #. The input to select another user's nickname to view their shared location tracks
-#: src/tracking_request_handler.cpp:240
+#: src/tracking_request_handler.cpp:243
 msgid "Display shared user's tracks"
 msgstr "Mostrar des recorridos compartidos"
 
 #. The maximum Horizontal Dilution of Precision (accuracy in metres) to filter locations by
-#: src/tracking_request_handler.cpp:269
+#: src/tracking_request_handler.cpp:272
 msgid "Max hdop"
 msgstr "HDOP máximo"
 
 #. instructions to disable filtering locations by HDOP (accuracy in metres)
-#: src/tracking_request_handler.cpp:276
+#: src/tracking_request_handler.cpp:279
 msgid "leave blank for no maximum"
 msgstr "dejar en blanco para sin máximo"
 
 #. Whether the user wishes to filter the results to only include those with notes attached
-#: src/tracking_request_handler.cpp:286
+#: src/tracking_request_handler.cpp:289
 msgid "Show notes only"
 msgstr "Mostra solo las notas"
 
 #. Label for the button to perform the search that lists the tracked locations
-#: src/tracking_request_handler.cpp:291
+#: src/tracking_request_handler.cpp:294
 msgid "List tracks"
 msgstr "Enumera los recorridos"
 
 #. Prompt to confirm the user wished to download a data file with a limited number of tracked locations
-#: src/tracking_request_handler.cpp:300
+#: src/tracking_request_handler.cpp:303
 msgid ""
 "Download exceeds maximum.  Only the most recent {1} locations will be "
 "included.  Continue?"
 msgstr ""
 
 #. Prompt to confirm the user wished to download a data file with the tracked locations
-#: src/tracking_request_handler.cpp:304
+#: src/tracking_request_handler.cpp:307
 msgid "Download tracks?"
 msgstr "¿Descarga?"
 
 #. Label for the button to download the tracks as an XML data file
-#: src/tracking_request_handler.cpp:308
+#: src/tracking_request_handler.cpp:311
 msgid "Download tracks"
 msgstr "Descarga los recorridos"
 
 #. Label for the button to make a copy of the tracked locations
-#: src/tracking_request_handler.cpp:310
+#: src/tracking_request_handler.cpp:313
 msgid "Copy"
 msgstr "Copia"
 
@@ -1868,7 +1868,7 @@ msgstr ""
 
 #. Title for the login page
 #: src/trip_request_handler.cpp:74
-#: trip-server-common/src/http_request_handler.cpp:716
+#: trip-server-common/src/http_request_handler.cpp:722
 msgid "Login"
 msgstr "Login"
 
@@ -1936,8 +1936,8 @@ msgid_plural "Creating {1} workers"
 msgstr[0] "Está creando {1} trabajador"
 msgstr[1] "Está creando {1} trabajadores"
 
-#: trip-server-common/src/http_request_handler.cpp:672
-#: trip-server-common/src/http_request_handler.cpp:682
+#: trip-server-common/src/http_request_handler.cpp:678
+#: trip-server-common/src/http_request_handler.cpp:688
 msgid "Username"
 msgstr "Identificación del usuario"
 
