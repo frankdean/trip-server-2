@@ -406,6 +406,10 @@ void TrackingRequestHandler::handle_authenticated_request(
   } else if (action == "reset") {
     q = TrackPgDao::location_search_query_params{};
     q.user_id = get_user_id();
+    json j = q;
+    session_dao.save_value(get_session_id(),
+                           SessionPgDao::tracks_query_key,
+                           j.dump());
   }
 
   // std::cout << "Query object: " << q << "\n- - -\n";
