@@ -1,5 +1,9 @@
 SUBDIRS = src po tests doc
 
+# When running `distcheck` build with additional features that are normally
+# disabled by default
+AM_DISTCHECK_CONFIGURE_FLAGS = --enable-cairo --enable-directory-listing
+
 EXTRA_DIST = m4/ChangeLog  .gitignore \
 	RELEASE_PROCEDURE.md \
 	Vagrantfile \

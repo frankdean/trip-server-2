@@ -310,6 +310,12 @@ link against the Boost Locale library:
 
 	$ ./configure --with-boost-locale=boost_locale
 
+If you are developing the application and need to add flags to the
+`make distcheck` command, set them in the `DISTCHECK_CONFIGURE_FLAGS`
+variable, e.g.
+
+	$ DISTCHECK_CONFIGURE_FLAGS='--with-boost-locale=boost_locale' make distcheck
+
 See <http://www.randspringer.de/boost/ucl-sbs.html> for help with the Boost
 library arguments.
 
