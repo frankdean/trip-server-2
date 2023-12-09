@@ -636,22 +636,22 @@ void TrackPgDao::check_new_locations_available(
       );
     const DateTime from(since);
     for (auto &c : criteria) {
-      pqxx::row r;
       if (c.nickname == user_nickname) {
-        r = tx.exec_prepared1(
+        auto r = tx.exec_prepared1(
             ps_name_user_id,
             user_id,
             c.min_threshold_id.first ? &c.min_threshold_id.second : nullptr,
             from.get_time_as_iso8601_gmt());
+        c.update_available = r[0].as<long>() > 0;
       } else {
-        r = tx.exec_prepared1(
+        auto r = tx.exec_prepared1(
             ps_name,
             user_id,
             c.nickname,
             c.min_threshold_id.first ? &c.min_threshold_id.second : nullptr,
             from.get_time_as_iso8601_gmt());
+        c.update_available = r[0].as<long>() > 0;
       }
-      c.update_available = r[0].as<long>() > 0;
     }
     tx.commit();
   } catch (const std::exception &e) {
