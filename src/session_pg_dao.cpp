@@ -374,9 +374,9 @@ void SessionPgDao::upgrade()
 SessionPgDao::tile_report
     SessionPgDao::get_tile_usage_metrics(int month_count)
 {
+  work tx(*connection);
+  tile_report report;
   try {
-    work tx(*connection);
-    tile_report report;
     auto summary = tx.exec_params1(
         "SELECT time, count FROM tile_metric ORDER BY time DESC LIMIT 1");
     std::string date_str;
@@ -407,6 +407,9 @@ SessionPgDao::tile_report
     }
     tx.commit();
     report.metrics.pop_back();
+    return report;
+  } catch (const std::out_of_range &e) {
+    // There are no tile metrics
     return report;
   } catch (const std::exception &e) {
     std::cerr << "Error getting tile usage metrics: " << e.what() << '\n';
