@@ -21,6 +21,9 @@
 */
 #include "../config.h"
 #include "session_pg_dao.hpp"
+#ifdef HAVE_TUI
+#include "text-based_user_interface.hpp"
+#endif // HAVE_TUI
 #include "trip_application.hpp"
 #include "trip_get_options.hpp"
 #include "trip_pg_dao.hpp"
@@ -121,6 +124,15 @@ int main(int argc, char *argv[])
 
     application.initialize_workers(application.get_worker_count(),
                                    pool_manager);
+#ifdef HAVE_TUI
+    if (options.tui_flag) {
+      TextUserInterface tui;
+      const int exit_val = tui.run(argc, argv);
+      std::cout << "Finished runing TUI exit status " << exit_val << '\n';
+      closelog();
+      return exit_val;
+    }
+#endif // HAVE_TUI
     std::stringstream msg01;
     msg01
       // Label for the version text of the application

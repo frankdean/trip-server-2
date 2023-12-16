@@ -128,7 +128,7 @@ fi
 # Don't build if we appear to already have an installed version of trip-server
 if [ ! -x /usr/local/bin/trip-server ]; then
     if [ -r /usr/lib/fedora-release ] || [ -x /bin/freebsd-version ]; then
-	$SU_CMD "cd /home/vagrant/build && pwd && /vagrant/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' --disable-gdal --enable-cairo"
+	$SU_CMD "cd /home/vagrant/build && pwd && /vagrant/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' --disable-gdal --enable-cairo --enable-tui"
     elif [ -f /etc/rocky-release ]; then
 	# Weirdly, pkg-config was appending a spurious '-L' with the '--libs'
 	# parameter for 'libpqxx', proven with the following command:
@@ -137,9 +137,9 @@ if [ ! -x /usr/local/bin/trip-server ]; then
 	PG_LIBDIR=$(/usr/pgsql-13/bin/pg_config --libdir)
 	# SUCCESS -> $SU_CMD "pwd && /vagrant/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
 	# SUCCESS -> $SU_CMD "pwd && /vagrant/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
-	$SU_CMD "pwd && /vagrant/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal --enable-cairo"
+	$SU_CMD "pwd && /vagrant/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal --enable-cairo --enable-tui"
     else
-	$SU_CMD "/vagrant/configure CXXFLAGS='-g -O0' --disable-gdal --enable-cairo"
+	$SU_CMD "/vagrant/configure CXXFLAGS='-g -O0' --disable-gdal --enable-cairo --enable-tui"
     fi
 
     $SU_CMD 'pwd && make -C /home/vagrant/build check'

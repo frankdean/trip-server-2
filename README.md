@@ -274,6 +274,33 @@ locations.
 [proj4js]: https://github.com/proj4js/proj4js "JavaScript library to transform coordinates from one coordinate system to another, including datum transformations"
 [zxcvbn]: https://github.com/dropbox/zxcvbn "Low-Budget Password Strength Estimation"
 
+### Optional Text-based User Interface (TUI)
+
+The application can optionally be built with the `--enable-tui` configure
+option to include an interactive TUI which can be used to create an initial
+admin user.
+
+1.  Download and install the [Final Cut][finalcut] library.  **Note** when
+    building Final Cut for Linux, to enable mouse support you need to also
+    install the `GPM` library.  After installing the `GPM` library, re-run
+    Final Cut's `configure` script so that it re-configures the build to use
+    the library.
+
+2.  Include the `--enable-tui` option when running `configure`, e.g.:
+
+		$ ./configure --enable-tui
+		$ make
+
+3.  After creating the initial database, (see the `PostgreSQL Setup` section
+    of the application manual (`info trip-server`)), execute `trip-server`
+    with the `--interactive` option:
+
+		$ ./src/trip-server --interactive
+
+4.  Select the option to create a new user from the menu.
+
+[finalcut]: https://github.com/gansm/finalcut/tree/main "A text-based widget toolkit"
+
 ### Debian
 
 For Debian version 11 (Bullseye).

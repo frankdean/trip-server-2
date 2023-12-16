@@ -239,6 +239,10 @@ filename
 |
 --upgrade
 ] [
+-i
+|
+-interactive
+] [
 -V
 |
 --verbose
@@ -287,6 +291,10 @@ Configuration file name.
 
 @item -u, --upgrade
 Upgrade the database.
+
+@item -i, --interactive
+Run an interactive session.  Note that this option is only available
+when compiled with the @code{--enable-tui} configure option.
 
 @item -V, --verbose
 Verbose output
@@ -615,15 +623,28 @@ that user maintains other users using the web application.  Creating the
 initial admin user fundamentally consists of making entries in the
 @code{usertable}, @code{role} and @code{user_role} tables.
 
-Firstly, create the entries in the @code{role} table by running the
-following script using @code{psql}:
+Firstly, if the roles have not previously been created, create the
+entries in the @code{role} table by running the following script using
+@code{psql}:
 
 @example
+SELECT * FROM role;
 INSERT INTO role (name) VALUES ('Admin'), ('User');
 @end example
 
-An initial admin user can be created similarly to the following, replacing
-each value appropriately:
+If the application has been built with the @code{--enable-tui} configure
+option, an admin user can be created by running the application with the
+@code{--interactive} option, which provides a Text-based User Interface
+(TUI) suitable to run within a terminal session. E.g.
+
+@example
+$ trip-server --interactive
+@end example
+
+Select the option to create a new user from the menu.
+
+Alternatively, an initial admin user can be created similarly to the
+following, replacing each value appropriately:
 
 @example
 INSERT INTO usertable (firstname, lastname, email, uuid, password, nickname)
@@ -656,7 +677,7 @@ On a @url{@value{debianurl},Debian system}, you can create a system user to
 run the application as follows:
 
 @example
-sudo adduser trip --system --group --home /nonexistent --no-create-home
+$ sudo adduser trip --system --group --home /nonexistent --no-create-home
 @end example
 
 On other systems, you will probably need to use the less friendly

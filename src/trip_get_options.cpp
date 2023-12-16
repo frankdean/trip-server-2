@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ using namespace boost::locale;
 
 int TripGetOptions::expire_sessions = 0;
 int TripGetOptions::upgrade_flag = 0;
+int TripGetOptions::tui_flag = 0;
 
 TripGetOptions::TripGetOptions() : GetOptions()
 {
@@ -41,6 +42,9 @@ TripGetOptions::TripGetOptions() : GetOptions()
 #ifdef HAVE_GETOPT_H
 
 const char TripGetOptions::short_opts[] = "hs:p:c:vuVe"
+#ifdef HAVE_TUI
+  "i"
+#endif
 #ifdef ALLOW_STATIC_FILES
   "r:"
 #endif
@@ -59,6 +63,9 @@ struct option TripGetOptions::long_options[] = {
   {"version",             no_argument,       NULL,             'v'},
   {"expire_sessions",     no_argument,       &expire_sessions, 1},
   {"upgrade",             no_argument,       &upgrade_flag,    1},
+#ifdef HAVE_TUI
+  {"interactive",         no_argument,       &tui_flag,    1},
+#endif // HAVE_TUI
   {NULL, 0, NULL, 0}
 };
 
@@ -76,6 +83,11 @@ bool TripGetOptions::handle_option(int c)
     case 'u':
       upgrade_flag = 1;
       break;
+#ifdef HAVE_TUI
+    case 'i':
+      tui_flag = 1;
+      break;
+#endif // HAVE_TUI
     default:
       return GetOptions::handle_option(c);
   } // switch
@@ -87,7 +99,7 @@ void TripGetOptions::show_version_info() const
 {
   std::cout
     << PACKAGE << " " << VERSION << '\n'
-    << "Copyright (C) 2022 Frank Dean\n"
+    << "Copyright (C) 2022-2023 Frank Dean\n"
     << "This program comes with ABSOLUTELY NO WARRANTY.\n"
     << "This is free software, and you are welcome to redistribute it\n"
     << "under certain conditions.\n"
@@ -118,6 +130,10 @@ void TripGetOptions::usage(std::ostream& os) const
     << "  -c, --config-file=FILENAME\t\t" << translate("configuration file name") << '\n'
     // Command line short description for the --upgrade option
     << "  -u, --upgrade\t\t\t\t" << translate("upgrade database") << '\n'
+#ifdef HAVE_TUI
+    // Command line short description for the --interactive option
+    << "  -i  --interactive\t\t\t" << translate("run an interactive session") << '\n'
+#endif // HAVE_TUI
     // Command line short description for the --verbose option
     << "  -V, --verbose\t\t\t\t" << translate("verbose output") << '\n';
 #else

@@ -32,7 +32,7 @@ AC_ARG_ENABLE([directory-listing],
 	[use_directory_listing=no])
 AC_ARG_ENABLE([boost-geometry],
     AS_HELP_STRING([--disable-boost-geometry],
-	[Build using Boost Geometrey headers (default yes)]),
+	[Build using Boost Geometry headers (default yes)]),
 	[use_boost_geometry=${enableval}],
 	[use_boost_geometry=yes])
 AC_ARG_ENABLE([gdal],
@@ -45,6 +45,11 @@ AC_ARG_ENABLE([cairo],
 	[Build using CAIRO library (default no)]),
 	[use_cairo=${enableval}],
 	[use_cairo=no])
+AC_ARG_ENABLE([tui],
+    AS_HELP_STRING([--enable-tui],
+	[Build Text-based User Interface (default no)]),
+	[use_tui=${enableval}],
+	[use_tui=no])
 
 # Checks for programs.
 AX_CXX_COMPILE_STDCXX(17)
@@ -78,7 +83,12 @@ if test "x${use_gdal}" = xyes; then
    dnl GDAL_SYSTEM='elevation_tile.$(OBJEXT)'
    dnl AC_SUBST([GDAL_SYSTEM])
 fi
-AM_CONDITIONAL([USE_GDAL], [test "$use_gdal" = yes])
+AM_CONDITIONAL([USE_TUI], [test x$use_tui = xyes])
+if test "x${use_tui}" = xyes; then
+   AC_DEFINE([HAVE_TUI], [1], [Build with Text-based User Interface])
+   PKG_CHECK_MODULES([FINALCUT], [finalcut >= 0.8.0])
+fi
+AM_CONDITIONAL([USE_GDAL], [test x$use_gdal = xyes])
 
 case $host in
 *-*-freebsd* | *-*-linux-*)
@@ -125,9 +135,9 @@ if test "x${use_keep_alive}" == xyes; then
    AC_DEFINE([ENABLE_KEEP_ALIVE], [1], [Enable HTTP keep alive])
 fi
 
-CXXFLAGS="${CXXFLAGS} -Wno-deprecated-declarations ${LIBPQXX_CFLAGS} ${LIBYAML_CFLAGS} ${LIBUUID_CFLAGS} ${BOOST_CPPFLAGS} ${LIBPUGIXML_CFLAGS} ${LIBGDAL_CFLAGS} ${LIBCAIROMM_CFLAGS} ${LIBCMARK_CFLAGS}"
+CXXFLAGS="${CXXFLAGS} -Wno-deprecated-declarations ${LIBPQXX_CFLAGS} ${LIBYAML_CFLAGS} ${LIBUUID_CFLAGS} ${BOOST_CPPFLAGS} ${LIBPUGIXML_CFLAGS} ${LIBGDAL_CFLAGS} ${LIBCAIROMM_CFLAGS} ${LIBCMARK_CFLAGS} ${FINALCUT_CFLAGS}"
 dnl CPPFLAGS="${CPPFLAGS} ${XXXXXX_CPPFLAGS}"
-LIBS="${LIBS} ${LIBPQXX_LIBS} ${LIBYAML_LIBS} ${LIBUUID_LIBS} ${BOOST_LDFLAGS} ${BOOST_LOCALE_LIB} ${LIBPUGIXML_LIBS} ${LIBGDAL_LIBS} ${LIBCAIROMM_LIBS} ${LIBCMARK_LIBS}"
+LIBS="${LIBS} ${LIBPQXX_LIBS} ${LIBYAML_LIBS} ${LIBUUID_LIBS} ${BOOST_LDFLAGS} ${BOOST_LOCALE_LIB} ${LIBPUGIXML_LIBS} ${LIBGDAL_LIBS} ${LIBCAIROMM_LIBS} ${LIBCMARK_LIBS} ${FINALCUT_LIBS}"
 
 # Checks for header files.
 dnl echo "Host_os: ${host_os}"
@@ -176,7 +186,7 @@ fi
 
 if test "x${use_boost_geometry}" = xyes; then
    AC_CHECK_HEADERS([boost/geometry.hpp boost/range.hpp boost/geometry/algorithms/simplify.hpp],,
-	 [AC_MSG_ERROR([boost/geometry.hpp not found.  Please install the Boost Geometry library headers.])])
+	 [AC_MSG_ERROR([Boost library headers appear to be missing. Check config.log.])])
    AC_DEFINE([HAVE_BOOST_GEOMETRY], [1], [Build to use Boost Geometry headers])
    AC_DEFINE([BOOST_ALLOW_DEPRECATED_HEADERS], [1], [Suppress deprecated header warnings in Boost])
 fi

@@ -25,6 +25,8 @@ LIBPQXX_VERSION=6.4.8
 LIBPQXX_SHA256=3f7aba951822e01f1b9f9f353702954773323dd9f9dc376ffb57cb6bbd9a7a2f
 NLOHMANN_JSON_VERSION=v3.11.2
 NLOHMANN_JSON_SHA256=665fa14b8af3837966949e8eb0052d583e2ac105d3438baba9951785512cf921
+FINALCUT_VERSION=0.9.0
+FINALCUT_SHA256=73ff5016bf6de0a5d3d6e88104668b78a521c34229e7ca0c6a04b5d79ecf666e
 NODE_VERSION="v16.20.1"
 NODE_SHA256=b6c60e1e106ad7d8881e83945a5208c1b1d1b63e6901c04b9dafa607aff3a154
 
@@ -32,6 +34,8 @@ DOWNLOAD_CACHE_DIR="/vagrant/provisioning/downloads"
 LIBPQXX_DOWNLOAD="libpqxx-${LIBPQXX_VERSION}.tar.gz"
 LIBPQXX_DOWNLOAD_URL="https://github.com/jtv/libpqxx/archive/refs/tags/${LIBPQXX_VERSION}.tar.gz"
 NLOHMANN_JSON_DOWNLOAD_URL="https://github.com/nlohmann/json/releases/download/${NLOHMANN_JSON_VERSION}/json.hpp"
+FINALCUT_DOWNLOAD="finalcut-0.9.0.tar.gz"
+FINALCUT_DOWNLOAD_URL="https://github.com/gansm/finalcut/archive/refs/tags/${FINALCUT_VERSION}.tar.gz"
 
 SHASUM=shasum
 SU_CMD="su vagrant -c"
@@ -100,7 +104,7 @@ function install_nlohmann_json
     # Download and install nlohmann/json if it does not exist
     if [ ! -r /usr/local/include/nlohmann/json.hpp ]; then
 	if [ ! -r "${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" ]; then
-	    https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp
+	    # https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp
 	    curl -L --output "${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" $NLOHMANN_JSON_DOWNLOAD_URL
 	fi
 	if [ -r "${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" ]; then
@@ -111,6 +115,39 @@ function install_nlohmann_json
 	    fi
 	    mkdir /usr/local/include/nlohmann
 	    cp "${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" /usr/local/include/nlohmann/json.hpp
+	fi
+    fi
+}
+
+function install_finalcut
+{
+    if [ ! -r /usr/local/include/final/final.h ]; then
+	if [ ! -d "/usr/local/src/finalcut-${FINALCUT_VERSION}" ]; then
+	    if [ ! -r "${DOWNLOAD_CACHE_DIR}/finalcut-${FINALCUT_VERSION}.tar.gz" ]; then
+		curl -L --output "${DOWNLOAD_CACHE_DIR}/${FINALCUT_DOWNLOAD}" $FINALCUT_DOWNLOAD_URL
+	    fi
+	    if [ ! -r "${DOWNLOAD_CACHE_DIR}/finalcut-${FINALCUT_VERSION}.tar.gz" ]; then
+		echo "$FINALCUT_SHA256  ${DOWNLOAD_CACHE_DIR}/${FINALCUT_DOWNLOAD}" | $SHASUM -c -
+		if [ $? -ne "0" ]; then
+		    2>&1 echo "Checksum of ${DOWNLOAD_CACHE_DIR}/${FINALCUT_DOWNLOAD} does not match expected value of ${FINALCUT_SHA256}"
+		    exit 1
+		fi
+	    fi
+	fi
+
+	if [ ! -r /usr/local/include/final/final.h ]; then
+	    cd /usr/local/src
+	    if [ ! -d "finalcut-${FINALCUT_VERSION}" ]; then
+		mkdir "finalcut-${FINALCUT_VERSION}"
+	    fi
+	    chown vagrant:vagrant "finalcut-${FINALCUT_VERSION}"
+	    $SU_CMD "tar -C /usr/local/src -xf ${DOWNLOAD_CACHE_DIR}/${FINALCUT_DOWNLOAD}"
+	    cd "finalcut-${FINALCUT_VERSION}"
+	    pwd
+	    $SU_CMD "autoreconf --install"
+	    $SU_CMD "./configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig"
+	    $SU_CMD make
+	    make install
 	fi
     fi
 }
@@ -174,7 +211,7 @@ function install_nodejs
 if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
     DNF_OPTIONS="--assumeyes"
     dnf $DNF_OPTIONS install gcc gcc-c++ gawk boost-devel libpq-devel \
-	libpq-devel libuuid-devel \
+	libpq-devel libuuid-devel gpm-devel ncurses-devel \
 	curl libX11 libXt libXmu \
 	vim autoconf automake info libtool \
 	intltool gdb valgrind git \
@@ -217,7 +254,9 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
     fi
 
     install_libpqxx_6
+    install_finalcut
     install_nlohmann_json
+    ldconfig /usr/local/lib
     if [ "$VB_GUI" == "y" ]; then
 	dnf $DNF_OPTIONS group install lxde-desktop
     fi
@@ -273,6 +312,7 @@ if [ -x /bin/freebsd-version ]; then
     DOWNLOAD_CACHE_DIR="/home/vagrant/downloads"
     mkdir -p $DOWNLOAD_CACHE_DIR
     install_libpqxx_6
+    install_finalcut
     if [ "$VB_GUI" == "y" ]; then
 	pkg install $FREEBSD_PKG_OPTIONS lxde-meta
     fi
@@ -327,7 +367,7 @@ if [ -f /etc/debian_version ]; then
 	    libboost-locale-dev libpugixml-dev autopoint intltool gdb \
 	    libyaml-cpp-dev nlohmann-json3-dev libcmark-dev \
 	    docbook2x texlive info texinfo curl libgdal-dev libcairomm-1.0-dev \
-	    vim
+	    vim libncurses-dev libgpm-dev
 
     if [ ! -d /etc/apt/keyrings ]; then
 	install -m 0755 -d /etc/apt/keyrings
@@ -351,6 +391,9 @@ if [ -f /etc/debian_version ]; then
     if [ "$VB_GUI" == "y" ]; then
 	apt-get install -y lxde
     fi
+
+    install_finalcut
+    ldconfig
 
     ## Additional configuration to also support developing with Trip Server version 1 series.
     if [ "$TRIP_DEV" == "y" ]; then

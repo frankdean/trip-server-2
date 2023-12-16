@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2023-12-01 15:22+0000\n"
-"PO-Revision-Date: 2023-11-22 17:02+0000\n"
+"POT-Creation-Date: 2023-12-12 17:40+0000\n"
+"PO-Revision-Date: 2023-12-12 16:21+0000\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -143,7 +143,8 @@ msgstr ""
 #: src/itinerary_sharing_edit_handler.cpp:92
 #: src/itinerary_simplify_handler.cpp:76
 #: src/itinerary_waypoint_edit_handler.cpp:309
-#: src/password_change_handler.cpp:95 src/track_sharing_edit_handler.cpp:157
+#: src/password_change_handler.cpp:95 src/text-based_user_interface.cpp:106
+#: src/track_sharing_edit_handler.cpp:157
 msgid "Save"
 msgstr ""
 
@@ -1263,42 +1264,42 @@ msgstr ""
 msgid "OsmAnd color"
 msgstr ""
 
-#: src/main.cpp:107
+#: src/main.cpp:110
 msgid "The database is not ready for use.  Cannot find the \"{1}\" table."
 msgstr ""
 
 #. Message output when the database is being upgraded
-#: src/main.cpp:114
+#: src/main.cpp:117
 msgid "Upgrading the database"
 msgstr "Enrichit la base de données"
 
 #. Label for the version text of the application
-#: src/main.cpp:127
+#: src/main.cpp:139
 msgid "version"
 msgstr "version"
 
 #. Label for the web address the application is listening at
-#: src/main.cpp:129
+#: src/main.cpp:141
 msgid "listening at"
 msgstr "écoute à"
 
 #. Output when the application has been built to allow serving static files.
-#: src/main.cpp:135
+#: src/main.cpp:147
 msgid "The application has been built to serve static files."
 msgstr "L'application a été conçue pour servir des fichiers statiques"
 
 #. Displays the name of the directory that static files will be served from.
-#: src/main.cpp:139
+#: src/main.cpp:151
 msgid "Static files will be served from the {1} directory."
 msgstr "Les fichiers statiques seront servis à partir du répertoire {1}"
 
 #. Message showing how long the application took to startup in milliseconds
-#: src/main.cpp:157
+#: src/main.cpp:169
 msgid "Started application in {1} ms"
 msgstr "Application démarrée en {1} ms"
 
 #. Text displayed when the application ends
-#: src/main.cpp:163
+#: src/main.cpp:175
 msgid "Bye!"
 msgstr "Au revoir!"
 
@@ -1385,6 +1386,95 @@ msgstr "Changer mot de passe"
 
 #: src/session_pg_dao.cpp:348
 msgid "Converting OSMAnd `color` column to new `extended_attributes` column"
+msgstr ""
+
+#. Message shown on status bar when the 'User' menu option is active
+#: src/text-based_user_interface.cpp:37
+msgid "User commands"
+msgstr ""
+
+#. The 'Key' column heading for instructions to the user on which keys perform
+#. which function
+#: src/text-based_user_interface.cpp:45
+msgid "Key"
+msgstr ""
+
+#. The 'Function' column heading for instructions to the user on which keys
+#. perform which function
+#: src/text-based_user_interface.cpp:52
+msgid "Function"
+msgstr ""
+
+#. Describes the behaviour of the <F10> function key
+#. Describes the behaviour of the <Ctrl>+<Space> key combination
+#. Describes the behaviour of the <Menu> function
+#: src/text-based_user_interface.cpp:61
+msgid "Activate menu bar"
+msgstr ""
+
+#. Describes the behaviour of the <Shift>+<Menu> key combination
+#: src/text-based_user_interface.cpp:63
+msgid "Open dialog menu"
+msgstr ""
+
+#. Describes the behaviour of the <Ctrl>+<q> key combination
+#: src/text-based_user_interface.cpp:65
+msgid "Quit"
+msgstr ""
+
+#: src/text-based_user_interface.cpp:97
+msgid "Hide"
+msgstr ""
+
+#: src/text-based_user_interface.cpp:98
+msgid "Hidden!"
+msgstr ""
+
+#: src/text-based_user_interface.cpp:107
+msgid "Saved!"
+msgstr ""
+
+#. Message shown on status bar when the 'Add User' menu option is active
+#: src/text-based_user_interface.cpp:114
+msgid "Create a new user"
+msgstr ""
+
+#. Message shown on status bar when the 'Quit' menu option is active
+#: src/text-based_user_interface.cpp:118
+msgid "Quit the program"
+msgstr ""
+
+#: src/text-based_user_interface.cpp:179
+msgid "You have chosen \"{1}\""
+msgstr ""
+
+#. Title of the Information dialog box
+#: src/text-based_user_interface.cpp:182
+msgid "Info"
+msgstr ""
+
+#: src/text-based_user_interface.cpp:197
+msgid "&User"
+msgstr "Utilisateur"
+
+#: src/text-based_user_interface.cpp:198
+msgid "&Add User"
+msgstr ""
+
+#: src/text-based_user_interface.cpp:200
+msgid "&Quit"
+msgstr ""
+
+#. input_email(this),
+#. input_nickname(this),
+#. input_password(this)
+#. Title of the OK button on the text-based UI
+#: src/text-based_user_interface.cpp:209
+msgid "&OK"
+msgstr ""
+
+#: src/text-based_user_interface.cpp:211
+msgid "Create user"
 msgstr ""
 
 #. Title of the page when creating the sharing of tracked locations with another user
@@ -1789,7 +1879,7 @@ msgid "The {1} locations have been truncated to the most recent {2}"
 msgstr ""
 
 #. Heading before showing command line usage and options with the program name as the parameter
-#: src/trip_get_options.cpp:102
+#: src/trip_get_options.cpp:111
 msgid ""
 "Usage:\n"
 " {1} [OPTIONS]\n"
@@ -1802,62 +1892,67 @@ msgstr ""
 "Options:\n"
 
 #. Command line short description for the --help option
-#: src/trip_get_options.cpp:104
+#: src/trip_get_options.cpp:113
 msgid "show this help, then exit"
 msgstr "affiche cette aide, puis quitte"
 
 #. Command line short description for the --version option
-#: src/trip_get_options.cpp:106
+#: src/trip_get_options.cpp:115
 msgid "show version information, then exit"
 msgstr "affiche les informations de version, puis quitte"
 
 #. Command line short description for the --listen option
-#: src/trip_get_options.cpp:108
+#: src/trip_get_options.cpp:117
 msgid "listen address, e.g. 0.0.0.0"
 msgstr "adresse d'écoute"
 
 #. Command line short description for the --port option
-#: src/trip_get_options.cpp:110
+#: src/trip_get_options.cpp:119
 msgid "port number, e.g. 8080"
 msgstr "numéro de port"
 
 #. Command line short description for the --root option
-#: src/trip_get_options.cpp:113
+#: src/trip_get_options.cpp:122
 msgid "document root directory"
 msgstr "réportoire racine du document"
 
 #. Command line short description for the --expire-sessions option
-#: src/trip_get_options.cpp:116
+#: src/trip_get_options.cpp:125
 msgid "expires any active user web sessions"
 msgstr "fait expirer toutes les sessions Web des utilisateurs actifs"
 
 #. Command line short description for the --config-file option
-#: src/trip_get_options.cpp:118
+#: src/trip_get_options.cpp:127
 msgid "configuration file name"
 msgstr "nom de fichier de configuration"
 
 #. Command line short description for the --upgrade option
-#: src/trip_get_options.cpp:120
+#: src/trip_get_options.cpp:129
 msgid "upgrade database"
 msgstr "optimise la base de données"
 
+#. Command line short description for the --interactive option
+#: src/trip_get_options.cpp:132
+msgid "run an interactive session"
+msgstr ""
+
 #. Command line short description for the --verbose option
-#: src/trip_get_options.cpp:122
+#: src/trip_get_options.cpp:135
 msgid "verbose output"
 msgstr "output verbeux"
 
 #. Example usage when the application is configured to serve static files
-#: src/trip_get_options.cpp:126
+#: src/trip_get_options.cpp:139
 msgid "Usage: {1} <address> <port> <doc_root>"
 msgstr "Options: {1} <adresse> <port> <doc_racine>"
 
 #. Example usage when the application is not configured to serve static files
-#: src/trip_get_options.cpp:129
+#: src/trip_get_options.cpp:142
 msgid "Usage: {1} <address> <port>"
 msgstr "Options: {1} <adresse> <port>"
 
 #. Heading before showing command line usage
-#: src/trip_get_options.cpp:134
+#: src/trip_get_options.cpp:147
 msgid "Example:\n"
 msgstr "Exemple:\n"
 

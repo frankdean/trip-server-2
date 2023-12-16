@@ -145,6 +145,11 @@ trip_server_SOURCES = \
 	../trip-server-common/src/worker.cpp \
 	../trip-server-common/src/worker.hpp
 
+if USE_TUI
+trip_server_SOURCES += text-based_user_interface.cpp \
+	text-based_user_interface.hpp
+endif
+
 if USE_GDAL
 trip_server_SOURCES += elevation_tile.cpp \
 	elevation_tile.hpp

@@ -37,6 +37,8 @@ struct TripGetOptions : public utils::GetOptions {
 #endif // HAVE_GETOPT_H
   static int expire_sessions;
   static int upgrade_flag;
+  /// True - run Text-based User Interface
+  static int tui_flag;
   void confirm_force();
   virtual void show_version_info() const override;
   virtual void usage(std::ostream& os) const override;
