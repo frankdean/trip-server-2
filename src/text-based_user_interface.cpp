@@ -155,6 +155,7 @@ void TripMenu::add_user_option()
     user.nickname = user_edit_dialog.get_nickname();
     user.password.first = true;
     user.password.second = user_edit_dialog.get_password();
+    user.is_admin = user_edit_dialog.is_admin();
     try  {
       SessionPgDao dao;
       dao.save(user);
@@ -199,6 +200,8 @@ UserEditDialog::UserEditDialog (finalcut::FWidget* parent)
   // Prompt for nickname input on text-based UI
   const std::string nickname_label = translate("&Nickname");
   const std::string password_label = translate("&Password").str();
+  // Prompt for Admin user checkbox on text-based UI
+  const std::string admin_label = translate("&Admin").str();
   const bool shadow_inputs = false;
 
   column1_width = std::max({
@@ -206,12 +209,13 @@ UserEditDialog::UserEditDialog (finalcut::FWidget* parent)
       email_label.length(),
       firstname_label.length(),
       lastname_label.length(),
-      password_label.length()
+      password_label.length(),
+      admin_label.length()
     });
   auto dialog_width = column1_width + 50;
 
   setText(translate("Create user").str());
-  setGeometry(FPoint(4, 2), FSize(dialog_width, 17));
+  setGeometry(FPoint(4, 2), FSize(dialog_width, 19));
   input_email.setLabelText(email_label);
   input_email.setGeometry(
       FPoint(column1_width + 3, 2),
@@ -234,15 +238,18 @@ UserEditDialog::UserEditDialog (finalcut::FWidget* parent)
   input_password.setInputType(FLineEdit::InputType::Password);
   input_password.setGeometry(FPoint(column1_width + 3, 10), FSize(20, 1));
   input_password.setShadow(shadow_inputs);
+  input_admin.setText(admin_label);
+  input_admin.unsetChecked();
+  input_admin.setGeometry(FPoint(column1_width + 3, 12), FSize(20, 1));
 
   btn_cancel.setText(cancel_label);
   btn_cancel.setGeometry(
-      FPoint(dialog_width / 2 - cancel_label.length() - 6, 13),
+      FPoint(dialog_width / 2 - cancel_label.length() - 6, 15),
       FSize(cancel_label.length() + 4, 1));
 
   btn_ok.setText(ok_label);
   btn_ok.setGeometry(
-      FPoint(dialog_width / 2 + 6, 13),
+      FPoint(dialog_width / 2 + 6, 15),
       FSize(ok_label.length() + 4, 1));
   btn_ok.addCallback(
       "clicked",

@@ -36,6 +36,7 @@ class UserEditDialog : public finalcut::FDialog {
   finalcut::FLineEdit input_lastname{this};
   finalcut::FLineEdit input_nickname{this};
   finalcut::FLineEdit input_password{this};
+  finalcut::FCheckBox input_admin{this};
   finalcut::FButton btn_ok{this};
   finalcut::FButton btn_cancel{this};
   void save();
@@ -60,6 +61,9 @@ public:
   }
   std::string get_password() {
     return input_password.getText().toString();
+  }
+  bool is_admin() {
+    return input_admin.isChecked();
   }
   bool is_invalid() {
     return invalid;
