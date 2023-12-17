@@ -2,6 +2,42 @@
 
 # Changelog
 
+## Next release
+
+- Implemented a Text-based User Interface to create users.
+
+- Do not listen on socket when upgrading the database or running
+  interactively.
+
+- Updated database schema.
+
+	  Added `extended_attributes` column to `itinerary_waypoint` table.  This
+	  should have been included in the 2.3.0 release.
+
+	  The change is also achieved by running `trip-server` with the
+	  `--upgrade` option.
+
+- Added missing foreign key constraints to the `user_role` table.  The
+  **database schema should be updated** using the `trip-server --upgrade`
+  option.  The upgrade will fail with a foreign key constraint violation if
+  any Admin users have been deleted in the past.  Use the following SQL to
+  identify those invalid user ID's:
+
+		SELECT ur.user_id FROM user_role ur
+		LEFT JOIN usertable u ON u.id=ur.user_id
+		WHERE u.id IS NULL ORDER BY ur.user_id;
+
+	The invalid entries can be deleted with the following SQL:
+
+		DELETE FROM user_role WHERE user_id IN
+		(SELECT ur.user_id FROM user_role ur
+		LEFT JOIN usertable u ON u.id=ur.user_id
+		WHERE u.id IS NULL);
+
+- Fix exception thrown when no map tile usage metrics are available.
+
+- Fix linker warning.
+
 ## 2.3.1
 
 - Fix exception when setting new `date from` tracking query parameter after
