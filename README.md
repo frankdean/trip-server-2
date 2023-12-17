@@ -282,9 +282,14 @@ admin user.
 
 1.  Download and install the [Final Cut][finalcut] library.  **Note** when
     building Final Cut for Linux, to enable mouse support you need to also
-    install the `GPM` library.  After installing the `GPM` library, re-run
-    Final Cut's `configure` script so that it re-configures the build to use
-    the library.
+    install the `gpm` library.  If you need to install additional libraries to
+    fix a failed build, re-run Final Cut's `configure` script so that it
+    re-configures the build to use the libraries.
+
+	On Debian 11 (Bullseye), install the following packages:
+
+	- libgpm-dev
+	- libncurses-dev
 
 2.  Include the `--enable-tui` option when running `configure`, e.g.:
 
