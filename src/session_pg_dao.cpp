@@ -631,6 +631,11 @@ long SessionPgDao::save(const SessionPgDao::user &user_details)
       r["id"].to(id);
     }
     if (user_details.is_admin) {
+      // Create the Admin role if it does not exist
+      auto row = tx.exec1("SELECT COUNT(*) FROM role WHERE name='Admin'");
+      if (row[0].as<int>() == 0)
+        tx.exec("INSERT INTO role (name) VALUES ('Admin')");
+
       tx.exec_params(
           "INSERT INTO user_role (user_id, role_id) "
           "VALUES ($1, (SELECT id FROM role WHERE name='Admin')) "
