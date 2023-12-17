@@ -159,9 +159,7 @@ void TripMenu::add_user_option()
     try  {
       SessionPgDao dao;
       dao.save(user);
-      // FMessageBox::info(this,
-      //                   translate("Save").str(),
-      //                   translate("Saved!").str());
+      // Message shown after successfully saving user details
       status_bar.setStatusbarMessage(translate("User saved!").str());
     } catch (const pqxx::failure& e) {
       std::ostringstream os;
@@ -214,22 +212,23 @@ UserEditDialog::UserEditDialog (finalcut::FWidget* parent)
     });
   auto dialog_width = column1_width + 50;
 
+  // Text-based UI Title of dialog for creating a user
   setText(translate("Create user").str());
   setGeometry(FPoint(4, 2), FSize(dialog_width, 19));
   input_email.setLabelText(email_label);
   input_email.setGeometry(
       FPoint(column1_width + 3, 2),
-      FSize(column1_width + 32, 1));
+      FSize(40, 1));
   input_email.setShadow(shadow_inputs);
   input_firstname.setLabelText(firstname_label);
   input_firstname.setGeometry(
       FPoint(column1_width + 3, 4),
-      FSize(column1_width + 32, 1));
+      FSize(40, 1));
   input_firstname.setShadow(shadow_inputs);
   input_lastname.setLabelText(lastname_label);
   input_lastname.setGeometry(
       FPoint(column1_width + 3, 6),
-      FSize(column1_width + 32, 1));
+      FSize(40, 1));
   input_lastname.setShadow(shadow_inputs);
   input_nickname.setLabelText(nickname_label);
   input_nickname.setGeometry(FPoint(column1_width + 3, 8), FSize(20, 1));

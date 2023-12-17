@@ -120,8 +120,6 @@ void ItineraryWaypointEditHandler::build_form(
   response.content
     <<
     " required>\n"
-    // "        <div id=\"position-required\" class=\"alert alert-warning\" role=\"alert\" ng-show=\"form.position.$error.required\">Enter the position for the itinerary waypoint</div>\n"
-    // "        <div id=\"position-invalid\" class=\"alert alert-warning\" role=\"alert\">Invalid latitude/longitude.  Many common formats are recognised, but try entering numeric only values, separated by a comma, e.g. 51.3,-2.3 for N5.31&deg; W2.3&deg;.  Then look at the various supported formats by changing the Display position format below.  You can use a letter 'd' instead of the &deg; symbol.  Single and double quotes are accepted for minutes and seconds.  Latitudes must be between -90 and 90 degrees.  Longitudes must be between -180 and 180 degrees.</div>\n"
     "      </div>\n"
     "      <div class=\"col-sm-6 col-lg-4\">\n"
     // Label for selecting the coordinate formatting of a location
@@ -141,7 +139,6 @@ void ItineraryWaypointEditHandler::build_form(
     <<
     "        </select>\n"
     "      </div>\n"
-    // "      <div ng-show=\"coordFormat !== 'plus+code' && coordFormat !== 'osgb36' && coordFormat !== 'IrishGrid' && coordFormat !== 'ITM'\">\n"
     "      <div id=\"position-style-div\" class=\"col-sm-6 col-lg-4\">\n"
     // Label for selecting the formatting style for a location
     "        <label for=\"position-separator\">" << translate("Position ordering and separator") << "</label>\n"

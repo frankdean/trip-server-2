@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2023-12-12 17:40+0000\n"
-"PO-Revision-Date: 2023-12-12 16:21+0000\n"
+"POT-Creation-Date: 2023-12-17 18:18+0000\n"
+"PO-Revision-Date: 2023-12-17 18:37+0000\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -142,9 +142,8 @@ msgstr ""
 #: src/itinerary_path_name_edit.cpp:75
 #: src/itinerary_sharing_edit_handler.cpp:92
 #: src/itinerary_simplify_handler.cpp:76
-#: src/itinerary_waypoint_edit_handler.cpp:309
-#: src/password_change_handler.cpp:95 src/text-based_user_interface.cpp:106
-#: src/track_sharing_edit_handler.cpp:157
+#: src/itinerary_waypoint_edit_handler.cpp:306
+#: src/password_change_handler.cpp:95 src/track_sharing_edit_handler.cpp:157
 msgid "Save"
 msgstr ""
 
@@ -164,7 +163,7 @@ msgstr ""
 #: src/itinerary_path_name_edit.cpp:78
 #: src/itinerary_sharing_edit_handler.cpp:95
 #: src/itinerary_simplify_handler.cpp:79 src/itinerary_upload_handler.cpp:181
-#: src/itinerary_waypoint_edit_handler.cpp:313
+#: src/itinerary_waypoint_edit_handler.cpp:310
 #: src/password_change_handler.cpp:97 src/track_sharing_edit_handler.cpp:159
 msgid "Cancel"
 msgstr ""
@@ -372,7 +371,7 @@ msgstr "Date avant"
 #. Column heading for route description
 #. Label for input of a waypoint's description
 #: src/itinerary_edit_handler.cpp:89 src/itinerary_route_edit_handler.cpp:146
-#: src/itinerary_waypoint_edit_handler.cpp:228
+#: src/itinerary_waypoint_edit_handler.cpp:225
 msgid "Description"
 msgstr ""
 
@@ -385,7 +384,7 @@ msgstr ""
 #. Text to confirm when cancelling editing an itinerary
 #. Confirmation dialog when canceling creating or editing an itinerary waypoint
 #: src/itinerary_edit_handler.cpp:114
-#: src/itinerary_waypoint_edit_handler.cpp:311
+#: src/itinerary_waypoint_edit_handler.cpp:308
 msgid "Cancel?"
 msgstr ""
 
@@ -571,7 +570,7 @@ msgstr ""
 #: src/itinerary_sharing_handler.cpp:127
 #: src/itinerary_track_edit_handler.cpp:201
 #: src/itinerary_track_segment_edit_handler.cpp:201
-#: src/itinerary_waypoint_edit_handler.cpp:321
+#: src/itinerary_waypoint_edit_handler.cpp:318
 msgid "Close"
 msgstr ""
 
@@ -777,7 +776,7 @@ msgstr ""
 #. Confirmation dialog when resetting changes when editing a route or track name
 #. Confirmation dialog when resetting changes to an itinerary waypoint
 #: src/itinerary_path_name_edit.cpp:80
-#: src/itinerary_waypoint_edit_handler.cpp:315
+#: src/itinerary_waypoint_edit_handler.cpp:312
 msgid "Reset changes?"
 msgstr ""
 
@@ -910,7 +909,7 @@ msgstr "Longitude"
 #. The column heading for the altitude of a tracked location point
 #: src/itinerary_route_edit_handler.cpp:140
 #: src/itinerary_track_segment_edit_handler.cpp:124
-#: src/itinerary_waypoint_edit_handler.cpp:172
+#: src/itinerary_waypoint_edit_handler.cpp:169
 #: src/tracking_info_handler.cpp:162 src/tracking_request_handler.cpp:108
 msgid "Altitude"
 msgstr "Altitude"
@@ -918,7 +917,7 @@ msgstr "Altitude"
 #. Column heading for route comment
 #. Label for input of a comment for a waypoint
 #: src/itinerary_route_edit_handler.cpp:144
-#: src/itinerary_waypoint_edit_handler.cpp:242
+#: src/itinerary_waypoint_edit_handler.cpp:239
 msgid "Comment"
 msgstr ""
 
@@ -928,7 +927,7 @@ msgstr ""
 #. "        </div>\n"
 #. Label for selection of GPS symbol value
 #: src/itinerary_route_edit_handler.cpp:148
-#: src/itinerary_waypoint_edit_handler.cpp:188
+#: src/itinerary_waypoint_edit_handler.cpp:185
 msgid "Symbol"
 msgstr ""
 
@@ -996,18 +995,15 @@ msgid "Position"
 msgstr ""
 
 #. Label for selecting the coordinate formatting of a location
-#. "        <div id=\"position-required\" class=\"alert alert-warning\" role=\"alert\" ng-show=\"form.position.$error.required\">Enter the position for the itinerary waypoint</div>\n"
-#. "        <div id=\"position-invalid\" class=\"alert alert-warning\" role=\"alert\">Invalid latitude/longitude.  Many common formats are recognised, but try entering numeric only values, separated by a comma, e.g. 51.3,-2.3 for N5.31&deg; W2.3&deg;.  Then look at the various supported formats by changing the Display position format below.  You can use a letter 'd' instead of the &deg; symbol.  Single and double quotes are accepted for minutes and seconds.  Latitudes must be between -90 and 90 degrees.  Longitudes must be between -180 and 180 degrees.</div>\n"
-#. Label for selecting the coordinate formatting of a location
 #: src/itinerary_search_handler.cpp:59
-#: src/itinerary_waypoint_edit_handler.cpp:128
+#: src/itinerary_waypoint_edit_handler.cpp:126
 msgid "Display position format"
 msgstr ""
 
 #. "      <div ng-show=\"coordFormat !== 'plus+code' && coordFormat !== 'osgb36' && coordFormat !== 'IrishGrid' && coordFormat !== 'ITM'\">\n"
 #. Label for selecting the formatting style for a location
 #: src/itinerary_search_handler.cpp:78
-#: src/itinerary_waypoint_edit_handler.cpp:147
+#: src/itinerary_waypoint_edit_handler.cpp:144
 msgid "Position ordering and separator"
 msgstr ""
 
@@ -1204,7 +1200,7 @@ msgstr ""
 #. Label for input of a waypoint's time and date
 #. The column heading for the date and time of a tracked location point
 #: src/itinerary_track_segment_edit_handler.cpp:118
-#: src/itinerary_waypoint_edit_handler.cpp:213
+#: src/itinerary_waypoint_edit_handler.cpp:210
 #: src/tracking_request_handler.cpp:102
 msgid "Time"
 msgstr "Temps"
@@ -1248,58 +1244,58 @@ msgid "Itinerary Waypoint"
 msgstr ""
 
 #. Select choice entry when no item has been chosen
-#: src/itinerary_waypoint_edit_handler.cpp:195
+#: src/itinerary_waypoint_edit_handler.cpp:192
 msgid "-- not set --"
 msgstr ""
 
-#: src/itinerary_waypoint_edit_handler.cpp:255
+#: src/itinerary_waypoint_edit_handler.cpp:252
 msgid "Garmin averaging sample count"
 msgstr ""
 
-#: src/itinerary_waypoint_edit_handler.cpp:266
+#: src/itinerary_waypoint_edit_handler.cpp:263
 msgid "OsmAnd category (type)"
 msgstr ""
 
-#: src/itinerary_waypoint_edit_handler.cpp:284
+#: src/itinerary_waypoint_edit_handler.cpp:281
 msgid "OsmAnd color"
 msgstr ""
 
-#: src/main.cpp:110
-msgid "The database is not ready for use.  Cannot find the \"{1}\" table."
-msgstr ""
-
 #. Message output when the database is being upgraded
-#: src/main.cpp:117
+#: src/main.cpp:101
 msgid "Upgrading the database"
 msgstr "Enrichit la base de données"
 
+#: src/main.cpp:152
+msgid "The database is not ready for use.  Cannot find the \"{1}\" table."
+msgstr ""
+
 #. Label for the version text of the application
-#: src/main.cpp:139
+#: src/main.cpp:165
 msgid "version"
 msgstr "version"
 
 #. Label for the web address the application is listening at
-#: src/main.cpp:141
+#: src/main.cpp:167
 msgid "listening at"
 msgstr "écoute à"
 
 #. Output when the application has been built to allow serving static files.
-#: src/main.cpp:147
+#: src/main.cpp:173
 msgid "The application has been built to serve static files."
 msgstr "L'application a été conçue pour servir des fichiers statiques"
 
 #. Displays the name of the directory that static files will be served from.
-#: src/main.cpp:151
+#: src/main.cpp:177
 msgid "Static files will be served from the {1} directory."
 msgstr "Les fichiers statiques seront servis à partir du répertoire {1}"
 
 #. Message showing how long the application took to startup in milliseconds
-#: src/main.cpp:169
+#: src/main.cpp:195
 msgid "Started application in {1} ms"
 msgstr "Application démarrée en {1} ms"
 
 #. Text displayed when the application ends
-#: src/main.cpp:175
+#: src/main.cpp:201
 msgid "Bye!"
 msgstr "Au revoir!"
 
@@ -1389,93 +1385,113 @@ msgid "Converting OSMAnd `color` column to new `extended_attributes` column"
 msgstr ""
 
 #. Message shown on status bar when the 'User' menu option is active
-#: src/text-based_user_interface.cpp:37
+#: src/text-based_user_interface.cpp:43
 msgid "User commands"
-msgstr ""
+msgstr "Commandes de l'utilisateur"
 
 #. The 'Key' column heading for instructions to the user on which keys perform
 #. which function
-#: src/text-based_user_interface.cpp:45
+#: src/text-based_user_interface.cpp:49
 msgid "Key"
-msgstr ""
+msgstr "Clé"
 
 #. The 'Function' column heading for instructions to the user on which keys
 #. perform which function
-#: src/text-based_user_interface.cpp:52
+#: src/text-based_user_interface.cpp:56
 msgid "Function"
-msgstr ""
+msgstr "Fonction"
 
 #. Describes the behaviour of the <F10> function key
 #. Describes the behaviour of the <Ctrl>+<Space> key combination
 #. Describes the behaviour of the <Menu> function
-#: src/text-based_user_interface.cpp:61
+#: src/text-based_user_interface.cpp:65
 msgid "Activate menu bar"
-msgstr ""
+msgstr "Activer la barre de menus"
 
 #. Describes the behaviour of the <Shift>+<Menu> key combination
-#: src/text-based_user_interface.cpp:63
+#: src/text-based_user_interface.cpp:67
 msgid "Open dialog menu"
-msgstr ""
+msgstr "Ouvrir le menu de la boîte de dialogue"
 
 #. Describes the behaviour of the <Ctrl>+<q> key combination
-#: src/text-based_user_interface.cpp:65
+#: src/text-based_user_interface.cpp:69
 msgid "Quit"
-msgstr ""
-
-#: src/text-based_user_interface.cpp:97
-msgid "Hide"
-msgstr ""
-
-#: src/text-based_user_interface.cpp:98
-msgid "Hidden!"
-msgstr ""
-
-#: src/text-based_user_interface.cpp:107
-msgid "Saved!"
-msgstr ""
+msgstr "Quitter"
 
 #. Message shown on status bar when the 'Add User' menu option is active
-#: src/text-based_user_interface.cpp:114
+#: src/text-based_user_interface.cpp:101
 msgid "Create a new user"
-msgstr ""
+msgstr "Créer un nouvel utilisateur"
 
 #. Message shown on status bar when the 'Quit' menu option is active
-#: src/text-based_user_interface.cpp:118
+#: src/text-based_user_interface.cpp:105
 msgid "Quit the program"
-msgstr ""
+msgstr "Quitter le programme"
 
-#: src/text-based_user_interface.cpp:179
-msgid "You have chosen \"{1}\""
-msgstr ""
+#. Message shown after successfully saving user details
+#: src/text-based_user_interface.cpp:163
+msgid "User saved!"
+msgstr "Utilisateur enrigistré!"
 
-#. Title of the Information dialog box
-#: src/text-based_user_interface.cpp:182
-msgid "Info"
-msgstr ""
-
-#: src/text-based_user_interface.cpp:197
+#: src/text-based_user_interface.cpp:174
 msgid "&User"
-msgstr "Utilisateur"
+msgstr "&Utilisateur"
 
-#: src/text-based_user_interface.cpp:198
+#: src/text-based_user_interface.cpp:175
 msgid "&Add User"
-msgstr ""
+msgstr "Ajouter un &utilisateur"
+
+#: src/text-based_user_interface.cpp:177
+msgid "&Quit"
+msgstr "&Quitter"
+
+#. Title of the OK button on the text-based UI
+#: src/text-based_user_interface.cpp:189
+msgid "&OK"
+msgstr "&OK"
+
+#. Title of the Cancel button on the text-based UI
+#: src/text-based_user_interface.cpp:191
+msgid "&Cancel"
+msgstr "&Annuler"
+
+#. Prompt for email input on text-based UI
+#: src/text-based_user_interface.cpp:193
+msgid "&Email"
+msgstr "&E-mail"
+
+#. Prompt for user's first name on text-based UI
+#: src/text-based_user_interface.cpp:195
+msgid "&First name"
+msgstr "&Prénom"
+
+#. Prompt for user's last name on text-based UI
+#: src/text-based_user_interface.cpp:197
+msgid "&Last name"
+msgstr "&Nom de famille"
+
+#. Prompt for nickname input on text-based UI
+#: src/text-based_user_interface.cpp:199
+msgid "&Nickname"
+msgstr "&Surnom"
 
 #: src/text-based_user_interface.cpp:200
-msgid "&Quit"
-msgstr ""
+msgid "&Password"
+msgstr "&Mot de passe"
 
-#. input_email(this),
-#. input_nickname(this),
-#. input_password(this)
-#. Title of the OK button on the text-based UI
-#: src/text-based_user_interface.cpp:209
-msgid "&OK"
-msgstr ""
+#. Prompt for Admin user checkbox on text-based UI
+#: src/text-based_user_interface.cpp:202
+msgid "&Admin"
+msgstr "A&dministrateur"
 
-#: src/text-based_user_interface.cpp:211
+#. Text-based UI Title of dialog for creating a user
+#: src/text-based_user_interface.cpp:216
 msgid "Create user"
-msgstr ""
+msgstr "Créer un utilisateur"
+
+#: src/text-based_user_interface.cpp:275
+msgid "You must enter a value for each field"
+msgstr "Vous devez entrer une valeur pour chaque champ"
 
 #. Title of the page when creating the sharing of tracked locations with another user
 #: src/track_sharing_edit_handler.cpp:43
@@ -1879,7 +1895,7 @@ msgid "The {1} locations have been truncated to the most recent {2}"
 msgstr ""
 
 #. Heading before showing command line usage and options with the program name as the parameter
-#: src/trip_get_options.cpp:111
+#: src/trip_get_options.cpp:114
 msgid ""
 "Usage:\n"
 " {1} [OPTIONS]\n"
@@ -1892,67 +1908,67 @@ msgstr ""
 "Options:\n"
 
 #. Command line short description for the --help option
-#: src/trip_get_options.cpp:113
+#: src/trip_get_options.cpp:116
 msgid "show this help, then exit"
 msgstr "affiche cette aide, puis quitte"
 
 #. Command line short description for the --version option
-#: src/trip_get_options.cpp:115
+#: src/trip_get_options.cpp:118
 msgid "show version information, then exit"
 msgstr "affiche les informations de version, puis quitte"
 
 #. Command line short description for the --listen option
-#: src/trip_get_options.cpp:117
+#: src/trip_get_options.cpp:120
 msgid "listen address, e.g. 0.0.0.0"
 msgstr "adresse d'écoute"
 
 #. Command line short description for the --port option
-#: src/trip_get_options.cpp:119
+#: src/trip_get_options.cpp:122
 msgid "port number, e.g. 8080"
 msgstr "numéro de port"
 
 #. Command line short description for the --root option
-#: src/trip_get_options.cpp:122
+#: src/trip_get_options.cpp:125
 msgid "document root directory"
 msgstr "réportoire racine du document"
 
 #. Command line short description for the --expire-sessions option
-#: src/trip_get_options.cpp:125
+#: src/trip_get_options.cpp:128
 msgid "expires any active user web sessions"
 msgstr "fait expirer toutes les sessions Web des utilisateurs actifs"
 
 #. Command line short description for the --config-file option
-#: src/trip_get_options.cpp:127
+#: src/trip_get_options.cpp:130
 msgid "configuration file name"
 msgstr "nom de fichier de configuration"
 
 #. Command line short description for the --upgrade option
-#: src/trip_get_options.cpp:129
+#: src/trip_get_options.cpp:132
 msgid "upgrade database"
 msgstr "optimise la base de données"
 
 #. Command line short description for the --interactive option
-#: src/trip_get_options.cpp:132
+#: src/trip_get_options.cpp:135
 msgid "run an interactive session"
 msgstr ""
 
 #. Command line short description for the --verbose option
-#: src/trip_get_options.cpp:135
+#: src/trip_get_options.cpp:138
 msgid "verbose output"
 msgstr "output verbeux"
 
 #. Example usage when the application is configured to serve static files
-#: src/trip_get_options.cpp:139
+#: src/trip_get_options.cpp:142
 msgid "Usage: {1} <address> <port> <doc_root>"
 msgstr "Options: {1} <adresse> <port> <doc_racine>"
 
 #. Example usage when the application is not configured to serve static files
-#: src/trip_get_options.cpp:142
+#: src/trip_get_options.cpp:145
 msgid "Usage: {1} <address> <port>"
 msgstr "Options: {1} <adresse> <port>"
 
 #. Heading before showing command line usage
-#: src/trip_get_options.cpp:147
+#: src/trip_get_options.cpp:150
 msgid "Example:\n"
 msgstr "Exemple:\n"
 
