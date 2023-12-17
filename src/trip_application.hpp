@@ -28,18 +28,16 @@
 #include <mutex>
 #include <thread>
 #include "../trip-server-common/src/application.hpp"
+#include "trip_config.hpp"
 
 namespace fdsd
 {
 namespace trip
 {
 
-class TripConfig;
-
 class TripApplication : public fdsd::web::Application {
 private:
   std::shared_ptr<TripConfig>config;
-  std::string config_filename;
 protected:
   virtual std::shared_ptr<web::HTTPRequestFactory> get_request_factory() const override;
 public:

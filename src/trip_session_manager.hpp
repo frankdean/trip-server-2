@@ -22,16 +22,16 @@
 #ifndef TRIP_SESSION_HPP
 #define TRIP_SESSION_HPP
 
-class SessionManager;
-class TripConfig;
-
 namespace fdsd {
 
 namespace web {
-class Session;
+  class SessionManager;
+  class Session;
 }
 
 namespace trip {
+
+class TripConfig;
 
 class TripSessionManager : public fdsd::web::SessionManager
 {

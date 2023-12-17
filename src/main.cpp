@@ -68,6 +68,48 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
+#ifdef HAVE_TUI
+    if (options.tui_flag) {
+      try {
+        auto config =
+          std::make_shared<TripConfig>(TripConfig(options.config_filename));
+        // Running interactively only requires a single database connection
+        auto pool_manager = std::make_shared<PgPoolManager>(
+            config->get_db_connect_string(), 1);
+        TripPgDao::set_pool_manager(pool_manager);
+        TextUserInterface tui;
+        const int exit_val = tui.run(argc, argv);
+        closelog();
+        return exit_val;
+      } catch (const std::exception& e) {
+        std::cerr << "Exception: " <<  e.what() << '\n';
+        closelog();
+        return EXIT_FAILURE;
+      }
+    }
+#endif // HAVE_TUI
+
+    if (options.upgrade_flag) {
+      try {
+        auto config =
+          std::make_shared<TripConfig>(TripConfig(options.config_filename));
+        // Running the upgrade only requires a single database connection
+        auto pool_manager = std::make_shared<PgPoolManager>(
+            config->get_db_connect_string(), 1);
+        TripPgDao::set_pool_manager(pool_manager);
+        // Message output when the database is being upgraded
+        syslog(LOG_INFO, "%s", translate("Upgrading the database").str().c_str());
+        SessionPgDao session_dao;
+        session_dao.upgrade();
+        closelog();
+        return EXIT_SUCCESS;
+      } catch (const std::exception& e) {
+        std::cerr << "Exception: " <<  e.what() << '\n';
+        closelog();
+        return EXIT_FAILURE;
+      }
+    }
+
     TripApplication application(
         options.listen_address,
         options.port,
@@ -112,27 +154,11 @@ int main(int argc, char *argv[])
         closelog();
         return EXIT_FAILURE;
       }
-      if (options.upgrade_flag) {
-        // Message output when the database is being upgraded
-        syslog(LOG_INFO, "%s", translate("Upgrading the database").str().c_str());
-        session_dao.upgrade();
-        closelog();
-        return EXIT_SUCCESS;
-      }
     }
     application.initialize_user_sessions(options.expire_sessions);
 
     application.initialize_workers(application.get_worker_count(),
                                    pool_manager);
-#ifdef HAVE_TUI
-    if (options.tui_flag) {
-      TextUserInterface tui;
-      const int exit_val = tui.run(argc, argv);
-      std::cout << "Finished runing TUI exit status " << exit_val << '\n';
-      closelog();
-      return exit_val;
-    }
-#endif // HAVE_TUI
     std::stringstream msg01;
     msg01
       // Label for the version text of the application

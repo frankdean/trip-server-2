@@ -24,7 +24,6 @@
 #ifdef HAVE_GDAL
 #include "elevation_tile.hpp"
 #endif
-#include "trip_config.hpp"
 #include "trip_request_factory.hpp"
 #include "session_pg_dao.hpp"
 #include "../trip-server-common/src/session.hpp"
@@ -47,9 +46,7 @@ TripApplication::TripApplication(std::string listen_address,
     port,
     locale)
 {
-  this->config_filename = config_filename.empty() ?
-    SYSCONFDIR "/trip-server.yaml" : config_filename;
-  config = std::make_shared<TripConfig>(TripConfig(this->config_filename));
+  config = std::make_shared<TripConfig>(TripConfig(config_filename));
 #ifdef HAVE_GDAL
   if (!config->get_elevation_tile_path().empty()) {
     elevation_service = new ElevationService(

@@ -49,6 +49,8 @@ TripConfig::TripConfig(std::string filename) :
   default_triplogger_configuration()
 {
   try {
+    if (filename.empty())
+      filename = SYSCONFDIR "/trip-server.yaml";
     // std::cout << "Reading config from \"" << filename << "\"\n";
     auto yaml = YAML::LoadFile(filename);
     if (auto db = yaml["db"]) {
