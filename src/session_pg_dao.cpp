@@ -369,6 +369,39 @@ void SessionPgDao::upgrade()
     std::cerr << "Error creating pgcrypto extension: "
               << e.what() << '\n';
   }
+
+  try {
+    work tx(*connection);
+    auto r = tx.exec("SELECT COUNT(*) FROM pg_constraint "
+                     "WHERE conname = 'user_role_user_id_fkey'");
+    if (r[0][0].as<int>() == 0) {
+      tx.exec("ALTER TABLE user_role ADD FOREIGN KEY (user_id) "
+              "REFERENCES usertable(id) ON DELETE CASCADE");
+    }
+    tx.commit();
+  } catch (const std::exception& e) {
+    std::cerr << "Error adding user_id foreign key to user_role table: "
+              << typeid(e).name() << ' '
+              << e.what() << '\n';
+    throw;
+  }
+
+  try {
+    work tx(*connection);
+    auto r = tx.exec("SELECT COUNT(*) FROM pg_constraint "
+                     "WHERE conname = 'user_role_role_id_fkey'");
+    if (r[0][0].as<int>() == 0) {
+      tx.exec("ALTER TABLE user_role ADD FOREIGN KEY (role_id) "
+              "REFERENCES role(id) ON DELETE CASCADE");
+    }
+    tx.commit();
+  } catch (const std::exception& e) {
+    std::cerr << "Error adding user_id foreign key to user_role table: "
+              << typeid(e).name() << ' '
+              << e.what() << '\n';
+    throw;
+  }
+
 }
 
 SessionPgDao::tile_report

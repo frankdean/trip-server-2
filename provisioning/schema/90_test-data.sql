@@ -16,6 +16,8 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+ALTER TABLE IF EXISTS ONLY public.user_role DROP CONSTRAINT IF EXISTS user_role_user_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.user_role DROP CONSTRAINT IF EXISTS user_role_role_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.session DROP CONSTRAINT IF EXISTS session_user_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.session_data DROP CONSTRAINT IF EXISTS session_data_session_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.location DROP CONSTRAINT IF EXISTS location_user_id_fkey;
@@ -4367,7 +4369,6 @@ COPY public.tile_metric ("time", count) FROM stdin;
 
 COPY public.user_role (user_id, role_id) FROM stdin;
 1	1
-99	1
 \.
 
 
@@ -5044,6 +5045,22 @@ ALTER TABLE ONLY public.session_data
 
 ALTER TABLE ONLY public.session
     ADD CONSTRAINT session_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.usertable(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_role user_role_role_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: trip
+--
+
+ALTER TABLE ONLY public.user_role
+    ADD CONSTRAINT user_role_role_id_fkey FOREIGN KEY (role_id) REFERENCES public.role(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_role user_role_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: trip
+--
+
+ALTER TABLE ONLY public.user_role
+    ADD CONSTRAINT user_role_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.usertable(id) ON DELETE CASCADE;
 
 
 --
