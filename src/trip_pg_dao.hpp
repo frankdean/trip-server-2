@@ -56,7 +56,7 @@ public:
       (std::shared_ptr<fdsd::utils::PgPoolManager> pool_manager);
   bool is_ready(std::string test_table_name,
                 int retry_interval_secs = 10,
-                int max_retries = 6);
+                int max_retries = 12);
 };
 
 } // namespace trip

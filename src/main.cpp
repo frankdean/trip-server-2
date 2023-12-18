@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
     }
 #endif // HAVE_TUI
 
+    const std::string test_table_name = "session";
     if (options.upgrade_flag) {
       try {
         auto config =
@@ -97,9 +98,18 @@ int main(int argc, char *argv[])
         auto pool_manager = std::make_shared<PgPoolManager>(
             config->get_db_connect_string(), 1);
         TripPgDao::set_pool_manager(pool_manager);
+        SessionPgDao session_dao;
+        if (!session_dao.is_ready(test_table_name)) {
+          // Message output when the database is not ready for use
+          syslog(LOG_ERR, "%s",
+                 (format(
+                     translate("The database is not ready for use.  Cannot find the \"{1}\" table.")) % test_table_name
+                   ).str().c_str());
+          closelog();
+          return EXIT_FAILURE;
+        }
         // Message output when the database is being upgraded
         syslog(LOG_INFO, "%s", translate("Upgrading the database").str().c_str());
-        SessionPgDao session_dao;
         session_dao.upgrade();
         closelog();
         return EXIT_SUCCESS;
@@ -144,7 +154,6 @@ int main(int argc, char *argv[])
     TripSessionManager::set_session_manager(&session_manager);
     {
       SessionPgDao session_dao;
-      const std::string test_table_name = "session";
       if (!session_dao.is_ready(test_table_name)) {
         // Message output when the database is not ready for use
         syslog(LOG_ERR, "%s",
