@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 2.4.0-rc.1
+## 2.4.0
 
 - Implemented a Text-based User Interface to create users.
 

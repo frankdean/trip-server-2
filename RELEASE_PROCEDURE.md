@@ -34,48 +34,63 @@
 
 ## Docker
 
-1.  Check the `Dockerfile` has been updated to the use the correct release
-	version number.  The version information is updated by `configure`
+1.  Optionally, check the `Dockerfile` has been updated to the use the correct
+	release version number.  The version information is updated by `configure`
 	when `Dockerfile` is created from `Dockerfile.in`.
 
 		$ grep 'ARG TRIP_SERVER_VERSION' Dockerfile
 		$ grep LABEL Dockerfile Dockerfile-postgis
 
-1.  Optionally, build the database image.  This only needs updating if
-    there have been any database schema changes.
+1.  Build the Docker images.  Either build them manually as follows, or add
+    the `--build` option to the `compose up` command in the section below.
 
-	Update `Dockerfile-postgis` to use the latest
-	[PostgreSQL build](https://hub.docker.com/_/postgres).
+	1.  Optionally, build the database image.  This only needs updating if
+		there have been any database schema changes.
 
-		$ cd ./trip-server-2
-		$ docker build -f Dockerfile-postgis -t fdean/trip-database:latest .
+		Update `Dockerfile-postgis` to use the latest
+		[PostgreSQL build](https://hub.docker.com/_/postgres).
 
-1.  Build the `trip-server-2` image:
+			$ cd ./trip-server-2
+			$ docker build -f Dockerfile-postgis -t fdean/trip-database:latest .
 
-    1.  Run the Docker build:
+	1.  Build the `trip-server-2` image:
 
-		    $ cd ./trip-server-2
-		    $ docker build -t fdean/trip-server-2:latest .
+		*  Run the Docker build:
 
-	    The `--no-cache` option may be required if Docker skips the `COPY`
-        command for the distribution tarball.
+				$ cd ./trip-server-2
+				$ docker build -t fdean/trip-server-2:latest .
 
-	1.  Optionally, check the image labels with:
+			The `--no-cache` option may be required if Docker uses a cached
+			version of the `COPY` command when copying the distribution tarball to
+			the image.
 
-			$ docker image inspect --format='{{println .Config.Labels}}' \
-			  fdean/trip-server-2:latest
-			$ docker image inspect --format='{{println .Config.Labels}}' \
-			  fdean/trip-database:latest
+		*  Optionally, check the image labels with:
+
+				$ docker image inspect --format='{{println .Config.Labels}}' \
+				  fdean/trip-server-2:latest
+				$ docker image inspect --format='{{println .Config.Labels}}' \
+				  fdean/trip-database:latest
 
 1.	Test the Dockerfile
 
-		$ docker compose up -d
+	Omit the `--build` option if the images were built in the earlier steps.
+
+		$ docker compose up -d --build
 		$ docker compose logs --follow
+
+	or
+
+		$ podman-compose up -d --build
+		$ podman logs -f trip-server-2_web_1
 
 	Stop the container with (use the `--volumes` switch to also remove
     the database volume):
 
 		$ docker compose down --volumes
+
+	or
+
+		$ podman-compose down --volumes
 
 ## Installation
 
