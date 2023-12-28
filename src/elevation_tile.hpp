@@ -95,7 +95,7 @@ class ElevationService {
   bool initialized;
   std::exception_ptr initialization_error;
   void init();
-  std::thread* init_thread;
+  std::unique_ptr<std::thread> init_thread;
 public:
   ElevationService(std::string directory_path, long tile_cache_ms);
   ~ElevationService();

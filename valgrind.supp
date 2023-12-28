@@ -1,17 +1,168 @@
 {
-   boost::locale/icu leak
+   ignore_boost_locale
    Memcheck:Leak
-   match-leak-kinds: possible
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libboost_locale.so.*
+   ...
+}
+{
+   ignore_icu_library
+   Memcheck:Leak
    fun:malloc
-   fun:_ZN6icu_6713UnicodeString8allocateEi
-   fun:_ZN6icu_6713UnicodeString18cloneArrayIfNeededEiiaPPia
-   fun:_ZN6icu_6713UnicodeString8doAppendEPKDsii
-   fun:_ZN6icu_6715SimpleFormatter6formatEPKDsiPKPKNS_13UnicodeStringERS3_S5_aPiiR10UErrorCode
-   fun:_ZNK6icu_6715SimpleFormatter15formatAndAppendEPKPKNS_13UnicodeStringEiRS1_PiiR10UErrorCode
-   fun:_ZNK6icu_6715SimpleFormatter6formatERKNS_13UnicodeStringES3_RS1_R10UErrorCode
-   fun:_ZN6icu_6716SimpleDateFormat9constructENS_10DateFormat6EStyleES2_RKNS_6LocaleER10UErrorCode
-   fun:_ZN6icu_6716SimpleDateFormatC1ENS_10DateFormat6EStyleES2_RKNS_6LocaleER10UErrorCode
-   fun:_ZN6icu_6710DateFormat6createENS0_6EStyleES1_RKNS_6LocaleE
-   obj:/usr/lib/x86_64-linux-gnu/libboost_locale.so.1.74.0
-   obj:/usr/lib/x86_64-linux-gnu/libboost_locale.so.1.74.0
+   obj:/usr/lib/x86_64-linux-gnu/libicuuc.so.*
+}
+{
+   ignore_pixman_library
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   obj:*/lib/x86_64-linux-gnu/libpixman-1.so.*
+}
+{
+   ignore_libheif_libde_used_by_gdal
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib/x86_64-linux-gnu/libde265.so.*
+   fun:de265_init
+   obj:/usr/lib/x86_64-linux-gnu/libheif.so.*
+   ...
+}
+{
+   gdal
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   ...
+   obj:/usr/lib/libgdal.so.*
+   fun:GDALAllRegister
+   ...
+}
+{
+   gdal_large_file_handler
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   fun:VSIInstall*FileHandler
+   ...
+   fun:GDALAllRegister
+   ...
+}
+{
+   gdal_register_cog
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   ...
+   obj:/usr/lib/libgdal.so.*
+   fun:GDALRegister_COG
+   fun:GDALAllRegister
+   ...
+}
+{
+   gdal
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   obj:/usr/lib/libgdal.so.*
+   ...
+}
+{
+   gdal_all_register
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   ...
+   fun:GDALAllRegister
+   ...
+}
+{
+   gdal_all_register
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   ...
+   fun:GDALAllRegister
+   ...
+}
+{
+   gdal_all_register
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib/libgdal.so.*
+   ...
+   fun:GDALOpenEx
+   ...
+}
+{
+   dataset_get_projection_ref
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib/libgdal.so.*
+   fun:CPLCreateOrAcquireMutexEx
+   fun:_ZN14CPLMutexHolderC1EPPvdPKcii
+   obj:/usr/lib/libgdal.so.*
+   fun:_Z11PamGetProxyPKc
+   fun:_ZN14GDALPamDataset16BuildPamFilenameEv
+   fun:_ZN14GDALPamDataset10TryLoadXMLEPPc
+   obj:/usr/lib/libgdal.so.*
+   obj:/usr/lib/libgdal.so.*
+   fun:_ZNK11GDALDataset16GetProjectionRefEv
+   fun:_ZN4fdsd4trip13ElevationTile4openEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib/libgdal.so.28.0.2
+   fun:CPLCreateOrAcquireMutexEx
+   fun:_ZN14CPLMutexHolderC1EPPvdPKcii
+   obj:/usr/lib/libgdal.so.28.0.2
+   fun:_Z11PamGetProxyPKc
+   fun:_ZN14GDALPamDataset16BuildPamFilenameEv
+   fun:_ZN14GDALPamDataset10TryLoadXMLEPPc
+   obj:/usr/lib/libgdal.so.28.0.2
+   obj:/usr/lib/libgdal.so.28.0.2
+   fun:_ZNK11GDALDataset16GetProjectionRefEv
+   fun:_ZN4fdsd4trip13ElevationTile4openEv
+}
+{
+   gdal_band_raster
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:CPLCreateOrAcquireLock
+   fun:_ZN13CPLLockHolderC1EPP8_CPLLock11CPLLockTypePKci
+   fun:GDALGetCacheMax64
+   fun:_ZN15GDALRasterBlock11InternalizeEv
+   fun:_ZN14GDALRasterBand17GetLockedBlockRefEiii
+   fun:_ZN14GDALRasterBand9IRasterIOE10GDALRWFlagiiiiPvii12GDALDataTypexxP20GDALRasterIOExtraArg
+   obj:/usr/lib/libgdal.so.28.0.2
+   fun:_ZN14GDALRasterBand8RasterIOE10GDALRWFlagiiiiPvii12GDALDataTypexxP20GDALRasterIOExtraArg
+   fun:_ZN4fdsd4trip13ElevationTile13get_elevationEdd
+   fun:_ZN4fdsd4trip16ElevationService13get_elevationEdd
+   ...
+}
+{
+   gdal_dataset_leak
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   ...
+   obj:/usr/lib/libgdal.so.28.0.2
+   fun:_ZN4fdsd4trip13ElevationTile5closeEv
+   fun:~ElevationTile
+   fun:operator()
+   fun:operator()
+   fun:~unique_ptr
+   fun:_Destroy<std::unique_ptr<fdsd::trip::ElevationTile> >
+   fun:__destroy<std::unique_ptr<fdsd::trip::ElevationTile>*>
+   fun:_Destroy<std::unique_ptr<fdsd::trip::ElevationTile>*>
+   fun:_Destroy<std::unique_ptr<fdsd::trip::ElevationTile>*, std::unique_ptr<fdsd::trip::ElevationTile> >
+   fun:~vector
+   fun:_ZN4fdsd4trip16ElevationServiceD1Ev
+   fun:_ZN4fdsd4trip15TripApplicationD1Ev
+   fun:main
 }
