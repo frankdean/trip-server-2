@@ -22,6 +22,7 @@
 #ifndef ITINERARY_PG_DAO_HPP
 #define ITINERARY_PG_DAO_HPP
 
+#include "geo_utils.hpp"
 #include "trip_pg_dao.hpp"
 #include "tracking_pg_dao.hpp"
 #include "geo_utils.hpp"
