@@ -32,9 +32,9 @@ The following features have been implemented:
 
 * Sharing tracks with others.
 
-* Viewing tracks on a map provided by a tile server, e.g. OpenStreetMap tiles.
+* Viewing tracks on a map provided by a tile server, e.g. [OpenStreetMap][] tiles.
 
-* Creating and sharing itineraries using the Markdown markup language.
+* Creating and sharing itineraries using the [Markdown][] markup language.
 
 * Using the map, interactively creating routes and waypoints for an itinerary.
 
@@ -80,7 +80,7 @@ are available online.
 
 ## Source Control
 
-The source is maintained in a Git repository which can be cloned with:
+The source is maintained in a [Git][] repository which can be cloned with:
 
 	$ git clone --recursive git://www.fdsd.co.uk/trip-server-2.git
 	$ cd ./trip-server-2/trip-server-common
@@ -89,8 +89,6 @@ The source is maintained in a Git repository which can be cloned with:
 ## Demo Options
 
 ### Docker
-
-[Docker]: https://www.docker.com "Develop faster.  Run anywhere."
 
 You can use [Docker][] to run the application, using `docker compose`.
 
@@ -244,7 +242,7 @@ overridden in the application's configuration file, see the `Configuration`
 section in the `trip-server` info manual.
 
 See the `PostgreSQL Database Configuration` section in the instructions for
-[TripServer v1][trip-server] to install PostgreSQL and create the database.
+[TripServer v1][trip-server] to install [PostgreSQL][] and create the database.
 Upgrade the database to support Trip Server v2 by running:
 
 	$ trip-server --upgrade
@@ -281,7 +279,7 @@ option to include an interactive TUI which can be used to create an initial
 admin user.
 
 1.  Download and install the [Final Cut][finalcut] library.  **Note** when
-    building Final Cut for Linux, to enable mouse support you need to also
+    building Final Cut for [Linux][], to enable mouse support you need to also
     install the `gpm` library.  If you need to install additional libraries to
     fix a failed build, re-run Final Cut's `configure` script so that it
     re-configures the build to use the libraries.
@@ -579,31 +577,17 @@ Download the appropriate version of `json.hpp` from
 
 See [CHANGELOG](./CHANGELOG.md)
 
-[AngularJS]: https://angularjs.org
-[Apache]: http://httpd.apache.org/ "an open-source HTTP server for modern operating systems including UNIX and Windows"
-[Debian]: https://www.debian.org "a free operating system (OS) for your computer"
-[ECMAScript]: https://en.wikipedia.org/wiki/ECMAScript
 [GPSLogger]: http://code.mendhak.com/gpslogger/ "A battery efficient GPS logging application"
 [Git]: http://git-scm.com/ "a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency"
 [libpqxx]: http://pqxx.org/ "The official C++ client API for PostgreSQL"
 [Linux]: https://www.kernel.org/
 [MacPorts]: http://www.macports.org/ "MacPorts Home Page"
 [Markdown]: http://daringfireball.net/projects/markdown/ "A text-to-HTML conversion tool for web writers"
-[Nginx]: https://nginx.org/ "HTTP and reverse proxy server, a mail proxy server, and a generic TCP/UDP proxy server"
-[Node.js]: https://nodejs.org/ "A JavaScript runtime built on Chrome's V8 JavaScript engine"
 [OpenStreetMap]: http://www.openstreetmap.org/ "OpenStreetMap"
-[PostGIS]: https://postgis.net "Spatial and Geographic objects for PostgreSQL"
-[PostGIS]: https://postgis.net "Spatial and Geographic objects for PostgreSQL"
-[PostgreSQL]: https://www.postgresql.org "A powerful, open source object-relational database system"
 [PostgreSQL]: https://www.postgresql.org "A powerful, open source object-relational database system"
 [Qemu]: https://www.qemu.org "A generic and open source machine emulator and virtualizer"
-[RaspberryPi]: https://www.raspberrypi.org
-[Traccar Client]: https://www.traccar.org/client/
 [TripLogger]: https://www.fdsd.co.uk/triplogger/ "TripLogger Remote for iOS"
 [Vagrant]: https://www.vagrantup.com "Development Environments Made Easy"
-[VirtualBox]: https://www.virtualbox.org "A x86 and AMD64/Intel64 virtualization product"
-[docker]: https://www.docker.com "Securely build and share any application, anywhere"
+[Docker]: https://www.docker.com
 [gpx]: http://www.topografix.com/gpx.asp "The GPX Exchange Format"
-[semver]: http://semver.org
 [trip-server]: https://www.fdsd.co.uk/trip-server/ "TRIP - Trip Recording and Itinerary Planner"
-[trip-web-client]: https://www.fdsd.co.uk/trip-web-client-docs/
