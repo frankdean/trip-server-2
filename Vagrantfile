@@ -31,32 +31,17 @@ Vagrant.configure("2") do |config|
     debian.vm.box = "debian/bullseye64"
     debian.vm.box_version = "11.20231009.1"
 
-    # Share an additional folder to the guest VM. The first argument is
-    # the path on the host to the actual folder. The second argument is
-    # the path on the guest to mount the folder. And the optional third
-    # argument is a set of non-required options.
-    if myEnv[:TRIP_DEV] == "y"
-      debian.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client"
-      debian.vm.synced_folder "../trip-server", "/vagrant-trip-server"
-    end
-
     # Create a forwarded port mapping which allows access to a specific port
     # within the machine from a port on the host machine. In the example below,
     # accessing "localhost:8080" will access port 80 on the guest machine.
     #config.vm.network "forwarded_port", guest: 80, host: 80
     debian.vm.network "forwarded_port", guest: 8080, host: 8080
-    debian.vm.network "forwarded_port", guest: 8081, host: 8081
   end
 
   config.vm.define "debian12", autostart: false do |debian12|
     debian12.vm.box = "debian/bookworm64"
     debian12.vm.box_version = "12.20231009.1"
-    if myEnv[:TRIP_DEV] == "y"
-      debian12.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client"
-      debian12.vm.synced_folder "../trip-server", "/vagrant-trip-server"
-    end
     debian12.vm.network "forwarded_port", guest: 8080, host: 8090
-    debian12.vm.network "forwarded_port", guest: 8081, host: 8091
   end
 
   # It may take multiple attempts to fully succeed in provisioning a working
@@ -77,13 +62,7 @@ Vagrant.configure("2") do |config|
     # VirtualBox guest additions and a restart is required to enable the guest
     # additions.
 
-    if myEnv[:TRIP_DEV] == "y"
-      fedora.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client"
-      fedora.vm.synced_folder "../trip-server", "/vagrant-trip-server"
-    end
-
     fedora.vm.network "forwarded_port", guest: 8080, host: 8082
-    fedora.vm.network "forwarded_port", guest: 8081, host: 8083
   end
 
   # The FreeBSD configuration is not recommended for testing with Trip Server
@@ -121,13 +100,7 @@ Vagrant.configure("2") do |config|
     # https://developer.hashicorp.com/vagrant/docs/cli/rsync
     freebsd.vm.synced_folder ".", "/vagrant", type: "rsync"
 
-    if myEnv[:TRIP_DEV] == "y"
-      freebsd.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client", type: "rsync"
-      freebsd.vm.synced_folder "../trip-server", "/vagrant-trip-server", type: "rsync"
-    end
-
     freebsd.vm.network "forwarded_port", guest: 8080, host: 8084
-    freebsd.vm.network "forwarded_port", guest: 8081, host: 8085
 
     # Export the following environment variable to enable specifying the disk
     # size:
@@ -163,9 +136,6 @@ Vagrant.configure("2") do |config|
     rockylinux.vm.synced_folder ".", "/vagrant", type: "rsync"
 
     if myEnv[:TRIP_DEV] == "y"
-      rockylinux.vm.synced_folder "../trip-web-client", "/vagrant-trip-web-client", type: "rsync"
-      rockylinux.vm.synced_folder "../trip-server", "/vagrant-trip-server", type: "rsync"
-
       # Export the following environment variable to enable specifying the
       # disk size:
       #
@@ -191,7 +161,6 @@ Vagrant.configure("2") do |config|
       #
     end
     rockylinux.vm.network "forwarded_port", guest: 8080, host: 8086
-    rockylinux.vm.network "forwarded_port", guest: 8081, host: 8087
   end
 
   # Disable automatic box update checking. If you disable this, then

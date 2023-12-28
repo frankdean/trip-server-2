@@ -27,8 +27,6 @@ NLOHMANN_JSON_VERSION=v3.11.2
 NLOHMANN_JSON_SHA256=665fa14b8af3837966949e8eb0052d583e2ac105d3438baba9951785512cf921
 FINALCUT_VERSION=0.9.0
 FINALCUT_SHA256=73ff5016bf6de0a5d3d6e88104668b78a521c34229e7ca0c6a04b5d79ecf666e
-NODE_VERSION="v16.20.1"
-NODE_SHA256=b6c60e1e106ad7d8881e83945a5208c1b1d1b63e6901c04b9dafa607aff3a154
 
 DOWNLOAD_CACHE_DIR="/vagrant/provisioning/downloads"
 LIBPQXX_DOWNLOAD="libpqxx-${LIBPQXX_VERSION}.tar.gz"
@@ -152,56 +150,6 @@ function install_finalcut
     fi
 }
 
-function install_nodejs
-{
-    # https://github.com/nodejs/help/wiki/Installation
-    NODE_FILENAME="node-${NODE_VERSION}-linux-x64"
-    NODE_TAR_FILENAME="${NODE_FILENAME}.tar.xz"
-    NODE_EXTRACT_DIR="${NODE_FILENAME}"
-    NODE_DOWNLOAD_URL="https://nodejs.org/dist/${NODE_VERSION}/${NODE_TAR_FILENAME}"
-
-    if [ ! -x "/usr/local/lib/nodejs/${NODE_EXTRACT_DIR}/bin/node" ]; then
-	# Download the tarball distribution if it does not already exist
-	if [ ! -e "${DOWNLOAD_CACHE_DIR}/${NODE_TAR_FILENAME}" ]; then
-	    if [ ! -d ${DOWNLOAD_CACHE_DIR} ]; then
-		mkdir -p ${DOWNLOAD_CACHE_DIR}
-	    fi
-	    curl --location --remote-name --output-dir ${DOWNLOAD_CACHE_DIR} $NODE_DOWNLOAD_URL
-	fi
-	if [ -e "${DOWNLOAD_CACHE_DIR}/$NODE_TAR_FILENAME" ]; then
-	    echo "$NODE_SHA256  ${DOWNLOAD_CACHE_DIR}/$NODE_TAR_FILENAME" | $SHASUM -c -
-	    if [ $? -ne "0" ]; then
-		>&2 echo "Checksum of downloaded file does not match expected value of ${NODE_SHA256}"
-		exit 1
-	    fi
-	    if [ ! -d /usr/local/lib/nodejs ]; then
-		mkdir -p /usr/local/lib/nodejs
-	    fi
-	    tar --no-same-owner --no-same-permissions --xz \
-		-xf "${DOWNLOAD_CACHE_DIR}/${NODE_TAR_FILENAME}" \
-		-C /usr/local/lib/nodejs
-	    if [ -L /usr/local/lib/nodejs/node-current ]; then
-		rm -f /usr/local/lib/nodejs/node-current
-	    fi
-	    ln -sf "/usr/local/lib/nodejs/${NODE_EXTRACT_DIR}" /usr/local/lib/nodejs/node-current
-	    if [ -e /vagrant/node_modules ]; then
-		cd /vagrant
-		rm -rf node_modules
-	    fi
-	fi
-    fi
-    grep -E '^export\s+PATH.*nodejs' /home/vagrant/.profile >/dev/null 2>&1
-    if [ $? -ne 0 ]; then
-	echo "export PATH=/usr/local/lib/nodejs/node-current/bin:$PATH" >>/home/vagrant/.profile
-    fi
-    if [ -x /usr/local/lib/nodejs/node-current/bin/node ] && \
-	   [ ! -x /usr/local/lib/nodejs/node-current/lib/node_modules/yarn/bin/yarn ]; then
-	PATH="/usr/local/lib/nodejs/node-current/bin:$PATH" \
-	    /usr/local/lib/nodejs/node-current/lib/node_modules/npm/bin/npm-cli.js \
-	    install -g yarn
-    fi
-}
-
 ##############################################################################
 #
 # Fedora & Rocky Linux provisioning
@@ -214,8 +162,7 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 	libpq-devel libuuid-devel gpm-devel ncurses-devel \
 	curl libX11 libXt libXmu \
 	vim autoconf automake info libtool \
-	intltool gdb valgrind git \
-	nodejs
+	intltool gdb valgrind git
 
     if [ -f /etc/rocky-release ]; then
 	# Rocky Linux fails to install the VirtualBox Guest Additions kernel with:
@@ -297,8 +244,7 @@ if [ -x /bin/freebsd-version ]; then
 	python3 pugixml e2fsprogs-libuuid nlohmann-json \
 	texinfo vim python3 valgrind apg \
 	intltool gdb libtool autoconf-archive gettext automake cairomm \
-	cmark \
-	node16 yarn-node16
+	cmark
     # Include the textlive-full package to allow building the PDF docs, which
     # needs an additional 11G or more of disk space.
     
@@ -372,21 +318,6 @@ if [ -f /etc/debian_version ]; then
     if [ ! -d /etc/apt/keyrings ]; then
 	install -m 0755 -d /etc/apt/keyrings
     fi
-    if [ ! -e /etc/apt/keyrings/docker.gpg ]; then
-	$SU_CMD 'curl -fsSL https://download.docker.com/linux/debian/gpg' | gpg --no-tty --dearmor -o /etc/apt/keyrings/docker.gpg 2>&1 >/dev/null
-	chmod a+r /etc/apt/keyrings/docker.gpg
-    fi
-    if [ ! -e /etc/apt/sources.list.d/docker.list ]; then
-	echo \
-	    "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
-  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-	    tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-    fi
-    apt-get update
-    apt-get install $DEB_OPTIONS docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-    adduser vagrant docker >/dev/null
 
     if [ "$VB_GUI" == "y" ]; then
 	apt-get install -y lxde
@@ -395,15 +326,4 @@ if [ -f /etc/debian_version ]; then
     install_finalcut
     ldconfig
 
-    ## Additional configuration to also support developing with Trip Server version 1 series.
-    if [ "$TRIP_DEV" == "y" ]; then
-	grep -E '^11\.' /etc/debian_version
-	if [ $? -eq 0 ]; then
-	    apt-get install -y openjdk-11-jdk chromium chromium-l10n firefox-esr-l10n-en-gb
-	    install_nodejs
-	else
-	    apt-get install -y openjdk-17-jdk chromium chromium-l10n firefox-esr-l10n-en-gb
-	    install_nodejs
-	fi
-    fi
 fi
