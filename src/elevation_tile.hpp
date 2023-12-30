@@ -167,19 +167,14 @@ public:
       bool force = false,
       bool skip_all_if_any_exist = false) {
 
-    // This is primarily useful where the paths are all segments of the same
-    // track and the statistics can be applied to the owning track on return
-    path_statistics path_statistics;
-    for (auto i = begin; i != end; ++i) {
-      auto path = *i;
-      auto points = path.points;
+    for (auto &i = begin; i != end; ++i)
       fill_elevations(
-          path.points.begin(),
-          path.points.end(),
+          i->points.begin(),
+          i->points.end(),
           force,
           skip_all_if_any_exist);
-    }
   }
+
 };
 
 } // namespace trip
