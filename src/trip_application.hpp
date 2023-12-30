@@ -48,7 +48,6 @@ public:
                   std::string port,
                   std::string config_filename,
                   std::string locale = "");
-  virtual ~TripApplication();
   std::string get_db_connect_string() const;
   int get_worker_count() const;
   int get_pg_pool_size() const;

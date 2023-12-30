@@ -53,15 +53,6 @@ TripApplication::TripApplication(std::string listen_address,
 #endif
 }
 
-TripApplication::~TripApplication()
-{
-  std::cout << "TripApplication::~TripApplication()\n";
-// #ifdef HAVE_GDAL
-//   if (elevation_service != nullptr)
-//     delete elevation_service;
-// #endif
-}
-
 std::string TripApplication::get_db_connect_string() const {
   return config->get_db_connect_string();
 }
