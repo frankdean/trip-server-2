@@ -290,6 +290,21 @@ admin user.
 	- libgpm-dev
 	- libncurses-dev
 
+	E.g.
+
+		$ sudo apt-get install libtool libgpm-dev libncurses-dev
+		$ mkdir work
+		$ cd work
+		$ curl -L -o finalcut-0.9.0.tar.gz \
+		https://github.com/gansm/finalcut/archive/refs/tags/0.9.0.tar.gz
+		$ tar -xf finalcut-0.9.0.tar.gz
+		$ cd finalcut-0.9.0
+		$ autoreconf -i
+		$ ./configure
+		$ make
+		$ sudo make install
+		$ sudo ldconfig
+
 2.  Include the `--enable-tui` option when running `configure`, e.g.:
 
 		$ ./configure --enable-tui
@@ -313,6 +328,7 @@ Minimal packages required to build from the source distribution tarball:
 
 - g++
 - gawk
+- info
 - libboost-dev
 - libboost-locale-dev
 - libcairomm-1.0-dev (optional)
@@ -325,7 +341,7 @@ Minimal packages required to build from the source distribution tarball:
 - nlohmann-json3-dev
 - postgis (optional)
 - postgresql (optional)
-- texinfo (optional for building HTML documentation)
+- texinfo
 - texlive (optional for building PDF documentation)
 - uuid-dev
 

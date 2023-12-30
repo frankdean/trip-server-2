@@ -439,7 +439,7 @@ $ sudo -u postgres createuser -P trip
 Create a database for use by the application:
 
 @example
-$ sudo -u postgres createdb trip --owner=trip --locale=en_GB.UTF-8
+$ sudo -u postgres createdb trip --owner=trip
 @end example
 
 If the default locale for the database does not match the running user's
@@ -524,6 +524,7 @@ $ cd ./provisioning/schema
 $ psql trip <10_trip_role.sql
 $ psql trip <20_schema.sql
 $ psql trip <30_permissions.sql
+$ psql trip <35_user_roles.sql
 @end example
 
 Optionally, populate the database with data that can be used to perform

@@ -2,6 +2,14 @@
 
 # Changelog
 
+## Next Release
+
+- Bug fix - blank route and track elevations not being filled on file import
+- Removed launching Trip Server v1 from Vagrant scripts
+- Documentation updates
+- Refactored code to avoid global reference to elevation_service
+- Use std::unique_ptr for elevation loading thread instead of standard pointer
+
 ## 2.4.0
 
 - Implemented a Text-based User Interface to create users.
