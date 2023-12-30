@@ -199,7 +199,7 @@ void TrackSharingEditHandler::handle_authenticated_request(
 
   try {
     if (action == "save") {
-      TrackPgDao dao;
+      TrackPgDao dao(elevation_service);
       share.shared_by_id = get_user_id();
       try {
         share.shared_to_id = dao.get_user_id_by_nickname(nickname);
@@ -245,7 +245,7 @@ void TrackSharingEditHandler::handle_authenticated_request(
       return;
     } else {
       if (!nickname.empty()) {
-        TrackPgDao dao;
+        TrackPgDao dao(elevation_service);
         auto result = dao.get_tracked_location_share_details_by_sharer(nickname, get_user_id());
         if (result.first)
           share = result.second;

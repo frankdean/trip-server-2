@@ -35,11 +35,14 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 /**
  * Handles uploading a GPX (XML) file containing routes, waypoints and
  * tracks.
  */
 class ItineraryUploadHandler : public TripAuthenticatedRequestHandler {
+  std::shared_ptr<ElevationService> elevation_service;
   long itinerary_id;
   void build_form(
       const web::HTTPServerRequest& request,
@@ -82,8 +85,11 @@ protected:
       child_node_as_time_point(const pugi::xml_node &node,
                                const pugi::char_t *child_name);
 public:
-  ItineraryUploadHandler(std::shared_ptr<TripConfig> config) :
-    TripAuthenticatedRequestHandler(config), itinerary_id() {}
+  ItineraryUploadHandler(std::shared_ptr<TripConfig> config,
+                         std::shared_ptr<ElevationService> elevation_service) :
+    TripAuthenticatedRequestHandler(config),
+    elevation_service(elevation_service),
+    itinerary_id() {}
   virtual ~ItineraryUploadHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItineraryUploadHandler";
@@ -94,7 +100,7 @@ public:
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<ItineraryUploadHandler>(
-        new ItineraryUploadHandler(config));
+        new ItineraryUploadHandler(config, elevation_service));
   }
   static std::string xml_osmand_namespace;
   static std::string xml_osmand_color;

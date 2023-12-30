@@ -39,10 +39,6 @@ using json = nlohmann::json;
 
 std::mutex TrackPgDao::location_search_query_params::mutex;
 
-#ifdef HAVE_GDAL
-extern ElevationService *elevation_service;
-#endif
-
 namespace fdsd {
 namespace trip {
 

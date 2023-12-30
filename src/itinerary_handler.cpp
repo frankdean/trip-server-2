@@ -785,7 +785,7 @@ std::pair<bool, ItineraryHandler::paste_features>
 
 void ItineraryHandler::paste_locations()
 {
-  TrackPgDao track_dao;
+  TrackPgDao track_dao(elevation_service);
   location_history_paste_params.second.page_offset = 0;
   auto max_track_points = config->get_maximum_location_tracking_points();
   location_history_paste_params.second.page_size = max_track_points;
@@ -944,7 +944,8 @@ void ItineraryHandler::handle_authenticated_request(
     if (new_itinerary.first) {
       const long new_itinerary_id =
         ItineraryImportHandler::duplicate_itinerary(get_user_id(),
-                                                    new_itinerary.second);
+                                                    new_itinerary.second,
+                                                    elevation_service);
       std::ostringstream url;
       url << get_uri_prefix() << "/itinerary?id=" << new_itinerary_id
           << "&active-tab=features";

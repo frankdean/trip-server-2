@@ -31,13 +31,17 @@ namespace trip
 {
 
 class TripConfig;
+class ElevationService;
 
 class TripRequestFactory : public web::HTTPRequestFactory {
 private:
   static fdsd::utils::Logger logger;
   std::shared_ptr<TripConfig> config;
+  std::shared_ptr<ElevationService> elevation_service;
+
 public:
-  TripRequestFactory(std::shared_ptr<TripConfig> config);
+  TripRequestFactory(std::shared_ptr<TripConfig> config,
+                     std::shared_ptr<ElevationService> elevation_service);
   virtual ~TripRequestFactory() {}
   virtual long get_maximum_request_size() const override {
     return config->get_maximum_request_size();

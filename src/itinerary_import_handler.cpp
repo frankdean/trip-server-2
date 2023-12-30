@@ -21,6 +21,7 @@
 */
 #include "../config.h"
 #include "itinerary_import_handler.hpp"
+#include "elevation_tile.hpp"
 #include "itinerary_pg_dao.hpp"
 #include "../trip-server-common/src/get_options.hpp"
 #include "../trip-server-common/src/http_response.hpp"
@@ -59,7 +60,8 @@ void ItineraryImportHandler::build_form(web::HTTPServerResponse& response)
 
 long ItineraryImportHandler::duplicate_itinerary(
     std::string user_id,
-    ItineraryPgDao::itinerary_complete& itinerary)
+    ItineraryPgDao::itinerary_complete& itinerary,
+    std::shared_ptr<ElevationService> elevation_service)
 {
   if (itinerary.id.first) {
     // Text appended to an itinerary title when it is created as a copy of
@@ -78,7 +80,7 @@ long ItineraryImportHandler::duplicate_itinerary(
 
   if (!itinerary.shares.empty()) {
     std::vector<ItineraryPgDao::itinerary_share> new_shares;
-    TrackPgDao tracking_dao;
+    TrackPgDao tracking_dao(elevation_service);
     for (const auto &sh : itinerary.shares) {
       try {
         const std::string shared_to_id_str = tracking_dao.get_user_id_by_nickname(sh.nickname);
@@ -126,7 +128,7 @@ void ItineraryImportHandler::handle_authenticated_request(
         itinerary(node.as<ItineraryPgDao::itinerary_complete>());
 
       const auto itinerary_id =
-        ItineraryImportHandler::duplicate_itinerary(get_user_id(), itinerary);
+        ItineraryImportHandler::duplicate_itinerary(get_user_id(), itinerary, elevation_service);
 
       redirect(request, response,
                get_uri_prefix() + "/itinerary?id=" +

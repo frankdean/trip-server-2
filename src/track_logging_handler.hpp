@@ -32,24 +32,31 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 /**
  * Handle logging tracked locations from a remote client application,
  * e.g. [TripLogger](https://www.fdsd.co.uk/triplogger/)
  */
 class TrackLoggingHandler : public TripRequestHandler {
+  std::shared_ptr<ElevationService> elevation_service;
 protected:
   virtual void do_handle_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  TrackLoggingHandler(std::shared_ptr<TripConfig> config) :
-    TripRequestHandler(config) {}
+  TrackLoggingHandler(std::shared_ptr<TripConfig> config,
+                      std::shared_ptr<ElevationService> elevation_service) :
+    TripRequestHandler(config),
+    elevation_service(elevation_service) {}
   virtual ~TrackLoggingHandler() {}
   virtual std::string get_handler_name() const override {
     return "TrackLoggingHandler";
   }
   virtual std::unique_ptr<BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<TrackLoggingHandler>(new TrackLoggingHandler(config));
+    return std::unique_ptr<TrackLoggingHandler>(
+        new TrackLoggingHandler(config,
+                                elevation_service));
   }
   virtual bool can_handle(const web::HTTPServerRequest& request) const override;
 };

@@ -91,7 +91,7 @@ void TrackLoggingHandler::do_handle_request(
       std::cerr << "Track log_point: invalid UUID" << '\n';
     throw BadRequestException("Track log_point: invalid UUID");
   }
-  TrackPgDao dao;
+  TrackPgDao dao(elevation_service);
   try {
     std::string user_id = dao.get_user_id_by_uuid(uuid_str);
     if (user_id.empty()) {

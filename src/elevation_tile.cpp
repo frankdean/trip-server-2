@@ -33,10 +33,6 @@ using namespace boost::locale;
 using namespace fdsd::trip;
 using namespace fdsd::utils;
 
-#ifdef HAVE_GDAL
-ElevationService *elevation_service;
-#endif
-
 bool ElevationTile::drivers_registered = false;
 const int ElevationTile::no_data = -32768;
 
@@ -195,7 +191,7 @@ ElevationService::ElevationService(std::string directory_path, long tile_cache_m
     initialization_error(),
     init_thread(new std::thread(&ElevationService::init, this))
 {
-  // syslog(LOG_DEBUG, "Initializing elevation service\n");
+  syslog(LOG_DEBUG, "Initializing elevation service\n");
 }
 
 void ElevationService::init()
@@ -246,7 +242,7 @@ void ElevationService::init()
 
 ElevationService::~ElevationService()
 {
-  // syslog(LOG_DEBUG, "Closing elevation service\n");
+  syslog(LOG_DEBUG, "Closing elevation service\n");
   if (init_thread) {
     init_thread->join();
   }

@@ -27,6 +27,7 @@
 #include "../trip-server-common/src/dao_helper.hpp"
 #include <chrono>
 #include <map>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -35,8 +36,17 @@
 namespace fdsd {
 namespace trip {
 
+class ElevationService;
+
 class TrackPgDao : public TripPgDao {
+
+  std::shared_ptr<ElevationService> elevation_service;
+
 public:
+
+  TrackPgDao(std::shared_ptr<ElevationService> elevation_service)
+    : TripPgDao(),
+      elevation_service(elevation_service) {}
 
   struct location_search_query_params : utils::dao_helper {
     location_search_query_params();

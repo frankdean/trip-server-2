@@ -50,7 +50,7 @@ void DownloadTripLoggerConfigurationHandler::handle_authenticated_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
-  TrackPgDao dao;
+  TrackPgDao dao(elevation_service);
   TrackPgDao::triplogger_configuration c =
     dao.get_triplogger_configuration(get_user_id());
   YAML::Node node;

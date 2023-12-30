@@ -46,8 +46,11 @@ using json = nlohmann::json;
 
 const std::string TrackingRequestHandler::tracking_url = "/tracks";
 
-TrackingRequestHandler::TrackingRequestHandler(std::shared_ptr<TripConfig> config) :
+TrackingRequestHandler::TrackingRequestHandler(
+    std::shared_ptr<TripConfig> config,
+    std::shared_ptr<ElevationService> elevation_service) :
   TripAuthenticatedRequestHandler(config),
+  elevation_service(elevation_service),
   track_copy_success(false)
 {
 }
@@ -418,7 +421,7 @@ void TrackingRequestHandler::handle_authenticated_request(
   //   std::cout << p.first << " -> " << p.second << '\n';
   // }
 
-  TrackPgDao dao;
+  TrackPgDao dao(elevation_service);
   TrackPgDao::tracked_locations_result locations_result;
 
   Pagination pagination(get_uri_prefix() + tracking_url,

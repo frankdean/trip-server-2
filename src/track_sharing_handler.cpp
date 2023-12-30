@@ -170,7 +170,7 @@ void TrackSharingHandler::handle_authenticated_request(
     HTTPServerResponse& response)
 {
   const int max_page_size = 10;
-  TrackPgDao dao;
+  TrackPgDao dao(elevation_service);
   if (request.method == HTTPMethod::post) {
     const std::string action = request.get_post_param("action");
     // std::cout << "Action: \"" << action << "\"\n";

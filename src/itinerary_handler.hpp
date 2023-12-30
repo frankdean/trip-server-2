@@ -36,7 +36,11 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 class ItineraryHandler : public TripAuthenticatedRequestHandler {
+  std::shared_ptr<ElevationService> elevation_service;
+
 public:
 
   struct paste_features : public ItineraryPgDao::selected_feature_ids {
@@ -125,8 +129,10 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  ItineraryHandler(std::shared_ptr<TripConfig> config) :
+  ItineraryHandler(std::shared_ptr<TripConfig> config,
+                   std::shared_ptr<ElevationService> elevation_service) :
     TripAuthenticatedRequestHandler(config),
+    elevation_service(elevation_service),
     feature_copy_success(false),
     read_only(true),
     show_raw_markdown(false),
@@ -144,7 +150,7 @@ public:
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<ItineraryHandler>(
-        new ItineraryHandler(config));
+        new ItineraryHandler(config, elevation_service));
   }
   static ItineraryPgDao::selected_feature_ids get_selected_feature_ids(
       const web::HTTPServerRequest& request);

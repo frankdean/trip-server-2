@@ -40,8 +40,11 @@ using namespace pugi;
 
 const std::string TrackingDownloadHandler::tracking_download_url = "/download/tracks";
 
-TrackingDownloadHandler::TrackingDownloadHandler(std::shared_ptr<TripConfig> config) :
-  BaseRestHandler(config)
+TrackingDownloadHandler::TrackingDownloadHandler(
+    std::shared_ptr<TripConfig> config,
+    std::shared_ptr<ElevationService> elevation_service) :
+  BaseRestHandler(config),
+  elevation_service(elevation_service)
 {
 }
 
@@ -132,7 +135,7 @@ void TrackingDownloadHandler::handle_authenticated_request(
   //   std::cout << p.first << " -> " << p.second << '\n';
   // }
 
-  TrackPgDao dao;
+  TrackPgDao dao(elevation_service);
   TrackPgDao::tracked_locations_result locations_result;
   q.page = 1;
   q.order = dao_helper::ascending;

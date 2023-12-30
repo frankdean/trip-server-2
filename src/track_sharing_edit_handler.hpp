@@ -34,7 +34,10 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 class TrackSharingEditHandler : public TripAuthenticatedRequestHandler {
+  std::shared_ptr<ElevationService> elevation_service;
   bool is_new;
   std::string nickname;
   /// Used to determine which page to return to in the track sharing list
@@ -53,8 +56,12 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  TrackSharingEditHandler(std::shared_ptr<TripConfig> config) :
-    TripAuthenticatedRequestHandler(config), is_new(false), nickname(),
+  TrackSharingEditHandler(
+      std::shared_ptr<TripConfig> config,
+      std::shared_ptr<ElevationService> elevation_service) :
+    TripAuthenticatedRequestHandler(config),
+    elevation_service(elevation_service),
+    is_new(false), nickname(),
     current_page(1) {}
   virtual ~TrackSharingEditHandler() {}
   virtual std::string get_handler_name() const override {
@@ -66,7 +73,7 @@ public:
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<TrackSharingEditHandler>(
-        new TrackSharingEditHandler(config));
+        new TrackSharingEditHandler(config, elevation_service));
   }
 };
 

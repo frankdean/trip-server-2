@@ -35,8 +35,11 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 class TrackingRequestHandler : public TripAuthenticatedRequestHandler {
 private:
+  std::shared_ptr<ElevationService> elevation_service;
   /// When set, response includes success alert
   bool track_copy_success;
   void build_form(
@@ -57,7 +60,8 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  TrackingRequestHandler(std::shared_ptr<TripConfig> config);
+  TrackingRequestHandler(std::shared_ptr<TripConfig> config,
+                         std::shared_ptr<ElevationService> elevation_service);
   virtual ~TrackingRequestHandler() {}
   static const std::string tracking_url;
   virtual std::string get_handler_name() const override {
@@ -71,7 +75,7 @@ public:
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<TrackingRequestHandler>(
-        new TrackingRequestHandler(config));
+        new TrackingRequestHandler(config, elevation_service));
   }
 };
 

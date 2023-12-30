@@ -32,8 +32,11 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 class ItineraryMapHandler : public BaseMapHandler {
   long itinerary_id;
+  std::shared_ptr<ElevationService> elevation_service;
 protected:
   virtual std::string get_page_title() const override;
   virtual void handle_authenticated_request(
@@ -41,8 +44,11 @@ protected:
       web::HTTPServerResponse& response) override;
   virtual void append_pre_body_end(std::ostream& os) const override;
 public:
-  ItineraryMapHandler(std::shared_ptr<TripConfig> config) :
-    BaseMapHandler(config), itinerary_id() {}
+  ItineraryMapHandler(std::shared_ptr<TripConfig> config,
+                      std::shared_ptr<ElevationService> elevation_service) :
+    BaseMapHandler(config),
+    elevation_service(elevation_service),
+    itinerary_id() {}
   virtual ~ItineraryMapHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItineraryMapHandler";
@@ -51,7 +57,7 @@ public:
       const web::HTTPServerRequest& request) const override;
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<ItineraryMapHandler>(
-        new ItineraryMapHandler(config));
+        new ItineraryMapHandler(config, elevation_service));
   }
 };
 

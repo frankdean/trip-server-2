@@ -28,7 +28,12 @@
 namespace fdsd {
 namespace trip {
 
+class ElevationService;
+
 class DownloadTripLoggerConfigurationHandler : public BaseRestHandler {
+
+  std::shared_ptr<ElevationService> elevation_service;
+
 protected:
   virtual void set_content_headers(
       web::HTTPServerResponse& response) const override;
@@ -36,8 +41,12 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  DownloadTripLoggerConfigurationHandler(std::shared_ptr<TripConfig> config) :
-    BaseRestHandler(config) {}
+  DownloadTripLoggerConfigurationHandler(
+      std::shared_ptr<TripConfig> config,
+      std::shared_ptr<ElevationService> elevation_service) :
+    BaseRestHandler(config),
+    elevation_service(elevation_service)
+    {}
   virtual ~DownloadTripLoggerConfigurationHandler() {}
   virtual std::string get_handler_name() const override {
     return "DownloadTripLoggerConfigurationHandler";
@@ -48,7 +57,7 @@ public:
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<DownloadTripLoggerConfigurationHandler>(
-        new DownloadTripLoggerConfigurationHandler(config));
+        new DownloadTripLoggerConfigurationHandler(config, elevation_service));
   }
 };
 

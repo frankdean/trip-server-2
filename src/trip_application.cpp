@@ -28,14 +28,11 @@
 #include "session_pg_dao.hpp"
 #include "../trip-server-common/src/session.hpp"
 #include <chrono>
+#include <memory>
 
 using namespace fdsd::utils;
 using namespace fdsd::web;
 using namespace fdsd::trip;
-
-#ifdef HAVE_GDAL
-extern ElevationService *elevation_service;
-#endif
 
 TripApplication::TripApplication(std::string listen_address,
                                  std::string port,
@@ -49,19 +46,20 @@ TripApplication::TripApplication(std::string listen_address,
   config = std::make_shared<TripConfig>(TripConfig(config_filename));
 #ifdef HAVE_GDAL
   if (!config->get_elevation_tile_path().empty()) {
-    elevation_service = new ElevationService(
+    elevation_service.reset(new ElevationService(
         config->get_elevation_tile_path(),
-        config->get_elevation_tile_cache_ms());
+        config->get_elevation_tile_cache_ms()));
   }
 #endif
 }
 
 TripApplication::~TripApplication()
 {
-#ifdef HAVE_GDAL
-  if (elevation_service != nullptr)
-    delete elevation_service;
-#endif
+  std::cout << "TripApplication::~TripApplication()\n";
+// #ifdef HAVE_GDAL
+//   if (elevation_service != nullptr)
+//     delete elevation_service;
+// #endif
 }
 
 std::string TripApplication::get_db_connect_string() const {
@@ -84,7 +82,7 @@ void TripApplication::set_root_directory(std::string directory) {
 std::shared_ptr<HTTPRequestFactory>
     TripApplication::get_request_factory() const
 {
-  TripRequestFactory factory(config);
+  TripRequestFactory factory(config, elevation_service);
   return std::make_shared<TripRequestFactory>(factory);
 }
 

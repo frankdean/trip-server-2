@@ -261,7 +261,7 @@ void TrackingInfoHandler::handle_authenticated_request(
 {
   bool new_uuid_flag = false;
   const std::string user_id = get_user_id();
-  TrackPgDao dao;
+  TrackPgDao dao(elevation_service);
   std::string logging_uuid;
   const std::string action = request.get_param("action");
   // std::cout << "Action: \"" << action << "\"\n";

@@ -39,10 +39,6 @@ using namespace fdsd::trip;
 using namespace fdsd::web;
 using namespace fdsd::utils;
 
-#ifdef HAVE_GDAL
-extern ElevationService *elevation_service;
-#endif
-
 void ItineraryWaypointEditHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)

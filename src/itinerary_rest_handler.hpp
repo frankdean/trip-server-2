@@ -53,7 +53,11 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 class ItineraryRestHandler : public BaseRestHandler {
+
+  std::shared_ptr<ElevationService> elevation_service;
 
   long itinerary_id;
 
@@ -132,8 +136,11 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  ItineraryRestHandler(std::shared_ptr<TripConfig> config) :
-    BaseRestHandler(config), itinerary_id() {}
+  ItineraryRestHandler(std::shared_ptr<TripConfig> config,
+                       std::shared_ptr<ElevationService> elevation_service) :
+    BaseRestHandler(config),
+    elevation_service(elevation_service),
+    itinerary_id() {}
   virtual ~ItineraryRestHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItineraryRestHandler";
@@ -147,7 +154,7 @@ public:
   virtual std::unique_ptr<web::BaseRequestHandler>
       new_instance() const override {
     return std::unique_ptr<ItineraryRestHandler>(
-        new ItineraryRestHandler(config));
+        new ItineraryRestHandler(config, elevation_service));
   }
 };
 

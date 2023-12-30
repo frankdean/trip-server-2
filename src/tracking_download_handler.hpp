@@ -29,7 +29,10 @@
 namespace fdsd {
 namespace trip {
 
+class ElevationService;
+
 class TrackingDownloadHandler : public BaseRestHandler {
+  std::shared_ptr<ElevationService> elevation_service;
   void handle_download(
       web::HTTPServerResponse& response,
       const TrackPgDao::tracked_locations_result &locations_result) const;
@@ -39,7 +42,8 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  TrackingDownloadHandler(std::shared_ptr<TripConfig> config);
+  TrackingDownloadHandler(std::shared_ptr<TripConfig> config,
+                          std::shared_ptr<ElevationService> elevation_service);
   virtual ~TrackingDownloadHandler() {}
   static const std::string tracking_download_url;
   virtual std::string get_handler_name() const override {
@@ -53,7 +57,7 @@ public:
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<TrackingDownloadHandler>(
-        new TrackingDownloadHandler(config));
+        new TrackingDownloadHandler(config, elevation_service));
   }
 };
 

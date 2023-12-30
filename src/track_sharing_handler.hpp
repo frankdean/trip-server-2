@@ -33,7 +33,10 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 class TrackSharingHandler :  public TripAuthenticatedRequestHandler {
+  std::shared_ptr<ElevationService> elevation_service;
   void build_form(web::HTTPServerResponse& response,
                   const web::Pagination& pagination,
                   const std::vector<TrackPgDao::track_share>& track_shares) const;
@@ -45,8 +48,10 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  TrackSharingHandler(std::shared_ptr<TripConfig> config) :
-    TripAuthenticatedRequestHandler(config) {}
+  TrackSharingHandler(std::shared_ptr<TripConfig> config,
+                      std::shared_ptr<ElevationService> elevation_service) :
+    TripAuthenticatedRequestHandler(config),
+    elevation_service(elevation_service) {}
   virtual ~TrackSharingHandler() {}
   virtual std::string get_handler_name() const override {
     return "TrackSharingHandler";
@@ -58,7 +63,7 @@ public:
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<TrackSharingHandler>(
-        new TrackSharingHandler(config));
+        new TrackSharingHandler(config, elevation_service));
   }
 };
 

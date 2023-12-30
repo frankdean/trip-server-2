@@ -34,7 +34,10 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 class ItineraryWaypointEditHandler : public TripAuthenticatedRequestHandler {
+  std::shared_ptr<ElevationService> elevation_service;
   bool read_only;
   long itinerary_id;
   std::pair<bool, long> waypoint_id;
@@ -57,8 +60,11 @@ protected:
       web::HTTPServerResponse& response) override;
   virtual void append_pre_body_end(std::ostream& os) const override;
 public:
-  ItineraryWaypointEditHandler(std::shared_ptr<TripConfig> config) :
+  ItineraryWaypointEditHandler(
+      std::shared_ptr<TripConfig> config,
+      std::shared_ptr<ElevationService> elevation_service) :
     TripAuthenticatedRequestHandler(config),
+    elevation_service(elevation_service),
     read_only(true),
     itinerary_id(),
     waypoint_id(),
@@ -74,7 +80,7 @@ public:
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<ItineraryWaypointEditHandler>(
-        new ItineraryWaypointEditHandler(config));
+        new ItineraryWaypointEditHandler(config, elevation_service));
   }
 };
 

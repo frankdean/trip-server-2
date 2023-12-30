@@ -22,6 +22,8 @@
 #ifndef ELEVATION_TILE_HPP
 #define ELEVATION_TILE_HPP
 
+#ifdef HAVE_GDAL
+
 #include "itinerary_pg_dao.hpp"
 #include <algorithm>
 #include <chrono>
@@ -182,5 +184,7 @@ public:
 
 } // namespace trip
 } // namespace fdsd
+
+#endif // HAVE_GDAL
 
 #endif // ELEVATION_TILE_HPP

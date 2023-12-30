@@ -154,7 +154,7 @@ public:
     std::pair<bool, double> speed;
     track_point() : point_info(), time(), hdop(), speed() {}
     track_point(location loc) : point_info(loc), time(), hdop(), speed() {}
-    track_point(const TrackPgDao::tracked_location &loc);
+    track_point(const fdsd::trip::TrackPgDao::tracked_location &loc);
     void calculate_speed(const track_point &previous);
     static YAML::Node encode(const track_point& rhs);
     static bool decode(const YAML::Node& node, track_point& rhs);

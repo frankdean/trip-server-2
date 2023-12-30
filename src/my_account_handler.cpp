@@ -105,7 +105,7 @@ void MyAccountHandler::handle_authenticated_request(
             std::ostringstream ss;
             ss << node;
             settings.tl_settings = ss.str();
-            TrackPgDao dao;
+            TrackPgDao dao(elevation_service);
             dao.save(get_user_id(), settings);
             upload_success = true;
           } else {

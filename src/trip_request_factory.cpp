@@ -75,9 +75,12 @@ using namespace fdsd::utils;
 
 Logger TripRequestFactory::logger("TripRequestFactory", std::clog, Logger::info);
 
-TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
+TripRequestFactory::TripRequestFactory(
+    std::shared_ptr<TripConfig> config,
+    std::shared_ptr<ElevationService> elevation_service)
   : HTTPRequestFactory(config->get_application_prefix_url()),
-    config(config)
+    config(config),
+    elevation_service(elevation_service)
 {
   // pre_login_handlers.push_back(
   //     std::make_shared<TripCssHandler>(
@@ -96,19 +99,19 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
 #endif
   pre_login_handlers.push_back(
       std::make_shared<TrackLoggingHandler>(
-          TrackLoggingHandler(config)));
+          TrackLoggingHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<TrackingMapHandler>(
           TrackingMapHandler(config)));
   post_login_handlers.push_back(
       std::make_shared<TrackingRequestHandler>(
-          TrackingRequestHandler(config)));
+          TrackingRequestHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<TrackingRestHandler>(
-          TrackingRestHandler(config)));
+          TrackingRestHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<TrackingDownloadHandler>(
-          TrackingDownloadHandler(config)));
+          TrackingDownloadHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<TileHandler>(
           TileHandler(config)));
@@ -117,22 +120,22 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
           TripAuthenticatedRequestHandler(config)));
   post_login_handlers.push_back(
       std::make_shared<TrackingInfoHandler>(
-          TrackingInfoHandler(config)));
+          TrackingInfoHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<DownloadTripLoggerConfigurationHandler>(
-          DownloadTripLoggerConfigurationHandler(config)));
+          DownloadTripLoggerConfigurationHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<TrackSharingHandler>(
-          TrackSharingHandler(config)));
+          TrackSharingHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<TrackSharingEditHandler>(
-          TrackSharingEditHandler(config)));
+          TrackSharingEditHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<ItinerariesHandler>(
           ItinerariesHandler(config)));
   post_login_handlers.push_back(
       std::make_shared<ItineraryHandler>(
-          ItineraryHandler(config)));
+          ItineraryHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<ItineraryEditHandler>(
           ItineraryEditHandler(config)));
@@ -159,22 +162,22 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
           ItineraryExportHandler(config)));
   post_login_handlers.push_back(
       std::make_shared<ItineraryImportHandler>(
-          ItineraryImportHandler(config)));
+          ItineraryImportHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<ItineraryUploadHandler>(
-          ItineraryUploadHandler(config)));
+          ItineraryUploadHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<ItineraryMapHandler>(
-          ItineraryMapHandler(config)));
+          ItineraryMapHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<ItineraryRestHandler>(
-          ItineraryRestHandler(config)));
+          ItineraryRestHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<ItinerarySimplifyHandler>(
           ItinerarySimplifyHandler(config)));
   post_login_handlers.push_back(
       std::make_shared<ItineraryWaypointEditHandler>(
-          ItineraryWaypointEditHandler(config)));
+          ItineraryWaypointEditHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<ItineraryRouteNameEdit>(
           ItineraryRouteNameEdit(config)));
@@ -186,13 +189,13 @@ TripRequestFactory::TripRequestFactory(std::shared_ptr<TripConfig> config)
           ItinerarySharingHandler(config)));
   post_login_handlers.push_back(
       std::make_shared<ItinerarySharingEditHandler>(
-          ItinerarySharingEditHandler(config)));
+          ItinerarySharingEditHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<ItinerarySharingReportHandler>(
           ItinerarySharingReportHandler(config)));
   post_login_handlers.push_back(
       std::make_shared<MyAccountHandler>(
-          MyAccountHandler(config)));
+          MyAccountHandler(config, elevation_service)));
   post_login_handlers.push_back(
       std::make_shared<PasswordChangeHandler>(
           PasswordChangeHandler(config)));

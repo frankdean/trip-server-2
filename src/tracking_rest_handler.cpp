@@ -34,8 +34,11 @@ using namespace fdsd::utils;
 using namespace boost::locale;
 using json = nlohmann::basic_json<nlohmann::ordered_map>;
 
-TrackingRestHandler::TrackingRestHandler(std::shared_ptr<TripConfig> config) :
-    BaseRestHandler(config)
+TrackingRestHandler::TrackingRestHandler(
+    std::shared_ptr<TripConfig> config,
+    std::shared_ptr<ElevationService> elevation_service) :
+  BaseRestHandler(config),
+  elevation_service(elevation_service)
 {
 }
 
@@ -245,7 +248,7 @@ void TrackingRestHandler::handle_authenticated_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
-  TrackPgDao dao;
+  TrackPgDao dao(elevation_service);
   // std::cout << "TrackingRestHandler::handle_authenticated_request()\n";
   if (compare_request_regex(request.uri, "/rest/locations/is-updates($|\\?.*)")) {
     if (request.method == HTTPMethod::get) {

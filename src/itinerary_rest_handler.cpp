@@ -39,10 +39,6 @@ using namespace fdsd::trip;
 using namespace fdsd::web;
 using json = nlohmann::basic_json<nlohmann::ordered_map>;
 
-#ifdef HAVE_GDAL
-extern ElevationService *elevation_service;
-#endif
-
 nlohmann::basic_json<nlohmann::ordered_map>
     ItineraryRestHandler::get_routes_as_geojson(
     const std::vector<ItineraryPgDao::route> &routes) const

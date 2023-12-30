@@ -24,6 +24,7 @@
 
 #include "itinerary_pg_dao.hpp"
 #include "trip_request_handler.hpp"
+#include <memory>
 #include <string>
 
 namespace fdsd {
@@ -33,19 +34,24 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 /**
  * Handles importing a YAML file containing a full itinerary including
  * itinerary sharing, routes, waypoints and tracks.
  */
 class ItineraryImportHandler : public TripAuthenticatedRequestHandler {
+  std::shared_ptr<ElevationService> elevation_service;
   void build_form(web::HTTPServerResponse& response);
 protected:
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  ItineraryImportHandler(std::shared_ptr<TripConfig> config) :
-    TripAuthenticatedRequestHandler(config) {}
+  ItineraryImportHandler(std::shared_ptr<TripConfig> config,
+                         std::shared_ptr<ElevationService> elevation_service) :
+    TripAuthenticatedRequestHandler(config),
+    elevation_service(elevation_service) {}
   virtual ~ItineraryImportHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItineraryImportHandler";
@@ -56,11 +62,12 @@ public:
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<ItineraryImportHandler>(
-        new ItineraryImportHandler(config));
+        new ItineraryImportHandler(config, elevation_service));
   }
   static long duplicate_itinerary(
       std::string user_id,
-      ItineraryPgDao::itinerary_complete& itinerary);
+      ItineraryPgDao::itinerary_complete& itinerary,
+      std::shared_ptr<ElevationService> elevation_service);
 };
 
 } // namespace trip

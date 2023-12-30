@@ -33,7 +33,10 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 class ItinerarySharingEditHandler :  public TripAuthenticatedRequestHandler {
+  std::shared_ptr<ElevationService> elevation_service;
   long itinerary_id;
   std::pair<bool, long> shared_to_id;
   bool is_new;
@@ -54,8 +57,11 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  ItinerarySharingEditHandler(std::shared_ptr<TripConfig> config) :
+  ItinerarySharingEditHandler(
+      std::shared_ptr<TripConfig> config,
+      std::shared_ptr<ElevationService> elevation_service) :
     TripAuthenticatedRequestHandler(config),
+    elevation_service(elevation_service),
     itinerary_id(),
     shared_to_id(),
     is_new(false),
@@ -73,7 +79,7 @@ public:
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<ItinerarySharingEditHandler>(
-        new ItinerarySharingEditHandler(config));
+        new ItinerarySharingEditHandler(config, elevation_service));
   }
 };
 

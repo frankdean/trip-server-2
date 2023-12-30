@@ -36,10 +36,6 @@ using namespace fdsd::utils;
 using namespace boost::locale;
 using namespace pugi;
 
-#ifdef HAVE_GDAL
-extern ElevationService *elevation_service;
-#endif
-
 std::string ItineraryUploadHandler::xml_osmand_namespace = "osmand";
 std::string ItineraryUploadHandler::xml_osmand_color =
   xml_osmand_namespace + ":color";

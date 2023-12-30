@@ -35,9 +35,12 @@ namespace fdsd
 namespace trip
 {
 
+class ElevationService;
+
 class TripApplication : public fdsd::web::Application {
 private:
   std::shared_ptr<TripConfig>config;
+  std::shared_ptr<ElevationService> elevation_service;
 protected:
   virtual std::shared_ptr<web::HTTPRequestFactory> get_request_factory() const override;
 public:

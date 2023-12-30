@@ -35,7 +35,10 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 class TrackingRestHandler : public fdsd::trip::BaseRestHandler {
+  std::shared_ptr<ElevationService> elevation_service;
   void live_map_update_check(
       const web::HTTPServerRequest& request,
       std::ostream &os,
@@ -55,7 +58,8 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  TrackingRestHandler(std::shared_ptr<TripConfig> config);
+  TrackingRestHandler(std::shared_ptr<TripConfig> config,
+                      std::shared_ptr<ElevationService> elevation_service);
   virtual ~TrackingRestHandler() {}
   virtual std::string get_handler_name() const override {
     return "TrackingRestHandler";
@@ -70,7 +74,7 @@ public:
       new_instance() const override {
 
     return std::unique_ptr<TrackingRestHandler>(
-        new TrackingRestHandler(config));
+        new TrackingRestHandler(config, elevation_service));
   }
 };
 

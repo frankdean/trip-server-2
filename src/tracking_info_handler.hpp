@@ -32,7 +32,10 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 class TrackingInfoHandler : public TripAuthenticatedRequestHandler {
+  std::shared_ptr<ElevationService> elevation_service;
   void build_form(
       std::ostream& os,
       std::string uuid,
@@ -45,8 +48,10 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  TrackingInfoHandler(std::shared_ptr<TripConfig> config) :
-    TripAuthenticatedRequestHandler(config) {}
+  TrackingInfoHandler(std::shared_ptr<TripConfig> config,
+                      std::shared_ptr<ElevationService> elevation_service) :
+    TripAuthenticatedRequestHandler(config),
+    elevation_service(elevation_service){}
   virtual ~TrackingInfoHandler() {}
   virtual std::string get_handler_name() const override {
     return "TrackingInfoHandler";
@@ -57,7 +62,7 @@ public:
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<TrackingInfoHandler>(
-        new TrackingInfoHandler(config));
+        new TrackingInfoHandler(config, elevation_service));
   }
 };
 

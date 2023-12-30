@@ -59,7 +59,7 @@ void ItineraryMapHandler::handle_authenticated_request(
   try {
     itinerary_id = std::stol(request.get_param("id"));
     ItineraryPgDao dao;
-    TrackPgDao track_dao;
+    TrackPgDao track_dao(elevation_service);
     const bool read_only = !dao.has_user_itinerary_modification_access(
         get_user_id(),
         itinerary_id);

@@ -143,7 +143,7 @@ void ItinerarySharingEditHandler::handle_authenticated_request(
       itinerary_share.nickname = request.get_post_param("nickname");
       dao_helper::trim(itinerary_share.nickname);
       if (!itinerary_share.nickname.empty()) {
-        TrackPgDao tracking_dao;
+        TrackPgDao tracking_dao(elevation_service);
         try {
           const std::string shared_to_id_str = tracking_dao.get_user_id_by_nickname(itinerary_share.nickname);
           itinerary_share.shared_to_id = std::stol(shared_to_id_str);

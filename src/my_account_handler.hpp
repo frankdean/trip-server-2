@@ -34,7 +34,10 @@ namespace web {
 }
 namespace trip {
 
+class ElevationService;
+
 class MyAccountHandler : public TripAuthenticatedRequestHandler {
+  std::shared_ptr<ElevationService> elevation_service;
   /// Flag set when a file is successfully uploads
   bool upload_success;
   bool upload_failure;
@@ -47,8 +50,12 @@ protected:
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
 public:
-  MyAccountHandler(std::shared_ptr<TripConfig> config) :
-    TripAuthenticatedRequestHandler(config), upload_success(), upload_failure() {}
+  MyAccountHandler(std::shared_ptr<TripConfig> config,
+                   std::shared_ptr<ElevationService> elevation_service) :
+    TripAuthenticatedRequestHandler(config),
+    elevation_service(elevation_service),
+    upload_success(),
+    upload_failure() {}
   virtual std::string get_handler_name() const override {
     return "MyAccountHandler";
   }
@@ -58,7 +65,7 @@ public:
   }
   virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
     return std::unique_ptr<MyAccountHandler>(
-        new MyAccountHandler(config));
+        new MyAccountHandler(config, elevation_service));
   }
 };
 
