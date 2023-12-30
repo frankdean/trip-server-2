@@ -15,7 +15,9 @@
    ignore_pixman_library
    Memcheck:Leak
    match-leak-kinds: reachable
+   ...
    obj:*/lib/x86_64-linux-gnu/libpixman-1.so.*
+   ...
 }
 {
    ignore_libheif_libde_used_by_gdal
