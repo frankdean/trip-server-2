@@ -352,6 +352,13 @@ uri: "postgresql://%2Fvar%2Frun%2Fpostgresql/trip"
 @section Database Changes
 @cindex Database Changes
 
+This section describes the changes to the database since Trip Server v1.
+All the following changes can be implemented by running
+@code{trip-server} with the @code{--upgrade} option.
+
+@subsection pgcrypto extension
+@cindex pgcrypto extension
+
 The @code{pgcrypto} extension is needed for user password validation.
 Run the following command in the Trip database:
 
@@ -360,14 +367,11 @@ $ psql trip
 CREATE EXTENSION pgcrypto;
 @end example
 
-This is also executed when running @code{trip-server} with the
-@code{--upgrade} option.
-
 @subsection Session Table
 @cindex Session Table
 
-There is a new table to handle user sessions.  It is created after
-running @code{trip-server} with the @code{--upgrade} option.
+There are new @code{session} and @code{session_data} tables to handle
+user sessions.
 
 @subsection Passwords
 @cindex Passwords
@@ -381,8 +385,13 @@ UPDATE usertable SET password = '$2a' || SUBSTRING(password, 4, 57)
 WHERE password NOT LIKE '$2a%';
 @end example
 
-This is also executed when running @code{trip-server} with the
-@code{--upgrade} option.
+@subsection Handling OSM Extended Waypoint Attributes
+@cindex Handling OSM Extended Waypoint Attributes
+
+The @code{itinerary_waypoint} table's @code{color} column has been
+replaced with an @code{extended_attributes} column which now stores the
+extended attributes of an import from @url{https://osmand.net,OSMAnd},
+including the @code{color} attribute.
 
 @node PostgreSQL Setup, Configuration, Upgrading from Trip Server v1, Top
 @chapter PostgreSQL Setup

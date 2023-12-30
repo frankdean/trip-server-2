@@ -15,9 +15,10 @@ passed to rescue services etc., to assist with locating the missing
 adventurer.
 
 Trip Server 2 is a port of [Trip Server v1][trip-server], written mostly in
-C++. It can be run alongside an existing Trip Server version 1.11.x
-installation, as version 2 maintains database compatibility with version 1,
-with an `--upgrade` option to upgrade a version 1 database to version 2.
+C++. Versions prior to v2.3.0 can be run alongside an existing Trip Server
+version 1.11.x installation, as these versions maintains database
+compatibility with version 1, by running an `--upgrade` option to upgrade a
+version 1 database to the current version.
 
 ### Features
 
