@@ -820,7 +820,7 @@ $ find ~/downlods/srtm -name '*.zip' -exec unzip -n '@{@}' '*.tif' \;
 Create a Squashfs compressed file containing the @code{tiff} images
 
 @example
-$ mksquashfs ~/tmp/tiff /var/local/elevation-data.squashfs -no-recovery
+$ sudo mksquashfs ~/tmp/tiff /var/local/elevation-data.squashfs -no-recovery
 @end example
 
 The @code{-no-recovery} option is to stop Squashfs leaving a recovery
@@ -859,8 +859,8 @@ $ sudo umount /var/local/elevation-data
 Add an entry to @code{/etc/fstab} to mount the Squashfs file on boot:
 
 @example
-$ echo '/var/local/elevation-data.squashfs \
-/var/local/elevation-data squashfs ro,defaults 0 0' \
+$ echo "/var/local/elevation-data.squashfs \
+/var/local/elevation-data squashfs ro,defaults 0 0" \
 | sudo tee -a /etc/fstab
 @end example
 
