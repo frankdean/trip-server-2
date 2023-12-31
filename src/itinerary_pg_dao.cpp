@@ -974,7 +974,7 @@ std::vector<ItineraryPgDao::waypoint>
       "LEFT JOIN itinerary_sharing sh "
       "ON sh.itinerary_id=$2 AND sh.shared_to_id=$1 "
       "WHERE i.archived != true AND (i.user_id=$1 OR (sh.active AND sh.shared_to_id=$1)) "
-      "AND w.itinerary_id=$2"
+      "AND w.itinerary_id=$2 "
       "ORDER BY name, symbol, id",
       user_id,
       itinerary_id);

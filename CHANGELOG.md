@@ -4,10 +4,19 @@
 
 ## Next Release
 
+- Bug fix - invalid SQL
+
+	Version 13 of PostgreSQL is tolerant of a missing space after a parameter,
+	but not PostgreSQL 15.
+
 - Bug fix - blank route and track elevations not being filled on file import
+
 - Removed launching Trip Server v1 from Vagrant scripts
+
 - Documentation updates
+
 - Refactored code to avoid global reference to elevation_service
+
 - Use std::unique_ptr for elevation loading thread instead of standard pointer
 
 ## 2.4.0
