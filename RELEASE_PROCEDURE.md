@@ -78,19 +78,10 @@
 		$ docker compose up -d --build
 		$ docker compose logs --follow
 
-	or
-
-		$ podman-compose up -d --build
-		$ podman logs -f trip-server-2_web_1
-
 	Stop the container with (use the `--volumes` switch to also remove
     the database volume):
 
 		$ docker compose down --volumes
-
-	or
-
-		$ podman-compose down --volumes
 
 ## Installation
 

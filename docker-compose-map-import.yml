@@ -19,10 +19,10 @@ services:
           cpus: '0.25'
           memory: 400M
     environment:
-      # DOWNLOAD_PBF: https://download.geofabrik.de/europe/monaco-latest.osm.pbf
-      # DOWNLOAD_POLY: https://download.geofabrik.de/europe/monaco.poly
+      - DOWNLOAD_PBF=${DOWNLOAD_PBF}
+      - DOWNLOAD_POLY=${DOWNLOAD_POLY}
       # https://osm2pgsql.org/doc/manual.html
-      OSM2PGSQL_EXTRA_ARGS: "-C 3072 --slim"
+      - OSM2PGSQL_EXTRA_ARGS=-C 3072 --slim
     volumes:
       - osm-data:/data/database
     command: "import"

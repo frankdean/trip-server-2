@@ -1399,7 +1399,17 @@ $ docker volume create osm-tiles
 @item
 It is recommended to use a small region to minimise resource usage.
 
-Import OSM data for Monaco:
+The default set in @code{./.env} imports OSM data for Monaco.  To import
+another region,
+e.g. @url{https://download.geofabrik.de/europe/isle-of-man.html, the
+Isle of Man}, override the environment variables in @code{./.env}, e.g.:
+
+@example
+$ export DOWNLOAD_PBF=https://download.geofabrik.de/europe/isle-of-man-latest.osm.pbf
+$ export DOWNLOAD_POLY=https://download.geofabrik.de/europe/isle-of-man.poly
+@end example
+
+The run the import with:
 
 @example
 $ docker compose -f docker-compose-map-import.yml up
