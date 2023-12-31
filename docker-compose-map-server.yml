@@ -22,6 +22,8 @@ services:
         reservations:
           cpus: '0.25'
           memory: 40M
+    volumes:
+      - elevation-data:/elevation-data
     ports:
       - 8080:8080
     environment:
@@ -78,6 +80,8 @@ services:
     command: "run"
 volumes:
   trip-db-data:
+  elevation-data:
+    external: true
   osm-data:
     external: true
   osm-tiles:

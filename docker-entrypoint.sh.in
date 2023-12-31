@@ -103,9 +103,9 @@ cat >>trip-server.yaml <<EOF
   poolSize: 10
   poolIdleTimeout: 10000
   connectionTimeoutMillis: 0
-elevation-local-disabled:
+elevation:
   tileCacheMs: 60000
-  datasetDir: ./elevation-data/
+  datasetDir: /elevation-data
 elevation-remote-disabled:
   provider:
     userAgentInfo: (mailto:your.contact@email.address)

@@ -1297,10 +1297,6 @@ result in a similarly confusing error message.
 @section Docker
 @cindex Docker
 
-As a convenience, @url{@value{dockerurl},Docker} is installed in the
-@url{@value{debianurl},Debian} flavour of Vagrant.  See the @ref{Vagrant}
-section for more information on using Vagrant for testing this application.
-
 A minimum of two Docker containers are required to run the application.  One
 for the @url{@value{postgresqlurl},PostgreSQL database} and another for the
 application.  A third container can be run to provide a map tile server.
@@ -1372,9 +1368,34 @@ container for OpenStreetMap tile server}
 One imports the @url{@value{osmurl},OpenStreetMap} data.  The other runs the
 tile server after the data has been imported.
 
-It is unlikely there would be sufficient memory or disk space in the Vagrant
-VM to run the Tile Server.  It would be best to use a dedicated server for
-this process.
+Elevation data can be made available to the container as follows:
+
+@enumerate
+@item
+Create an external volume for the elevation data.  (It is necessary to
+create the volume, even if no elevation data is available.):
+
+@example
+$ docker volume create elevation-data
+@end example
+
+@item
+To copy elevation data files to the volume, stream the data from a tar
+file via a helper container to the volume as follows:
+
+@example
+$ tar -zcf elevation-data.tar.gz *.tif
+$ CID=$(docker run -d -v elevation-data:/elevation-data busybox true)
+$ cat elevation-data.tar.gz | docker cp - $CID:/elevation-data/
+$ docker container stop $CID
+$ docker container rm $CID
+@end example
+
+It is necessary to use the tar file method as that seems the only way to
+copy the data to the root of the volume.
+@end enumerate
+
+Import map tile data as follows:
 
 @enumerate
 @item
@@ -1389,7 +1410,8 @@ $ sudo swapon /swap
 @end example
 
 @item
-Create Docker volumes for storing the database and caching map tiles:
+Create Docker volumes for storing any elevation data, the database and
+caching of map tiles:
 
 @example
 $ docker volume create osm-data
