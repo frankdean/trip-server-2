@@ -250,10 +250,11 @@ void ItineraryWaypointEditHandler::build_form(
   append_value(response.content,
                waypoint->id.first && waypoint->avg_samples.first,
                waypoint->avg_samples.second);
+  response.content << '"';
   append_element_disabled_flag(response.content, read_only);
   response.content
     <<
-    "\">\n"
+    ">\n"
     "      </div>\n"
     "      <div class=\"col-md-6 col-lg-4\">\n"
     "        <label for=\"input-type\">" << translate("OsmAnd category (type)") << "</label>\n"
@@ -261,10 +262,11 @@ void ItineraryWaypointEditHandler::build_form(
   append_value(response.content,
                waypoint->id.first && waypoint->type.first,
                x(waypoint->type.second));
+  response.content << '"';
   append_element_disabled_flag(response.content, read_only);
   response.content
     <<
-    "\">\n"
+    ">\n"
     "      </div>\n"
     "      <div class=\"col-md-6 col-lg-4\">\n"
     "        <input id=\"input-ext-attrs\" name=\"ext-attrs\" type=\"hidden\" value=\"";
@@ -286,10 +288,11 @@ void ItineraryWaypointEditHandler::build_form(
                    x(osmand_color));
     }
   }
+  response.content << '"';
   append_element_disabled_flag(response.content, read_only);
   response.content
     <<
-    "\">\n"
+    ">\n"
     // "        <div ng-show=\"form.$submitted || form.color.$touched\">\n"
     // "          <div id=\"error-color\" class=\"alert alert-warning\" role=\"alert\" ng-show=\"form.color.$error.pattern\">Color must be a hexadecimal number preceeding by the # sign, e.g. #b4123adf</div>\n"
     // "        </div>\n"
