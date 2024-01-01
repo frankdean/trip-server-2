@@ -20,7 +20,7 @@ RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \
     localedef -i en_GB -c -f UTF-8 -A /usr/share/locale/locale.alias en_GB.UTF-8 && \
     update-locale LANG LANGUAGE && \
     ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime && \
-    dpkg-reconfigure tzdata
+    dpkg-reconfigure tzdata --frontend=noninteractive
 ENV LANG en_GB.utf8
 ARG TRIP_SERVER_VERSION=@PACKAGE_VERSION@
 ARG TRIP_SERVER_FILENAME=trip-${TRIP_SERVER_VERSION}.tar.xz
@@ -68,7 +68,7 @@ RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \
     localedef -i en_GB -c -f UTF-8 -A /usr/share/locale/locale.alias en_GB.UTF-8 && \
     update-locale LANG LANGUAGE && \
     ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime && \
-    dpkg-reconfigure tzdata
+    dpkg-reconfigure tzdata --frontend=noninteractive
 ENV LANG en_GB.utf8
 
 COPY --from=build /usr/local/bin/ /usr/local/bin/
