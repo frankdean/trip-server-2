@@ -58,6 +58,11 @@ class TrackingMap extends TripMap {
   fetchFeatures() {
     const self = this;
     this.nickname = this.options.query_params.get('nickname');
+    if (!this.nickname)
+      this.nickname = '';
+    this.notes_only_flag = self.options.query_params.get('notes_only_flag');
+    if (!this.notes_only_flag)
+      this.notes_only_flag = '';
     this.endDate = new Date(this.options.query_params.get('to'));
     // console.log('To:', this.endDate);
     if (self.lat && self.lng) {
@@ -70,11 +75,11 @@ class TrackingMap extends TripMap {
       const myRequest = new Request(
         self.options.url + '?' +
           new URLSearchParams({
-            nickname: self.options.query_params.get('nickname'),
+            nickname: self.nickname,
             from: self.options.query_params.get('from'),
             to: self.options.query_params.get('to'),
             max_hdop: self.options.query_params.get('max_hdop'),
-            notes_only_flag: self.options.query_params.get('notes_only_flag'),
+            notes_only_flag: self.notes_only_flag,
             order: 'ASC',
             offset: -1,
             page_size: -1,

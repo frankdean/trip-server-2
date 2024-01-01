@@ -267,6 +267,8 @@ void TrackingRequestHandler::build_form(
     response.content <<
       "        </select>\n"
       "      </div><!-- div-nicknames -->\n";
+  } else {
+    response.content << "      <input type=\"hidden\" name=\"nickname\" value=\"\">\n";
   }
 
   response.content <<
