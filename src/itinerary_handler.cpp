@@ -554,7 +554,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       // Label for menu item to view waypoint details
       "                <li><button class=\"dropdown-item\" name=\"action\" value=\"attributes\" formmethod=\"post\">" << translate("Waypoint") << "</button></li> <!-- read-only version -->\n"
       // Label for menu item to view details of a path, which is either a selected route or track
-      "                <li><button class=\"dropdown-item\" name=\"action\">" << translate("Path") << "</button></li> <!-- read-only version -->\n";
+      "                <li><button class=\"dropdown-item\" name=\"action\" value=\"edit-path\" accesskey=\"z\">" << translate("Path") << "</button></li> <!-- read-only version -->\n";
   }
   response.content
     <<
