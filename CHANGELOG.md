@@ -2,7 +2,7 @@
 
 # Changelog
 
-## Next Release
+## 2.4.1
 
 - Bug fix - invalid SQL
 
@@ -11,13 +11,26 @@
 
 - Bug fix - blank route and track elevations not being filled on file import
 
-- Removed launching Trip Server v1 from Vagrant scripts
+- Bug fix - locations not shown on map where no shared locations
 
-- Documentation updates
+	If no other user is sharing locations with the current user, the map fails
+	to show any locations for the current user.
 
-- Refactored code to avoid global reference to elevation_service
+- Bug fix - could not view routes or tracks on read-only shared itinerary.
 
-- Use std::unique_ptr for elevation loading thread instead of standard pointer
+- Bug fix - invalid HTML with read-only view of an itinerary waypoint.
+
+- Removed launching Trip Server v1 from Vagrant scripts.
+
+- Documentation updates.
+
+- Refactored code to avoid global reference to elevation_service.
+
+- Use std::unique_ptr for elevation loading thread instead of standard pointer.
+
+- Improved running with tile server under Docker
+
+- Support including elevation data in Docker container
 
 ## 2.4.0
 

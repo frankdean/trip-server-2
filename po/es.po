@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2023-12-20 14:22+0000\n"
+"POT-Creation-Date: 2024-01-01 15:11+0000\n"
 "PO-Revision-Date: 2023-12-17 18:19+0000\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
@@ -143,7 +143,7 @@ msgstr ""
 #: src/itinerary_path_name_edit.cpp:75
 #: src/itinerary_sharing_edit_handler.cpp:92
 #: src/itinerary_simplify_handler.cpp:76
-#: src/itinerary_waypoint_edit_handler.cpp:306
+#: src/itinerary_waypoint_edit_handler.cpp:305
 #: src/password_change_handler.cpp:95 src/track_sharing_edit_handler.cpp:157
 msgid "Save"
 msgstr ""
@@ -160,11 +160,11 @@ msgstr ""
 #. Label to cancel changing password
 #. Label for a cancel button
 #: src/admin_user_edit_handler.cpp:123 src/itinerary_edit_handler.cpp:116
-#: src/itinerary_import_handler.cpp:53 src/itinerary_path_join_handler.cpp:159
+#: src/itinerary_import_handler.cpp:54 src/itinerary_path_join_handler.cpp:159
 #: src/itinerary_path_name_edit.cpp:78
 #: src/itinerary_sharing_edit_handler.cpp:95
-#: src/itinerary_simplify_handler.cpp:79 src/itinerary_upload_handler.cpp:181
-#: src/itinerary_waypoint_edit_handler.cpp:310
+#: src/itinerary_simplify_handler.cpp:79 src/itinerary_upload_handler.cpp:177
+#: src/itinerary_waypoint_edit_handler.cpp:309
 #: src/password_change_handler.cpp:97 src/track_sharing_edit_handler.cpp:159
 msgid "Cancel"
 msgstr ""
@@ -242,7 +242,7 @@ msgstr ""
 #: src/itinerary_sharing_report_handler.cpp:99
 #: src/itinerary_track_edit_handler.cpp:177
 #: src/itinerary_track_segment_edit_handler.cpp:179
-#: src/track_sharing_handler.cpp:123 src/tracking_request_handler.cpp:214
+#: src/track_sharing_handler.cpp:123 src/tracking_request_handler.cpp:217
 msgid "Go"
 msgstr "Ir"
 
@@ -286,7 +286,7 @@ msgid "User Management"
 msgstr ""
 
 #. Message displayed after loading elevation tiles
-#: src/elevation_tile.cpp:237
+#: src/elevation_tile.cpp:232
 msgid "Loaded {1} elevation tiles in {2} ms"
 msgstr ""
 
@@ -358,13 +358,13 @@ msgstr ""
 #. Label for entering the start date for an itinerary
 #. "      <div class=\"row\">\n"
 #. The input start date to search for location tracks
-#: src/itinerary_edit_handler.cpp:69 src/tracking_request_handler.cpp:226
+#: src/itinerary_edit_handler.cpp:69 src/tracking_request_handler.cpp:229
 msgid "Date from"
 msgstr "Fecha de"
 
 #. Label for entering the end date for an itinerary
 #. The input end date to search for location tracks
-#: src/itinerary_edit_handler.cpp:79 src/tracking_request_handler.cpp:232
+#: src/itinerary_edit_handler.cpp:79 src/tracking_request_handler.cpp:235
 msgid "Date to"
 msgstr "Fecha para"
 
@@ -372,7 +372,7 @@ msgstr "Fecha para"
 #. Column heading for route description
 #. Label for input of a waypoint's description
 #: src/itinerary_edit_handler.cpp:89 src/itinerary_route_edit_handler.cpp:146
-#: src/itinerary_waypoint_edit_handler.cpp:225
+#: src/itinerary_waypoint_edit_handler.cpp:221
 msgid "Description"
 msgstr ""
 
@@ -385,7 +385,7 @@ msgstr ""
 #. Text to confirm when cancelling editing an itinerary
 #. Confirmation dialog when canceling creating or editing an itinerary waypoint
 #: src/itinerary_edit_handler.cpp:114
-#: src/itinerary_waypoint_edit_handler.cpp:308
+#: src/itinerary_waypoint_edit_handler.cpp:307
 msgid "Cancel?"
 msgstr ""
 
@@ -396,7 +396,7 @@ msgstr ""
 
 #. Form reset label
 #. Label for the button which resets the form's input criteria to that originally displayed
-#: src/itinerary_edit_handler.cpp:120 src/tracking_request_handler.cpp:315
+#: src/itinerary_edit_handler.cpp:120 src/tracking_request_handler.cpp:320
 msgid "Reset"
 msgstr "Reajusta"
 
@@ -571,7 +571,7 @@ msgstr ""
 #: src/itinerary_sharing_handler.cpp:127
 #: src/itinerary_track_edit_handler.cpp:201
 #: src/itinerary_track_segment_edit_handler.cpp:201
-#: src/itinerary_waypoint_edit_handler.cpp:318
+#: src/itinerary_waypoint_edit_handler.cpp:317
 msgid "Close"
 msgstr ""
 
@@ -598,7 +598,7 @@ msgstr ""
 
 #. Label for menu item to display the map page showing the selected routes, tracks and waypoints
 #. Label for the button to display a map showing the tracked locations
-#: src/itinerary_handler.cpp:565 src/tracking_request_handler.cpp:296
+#: src/itinerary_handler.cpp:565 src/tracking_request_handler.cpp:301
 msgid "Show map"
 msgstr "Mostra el mapa"
 
@@ -703,24 +703,24 @@ msgid "Download full itinerary"
 msgstr "Descarga itinerario completo"
 
 #. Title of the page for importing a YAML file contain a full itinerary
-#: src/itinerary_import_handler.cpp:41
+#: src/itinerary_import_handler.cpp:42
 msgid "Itinerary Import"
 msgstr ""
 
 #. Instructions for uploading a YAML file contain a full itinerary
-#: src/itinerary_import_handler.cpp:45
+#: src/itinerary_import_handler.cpp:46
 msgid "Select the YAML file to be uploaded, then click the upload button."
 msgstr ""
 
 #. Label for button to upload a YAML file containing a full itinerary
 #. Label for button to upload a GPX (XML) file containing routes, waypoints and tracks
 #. Label for button to initiate upload of a YAML file containing settings for the TripLogger app
-#: src/itinerary_import_handler.cpp:51 src/itinerary_upload_handler.cpp:179
+#: src/itinerary_import_handler.cpp:52 src/itinerary_upload_handler.cpp:175
 #: src/my_account_handler.cpp:68
 msgid "Upload"
 msgstr ""
 
-#: src/itinerary_import_handler.cpp:69
+#: src/itinerary_import_handler.cpp:71
 msgid "{1}—Copy of {2}"
 msgstr ""
 
@@ -765,7 +765,7 @@ msgstr ""
 #. Label for input of a waypoint name
 #: src/itinerary_path_name_edit.cpp:46 src/itinerary_route_edit_handler.cpp:142
 #: src/itinerary_simplify_handler.cpp:62
-#: src/itinerary_waypoint_edit_handler.cpp:100
+#: src/itinerary_waypoint_edit_handler.cpp:96
 msgid "Name"
 msgstr ""
 
@@ -777,7 +777,7 @@ msgstr ""
 #. Confirmation dialog when resetting changes when editing a route or track name
 #. Confirmation dialog when resetting changes to an itinerary waypoint
 #: src/itinerary_path_name_edit.cpp:80
-#: src/itinerary_waypoint_edit_handler.cpp:312
+#: src/itinerary_waypoint_edit_handler.cpp:311
 msgid "Reset changes?"
 msgstr ""
 
@@ -797,7 +797,7 @@ msgid "Itinerary Track"
 msgstr ""
 
 #. A note appended to a path name which has been simplified
-#: src/itinerary_rest_handler.cpp:435 src/itinerary_rest_handler.cpp:463
+#: src/itinerary_rest_handler.cpp:431 src/itinerary_rest_handler.cpp:459
 msgid "(simplified)"
 msgstr ""
 
@@ -881,7 +881,7 @@ msgstr ""
 #. The column heading for the database unique numeric identifier of a tracked location point
 #: src/itinerary_route_edit_handler.cpp:133
 #: src/itinerary_track_segment_edit_handler.cpp:115
-#: src/tracking_request_handler.cpp:100
+#: src/tracking_request_handler.cpp:103
 msgid "ID"
 msgstr "Identificación"
 
@@ -890,7 +890,7 @@ msgstr "Identificación"
 #. The column heading for the latitude coordinate of a tracked location point
 #: src/itinerary_route_edit_handler.cpp:136
 #: src/itinerary_track_segment_edit_handler.cpp:120
-#: src/tracking_request_handler.cpp:104
+#: src/tracking_request_handler.cpp:107
 msgid "Latitude"
 msgstr "Latitud"
 
@@ -899,7 +899,7 @@ msgstr "Latitud"
 #. The column heading for the longitude coordinate of a tracked location point
 #: src/itinerary_route_edit_handler.cpp:138
 #: src/itinerary_track_segment_edit_handler.cpp:122
-#: src/tracking_request_handler.cpp:106
+#: src/tracking_request_handler.cpp:109
 msgid "Longitude"
 msgstr "Longitud"
 
@@ -910,15 +910,15 @@ msgstr "Longitud"
 #. The column heading for the altitude of a tracked location point
 #: src/itinerary_route_edit_handler.cpp:140
 #: src/itinerary_track_segment_edit_handler.cpp:124
-#: src/itinerary_waypoint_edit_handler.cpp:169
-#: src/tracking_info_handler.cpp:162 src/tracking_request_handler.cpp:108
+#: src/itinerary_waypoint_edit_handler.cpp:165
+#: src/tracking_info_handler.cpp:162 src/tracking_request_handler.cpp:111
 msgid "Altitude"
 msgstr "Altitud"
 
 #. Column heading for route comment
 #. Label for input of a comment for a waypoint
 #: src/itinerary_route_edit_handler.cpp:144
-#: src/itinerary_waypoint_edit_handler.cpp:239
+#: src/itinerary_waypoint_edit_handler.cpp:235
 msgid "Comment"
 msgstr ""
 
@@ -928,7 +928,7 @@ msgstr ""
 #. "        </div>\n"
 #. Label for selection of GPS symbol value
 #: src/itinerary_route_edit_handler.cpp:148
-#: src/itinerary_waypoint_edit_handler.cpp:185
+#: src/itinerary_waypoint_edit_handler.cpp:181
 msgid "Symbol"
 msgstr ""
 
@@ -991,20 +991,20 @@ msgstr ""
 
 #. Label for input of a location in a variety of formats
 #: src/itinerary_search_handler.cpp:50
-#: src/itinerary_waypoint_edit_handler.cpp:113
+#: src/itinerary_waypoint_edit_handler.cpp:109
 msgid "Position"
 msgstr ""
 
 #. Label for selecting the coordinate formatting of a location
 #: src/itinerary_search_handler.cpp:59
-#: src/itinerary_waypoint_edit_handler.cpp:126
+#: src/itinerary_waypoint_edit_handler.cpp:122
 msgid "Display position format"
 msgstr ""
 
 #. "      <div ng-show=\"coordFormat !== 'plus+code' && coordFormat !== 'osgb36' && coordFormat !== 'IrishGrid' && coordFormat !== 'ITM'\">\n"
 #. Label for selecting the formatting style for a location
 #: src/itinerary_search_handler.cpp:78
-#: src/itinerary_waypoint_edit_handler.cpp:144
+#: src/itinerary_waypoint_edit_handler.cpp:140
 msgid "Position ordering and separator"
 msgstr ""
 
@@ -1201,15 +1201,15 @@ msgstr ""
 #. Label for input of a waypoint's time and date
 #. The column heading for the date and time of a tracked location point
 #: src/itinerary_track_segment_edit_handler.cpp:118
-#: src/itinerary_waypoint_edit_handler.cpp:210
-#: src/tracking_request_handler.cpp:102
+#: src/itinerary_waypoint_edit_handler.cpp:206
+#: src/tracking_request_handler.cpp:105
 msgid "Time"
 msgstr "Hora"
 
 #. Column heading for track segment point HDOPs
 #. The column heading for the Horizontal Dilution Of Precision (estimated accuracy in metres) of a tracked location point
 #: src/itinerary_track_segment_edit_handler.cpp:126
-#: src/tracking_request_handler.cpp:110
+#: src/tracking_request_handler.cpp:113
 msgid "HDOP"
 msgstr "HDOP"
 
@@ -1229,35 +1229,35 @@ msgid "Itinerary Track Segment Edit"
 msgstr ""
 
 #. Title of the page for uploading a GPX (XML) file containing routes, waypoints and tracks
-#: src/itinerary_upload_handler.cpp:169 src/itinerary_upload_handler.cpp:191
+#: src/itinerary_upload_handler.cpp:165 src/itinerary_upload_handler.cpp:187
 msgid "Itinerary Upload"
 msgstr ""
 
 #. Instructions for uploading a GPX (XML) file containing routes, waypoints and tracks
-#: src/itinerary_upload_handler.cpp:173
+#: src/itinerary_upload_handler.cpp:169
 msgid "Select the GPX file to be uploaded, then click the upload button."
 msgstr ""
 
 #. The title of the Itinerary Waypoint page
-#: src/itinerary_waypoint_edit_handler.cpp:51
-#: src/itinerary_waypoint_edit_handler.cpp:87
+#: src/itinerary_waypoint_edit_handler.cpp:47
+#: src/itinerary_waypoint_edit_handler.cpp:83
 msgid "Itinerary Waypoint"
 msgstr ""
 
 #. Select choice entry when no item has been chosen
-#: src/itinerary_waypoint_edit_handler.cpp:192
+#: src/itinerary_waypoint_edit_handler.cpp:188
 msgid "-- not set --"
 msgstr ""
 
-#: src/itinerary_waypoint_edit_handler.cpp:252
+#: src/itinerary_waypoint_edit_handler.cpp:248
 msgid "Garmin averaging sample count"
 msgstr ""
 
-#: src/itinerary_waypoint_edit_handler.cpp:263
+#: src/itinerary_waypoint_edit_handler.cpp:260
 msgid "OsmAnd category (type)"
 msgstr ""
 
-#: src/itinerary_waypoint_edit_handler.cpp:281
+#: src/itinerary_waypoint_edit_handler.cpp:279
 msgid "OsmAnd color"
 msgstr ""
 
@@ -1703,7 +1703,7 @@ msgstr ""
 
 #. Description of 'speed' parameter in table of parameters
 #. The column heading for the speed of a tracked location point
-#: src/tracking_info_handler.cpp:168 src/tracking_request_handler.cpp:112
+#: src/tracking_info_handler.cpp:168 src/tracking_request_handler.cpp:115
 msgid "Speed"
 msgstr "Velocidad"
 
@@ -1794,104 +1794,104 @@ msgstr ""
 
 #. Title tor the location tracking page
 #. The title of the location tracking page
-#: src/tracking_request_handler.cpp:60 src/tracking_request_handler.cpp:75
+#: src/tracking_request_handler.cpp:63 src/tracking_request_handler.cpp:78
 msgid "Tracks"
 msgstr "Recorridos"
 
 #. Message displayed when copying location tracking query parameters into the copy buffer of the location tracking page is successful
-#: src/tracking_request_handler.cpp:81
+#: src/tracking_request_handler.cpp:84
 msgid ""
 "Search parameters copied.  Use the paste button on an itinerary to create an "
 "itinerary track based on these search parameters."
 msgstr ""
 
 #. Message showing the location tracking search result
-#: src/tracking_request_handler.cpp:89
+#: src/tracking_request_handler.cpp:92
 msgid "{1} track point received"
 msgid_plural "{1} track points received"
 msgstr[0] "{1} punto recibido"
 msgstr[1] "{1} puntos recibidos"
 
 #. Message showing the date range for the location tracking search result
-#: src/tracking_request_handler.cpp:91
+#: src/tracking_request_handler.cpp:94
 msgid "Between {1} and {2}"
 msgstr "Entre {1} y {2}"
 
 #. The column heading for the bearing (angle of heading) of a tracked location point
-#: src/tracking_request_handler.cpp:114
+#: src/tracking_request_handler.cpp:117
 msgid "Bearing"
 msgstr "Rumbo"
 
 #. The column heading of a user provided note for the tracked location point
-#: src/tracking_request_handler.cpp:116
+#: src/tracking_request_handler.cpp:119
 msgid "Note"
 msgstr "Nota"
 
 #. The column heading indicating how the location point was provided, e.g. iPhone, Apple Watch, GPS, manually, mobile phone mast
-#: src/tracking_request_handler.cpp:118
+#: src/tracking_request_handler.cpp:121
 msgid "Provider"
 msgstr "Proveedor"
 
 #. The column heading indicating how many satellites were used to determine the location
-#: src/tracking_request_handler.cpp:120
+#: src/tracking_request_handler.cpp:123
 msgid "Satellites"
 msgstr "Satélites"
 
 #. The column heading showing the remaining battery percentage recorded at the time of the tracked location point
-#: src/tracking_request_handler.cpp:122
+#: src/tracking_request_handler.cpp:125
 msgid "Battery"
 msgstr "Batería"
 
 #. The input to select another user's nickname to view their shared location tracks
-#: src/tracking_request_handler.cpp:243
+#: src/tracking_request_handler.cpp:246
 msgid "Display shared user's tracks"
 msgstr "Mostrar des recorridos compartidos"
 
 #. The maximum Horizontal Dilution of Precision (accuracy in metres) to filter locations by
-#: src/tracking_request_handler.cpp:272
+#: src/tracking_request_handler.cpp:277
 msgid "Max hdop"
 msgstr "HDOP máximo"
 
 #. instructions to disable filtering locations by HDOP (accuracy in metres)
-#: src/tracking_request_handler.cpp:279
+#: src/tracking_request_handler.cpp:284
 msgid "leave blank for no maximum"
 msgstr "dejar en blanco para sin máximo"
 
 #. Whether the user wishes to filter the results to only include those with notes attached
-#: src/tracking_request_handler.cpp:289
+#: src/tracking_request_handler.cpp:294
 msgid "Show notes only"
 msgstr "Mostra solo las notas"
 
 #. Label for the button to perform the search that lists the tracked locations
-#: src/tracking_request_handler.cpp:294
+#: src/tracking_request_handler.cpp:299
 msgid "List tracks"
 msgstr "Enumera los recorridos"
 
 #. Prompt to confirm the user wished to download a data file with a limited number of tracked locations
-#: src/tracking_request_handler.cpp:303
+#: src/tracking_request_handler.cpp:308
 msgid ""
 "Download exceeds maximum.  Only the most recent {1} locations will be "
 "included.  Continue?"
 msgstr ""
 
 #. Prompt to confirm the user wished to download a data file with the tracked locations
-#: src/tracking_request_handler.cpp:307
+#: src/tracking_request_handler.cpp:312
 msgid "Download tracks?"
 msgstr "¿Descarga?"
 
 #. Label for the button to download the tracks as an XML data file
-#: src/tracking_request_handler.cpp:311
+#: src/tracking_request_handler.cpp:316
 msgid "Download tracks"
 msgstr "Descarga los recorridos"
 
 #. Label for the button to make a copy of the tracked locations
-#: src/tracking_request_handler.cpp:313
+#: src/tracking_request_handler.cpp:318
 msgid "Copy"
 msgstr "Copia"
 
 #. Message displayed to the user when they attempt to exceed the
 #. maxmium amount of locations that can be displayed on the map
-#: src/tracking_rest_handler.cpp:236
+#: src/tracking_rest_handler.cpp:239
 msgid "The {1} locations have been truncated to the most recent {2}"
 msgstr ""
 
