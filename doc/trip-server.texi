@@ -1288,8 +1288,7 @@ stackoverflow answer, "Existing VM".}
 @subsubsection incompatible character encodings
 
 @example
-{incompatible character encodings: UTF-8 and ASCII-8BIT
-(Encoding::CompatibilityError)}
+incompatible character encodings: UTF-8 and ASCII-8BIT (Encoding::CompatibilityError)
 @end example
 
 If you receive this error when running @code{vagrant up}, even after
