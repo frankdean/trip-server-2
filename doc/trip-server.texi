@@ -592,8 +592,9 @@ E.g. a format string of %d@textdegree{}%M'%S''%c would result in a
 lat/long value of @samp{1.5,-2.5} being displayed as
 1@textdegree{}30'00''N 2@textdegree{}30'00''W
 
-Scripts to create default values for these lookup tables are in the
-@code{./provisioning/schema} folder;
+@need 7500
+Scripts to create some values for these lookup tables are in the
+@file{./provisioning/schema} folder;
 
 @itemize
 @item
@@ -621,7 +622,7 @@ exclusive lock is placed on the table for the duration of the cluster
 command execution.
 
 See
-@url{http://dba.stackexchange.com/questions/39589/optimizing-queries-on-a-range-of-timestamps-two-columns}
+@url{http://dba.stackexchange.com/questions/39589/optimizing-queries-on-a-range-of-timestamps-two-columns,postgresql - Optimizing queries on a range of timestamps (two columns) - Database Administrators Stack Exchange}
 for more information.
 
 @node Creating an Initial Admin User,  , Creating Tables and Roles, PostgreSQL Setup
@@ -657,7 +658,8 @@ Alternatively, an initial admin user can be created similarly to the
 following, replacing each value appropriately:
 
 @example
-INSERT INTO usertable (firstname, lastname, email, uuid, password, nickname)
+INSERT INTO usertable
+(firstname, lastname, email, uuid, password, nickname)
 VALUES ('admin', '', 'admin@@trip.test', gen_random_uuid(),
 crypt('SECRET', gen_salt('bf')), 'admin');
 
@@ -687,7 +689,8 @@ On a @url{@value{debianurl},Debian system}, you can create a system user to
 run the application as follows:
 
 @example
-$ sudo adduser trip --system --group --home /nonexistent --no-create-home
+$ sudo adduser trip --system --group --home /nonexistent \
+--no-create-home
 @end example
 
 On other systems, you will probably need to use the less friendly
@@ -772,7 +775,7 @@ hints.
 @cindex Elevation Data
 @cindex Altitude Data
 
-The @url{http://srtm.csi.cgiar.org/, Consortium for Spatial Information}
+The @url{http://srtm.csi.cgiar.org/,Consortium for Spatial Information}
 (CGIAR CSI) make
 @url{https://en.wikipedia.org/wiki/Digital_elevation_model, Digital
 Elevation Model} data covering about 80% of the globe, available for
@@ -814,7 +817,8 @@ Download files to @code{~/downloads/srtm}
 @example
 $ mkdir -p ~/downloads/srtm
 $ cd ~/downloads/srtm
-$ wget http://srtm.csi.cgiar.org/wp-content/uploads/files/srtm_5x5/tiff/srtm_72_22.zip
+$ wget \
+http://srtm.csi.cgiar.org/wp-content/uploads/files/srtm_5x5/tiff/srtm_72_22.zip
 @end example
 
 @item
@@ -823,14 +827,16 @@ Extract the tiff files to @code{~/tmp/tiff}
 @example
 $ mkdir -p ~/tmp/tiff
 $ cd ~/tmp/tiff
-$ find ~/downlods/srtm -name '*.zip' -exec unzip -n '@{@}' '*.tif' \;
+$ find ~/downlods/srtm -name '*.zip' \
+-exec unzip -n '@{@}' '*.tif' \;
 @end example
 
 @item
 Create a Squashfs compressed file containing the @code{tiff} images
 
 @example
-$ sudo mksquashfs ~/tmp/tiff /var/local/elevation-data.squashfs -no-recovery
+$ sudo mksquashfs ~/tmp/tiff /var/local/elevation-data.squashfs \
+-no-recovery
 @end example
 
 The @code{-no-recovery} option is to stop Squashfs leaving a recovery
@@ -860,7 +866,8 @@ Test mounting the Squashfs file
 
 @example
 $ mkdir -p /var/local/elevation-data/
-$ sudo mount -t squashfs /var/local/elevation-data.squashfs /var/local/elevation-data/
+$ sudo mount -t squashfs /var/local/elevation-data.squashfs \
+/var/local/elevation-data/
 $ ls /var/local/elevation-data/
 $ sudo umount /var/local/elevation-data
 @end example
@@ -905,8 +912,9 @@ files to be extracted, prefixed by a forward-slash.  e.g.
 $ unsquashfs -i -e list-of-files.txt /var/local/elevation-data.squashfs
 
 @item
-See @url{http://tldp.org/HOWTO/SquashFS-HOWTO/creatingandusing.html,
-SquashFS HOWTO} for more information
+See
+@url{http://tldp.org/HOWTO/SquashFS-HOWTO/creatingandusing.html,Squash-FSHOWTO}
+for more information
 @end enumerate
 
 @node Internationalisation and Localisation, Proxy Web Servers, Configuration, Top
@@ -1062,7 +1070,8 @@ the Apache @code{<VirtualHost/>} sections:
 # Redirect for Traccar Client
 <IfModule mod_rewrite.c>
         RewriteEngine On
-        RewriteCond "%@{QUERY_STRING@}" "^id=[\da-f]@{8@}-[\da-f]@{4@}-[\da-f]@{4@}-[\da-f]@{4@}-[\da-f]@{12@}&timestamp=\d+&lat=[-.\d]+&lon=[-.\d]+"
+        RewriteCond "%@{QUERY_STRING@}" \
+        "^id=[\da-f]@{8@}-[\da-f]@{4@}-[\da-f]@{4@}-[\da-f]@{4@}-[\da-f]@{12@}&timestamp=\d+&lat=[-.\d]+&lon=[-.\d]+"
         RewriteRule ^/ /trip/rest/log_point [PT,QSA]
 </IfModule>
 @end example
@@ -1177,7 +1186,8 @@ Replace @code{SECRET} with your desired password.
 $ cd ~/projects/trip-server
 $ vagrant ssh
 $ psql trip
-trip=# UPDATE usertable SET password=crypt('SECRET', gen_salt('bf')) WHERE nickname='admin';
+trip=# UPDATE usertable SET password=crypt('SECRET', gen_salt('bf')) \
+WHERE nickname='admin';
 trip=# \q
 @end example
 
@@ -1277,8 +1287,10 @@ stackoverflow answer, "Existing VM".}
 
 @subsubsection incompatible character encodings
 
-@code{incompatible character encodings: UTF-8 and ASCII-8BIT
+@example
+{incompatible character encodings: UTF-8 and ASCII-8BIT
 (Encoding::CompatibilityError)}
+@end example
 
 If you receive this error when running @code{vagrant up}, even after
 @code{vagrant destroy}, use VirtualBox to see if the VM still exists.
@@ -1385,7 +1397,8 @@ file via a helper container to the volume as follows:
 
 @example
 $ tar -zcf elevation-data.tar.gz *.tif
-$ CID=$(docker run -d -v elevation-data:/elevation-data busybox true)
+$ CID=$(docker run -d -v \
+elevation-data:/elevation-data busybox true)
 $ cat elevation-data.tar.gz | docker cp - $CID:/elevation-data/
 $ docker container stop $CID
 $ docker container rm $CID
@@ -1427,8 +1440,10 @@ e.g. @url{https://download.geofabrik.de/europe/isle-of-man.html, the
 Isle of Man}, override the environment variables in @code{./.env}, e.g.:
 
 @example
-$ export DOWNLOAD_PBF=https://download.geofabrik.de/europe/isle-of-man-latest.osm.pbf
-$ export DOWNLOAD_POLY=https://download.geofabrik.de/europe/isle-of-man.poly
+$ export DOWNLOAD_PBF=\
+https://download.geofabrik.de/europe/isle-of-man-latest.osm.pbf
+$ export DOWNLOAD_POLY=\
+https://download.geofabrik.de/europe/isle-of-man.poly
 @end example
 
 The run the import with:
@@ -1651,7 +1666,8 @@ Fetching a single page with @code{curl} using the session ID obtained
 from the previous command:
 
 @example
-$ curl -H 'Cookie: TRIP_SESSION_ID=b3571314-d5c4-4690-8164-8384fd748faa' \
+$ curl -H \
+'Cookie: TRIP_SESSION_ID=b3571314-d5c4-4690-8164-8384fd748faa' \
 'http://localhost:8080/trip/app/tracks'
 @end example
 
@@ -1847,8 +1863,10 @@ VACUUM (FULL, VERBOSE);
 Copy location records for user with id 1 to user with id 2
 
 @example
-INSERT INTO location (user_id, location, "time", hdop, altitude, speed, bearing)
-SELECT 2, location, "time", hdop, altitude, speed, bearing FROM location WHERE user_id = 1;
+INSERT INTO location
+(user_id, geog, "time", hdop, altitude, speed, bearing)
+SELECT 2, geog, "time", hdop, altitude, speed, bearing
+FROM location WHERE user_id = 1;
 @end example
 
 Moved yesterday's test location data forward by 1 day:
@@ -1873,7 +1891,8 @@ INSERT INTO temp_location SELECT * FROM location q
 WHERE user_id=29 AND time >= '2015-12-14' AND
 time <= '2015-12-14T23:59:59'
 
-UPDATE temp_location SET user_id=3, id=NEXTVAL('location_seq'::regclass);
+UPDATE temp_location SET user_id=3,
+id=NEXTVAL('location_seq'::regclass);
 
 INSERT INTO location SELECT * FROM temp_location;
 @end example
@@ -1904,8 +1923,8 @@ Backup schema, data and privileges, including commands to recreate
 tables, excluding the tile data:
 
 @example
-$ pg_dump --clean --if-exists --no-owner --exclude-table-data=tile trip
-\
+$ pg_dump --clean --if-exists --no-owner \
+--exclude-table-data=tile trip \
 > test-schema-data.sql
 @end example
 
