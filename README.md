@@ -305,7 +305,8 @@ admin user.
 		$ sudo make install
 		$ sudo ldconfig
 
-2.  Include the `--enable-tui` option when running `configure`, e.g.:
+2.  Include the `--enable-tui` option when running `configure` for
+    trip-server, e.g.:
 
 		$ ./configure --enable-tui
 		$ make
