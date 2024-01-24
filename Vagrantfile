@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
     # https://wiki.debian.org/Teams/Cloud/VagrantBaseBoxes
     # Boxes: https://app.vagrantup.com/debian
     debian.vm.box = "debian/bullseye64"
-    debian.vm.box_version = "11.20231009.1"
+    debian.vm.box_version = "11.20231211.1"
 
     # Create a forwarded port mapping which allows access to a specific port
     # within the machine from a port on the host machine. In the example below,
@@ -40,18 +40,14 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "debian12", autostart: false do |debian12|
     debian12.vm.box = "debian/bookworm64"
-    debian12.vm.box_version = "12.20231009.1"
+    debian12.vm.box_version = "12.20231211.1"
     debian12.vm.network "forwarded_port", guest: 8080, host: 8090
   end
 
-  # It may take multiple attempts to fully succeed in provisioning a working
-  # system:
-  #
-  #   vagrant reload fedora --provision
   config.vm.define "fedora", autostart: false do |fedora|
     # boxes at https://app.vagrantup.com/fedora/
-    fedora.vm.box = "fedora/38-cloud-base"
-    fedora.vm.box_version = "38.20230413.1"
+    fedora.vm.box = "fedora/39-cloud-base"
+    fedora.vm.box_version = "39.20231031.1"
 
     # If the VirtualBox guest additions fail to install, first try:
     #
@@ -65,25 +61,10 @@ Vagrant.configure("2") do |config|
     fedora.vm.network "forwarded_port", guest: 8080, host: 8082
   end
 
-  # The FreeBSD configuration is not recommended for testing with Trip Server
-  # v1.
-  #
-  # It is configured to use `rsync` to synchronise the source directory
-  # structure, which is less than ideal.  In that configuration, it may fail
-  # to download and build the Node.js modules.
-  #
-  # However, it can be useful to manually test a distribution tarball before
-  # release.
-  #
-  # It may take multiple attempts to fully succeed in provisioning a working
-  # system:
-  #
-  #   vagrant reload freebsd --provision
-  #
   config.vm.define "freebsd", autostart: false do |freebsd|
     # https://app.vagrantup.com/freebsd
-    freebsd.vm.box = "freebsd/FreeBSD-13.2-STABLE"
-    freebsd.vm.box_version = "2023.10.19"
+    freebsd.vm.box = "freebsd/FreeBSD-14.0-STABLE"
+    freebsd.vm.box_version = "2024.01.18"
 
     # Bento box does not have bash shell:
     #freebsd.vm.box = "bento/freebsd-13"
@@ -115,12 +96,10 @@ Vagrant.configure("2") do |config|
     freebsd.vm.disk :disk, size: "28GB", primary: true
   end
 
-  # Rocky Linux is tricky to get up and running.  Multiple restarts and manual
-  # intervention may be required.
   config.vm.define "rockylinux", autostart: false do |rockylinux|
     # https://app.vagrantup.com/rockylinux
     rockylinux.vm.box = "rockylinux/9"
-    rockylinux.vm.box_version = "2.0.0"
+    rockylinux.vm.box_version = "3.0.0"
     #
     # Using Bento box:
     #rockylinux.vm.box = "bento/rockylinux-9"

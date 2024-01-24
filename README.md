@@ -319,7 +319,7 @@ admin user.
 
 4.  Select the option to create a new user from the menu.
 
-[finalcut]: https://github.com/gansm/finalcut/tree/main "A text-based widget toolkit"
+[finalcut]: https://github.com/gansm/finalcut "A text-based widget toolkit"
 
 ### Debian
 
@@ -453,7 +453,7 @@ for instructions on installing `libpqxx`.
 The application also requires the `nlohmann/json` package, which is not
 included in the Fedora distribution.  Follow the instructions in the
 'nlohmann/json' section below to install it.  Tested on Fedora with
-`nlohmann/json` version 3.11.2.
+`nlohmann/json` version 3.11.3.
 
 - gcc
 - gawk
