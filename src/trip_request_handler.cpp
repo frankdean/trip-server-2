@@ -114,7 +114,9 @@ void TripAuthenticatedRequestHandler::append_head_content(std::ostream& os) cons
     // Bootstrap
     // "    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx\" crossorigin=\"anonymous\">\n"
     "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/bootstrap-" << BOOTSTRAP_VERSION << "-dist/css/bootstrap.min.css\">\n"
-    "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/css/trip.css\">\n";
+    "    <link rel=\"stylesheet\" href=\"" << get_uri_prefix() << "/static/css/trip.css\">\n"
+    "    <link rel=\"icon\" href=\"" << get_uri_prefix() << "/static/favicon.ico\" type=\"image/x-icon\">\n"
+    "    <link rel=\"shortcut icon\" href=\"" << get_uri_prefix() << "/static/favicon.ico\" type=\"image/x-icon\">\n";
 }
 
 void TripAuthenticatedRequestHandler::append_head_title_section(std::ostream& os) const

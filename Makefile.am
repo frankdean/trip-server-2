@@ -74,7 +74,8 @@ dist_jsmod_DATA = resources/static/js/modules/geo-utils.js \
 	resources/static/js/modules/map.js \
 	resources/static/js/modules/utils-service.js
 bsver = bootstrap-$(BOOTSTRAP_VERSION)-dist
-nobase_dist_pkgdata_DATA = resources/static/$(bsver)/LICENSE
+nobase_dist_pkgdata_DATA = resources/static/$(bsver)/LICENSE \
+	resources/static/favicon.ico
 
 bscssdir = $(pkgdatadir)/resources/static/bootstrap-$(BOOTSTRAP_VERSION)-dist/css
 dist_bscss_DATA = \
