@@ -39,7 +39,9 @@ namespace trip {
 class ElevationService;
 
 class ItineraryHandler : public TripAuthenticatedRequestHandler {
+
   std::shared_ptr<ElevationService> elevation_service;
+  ItineraryPgDao itinerary_dao;
 
 public:
 
@@ -133,6 +135,7 @@ public:
                    std::shared_ptr<ElevationService> elevation_service) :
     TripAuthenticatedRequestHandler(config),
     elevation_service(elevation_service),
+    itinerary_dao(),
     feature_copy_success(false),
     read_only(true),
     show_raw_markdown(false),

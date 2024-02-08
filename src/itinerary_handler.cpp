@@ -690,13 +690,19 @@ void ItineraryHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
-  set_page_title(translate("Itinerary"));
   set_menu_item(itinerary);
   std::string id = request.get_query_param("id");
   if (id.empty()) {
     id = request.get_query_param("itinerary_id");
   }
   itinerary_id = std::stol(id);
+
+  std::ostringstream ss;
+  ss << translate("Itinerary")
+     << " - "
+     << x(itinerary_dao.get_itinerary_title(get_user_id(), itinerary_id));
+  set_page_title(ss.str());
+
   if (request.get_param("active-tab") == "features") {
     active_tab = features_tab;
   }
@@ -709,22 +715,21 @@ void ItineraryHandler::convertTracksToRoutes(
 {
   auto selected_features = get_selected_feature_ids(request);
   ItineraryPgDao::itinerary_features features;
-  ItineraryPgDao dao;
   if (!selected_features.tracks.empty()) {
-    auto tracks = dao.get_tracks(get_user_id(),
+    auto tracks = itinerary_dao.get_tracks(get_user_id(),
                                  itinerary_id,
                                  selected_features.tracks);
     for (const auto &t : tracks)
       features.routes.push_back(ItineraryPgDao::route(t));
   }
   if (!selected_features.routes.empty()) {
-    auto routes = dao.get_routes(get_user_id(),
+    auto routes = itinerary_dao.get_routes(get_user_id(),
                                  itinerary_id,
                                  selected_features.routes);
     for (const auto &r : routes)
       features.tracks.push_back(ItineraryPgDao::track(r));
   }
-  dao.create_itinerary_features(get_user_id(),
+  itinerary_dao.create_itinerary_features(get_user_id(),
                                 itinerary_id,
                                 features);
 }
@@ -735,8 +740,8 @@ void ItineraryHandler::auto_color_paths(
   auto selected_features = get_selected_feature_ids(request);
   if (selected_features.routes.empty() && selected_features.tracks.empty())
     return;
-  ItineraryPgDao dao;
-  dao.auto_color_paths(get_user_id(), itinerary_id, selected_features);
+  itinerary_dao.auto_color_paths(get_user_id(),
+                                 itinerary_id, selected_features);
 }
 
 std::pair<bool, TrackPgDao::location_search_query_params>
@@ -809,19 +814,17 @@ void ItineraryHandler::paste_locations()
   segments.push_back(segment);
   ItineraryPgDao::track track(segments);
   track.calculate_statistics();
-  ItineraryPgDao dao;
-  dao.create_waypoints(get_user_id(), itinerary_id, waypoints);
+  itinerary_dao.create_waypoints(get_user_id(), itinerary_id, waypoints);
   std::vector<ItineraryPgDao::track> tracks;
   tracks.push_back(track);
-  dao.create_tracks(get_user_id(), itinerary_id, tracks);
+  itinerary_dao.create_tracks(get_user_id(), itinerary_id, tracks);
 }
 
 void ItineraryHandler::paste_itinerary_features()
 {
-  ItineraryPgDao dao;
   ItineraryPgDao::itinerary_features features;
   if (!selected_features_paste_params.second.routes.empty()) {
-    features.routes = dao.get_routes(
+    features.routes = itinerary_dao.get_routes(
         get_user_id(),
         selected_features_paste_params.second.itinerary_id,
         selected_features_paste_params.second.routes);
@@ -829,22 +832,22 @@ void ItineraryHandler::paste_itinerary_features()
       route.calculate_statistics();
   }
   if (!selected_features_paste_params.second.waypoints.empty()) {
-    features.waypoints = dao.get_waypoints(
+    features.waypoints = itinerary_dao.get_waypoints(
         get_user_id(),
         selected_features_paste_params.second.itinerary_id,
         selected_features_paste_params.second.waypoints);
   }
   if (!selected_features_paste_params.second.tracks.empty()) {
-    features.tracks = dao.get_tracks(
+    features.tracks = itinerary_dao.get_tracks(
         get_user_id(),
         selected_features_paste_params.second.itinerary_id,
         selected_features_paste_params.second.tracks);
     for (auto &track : features.tracks)
       track.calculate_statistics();
   }
-  dao.create_itinerary_features(get_user_id(),
-                                itinerary_id,
-                                features);
+  itinerary_dao.create_itinerary_features(get_user_id(),
+                                          itinerary_id,
+                                          features);
 }
 
 void ItineraryHandler::paste_items()
@@ -901,10 +904,9 @@ void ItineraryHandler::handle_authenticated_request(
   // for (auto const &p : pp) {
   //   std::cout << "param: \"" << p.first << "\" -> \"" << p.second << "\"\n";
   // }
-  ItineraryPgDao dao;
   if (action == "delete_features") {
     auto features = get_selected_feature_ids(request);
-    dao.delete_features(get_user_id(), itinerary_id, features);
+    itinerary_dao.delete_features(get_user_id(), itinerary_id, features);
     active_tab = features_tab;
   } else if (action == "refresh") {
     active_tab = features_tab;
@@ -939,8 +941,8 @@ void ItineraryHandler::handle_authenticated_request(
     active_tab = features_tab;
     paste_items();
   } else if (action == "duplicate") {
-    auto new_itinerary = dao.get_itinerary_complete(get_user_id(),
-                                                    itinerary_id);
+    auto new_itinerary = itinerary_dao.get_itinerary_complete(get_user_id(),
+                                                              itinerary_id);
     if (new_itinerary.first) {
       const long new_itinerary_id =
         ItineraryImportHandler::duplicate_itinerary(get_user_id(),
@@ -1009,7 +1011,8 @@ void ItineraryHandler::handle_authenticated_request(
       return;
     }
   }
-  auto itinerary = dao.get_itinerary_summary(get_user_id(), itinerary_id);
+  auto itinerary = itinerary_dao.get_itinerary_summary(get_user_id(),
+                                                       itinerary_id);
   if (!itinerary.first)
     throw BadRequestException("Itinerary ID not found");
   read_only = itinerary.second.shared_to_nickname.first;

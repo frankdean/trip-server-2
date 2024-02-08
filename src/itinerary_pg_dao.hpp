@@ -337,6 +337,7 @@ public:
       std::string user_id,
       std::uint32_t offset,
       int limit);
+  std::string get_itinerary_title(std::string user_id, long itinerary_id);
   /// Fetches basic detials of an itinerary excluding related child data
   std::pair<bool, itinerary_description>
       get_itinerary_description(

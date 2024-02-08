@@ -407,6 +407,16 @@ std::pair<bool, ItineraryPgDao::itinerary_complete>
   }
 }
 
+std::string ItineraryPgDao::get_itinerary_title(
+    std::string user_id, long itinerary_id)
+{
+  work tx(*connection);
+  validate_user_itinerary_read_access(tx, user_id, itinerary_id);
+  auto r = tx.exec_params1("SELECT title FROM itinerary WHERE id=$1",
+                           itinerary_id);
+  return r[0].as<std::string>();
+}
+
 std::pair<bool, ItineraryPgDao::itinerary_description>
     ItineraryPgDao::get_itinerary_description(
         std::string user_id, long itinerary_id)
@@ -414,7 +424,7 @@ std::pair<bool, ItineraryPgDao::itinerary_description>
   ItineraryPgDao::itinerary_description it;
   try {
     work tx(*connection);
-    auto r =tx.exec_params1(
+    auto r = tx.exec_params1(
         "SELECT id, start, finish, title, description "
         "FROM itinerary "
         "WHERE archived != true AND user_id=$1 AND id=$2"
