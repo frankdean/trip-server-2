@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2024-01-01 15:11+0000\n"
+"POT-Creation-Date: 2024-02-20 11:26+0000\n"
 "PO-Revision-Date: 2023-12-17 18:19+0000\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
@@ -287,13 +287,14 @@ msgstr ""
 
 #. Message displayed after loading elevation tiles
 #: src/elevation_tile.cpp:232
+#, c++-format
 msgid "Loaded {1} elevation tiles in {2} ms"
 msgstr ""
 
 #. Page title of the itenerary list page
 #. Menu item to select the list of itineraries page
 #: src/itineraries_handler.cpp:46 src/itineraries_handler.cpp:155
-#: src/trip_request_handler.cpp:205
+#: src/trip_request_handler.cpp:207
 msgid "Itineraries"
 msgstr "Itinerarios"
 
@@ -525,6 +526,7 @@ msgstr ""
 
 #. Message displayed when attempting to paste more than the maximum number of items into an itinerary
 #: src/itinerary_handler.cpp:467
+#, c++-format
 msgid "Pasted the maximum of {1} points"
 msgstr ""
 
@@ -537,7 +539,7 @@ msgstr ""
 
 #. Label of the tab on the itinerary page that shows general information about the itinerary
 #. Label for button to return to the itinerary when viewing a list of itinerary shares
-#: src/itinerary_handler.cpp:486 src/itinerary_handler.cpp:693
+#: src/itinerary_handler.cpp:486 src/itinerary_handler.cpp:701
 #: src/itinerary_sharing_handler.cpp:116
 msgid "Itinerary"
 msgstr "Itinerario"
@@ -721,6 +723,7 @@ msgid "Upload"
 msgstr ""
 
 #: src/itinerary_import_handler.cpp:71
+#, c++-format
 msgid "{1}—Copy of {2}"
 msgstr ""
 
@@ -732,6 +735,7 @@ msgstr ""
 #. Formatted default name when creating a joined path with a parameter of
 #. an existing path name
 #: src/itinerary_path_join_handler.cpp:46
+#, c++-format
 msgid "{1} (joined)"
 msgstr ""
 
@@ -810,6 +814,7 @@ msgstr ""
 #. Formatted output of label and track name
 #: src/itinerary_route_edit_handler.cpp:63
 #: src/itinerary_track_edit_handler.cpp:68
+#, c++-format
 msgid "<strong>Name:</strong>&nbsp;{1}"
 msgstr ""
 
@@ -823,6 +828,7 @@ msgstr ""
 #. Formatted output of label and track color
 #: src/itinerary_route_edit_handler.cpp:71
 #: src/itinerary_track_edit_handler.cpp:77
+#, c++-format
 msgid "<strong>Color:</strong>&nbsp;{1}"
 msgstr ""
 
@@ -967,6 +973,7 @@ msgstr ""
 #. the original track.
 #: src/itinerary_route_edit_handler.cpp:293
 #: src/itinerary_track_edit_handler.cpp:301
+#, c++-format
 msgid "{1} (split)"
 msgstr ""
 
@@ -1262,6 +1269,7 @@ msgid "OsmAnd color"
 msgstr ""
 
 #: src/main.cpp:106 src/main.cpp:161
+#, c++-format
 msgid "The database is not ready for use.  Cannot find the \"{1}\" table."
 msgstr ""
 
@@ -1287,11 +1295,13 @@ msgstr "La aplicación ha sido construida para servir los archivos estáticos."
 
 #. Displays the name of the directory that static files will be served from.
 #: src/main.cpp:186
+#, c++-format
 msgid "Static files will be served from the {1} directory."
 msgstr "Archivos estático se servirá de la carpeta {1}"
 
 #. Message showing how long the application took to startup in milliseconds
 #: src/main.cpp:204
+#, c++-format
 msgid "Started application in {1} ms"
 msgstr "La aplicación se inició en {1} ms"
 
@@ -1555,7 +1565,7 @@ msgstr ""
 #. The title of the track sharing page
 #. Menu item to select the track sharing page
 #: src/track_sharing_handler.cpp:40 src/track_sharing_handler.cpp:53
-#: src/trip_request_handler.cpp:198
+#: src/trip_request_handler.cpp:200
 msgid "Track Sharing"
 msgstr "Seguimiento Compartiendo"
 
@@ -1576,6 +1586,7 @@ msgstr ""
 
 #. Abbreviated expression for days, hours and minutes
 #: src/track_sharing_handler.cpp:87 src/track_sharing_handler.cpp:96
+#, c++-format
 msgid "{1}d {2}h {3}m"
 msgstr ""
 
@@ -1646,6 +1657,7 @@ msgstr ""
 #. Description of 'time' parameter in table of parameters.  The example shows an ISO 8601 formatted date
 #. e.g. 2022-10-20T18:13:13.124Z
 #: src/tracking_info_handler.cpp:102
+#, c++-format
 msgid ""
 "Time in <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</"
 "a> e.g. {1}"
@@ -1653,12 +1665,14 @@ msgstr ""
 
 #. Description of 'unixtime' parameter in table of parameters
 #: src/tracking_info_handler.cpp:108
+#, c++-format
 msgid ""
 "<a href=\"https://en.wikipedia.org/wiki/Unix_time\">Unix time</a> e.g.  {1}"
 msgstr ""
 
 #. Description of 'mstime' parameter in table of parameters
 #: src/tracking_info_handler.cpp:114
+#, c++-format
 msgid ""
 "Unix time in <a href=\"https://en.wikipedia.org/wiki/"
 "Millisecond\">milliseconds</a> e.g. {1}"
@@ -1749,6 +1763,7 @@ msgstr ""
 
 #. Text about downloading the configuration settings for the TripLogger iOS app.  The parameter is replaced with a URL.
 #: src/tracking_info_handler.cpp:219
+#, c++-format
 msgid ""
 "If you use <a href=\"https://www.fdsd.co.uk/triplogger/\" "
 "target=\"_blank\">TripLogger</a> as your tracking client, you can download "
@@ -1769,6 +1784,7 @@ msgstr ""
 
 #. Text about using the Traccar Client iOS app the replacement parameter shows a UUID string e.g. 2b3e8d99-0d8b-450a-a716-1ba13c89a129
 #: src/tracking_info_handler.cpp:235
+#, c++-format
 msgid ""
 "For the <a href=\"https://www.traccar.org/client/\" "
 "target=\"_blank\">Traccar Client</a> app, enter the 'Device identifier' as "
@@ -1807,6 +1823,7 @@ msgstr ""
 
 #. Message showing the location tracking search result
 #: src/tracking_request_handler.cpp:92
+#, c++-format
 msgid "{1} track point received"
 msgid_plural "{1} track points received"
 msgstr[0] "{1} punto recibido"
@@ -1814,6 +1831,7 @@ msgstr[1] "{1} puntos recibidos"
 
 #. Message showing the date range for the location tracking search result
 #: src/tracking_request_handler.cpp:94
+#, c++-format
 msgid "Between {1} and {2}"
 msgstr "Entre {1} y {2}"
 
@@ -1869,6 +1887,7 @@ msgstr "Enumera los recorridos"
 
 #. Prompt to confirm the user wished to download a data file with a limited number of tracked locations
 #: src/tracking_request_handler.cpp:308
+#, c++-format
 msgid ""
 "Download exceeds maximum.  Only the most recent {1} locations will be "
 "included.  Continue?"
@@ -1892,11 +1911,13 @@ msgstr "Copia"
 #. Message displayed to the user when they attempt to exceed the
 #. maxmium amount of locations that can be displayed on the map
 #: src/tracking_rest_handler.cpp:239
+#, c++-format
 msgid "The {1} locations have been truncated to the most recent {2}"
 msgstr ""
 
 #. Heading before showing command line usage and options with the program name as the parameter
 #: src/trip_get_options.cpp:114
+#, c++-format
 msgid ""
 "Usage:\n"
 " {1} [OPTIONS]\n"
@@ -1960,11 +1981,13 @@ msgstr "imprimir verboso"
 
 #. Example usage when the application is configured to serve static files
 #: src/trip_get_options.cpp:142
+#, c++-format
 msgid "Usage: {1} <address> <port> <doc_root>"
 msgstr "Utilización: {1} <dirreción> <puerto> <raíz del documento>"
 
 #. Example usage when the application is not configured to serve static files
 #: src/trip_get_options.cpp:145
+#, c++-format
 msgid "Usage: {1} <address> <port>"
 msgstr "utilización: {1} <dirreción> <puerto>"
 
@@ -1984,42 +2007,42 @@ msgid "Login"
 msgstr "Login"
 
 #. Menu item to select the location tracking page
-#: src/trip_request_handler.cpp:184
+#: src/trip_request_handler.cpp:186
 msgid "Tracking"
 msgstr "Seguimiento"
 
 #. Menu item to select the tracker information page
-#: src/trip_request_handler.cpp:191
+#: src/trip_request_handler.cpp:193
 msgid "Tracker Info"
 msgstr "Información de Seguimiento"
 
 #. Menu item for an admin user to administer user accounts, create, delete, reset password
-#: src/trip_request_handler.cpp:213
+#: src/trip_request_handler.cpp:215
 msgid "Users"
 msgstr "Usuarios"
 
 #. Menu item for an admin user to view the system status report
-#: src/trip_request_handler.cpp:219
+#: src/trip_request_handler.cpp:221
 msgid "Status"
 msgstr "Estado"
 
 #. Menu item for a user to administer their own account
-#: src/trip_request_handler.cpp:228
+#: src/trip_request_handler.cpp:230
 msgid "Account"
 msgstr "Cuenta"
 
 #. Menu item linking to the user guide
-#: src/trip_request_handler.cpp:231
+#: src/trip_request_handler.cpp:233
 msgid "Help"
 msgstr "Ayuda"
 
 #. Menu item for the user to logout
-#: src/trip_request_handler.cpp:234
+#: src/trip_request_handler.cpp:236
 msgid "Logout"
 msgstr "Cerra Sesión"
 
 #. Warning issued to terminal if no map tile providers have been configured
-#: src/trip_request_handler.cpp:324
+#: src/trip_request_handler.cpp:326
 msgid "Warning: no map tile providers have been configured"
 msgstr ""
 
@@ -2030,11 +2053,13 @@ msgstr "Nombre de archivo de configuración no especificado\n"
 
 #. Shows which configuration filename is being read
 #: trip-server-common/src/application.cpp:112
+#, c++-format
 msgid "Reading configuration from {1}"
 msgstr "Está leyendo de configuración desde {1}  "
 
 #. Shows how many worker processes are still running when the application is stopping
 #: trip-server-common/src/application.cpp:148
+#, c++-format
 msgid "Stopping {1} worker"
 msgid_plural "Stopping {1} workers"
 msgstr[0] "Está parando {1} trabajador"
@@ -2042,6 +2067,7 @@ msgstr[1] "Está parando {1} trabajadores"
 
 #. Shows how many worker processes are being created for the application
 #: trip-server-common/src/application.cpp:177
+#, c++-format
 msgid "Creating {1} worker"
 msgid_plural "Creating {1} workers"
 msgstr[0] "Está creando {1} trabajador"
@@ -2054,6 +2080,7 @@ msgstr "Identificación del usuario"
 
 #. Shows how many database connections are being created for the application
 #: trip-server-common/src/pg_pool.cpp:44
+#, c++-format
 msgid "Creating database pool with {1} connection"
 msgid_plural "Creating database pool with {1} connections"
 msgstr[0] "Está creando un grupo de base de datos con {1} conexión"

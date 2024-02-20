@@ -2,6 +2,17 @@
 
 # Changelog
 
+## 2.4.2
+
+- Added a favicon
+- Include the name of the itinerary in the itinerary page title
+- Updated Vagrant virtual machines
+- Update proj4js to version 2.9.2
+- Update nlohmann-json to v3.11.3 when using Vagrant with Fedora & Rocky Linux
+- Update trip-server documentation re importing map tiles
+- Fix error in texinfo file
+- Fixed formatting errors when generating PDF documentation
+
 ## 2.4.1
 
 - Bug fix - invalid SQL
