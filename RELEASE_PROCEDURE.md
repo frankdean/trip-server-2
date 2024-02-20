@@ -51,6 +51,7 @@
 		[PostgreSQL build](https://hub.docker.com/_/postgres).
 
 			$ cd ./trip-server-2
+			$ docker pull docker.io/library/postgres:15-bookworm
 			$ docker build -f Dockerfile-postgis -t fdean/trip-database:latest .
 
 	1.  Build the `trip-server-2` image:
@@ -58,6 +59,7 @@
 		*  Run the Docker build:
 
 				$ cd ./trip-server-2
+				$ docker pull docker.io/library/debian:bookworm-slim
 				$ docker build -t fdean/trip-server-2:latest .
 
 			The `--no-cache` option may be required if Docker uses a cached
