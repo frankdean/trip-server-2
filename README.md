@@ -305,6 +305,20 @@ admin user.
 		$ sudo make install
 		$ sudo ldconfig
 
+	On macOS, install the `ncurses` port from [MacPorts][].  The `./configure`
+    command will need to use the appropriate flags specifying the include
+    directory for the for `ncurses` headers, otherwise `term.h` from macOS
+    will be included first, producing errors similar to the following during
+    the build phase:
+
+			/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/term.h:728:1: error: a type specifier is required for all declarations
+			__OSX_AVAILABLE(14.0) __IOS_AVAILABLE(17.0) __WATCHOS_AVAILABLE(10.0)
+
+	Where MacPorts has been installed under the `/opt/local` prefix, the
+	`./configure` command should be:
+
+		$ ./configure CXX=/usr/bin/g++ CPPFLAGS=-I/opt/local/include
+
 2.  Include the `--enable-tui` option when running `configure` for
     trip-server, e.g.:
 
@@ -537,17 +551,31 @@ To build from a Git clone, install the following ports from [MacPorts][]:
 - cairomm (optinal)
 - cmark
 - gawk
-- gdal (optional)
+- gdal +postgresql15+proj9 (optional)
 - intltool
 - nlohmann-json
 - pkgconfig
 - postgresql13-server
 - postgis3 +postgresql13
+- pugixml
 - yaml-cpp
 
 **Note:** If `make distcheck` fails on macOS, install the `texinfo` and
 `texlive` packages from [MacPorts][], as the behaviour of the system installed
 `/usr/bin/texi2dvi` differs from the GNU version.
+
+With macOS Apple Silicon (arm64) it is necessary to specify the compiler
+command to use C++ 17 by adding `-std=gnu++17` to `CXX`.  Adding
+`-Wno-deprecated-builtins` also disables warnings compiling Boost libraries
+related to `__has_trivial_copy` being deprecated in clang. E.g.
+
+	./configure PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
+	CXX='/usr/bin/g++ -std=gnu++17 -Wno-deprecated-builtins'
+
+A specific version of Boost can be specified with the location of the boost
+installation, e.g.:
+
+	--with-boost=/opt/local/libexec/boost/1.81
 
 ### Dependencies
 
@@ -567,7 +595,7 @@ Download, build and install the latest 6.x release of libpqxx from
 <https://github.com/jtv/libpqxx/releases/tag/6.4.8>.
 
 `libpqxx` needs the `doxygen` and `xmlto` packages installed to build the
-refence documentation and tutorial.  Pass `--disable-documentation` to the
+reference documentation and tutorial.  Pass `--disable-documentation` to the
 `./configure` command if you wish to skip building the documentation.
 
 When running the `./configure` command to build this application, define the
@@ -578,9 +606,12 @@ compiler by defining the `CXX` environment variable when building both
 
 e.g.:
 
-	./configure \
+	$ export PATH="/opt/local/lib/postgresql15/bin:$PATH"
+	$ ./configure \
 	PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
 	CXX=/usr/bin/g++
+	$ make
+	$ sudo make install
 
 #### nlohmann/json
 
