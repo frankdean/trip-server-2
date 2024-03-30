@@ -548,7 +548,7 @@ To build from a Git clone, install the following ports from [MacPorts][]:
 - automake
 - autoconf-archive
 - boost
-- cairomm (optinal)
+- cairomm (optional)
 - cmark
 - gawk
 - gdal +postgresql15+proj9 (optional)
