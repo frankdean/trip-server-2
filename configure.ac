@@ -9,7 +9,7 @@ PROJ4JS_VERSION='2.9.2'
 OLC_VERSION='1.0.4'
 ZXCVBN_VERSION='4.4.2'
 AC_COPYRIGHT([Copyright (C) 2022-2023 Frank Dean])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign dist-xz subdir-objects info-in-builddir])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign dist-zip subdir-objects info-in-builddir])
 AC_CONFIG_SRCDIR([src/trip_request_factory.cpp])
 AC_CONFIG_HEADERS([config.h])
 
