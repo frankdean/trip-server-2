@@ -52,11 +52,13 @@ AC_ARG_ENABLE([tui],
 	[use_tui=no])
 
 # Checks for programs.
-AX_CXX_COMPILE_STDCXX(17)
+AC_LANG(C++)
+dnl Must set the compiler to use before AX_CXX_COMPILE_STDCXX_17
+#AC_PROG_CXX([clang++ g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC])
 AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX_17
 AC_PROG_INSTALL
 AC_PROG_LN_S
-AC_LANG(C++)
 AC_CHECK_PROGS([DOCBOOK2TEXI],[docbook2texi docbook2x-texi])
 AC_CHECK_PROGS([DOCBOOK2MAN],[docbook2man docbook2x-man])
 

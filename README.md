@@ -230,7 +230,7 @@ Generally the application is built and installed with:
 
 Add `CXXFLAGS='-g -O0'` to disable compiler optimisation.  E.g.
 
-	$ ./configure 'cxxflags=-g -o0'
+	$ ./configure 'CXXFLAGS=-g -O0'
 
 Optionally install the HTML and PDF documentation:
 
@@ -564,18 +564,24 @@ To build from a Git clone, install the following ports from [MacPorts][]:
 `texlive` packages from [MacPorts][], as the behaviour of the system installed
 `/usr/bin/texi2dvi` differs from the GNU version.
 
-With macOS Apple Silicon (arm64) it is necessary to specify the compiler
-command to use C++ 17 by adding `-std=gnu++17` to `CXX`.  Adding
-`-Wno-deprecated-builtins` also disables warnings compiling Boost libraries
-related to `__has_trivial_copy` being deprecated in clang. E.g.
+In recent macOS versions you may wish to define the `-Wno-deprecated-builtins`
+compiler flag to disable warnings in the Boost libraries related to
+`__has_trivial_copy` being deprecated in clang. E.g.
 
 	./configure PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
-	CXX='/usr/bin/g++ -std=gnu++17 -Wno-deprecated-builtins'
+	CXXFLAGS=-Wno-deprecated-builtins
+
+It is safest to build the application with the same compiler used to compile
+the libraries by setting the `CXX` variable.  Linking errors to the libraries
+is symptomatic of this issue.  E.g.
+
+	./configure PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
+	CXX=/usr/bin/g++
 
 A specific version of Boost can be specified with the location of the boost
-installation, e.g.:
+installation by specifying the `--with-boost` option to `configure`, e.g.:
 
-	--with-boost=/opt/local/libexec/boost/1.81
+	./configure --with-boost=/opt/local/libexec/boost/1.81
 
 ### Dependencies
 
@@ -599,10 +605,11 @@ reference documentation and tutorial.  Pass `--disable-documentation` to the
 `./configure` command if you wish to skip building the documentation.
 
 When running the `./configure` command to build this application, define the
-`PKG_CONFIG_PATH` to include where `libpqxx.pc` and d`libpq.pc` are installed.
-Also, if your default compiler is not `clang`, you should specify the `clang`
-compiler by defining the `CXX` environment variable when building both
-`libpqxx` and Trip.
+`PKG_CONFIG_PATH` to include where `libpqxx.pc` and `libpq.pc` are installed.
+Also, it is safest to build the all the libraries with the same compiler as
+the Trip application will be built with.  You may need to specify the compiler
+by defining the `CXX` environment variable when building both `libpqxx` and
+Trip.
 
 e.g.:
 
