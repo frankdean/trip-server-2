@@ -503,7 +503,7 @@ installed using `dnf`.
 ### FreeBSD
 
 Minimal packages required to build from the source distribution tarball, for
-Fedora version 36.
+FreeBSD version 13.2.
 
 - boost-all
 - cmark
