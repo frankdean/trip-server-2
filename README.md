@@ -458,7 +458,7 @@ information on using and running the application with Vagrant and [Qemu][].
 ### Fedora
 
 Minimal packages required to build from the source distribution tarball, for
-Fedora version 36.
+Fedora version 40.
 
 The application requires a version 6.x of [libpqxx][] installed, which is
 older than that in this version of Fedora.  See the 'libpqxx' section below
@@ -470,11 +470,12 @@ included in the Fedora distribution.  Follow the instructions in the
 `nlohmann/json` version 3.11.3.
 
 - gcc
+- gcc-c++
 - gawk
 - boost-devel
 - cairomm-devel (optional)
+- cmark
 - gdal-devel (optional)
-- libpqxx-devel
 - libpq-devel
 - yaml-cpp-devel
 - pugixml-devel
@@ -506,7 +507,7 @@ Minimal packages required to build from the source distribution tarball, for
 FreeBSD version 13.2.
 
 - boost-all
-- cmark
+- cmark-devel
 - gdal (optional)
 - yaml-cpp
 - postgresql13-client
