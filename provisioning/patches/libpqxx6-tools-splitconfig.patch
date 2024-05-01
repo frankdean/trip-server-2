@@ -1,0 +1,11 @@
+--- tools/splitconfig~	2021-12-15 07:59:41.000000000 +0000
++++ tools/splitconfig	2024-04-29 19:57:41.116510842 +0100
+@@ -131,7 +131,7 @@
+         statement, or None.
+     """
+     config_line = config_line.strip()
+-    match = re.match('\s*#\s*define\s+([^\s]+)', config_line)
++    match = re.match('\\s*#\\s*define\\s+([^\\s]+)', config_line)
+     if match is None:
+         return None
+     else:

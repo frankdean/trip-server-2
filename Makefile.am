@@ -22,11 +22,13 @@ EXTRA_DIST = m4/ChangeLog  .gitignore \
 	provisioning/nginx/index.html \
 	provisioning/nginx/sites-available/trip \
 	provisioning/nginx/trip.conf \
+	provisioning/patches/libpqxx6-tools-splitconfig.patch \
 	provisioning/schema/10_init-trip-db.sh \
 	provisioning/schema/10_trip_role.sql \
 	provisioning/schema/11_init-gis-db.sh \
 	provisioning/schema/20_schema.sql \
 	provisioning/schema/30_permissions.sql \
+	provisioning/schema/35_user_roles.sql \
 	provisioning/schema/40_path_colors.sql \
 	provisioning/schema/50_georef_formats.sql \
 	provisioning/schema/60_waypoint_symbols.sql \
