@@ -162,12 +162,12 @@ and can be obtained from
 
 @c [TripLogger]: https://www.fdsd.co.uk/triplogger/ "TripLogger Remote for iOS"
 @set triploggerurl https://www.fdsd.co.uk/triplogger/
-@c [GPSLogger]: http://code.mendhak.com/gpslogger/ "A battery efficient GPS logging application"
-@set gpsloggerurl http://code.mendhak.com/gpslogger/
+@c [GPSLogger]: https://gpslogger.app "A battery efficient GPS logging application"
+@set gpsloggerurl https://gpslogger.app
 @c [OpenStreetMap]: https://www.openstreetmap.org/
 @set osmurl https://www.openstreetmap.org/
-@c [gpx]: http://www.topografix.com/gpx.asp "The GPX Exchange Format"
-@set gpxurl http://www.topografix.com/gpx.asp
+@c [gpx]: https://www.topografix.com/gpx.asp "The GPX Exchange Format"
+@set gpxurl https://www.topografix.com/gpx.asp
 @c [Markdown]: https://daringfireball.net/projects/markdown/ "Markdown is a text-to-HTML conversion tool for web writers."
 @set markdownurl https://daringfireball.net/projects/markdown/
 

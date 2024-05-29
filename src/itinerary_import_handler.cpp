@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,16 +63,16 @@ long ItineraryImportHandler::duplicate_itinerary(
     ItineraryPgDao::itinerary_complete& itinerary,
     std::shared_ptr<ElevationService> elevation_service)
 {
-  if (itinerary.id.first) {
+  if (itinerary.id.has_value()) {
     // Text appended to an itinerary title when it is created as a copy of
     // another itinerary.  The first parameter is the original title with
     // the second parameter the original itinerary ID.
     std::ostringstream os;
     os << format(translate("{1}—Copy of {2}"))
       % itinerary.title
-      % itinerary.id.second;
+      % itinerary.id.value();
     itinerary.title = os.str();
-    itinerary.id.first = false;
+    itinerary.id = std::optional<long>();
   }
 
   ItineraryPgDao dao;

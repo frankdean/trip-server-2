@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -209,14 +209,14 @@ bool test_tracked_location_query_params_constructor_01()
     q.time_point == dt.time_tp() &&
     std::round((q.longitude - 2.294521) * 1e6) == 0 &&
     std::round((q.latitude - 48.858222) * 1e6) == 0 &&
-    q.altitude.first && std::round((q.altitude.second - 73.000001) * 1e6) == 0 &&
-    q.hdop.first && std::round((q.hdop.second - 15.8) * 10) == 0 &&
-    q.speed.first && std::round((q.speed.second - 3.2) * 10) == 0 &&
-    q.bearing.first && std::round((q.bearing.second - 359.56789) * 1e6) == 0 &&
-    q.satellite_count.first && q.satellite_count.second == 30 &&
-    q.provider.first && q.provider.second == "test" &&
-    q.battery.first && std::round((q.battery.second - 98.7) * 10) == 0 &&
-    q.note.first && q.note.second == "Test note";
+    q.altitude.has_value() && std::round((q.altitude.value() - 73.000001) * 1e6) == 0 &&
+    q.hdop.has_value() && std::round((q.hdop.value() - 15.8) * 10) == 0 &&
+    q.speed.has_value() && std::round((q.speed.value() - 3.2) * 10) == 0 &&
+    q.bearing.has_value() && std::round((q.bearing.value() - 359.56789) * 1e6) == 0 &&
+    q.satellite_count.has_value() && q.satellite_count.value() == 30 &&
+    q.provider.has_value() && q.provider.value() == "test" &&
+    q.battery.has_value() && std::round((q.battery.value() - 98.7) * 10) == 0 &&
+    q.note.has_value() && q.note.value() == "Test note";
   if (!retval) {
     std::cerr
       << "test_tracked_location_query_params_constructor_01() failed: "
@@ -229,23 +229,23 @@ bool test_tracked_location_query_params_constructor_01()
       std::cerr << "longitude\n";
     if (std::round((q.latitude - 48.858222) * 1e6) != 0)
       std::cerr << "latitude\n";
-    if (q.altitude.first && std::round((q.altitude.second - 73.000001) * 1e6) != 0)
-      std::cerr << "altitude.first && altitude.second\n";
-    if (q.hdop.first && std::round((q.hdop.second - 15.8) * 10) != 0)
-      std::cerr << "hdop.first && hdop.second\n";
-    if (q.speed.first && std::round((q.speed.second - 3.2) * 10) != 0)
-      std::cerr << "speed.first && speed.second\n";
-    if (q.bearing.first && std::round((q.bearing.second - 359.56789) * 1e6) != 0)
-      std::cerr << "bearing.first && bearing.second\n";
-    if (q.satellite_count.first && q.satellite_count.second != 30)
-      std::cerr << "satellite_count.first && q.satellitcount.second\n";
-    if (!q.provider.first || q.provider.second != "test")
+    if (q.altitude.has_value() && std::round((q.altitude.value() - 73.000001) * 1e6) != 0)
+      std::cerr << "altitude.has_value() && altitude.value()\n";
+    if (q.hdop.has_value() && std::round((q.hdop.value() - 15.8) * 10) != 0)
+      std::cerr << "hdop.has_value() && hdop.value()\n";
+    if (q.speed.has_value() && std::round((q.speed.value() - 3.2) * 10) != 0)
+      std::cerr << "speed.has_value() && speed.value()\n";
+    if (q.bearing.has_value() && std::round((q.bearing.value() - 359.56789) * 1e6) != 0)
+      std::cerr << "bearing.has_value() && bearing.value()\n";
+    if (q.satellite_count.has_value() && q.satellite_count.value() != 30)
+      std::cerr << "satellite_count.has_value() && q.satellitcount.value()\n";
+    if (!q.provider.has_value() || q.provider.value() != "test")
       std::cerr << "provider\n";
-    if (q.battery.first && std::round((q.battery.second - 98.7) * 10) != 0)
-      std::cerr << "battery.first && battery.second: "
+    if (q.battery.has_value() && std::round((q.battery.value() - 98.7) * 10) != 0)
+      std::cerr << "battery.has_value() && battery.value(): "
                 << std::fixed << std::setprecision(19)
-                << q.battery.second << '\n';
-    if (!q.note.first || q.note.second != "Test note")
+                << q.battery.value() << '\n';
+    if (!q.note.has_value() || q.note.value() != "Test note")
       std::cerr << "note\n";
   }
   return retval;

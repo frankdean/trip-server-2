@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ void ItineraryExportHandler::handle_authenticated_request(
   ItineraryPgDao dao;
   auto itinerary = dao.get_itinerary_complete(get_user_id(), itinerary_id);
 
-  if (!itinerary.first)
+  if (!itinerary.has_value())
     throw BadRequestException("Itinerary not found");
 
   // // Don't leak details of whom another user may also be sharing an itinerary
@@ -67,10 +67,10 @@ void ItineraryExportHandler::handle_authenticated_request(
   //     itinerary.second.shares.clear();
   // }
 
-  itinerary.second.routes = dao.get_routes(get_user_id(), itinerary_id);
-  itinerary.second.waypoints = dao.get_waypoints(get_user_id(), itinerary_id);
-  itinerary.second.tracks = dao.get_tracks(get_user_id(), itinerary_id);
-  auto node = ItineraryPgDao::itinerary_complete::encode(itinerary.second);
+  itinerary->routes = dao.get_routes(get_user_id(), itinerary_id);
+  itinerary->waypoints = dao.get_waypoints(get_user_id(), itinerary_id);
+  itinerary->tracks = dao.get_tracks(get_user_id(), itinerary_id);
+  auto node = ItineraryPgDao::itinerary_complete::encode(itinerary.value());
 
   // std::cout << node << '\n';
   response.content << node;

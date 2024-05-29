@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -80,9 +80,9 @@ void ItinerariesHandler::build_page(
         "      <tr>\n"
         "        <td>";
       const auto date = std::chrono::duration_cast<std::chrono::seconds>(
-          it.start.second.time_since_epoch()
+          it.start->time_since_epoch()
         ).count();
-      if (it.start.first) {
+      if (it.start.has_value()) {
         response.content
           << as::ftime("%a") << date << " "
           << as::date_medium << as::date << date
@@ -90,9 +90,9 @@ void ItinerariesHandler::build_page(
       }
       response.content
         << "</td>\n"
-        "        <td><a href=\"" << get_uri_prefix() << "/itinerary?id=" << it.id.second << "\">" << x(it.title) << "</a></td>\n"
-        "        <td>" << (it.owner_nickname.first ? x(it.owner_nickname.second) : "") << "</td>\n"
-        "        <td>" << (it.shared.first && it.shared.second ? "&check;" : "") << "</td>\n";
+        "        <td><a href=\"" << get_uri_prefix() << "/itinerary?id=" << it.id.value() << "\">" << x(it.title) << "</a></td>\n"
+        "        <td>" << (it.owner_nickname.has_value() ? x(it.owner_nickname.value()) : "") << "</td>\n"
+        "        <td>" << (it.shared.has_value() && it.shared.value() ? "&check;" : "") << "</td>\n";
     } // for
     response.content
       <<

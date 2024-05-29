@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,15 +48,14 @@ void TrackingRestHandler::live_map_update_check(
     TrackPgDao &dao)
 {
   // Query for multiple nicknames
-  std::pair<bool, long> max_hdop;
+  std::optional<long> max_hdop;
   try {
     json j = json::parse(request.content);
     // std::cout << j.dump(4) << '\n';
     if (j.contains("max_hdop")) {
       const auto j_max_hdop = j["max_hdop"];
       if (j_max_hdop.is_number()) {
-        max_hdop.second = j_max_hdop;
-        max_hdop.first = true;
+        max_hdop = j_max_hdop;
       }
     }
     DateTime since;
@@ -74,8 +73,7 @@ void TrackingRestHandler::live_map_update_check(
       if (element.contains("min_id_threshold")) {
         const auto j_min = element["min_id_threshold"];
         if (j_min.is_number()) {
-          c.min_threshold_id.second = j_min;
-          c.min_threshold_id.first = true;
+          c.min_threshold_id = j_min;
         }
       }
       criteria.push_back(c);
@@ -166,8 +164,8 @@ nlohmann::basic_json<nlohmann::ordered_map>
   // The last location can be used by the caller to request only updates more
   // recent than this last one.
   const TrackPgDao::tracked_location last_location = *(locations_result.locations.cend() -1);
-  long last_location_id = last_location.id.first ?
-    last_location.id.second : 0;
+  long last_location_id = last_location.id.has_value() ?
+    last_location.id.value() : 0;
 
   // Locations are ordered by time, not ID and are not necessarily received
   // and inserted into the database in time order.  Therefore last item may
@@ -177,8 +175,8 @@ nlohmann::basic_json<nlohmann::ordered_map>
         reverse_iterator i = locations_result.locations.rbegin();
       i != locations_result.locations.rend(); ++i) {
 
-    if (i->id.first)
-      last_location_id = std::max(last_location_id, i->id.second);
+    if (i->id.has_value())
+      last_location_id = std::max(last_location_id, i->id.value());
   }
   // std::cout << "Max ID: " << last_location_id << '\n';
 
@@ -196,14 +194,14 @@ nlohmann::basic_json<nlohmann::ordered_map>
     {"last_location_id", last_location_id},
     {"totalCount", locations_result.total_count},
     {"maxCount", max_result_count}};
-  if (geoUtils.get_max_height().first)
-    j.push_back({"maxHeight", std::round(geoUtils.get_max_height().second)});
-  if (geoUtils.get_min_height().first)
-    j.push_back({"minHeight", std::round(geoUtils.get_min_height().second)});
-  if (geoUtils.get_ascent().first)
-    j.push_back({"ascent", std::round(geoUtils.get_ascent().second)});
-  if (geoUtils.get_descent().first)
-    j.push_back({"descent", std::round(geoUtils.get_descent().second)});
+  if (geoUtils.get_max_height().has_value())
+    j.push_back({"maxHeight", std::round(geoUtils.get_max_height().value())});
+  if (geoUtils.get_min_height().has_value())
+    j.push_back({"minHeight", std::round(geoUtils.get_min_height().value())});
+  if (geoUtils.get_ascent().has_value())
+    j.push_back({"ascent", std::round(geoUtils.get_ascent().value())});
+  if (geoUtils.get_descent().has_value())
+    j.push_back({"descent", std::round(geoUtils.get_descent().value())});
 
   const TrackPgDao::tracked_location most_recent =
     locations_result.locations.back();
@@ -218,8 +216,8 @@ nlohmann::basic_json<nlohmann::ordered_map>
     },
     {"time", time.str()}
   };
-  if (most_recent.note.first && !most_recent.note.second.empty()) {
-    marker.push_back({"note", x(most_recent.note.second)});
+  if (most_recent.note.has_value() && !most_recent.note.value().empty()) {
+    marker.push_back({"note", x(most_recent.note.value())});
   }
   j.push_back({"most_recent", marker});
 

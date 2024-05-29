@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,13 +44,13 @@ void ItineraryPathNameEdit::build_form(std::ostream &os)
     "        <input type=\"hidden\" name=\"path_id\" value=\"" << path_id << "\">\n"
     // The label for the name field of a route or track
     "        <label for=\"input-name\">" << translate("Name") << "</label>\n"
-    "        <input id=\"input-name\" size=\"60\" name=\"name\" value=\"" << (name.first ? x(name.second) : "") << "\" autofocus>\n";
-  if (distance.first) {
+    "        <input id=\"input-name\" size=\"60\" name=\"name\" value=\"" << (name.has_value() ? x(name.value()) : "") << "\" autofocus>\n";
+  if (distance.has_value()) {
     os <<
       // Shows the total distance for a route or track in kilometers, when editing the name
-      "        <span>&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;km")) % distance.second
+      "        <span>&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;km")) % distance.value()
       // Shows the total distance for a route or track in miles, when editing the name
-       << "&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (distance.second / kms_per_mile) << "</span>\n";
+       << "&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (distance.value() / kms_per_mile) << "</span>\n";
   }
   os <<
     "      </div>\n"
@@ -62,7 +62,7 @@ void ItineraryPathNameEdit::build_form(std::ostream &os)
     "          <option value=\"\">-- not set --</option>\n";
   for (const auto &c : colors) {
     os << "          <option value=\"" << x(c.first) << "\"";
-    append_element_selected_flag(os, color_key.first && color_key.second == c.first);
+    append_element_selected_flag(os, color_key.has_value() && color_key.value() == c.first);
     os << ">" << x(c.second) << "</option>\n";
   }
   os <<
@@ -112,9 +112,9 @@ void ItineraryRouteNameEdit::load_path_data(
     const HTTPServerRequest &request, ItineraryPgDao &dao)
 {
   auto route = dao.get_route_summary(get_user_id(), itinerary_id, path_id);
-  if (!route.id.first)
+  if (!route.id.has_value())
     throw BadRequestException("Route ID not set");
-  path_id = route.id.second;
+  path_id = route.id.value();
   name = route.name;
   color_key = route.color_key;
   distance = route.distance;
@@ -131,15 +131,14 @@ void ItineraryRouteNameEdit::save_path(ItineraryPgDao &dao)
       route.calculate_statistics();
     }
     if (make_copy) {
-      route.id.first = false;
+      route.id = std::optional<long>();
       dao.create_route(get_user_id(), itinerary_id, route);
     } else {
       dao.save(get_user_id(), itinerary_id, route);
     }
   } else {
     ItineraryPgDao::route route;
-    route.id.first = true;
-    route.id.second = path_id;
+    route.id = path_id;
     route.name = name;
     route.color_key = color_key;
     dao.update_route_summary(get_user_id(), itinerary_id, route);
@@ -158,9 +157,9 @@ void ItineraryTrackNameEdit::load_path_data(
     const HTTPServerRequest &request, ItineraryPgDao &dao)
 {
   auto track = dao.get_track_summary(get_user_id(), itinerary_id, path_id);
-  if (!track.id.first)
+  if (!track.id.has_value())
     throw BadRequestException("Track ID not set");
-  path_id = track.id.second;
+  path_id = track.id.value();
   name = track.name;
   color_key = track.color_key;
   distance = track.distance;
@@ -169,8 +168,7 @@ void ItineraryTrackNameEdit::load_path_data(
 void ItineraryTrackNameEdit::save_path(ItineraryPgDao &dao)
 {
   ItineraryPgDao::track track;
-  track.id.first = true;
-  track.id.second = path_id;
+  track.id = path_id;
   track.name = name;
   track.color_key = color_key;
   dao.update_track_summary(get_user_id(), itinerary_id, track);
@@ -184,11 +182,13 @@ void ItineraryPathNameEdit::handle_authenticated_request(
   itinerary_id = std::stol(request.get_param("itinerary_id"));
   path_id = std::stol(request.get_param("path_id"));
   if (request.method == HTTPMethod::post) {
-    name.second = request.get_post_param("name");
-    dao_helper::trim(name.second);
-    name.first = !name.second.empty();
-    color_key.second = request.get_post_param("color_key");
-    color_key.first = !color_key.second.empty();
+    auto name_param = request.get_post_param("name");
+    dao_helper::trim(name_param);
+    if (!name_param.empty())
+      name = name_param;
+    auto color_key_param = request.get_post_param("color_key");
+    if (!color_key_param.empty())
+      color_key = color_key_param;
     make_copy = request.get_post_param("make_copy") == "on";
     reverse_route = request.get_post_param("reverse_route") == "on";
     const std::string action = request.get_param("action");

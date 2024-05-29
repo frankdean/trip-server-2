@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,7 +34,11 @@ namespace trip {
 
 class TripPgDao {
 protected:
+#ifdef HAVE_LIBPQXX7
+  std::shared_ptr<pqxx::connection> connection;
+#else
   std::shared_ptr<pqxx::lazyconnection> connection;
+#endif
   static std::shared_ptr<fdsd::utils::PgPoolManager> pool_manager;
   void create_table(pqxx::transaction_base &tx, std::string table_name,
                     std::string create_table_sql, bool overwrite);
@@ -42,14 +46,11 @@ public:
   TripPgDao();
   virtual ~TripPgDao();
 
-  /// Exception thrown when a user attempts to perform an unauthorised action,
+  /// Exception thrown when a user attempts to perform a forbidden action,
   /// e.g. access an itinerary they do not own.
-  class NotAuthorized : public web::BadRequestException {
+  class TripForbiddenException : public web::ForbiddenException {
   public:
-    NotAuthorized();
-    virtual const char* what() const throw() override {
-      return "User not authorized to perform the requested action";
-    }
+    TripForbiddenException();
   };
 
   static void set_pool_manager

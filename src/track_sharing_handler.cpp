@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -81,8 +81,8 @@ void TrackSharingHandler::build_form(
         "      <tr>\n"
         "        <td>" << x(share.nickname) << "</td>\n"
         "        <td>";
-      if (share.recent_minutes.first) {
-        period_dhm t(share.recent_minutes.second);
+      if (share.recent_minutes.has_value()) {
+        period_dhm t(share.recent_minutes.value());
         // Abbreviated expression for days, hours and minutes
         response.content << format(translate("{1}d {2}h {3}m"))
           % t.days % t.hours % t.minutes;
@@ -90,15 +90,15 @@ void TrackSharingHandler::build_form(
       response.content
         << "</td>\n"
         "        <td>";
-      if (share.max_minutes.first) {
-        period_dhm t(share.max_minutes.second);
+      if (share.max_minutes.has_value()) {
+        period_dhm t(share.max_minutes.value());
         // Abbreviated expression for days, hours and minutes
         response.content << format(translate("{1}d {2}h {3}m"))
           % t.days % t.hours % t.minutes;
       }
       response.content
         << "</td>\n"
-        "        <td>" << (share.active.first && share.active.second ? "&check;" : "") << "</td>\n"
+        "        <td>" << (share.active.has_value() && share.active.value() ? "&check;" : "") << "</td>\n"
         "        <td><input type=\"checkbox\" name=\"nickname[" << c << "]\" value=\"" << x(share.nickname) << "\"></td>\n"
         "      </tr>\n";
       c++;

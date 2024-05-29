@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include "tracking_pg_dao.hpp"
 #include "geo_utils.hpp"
 #include <chrono>
+#include <optional>
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
@@ -71,7 +72,7 @@ class ItineraryPgDao : public TripPgDao {
   static const std::string itinerary_share_report_query_body;
 public:
   struct path_base : public path_statistics {
-    std::pair<bool, long> id;
+    std::optional<long> id;
     path_base() :
       path_statistics(),
       id() {}
@@ -90,13 +91,13 @@ public:
       html_code() {}
   };
   struct path_summary : public path_base {
-    std::pair<bool, std::string> name;
+    std::optional<std::string> name;
     /// The color key for looking up the color details, e.g. 'DarkBlue'
-    std::pair<bool, std::string> color_key;
+    std::optional<std::string> color_key;
     /// The descriptive name of the color, e.g. 'Dark Blue'
-    std::pair<bool, std::string> color_description;
+    std::optional<std::string> color_description;
     /// The HTML code to render the color in HTML. e.g. 'navy'
-    std::pair<bool, std::string> html_code;
+    std::optional<std::string> html_code;
     path_summary() :
       path_base(),
       name(),
@@ -110,16 +111,16 @@ public:
     static bool decode(const YAML::Node& node, path_summary& rhs);
   };
   struct point_info : location {
-    std::pair<bool, double> bearing;
+    std::optional<double> bearing;
     point_info() : location(), bearing() {}
     point_info(location loc) : location(loc), bearing() {}
     void calculate_bearing(const point_info &previous);
   };
   struct route_point : public point_info {
-    std::pair<bool, std::string> name;
-    std::pair<bool, std::string> comment;
-    std::pair<bool, std::string> description;
-    std::pair<bool, std::string> symbol;
+    std::optional<std::string> name;
+    std::optional<std::string> comment;
+    std::optional<std::string> description;
+    std::optional<std::string> symbol;
     route_point() :
       point_info(),
       name(),
@@ -149,9 +150,9 @@ public:
     static bool decode(const YAML::Node& node, route& rhs);
   };
   struct track_point : public point_info {
-    std::pair<bool, std::chrono::system_clock::time_point> time;
-    std::pair<bool, float> hdop;
-    std::pair<bool, double> speed;
+    std::optional<std::chrono::system_clock::time_point> time;
+    std::optional<float> hdop;
+    std::optional<double> speed;
     track_point() : point_info(), time(), hdop(), speed() {}
     track_point(location loc) : point_info(loc), time(), hdop(), speed() {}
     track_point(const fdsd::trip::TrackPgDao::tracked_location &loc);
@@ -175,7 +176,7 @@ public:
     track(const route &r);
     void calculate_statistics();
     void calculate_speed_and_bearing_values();
-    std::pair<bool, double> calculate_maximum_speed() const;
+    std::optional<double> calculate_maximum_speed() const;
     static void calculate_statistics(std::vector<track> &tracks) {
       for (auto &track : tracks)
         track.calculate_statistics();
@@ -184,10 +185,10 @@ public:
     static bool decode(const YAML::Node& node, track& rhs);
   };
   struct waypoint_base {
-    std::pair<bool, std::string> name;
-    std::pair<bool, std::string> comment;
-    std::pair<bool, std::string> symbol;
-    std::pair<bool, std::string> type;
+    std::optional<std::string> name;
+    std::optional<std::string> comment;
+    std::optional<std::string> symbol;
+    std::optional<std::string> type;
     waypoint_base() :
       name(),
       comment(),
@@ -201,11 +202,11 @@ public:
     waypoint_summary() : waypoint_base(), id() {}
   };
   struct waypoint : public location, public waypoint_base {
-    std::pair<bool, std::chrono::system_clock::time_point> time;
-    std::pair<bool, std::string> description;
-    std::pair<bool, std::string> extended_attributes;
-    std::pair<bool, std::string> type;
-    std::pair<bool, long> avg_samples;
+    std::optional<std::chrono::system_clock::time_point> time;
+    std::optional<std::string> description;
+    std::optional<std::string> extended_attributes;
+    std::optional<std::string> type;
+    std::optional<long> avg_samples;
     waypoint() : location(),
                  waypoint_base(),
                  time(),
@@ -224,7 +225,7 @@ public:
     waypoint(TrackPgDao::tracked_location loc)
       : location(loc),
         waypoint_base(),
-        time(std::make_pair(true, loc.time_point)),
+        time(loc.time_point),
         description(),
         extended_attributes(),
         type(),
@@ -243,9 +244,9 @@ public:
                            waypoints() {}
   };
   struct itinerary_base {
-    std::pair<bool, long> id;
-    std::pair<bool, std::chrono::system_clock::time_point> start;
-    std::pair<bool, std::chrono::system_clock::time_point> finish;
+    std::optional<long> id;
+    std::optional<std::chrono::system_clock::time_point> start;
+    std::optional<std::chrono::system_clock::time_point> finish;
     std::string title;
     itinerary_base() : id(),
                        start(),
@@ -254,9 +255,9 @@ public:
     static bool decode(const YAML::Node& node, itinerary_base& rhs);
   };
   struct itinerary_summary : public itinerary_base {
-    std::pair<bool, std::string> owner_nickname;
+    std::optional<std::string> owner_nickname;
     /// true when shared to the current user by another user
-    std::pair<bool, bool> shared;
+    std::optional<bool> shared;
     itinerary_summary() : itinerary_base(),
                           owner_nickname(),
                           shared() {}
@@ -267,7 +268,7 @@ public:
     std::vector<std::string> nicknames;
   };
   struct itinerary_description : public itinerary_summary {
-    std::pair<bool, std::string> description;
+    std::optional<std::string> description;
     itinerary_description() : itinerary_summary(),
                               description() {}
     static YAML::Node encode(const itinerary_description& rhs);
@@ -276,7 +277,7 @@ public:
   struct itinerary_detail : public itinerary_description {
     /// Will be set and contain the current user when the itinerary belongs to
     /// another user
-    std::pair<bool, std::string> shared_to_nickname;
+    std::optional<std::string> shared_to_nickname;
     static YAML::Node encode(const itinerary_detail& rhs);
     static bool decode(const YAML::Node& node, itinerary_detail& rhs);
   };
@@ -296,7 +297,7 @@ public:
   struct itinerary_share {
     long shared_to_id;
     std::string nickname;
-    std::pair<bool, bool> active;
+    std::optional<bool> active;
     itinerary_share() : shared_to_id(),
                         nickname(),
                         active() {}
@@ -339,15 +340,15 @@ public:
       int limit);
   std::string get_itinerary_title(std::string user_id, long itinerary_id);
   /// Fetches basic detials of an itinerary excluding related child data
-  std::pair<bool, itinerary_description>
+  std::optional<itinerary_description>
       get_itinerary_description(
           std::string user_id, long itinerary_id);
   /// Fetches itinerary and itinerary shares including basic summary of routes,
   /// waypoints and tracks
-  std::pair<bool, ItineraryPgDao::itinerary>
+  std::optional<ItineraryPgDao::itinerary>
       get_itinerary_summary(
           std::string user_id, long itinerary_id);
-  std::pair<bool, ItineraryPgDao::itinerary_complete>
+  std::optional<ItineraryPgDao::itinerary_complete>
       get_itinerary_complete(
           std::string user_id, long itinerary_id);
   void delete_itinerary(
@@ -587,7 +588,7 @@ public:
       const std::vector<ItineraryPgDao::track> &tracks,
       const std::vector<ItineraryPgDao::waypoint> &waypoints);
 
-  static std::pair<bool, bounding_box> get_bounding_box(
+  static std::optional<bounding_box> get_bounding_box(
       const std::vector<ItineraryPgDao::track> &tracks,
       const std::vector<ItineraryPgDao::route> &routes,
       const std::vector<ItineraryPgDao::waypoint> &waypoints);
@@ -624,7 +625,7 @@ protected:
                                            std::string user_id,
                                            long itinerary_id);
   /// Fetches itinerary and itinerary shares
-  std::pair<bool, ItineraryPgDao::itinerary_detail>
+  std::optional<ItineraryPgDao::itinerary_detail>
       get_itinerary_details(pqxx::work &tx,
                             std::string user_id,
                             long itinerary_id);

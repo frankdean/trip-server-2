@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -109,19 +109,19 @@ void AdminUserManagementHandler::build_form(
       "          <th></th>\n"
       "        </tr>\n";
     for (const auto user : users) {
-      if (user.id.first) {
+      if (user.id.has_value()) {
         os <<
           "        <tr>\n"
-          "          <td><a href=\"" << get_uri_prefix() << "/edit-user?id=" << user.id.second << "\">" << x(user.nickname) << "</a></td>\n"
+          "          <td><a href=\"" << get_uri_prefix() << "/edit-user?id=" << user.id.value() << "\">" << x(user.nickname) << "</a></td>\n"
           "          <td>" << x(user.email) << "</td>\n"
           "          <td>" << x(user.firstname) << "</td>\n"
           "          <td>" << x(user.lastname) << "</td>\n"
           "          <td>";
-        if (user.uuid.first)
-          os << user.uuid.second;
+        if (user.uuid.has_value())
+          os << user.uuid.value();
         os << "</td>\n"
           "          <td>" << (user.is_admin == true ? "&#x2713;" : "") << "</td>\n"
-          "          <td><input type=\"checkbox\" name=\"user-id[" << user.id.second << "]\" value=\"" << user.id.second << "\"></td>\n"
+          "          <td><input type=\"checkbox\" name=\"user-id[" << user.id.value() << "]\" value=\"" << user.id.value() << "\"></td>\n"
           "        </tr>\n";
       }
     }
@@ -194,7 +194,7 @@ void AdminUserManagementHandler::handle_authenticated_request(
   if (!is_admin) {
     response.content.clear();
     response.content.str("");
-    response.status_code = HTTPStatus::unauthorized;
+    response.status_code = HTTPStatus::forbidden;
     create_full_html_page_for_standard_response(response);
     return;
   }

@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,10 +51,10 @@ void ItineraryEditHandler::build_form(
   response.content
     <<
     "              <form method=\"post\">\n";
-  if (itinerary_id.first) {
+  if (itinerary_id.has_value()) {
     response.content
       <<
-      "                <input type=\"hidden\" name=\"id\" value=\"" << itinerary_id.second << "\">\n";
+      "                <input type=\"hidden\" name=\"id\" value=\"" << itinerary_id.value() << "\">\n";
   }
   response.content
     <<
@@ -68,8 +68,8 @@ void ItineraryEditHandler::build_form(
     // Label for entering the start date for an itinerary
     "                    <label for=\"input-date-from\" class=\"form-label\">" << translate("Date from") << "</label>\n"
     "                    <input id=\"input-date-from\" class=\"form-control\" type=\"date\" name=\"from\" value=\"";
-  if (itinerary.start.first)
-    response.content << dao_helper::date_as_html_input_value(itinerary.start.second);
+  if (itinerary.start.has_value())
+    response.content << dao_helper::date_as_html_input_value(itinerary.start.value());
   response.content
     <<
     "\">\n"
@@ -78,8 +78,8 @@ void ItineraryEditHandler::build_form(
     // Label for entering the end date for an itinerary
     "                    <label for=\"input-date-to\" class=\"form-label\">" << translate("Date to") << "</label>\n"
     "                    <input id=\"input-date-to\" class=\"form-control\" type=\"date\" name=\"to\" value=\"";
-  if (itinerary.finish.first)
-    response.content << dao_helper::date_as_html_input_value(itinerary.finish.second);
+  if (itinerary.finish.has_value())
+    response.content << dao_helper::date_as_html_input_value(itinerary.finish.value());
   response.content
     <<
     "\">\n"
@@ -88,8 +88,8 @@ void ItineraryEditHandler::build_form(
     // Title for the itinerary description field when being edited
     "                    <label for=\"raw-textarea\" class=\"form-label\">" << translate("Description") << "</label>\n"
     "                    <textarea id=\"raw-textarea\" name=\"description\" class=\"raw-markdown\" rows=\"12\">";
-  if (itinerary.description.first)
-    response.content << itinerary.description.second;
+  if (itinerary.description.has_value())
+    response.content << itinerary.description.value();
   response.content
     <<
     "</textarea>\n"
@@ -135,7 +135,7 @@ void ItineraryEditHandler::do_preview_request(
   } else {
     // Title for the page when editing an existing itinerary
     set_page_title(translate("Itinerary Description&mdash;Edit"));
-    itinerary_id = std::make_pair(true, std::stol(id));
+    itinerary_id = std::stol(id);
   }
   // set_menu_item(unknown);
 }
@@ -152,19 +152,18 @@ void ItineraryEditHandler::handle_authenticated_request(
     ItineraryPgDao::itinerary_description itinerary;
     itinerary.id = itinerary_id;
     std::string s = request.get_post_param("from");
-    if ((itinerary.start.first = !s.empty())) {
+    if (!s.empty()) {
       DateTime start(s);
-      itinerary.start.second = start.time_tp();
+      itinerary.start = start.time_tp();
     }
     s = request.get_post_param("to");
-    itinerary.finish.first = !s.empty();
-    if (itinerary.finish.first) {
+    if (!s.empty()) {
       DateTime finish(s);
-      itinerary.finish.second = finish.time_tp();
+      itinerary.finish = finish.time_tp();
     }
     // Swap the dates if the start date is after the finish date
-    if (itinerary.start.first && itinerary.finish.first &&
-        itinerary.finish.second < itinerary.start.second) {
+    if (itinerary.start.has_value() && itinerary.finish.has_value() &&
+        itinerary.finish.value() < itinerary.start.value()) {
       const auto hold = itinerary.start;
       itinerary.start = itinerary.finish;
       itinerary.finish = hold;
@@ -173,22 +172,22 @@ void ItineraryEditHandler::handle_authenticated_request(
     dao_helper::trim(itinerary.title);
     no_title_error = itinerary.title.empty();
     s = request.get_post_param("description");
-    if ((itinerary.description.first = !s.empty())) {
-      itinerary.description.second = s;
+    if (!s.empty()) {
+      itinerary.description = s;
     }
     if (!no_title_error) {
       long id = dao.save(get_user_id(), itinerary);
       // Set the itinerary ID after creating a new one
-      if (!itinerary_id.first)
-        itinerary_id = std::make_pair(true, id);
+      if (!itinerary_id.has_value())
+        itinerary_id = id;
     } else {
       build_form(response, itinerary);
       return;
     }
   } else if (action == "delete") {
-    if (itinerary_id.first) {
+    if (itinerary_id.has_value()) {
       ItineraryPgDao dao;
-      dao.delete_itinerary(get_user_id(), itinerary_id.second);
+      dao.delete_itinerary(get_user_id(), itinerary_id.value());
       redirect(request, response,
                get_uri_prefix() + "/itineraries");
       return;
@@ -198,10 +197,10 @@ void ItineraryEditHandler::handle_authenticated_request(
   } else {
     if (!is_new) {
       ItineraryPgDao dao;
-      auto itinerary = dao.get_itinerary_description(get_user_id(), itinerary_id.second);
-      if (!itinerary.first)
+      auto itinerary = dao.get_itinerary_description(get_user_id(), itinerary_id.value());
+      if (!itinerary.has_value())
         throw BadRequestException("Itinerary ID not found");
-      build_form(response, itinerary.second);
+      build_form(response, itinerary.value());
       return;
     } else {
       ItineraryPgDao::itinerary_description itinerary;
@@ -209,9 +208,9 @@ void ItineraryEditHandler::handle_authenticated_request(
       return;
     }
   }
-  if (itinerary_id.first) {
+  if (itinerary_id.has_value()) {
     redirect(request, response,
-             get_uri_prefix() + "/itinerary?id=" + std::to_string(itinerary_id.second));
+             get_uri_prefix() + "/itinerary?id=" + std::to_string(itinerary_id.value()));
   } else {
     redirect(request, response,
              get_uri_prefix() + "/itineraries");

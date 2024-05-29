@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -101,38 +101,38 @@ void ItineraryHandler::append_heading_content(
     <<
     "            <div class=\"pt-3\">\n"
     "              <h1>" << x(itinerary.title) << "</h1>\n";
-  if (itinerary.shared_to_nickname.first) {
+  if (itinerary.shared_to_nickname.has_value()) {
     response.content
       <<
-      "            <p><span>Itinerary owner</span>: " << x(itinerary.owner_nickname.second) << "</p>\n";
+      "            <p><span>Itinerary owner</span>: " << x(itinerary.owner_nickname.value()) << "</p>\n";
   }
-  if (itinerary.start.first || itinerary.finish.first) {
+  if (itinerary.start.has_value() || itinerary.finish.has_value()) {
     response.content
       <<
       "              <div>\n"
       "                <hr>\n"
       "                <p>";
-    if (itinerary.start.first && !itinerary.finish.first) {
+    if (itinerary.start.has_value() && !itinerary.finish.has_value()) {
       response.content
         // Shows when an itineray with no end date starts
         << format(translate("From: {1,ftime='%a'} {1,date=medium}"))
         % std::chrono::duration_cast<std::chrono::seconds>(
-            itinerary.start.second.time_since_epoch()).count();
-    } else if (!itinerary.start.first && itinerary.finish.first) {
+            itinerary.start.value().time_since_epoch()).count();
+    } else if (!itinerary.start.has_value() && itinerary.finish.has_value()) {
       response.content
         // Shows when an itineray with no start date ends
         << format(translate("Until: {1,ftime='%a'} {1,date=medium}"))
         % std::chrono::duration_cast<std::chrono::seconds>(
-            itinerary.finish.second.time_since_epoch()).count();
+            itinerary.finish.value().time_since_epoch()).count();
     } else {
       // Shows when an itinerary starts and ends
       response.content
         << format(translate("Between: {1,ftime='%a'} {1,date=medium} "
                             "and {2,ftime='%a'} {2,date=medium}"))
         % std::chrono::duration_cast<std::chrono::seconds>(
-            itinerary.start.second.time_since_epoch()).count()
+            itinerary.start.value().time_since_epoch()).count()
         % std::chrono::duration_cast<std::chrono::seconds>(
-            itinerary.finish.second.time_since_epoch()).count();
+            itinerary.finish.value().time_since_epoch()).count();
     }
     response.content
       << as::posix << "</p>\n"
@@ -149,7 +149,7 @@ void ItineraryHandler::append_itinerary_content(
     <<
     "          <div id=\"itinerary-tab-content\">\n";
   append_heading_content(response, itinerary);
-  if (itinerary.description.first) {
+  if (itinerary.description.has_value()) {
     response.content
       <<
       "            <hr>\n";
@@ -158,12 +158,12 @@ void ItineraryHandler::append_itinerary_content(
         <<
         "            <div id=\"div-view-raw\">\n"
         "              <textarea id=\"raw-textarea\" class=\"raw-markdown\" rows=\"12\" readonly>\n"
-        << x(itinerary.description.second) <<
+        << x(itinerary.description.value()) <<
         "              </textarea>\n"
         "            </div>\n";
     } else {
-      char *p_html = cmark_markdown_to_html(itinerary.description.second.c_str(),
-                                            itinerary.description.second.length(),
+      char *p_html = cmark_markdown_to_html(itinerary.description.value().c_str(),
+                                            itinerary.description.value().length(),
                                             0);
       response.content << "            <div id=\"div-view-markdown\">\n" << p_html << "            </div>\n";
       free(p_html);
@@ -194,38 +194,38 @@ void ItineraryHandler::append_path(
     <<
     "                        <tr>\n"
     "                          <td>\n"
-    "                            <input id=\"input-" << path_type << "-" << path.id.second << "\" type=\"checkbox\" name=\"" << path_type << "[" << path.id.second << "]\">\n"
-    "                            <label for=\"input-" << path_type << "-" << path.id.second << "\">";
-  if (path.name.first) {
-    os << x(path.name.second);
+    "                            <input id=\"input-" << path_type << "-" << path.id.value() << "\" type=\"checkbox\" name=\"" << path_type << "[" << path.id.value() << "]\">\n"
+    "                            <label for=\"input-" << path_type << "-" << path.id.value() << "\">";
+  if (path.name.has_value() && !path.name.value().empty()) {
+    os << x(path.name.value());
   } else {
     // Database ID of an item, typically a route, track or waypoint
-    os << format(translate("ID:&nbsp;{1,number=left}")) % path.id.second;
+    os << format(translate("ID:&nbsp;{1,number=left}")) % path.id.value();
   }
   os
     <<
     "</label>\n"
     "                          </td>\n"
-    "                          <td>" << (path.color_description.first ? x(path.color_description.second) : "") << "</td>\n"
+    "                          <td>" << (path.color_description.has_value() ? x(path.color_description.value()) : "") << "</td>\n"
     "                          <td>";
-  if (path.distance.first) {
+  if (path.distance.has_value()) {
     os <<
       // Shows distance in kilometers
-      format(translate("{1,num=fixed,precision=2}&nbsp;km")) % path.distance.second;
+      format(translate("{1,num=fixed,precision=2}&nbsp;km")) % path.distance.value();
   }
   os
     <<
     "<td>\n"
     "                          <td>";
-  if (path.distance.first) {
+  if (path.distance.has_value()) {
     os <<
       // Shows distance in miles
-      format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (path.distance.second / kms_per_mile);
+      format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (path.distance.value() / kms_per_mile);
   }
   os << "<td>\n";
   if (estimate_time) {
-    const double distance =  path.distance.first ? path.distance.second : 0;
-    const double ascent = path.ascent.first ? path.ascent.second : 0;
+    const double distance =  path.distance.has_value() ? path.distance.value() : 0;
+    const double ascent = path.ascent.has_value() ? path.ascent.value() : 0;
     double estimated_hiking_time =
       calculate_scarfs_equivalence_kilometers(distance, ascent);
     os << "                          <td>";
@@ -240,9 +240,9 @@ void ItineraryHandler::append_path(
     os
       << "</td>\n";
   }
-  if (path.ascent.first || path.descent.first) {
-    const double ascent = path.ascent.first ? path.ascent.second : 0;
-    const double descent = path.descent.first ? path.descent.second : 0;
+  if (path.ascent.has_value() || path.descent.has_value()) {
+    const double ascent = path.ascent.has_value() ? path.ascent.value() : 0;
+    const double descent = path.descent.has_value() ? path.descent.value() : 0;
     os
       <<
       "                          <td>"
@@ -257,9 +257,9 @@ void ItineraryHandler::append_path(
   } else {
     os << "                          <td></td><td></td>\n";
   }
-  if (path.highest.first || path.lowest.first) {
-    const double highest = path.highest.first ? path.highest.second : 0;
-    const double lowest = path.lowest.first ? path.lowest.second : 0;
+  if (path.highest.has_value() || path.lowest.has_value()) {
+    const double highest = path.highest.has_value() ? path.highest.value() : 0;
+    const double lowest = path.lowest.has_value() ? path.lowest.value() : 0;
     os
       <<
       "                          <td>"
@@ -290,8 +290,8 @@ void ItineraryHandler::append_waypoint(
     "                        <td>\n"
     "                          <input id=\"input-waypoint-" << waypoint.id << "\" type=\"checkbox\" name=\"waypoint[" << waypoint.id << "]\">\n"
     "                          <label for=\"input-waypoint-" << waypoint.id << "\">";
-  if (waypoint.name.first) {
-    os << x(waypoint.name.second);
+  if (waypoint.name.has_value() && !waypoint.name.value().empty()) {
+    os << x(waypoint.name.value());
   } else {
     // Database ID or an item, typically a route, track or waypoint
     os << format(translate("ID:&nbsp;{1,number=left}")) % waypoint.id;
@@ -300,20 +300,20 @@ void ItineraryHandler::append_waypoint(
     "</label>\n"
     "                        </td>\n"
     "                        <td>";
-  if (waypoint.symbol.first) {
-    os << x(waypoint.symbol.second);
+  if (waypoint.symbol.has_value()) {
+    os << x(waypoint.symbol.value());
   }
   os <<
     "</td>\n"
     "                        <td>";
-  if (waypoint.comment.first) {
-    os << x(waypoint.comment.second);
+  if (waypoint.comment.has_value()) {
+    os << x(waypoint.comment.value());
   }
   os <<
     "</td>\n"
     "                        <td>";
-  if (waypoint.type.first) {
-    os << x(waypoint.type.second);
+  if (waypoint.type.has_value()) {
+    os << x(waypoint.type.value());
   }
   os <<
     "</td>\n"
@@ -599,8 +599,8 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       // Label for menu item to set a sequence of colors to the selected routes and tracks
       << translate("Assign colors to routes and tracks") << "</button></li> <!-- writable version -->\n";
 
-    if (location_history_paste_params.first ||
-        selected_features_paste_params.first) {
+    if (location_history_paste_params.has_value() ||
+        selected_features_paste_params.has_value()) {
 
       response.content
         <<
@@ -744,18 +744,18 @@ void ItineraryHandler::auto_color_paths(
                                  itinerary_id, selected_features);
 }
 
-std::pair<bool, TrackPgDao::location_search_query_params>
+std::optional<TrackPgDao::location_search_query_params>
     ItineraryHandler::get_location_history_paste_params()
 {
-  std::pair<bool, TrackPgDao::location_search_query_params> retval;
+  std::optional<TrackPgDao::location_search_query_params> retval;
   SessionPgDao session_dao;
   const std::string p =
     session_dao.get_value(get_session_id(), SessionPgDao::location_history_key);
   if (const bool key_exists = !p.empty()) {
     try {
       json j = json::parse(p);
-      retval.second = j.get<TrackPgDao::location_search_query_params>();
-      retval.first = key_exists;
+      if (key_exists)
+        retval = j.get<TrackPgDao::location_search_query_params>();
     } catch (const std::exception& e) {
       std::cerr << "Error parsing location history parameters from session: "
                 << e.what() << '\n';
@@ -766,18 +766,18 @@ std::pair<bool, TrackPgDao::location_search_query_params>
   return retval;
 }
 
-std::pair<bool, ItineraryHandler::paste_features>
+std::optional<ItineraryHandler::paste_features>
     ItineraryHandler::get_selected_features_paste_params()
 {
-  std::pair<bool, paste_features> retval;
+  std::optional<paste_features> retval;
   SessionPgDao session_dao;
   const std::string p =
     session_dao.get_value(get_session_id(), SessionPgDao::itinerary_features_key);
   if (const bool key_exists = !p.empty()) {
     try {
       json j = json::parse(p);
-      retval.second = j.get<ItineraryHandler::paste_features>();
-      retval.first = key_exists;
+      if (key_exists)
+        retval = j.get<ItineraryHandler::paste_features>();
     } catch (const std::exception& e) {
       std::cerr << "Error parsing itinerary features parameters from session: "
                 << e.what() << '\n';
@@ -791,12 +791,12 @@ std::pair<bool, ItineraryHandler::paste_features>
 void ItineraryHandler::paste_locations()
 {
   TrackPgDao track_dao(elevation_service);
-  location_history_paste_params.second.page_offset = 0;
+  location_history_paste_params.value().page_offset = 0;
   auto max_track_points = config->get_maximum_location_tracking_points();
-  location_history_paste_params.second.page_size = max_track_points;
+  location_history_paste_params.value().page_size = max_track_points;
   TrackPgDao::tracked_locations_result
     locations_result =
-    track_dao.get_tracked_locations(location_history_paste_params.second, max_track_points);
+    track_dao.get_tracked_locations(location_history_paste_params.value(), max_track_points);
   max_track_paste_exceeded =
     locations_result.total_count > max_track_points;
   std::vector<ItineraryPgDao::waypoint> waypoints;
@@ -804,7 +804,7 @@ void ItineraryHandler::paste_locations()
   for (const auto &location : locations_result.locations) {
     ItineraryPgDao::track_point point(location);
     points.push_back(point);
-    if (location.note.first && !location.note.second.empty()) {
+    if (location.note.has_value() && !location.note.value().empty()) {
       ItineraryPgDao::waypoint waypoint(location);
       waypoints.push_back(waypoint);
     }
@@ -823,25 +823,25 @@ void ItineraryHandler::paste_locations()
 void ItineraryHandler::paste_itinerary_features()
 {
   ItineraryPgDao::itinerary_features features;
-  if (!selected_features_paste_params.second.routes.empty()) {
+  if (!selected_features_paste_params.value().routes.empty()) {
     features.routes = itinerary_dao.get_routes(
         get_user_id(),
-        selected_features_paste_params.second.itinerary_id,
-        selected_features_paste_params.second.routes);
+        selected_features_paste_params.value().itinerary_id,
+        selected_features_paste_params.value().routes);
     for (auto &route : features.routes)
       route.calculate_statistics();
   }
-  if (!selected_features_paste_params.second.waypoints.empty()) {
+  if (!selected_features_paste_params.value().waypoints.empty()) {
     features.waypoints = itinerary_dao.get_waypoints(
         get_user_id(),
-        selected_features_paste_params.second.itinerary_id,
-        selected_features_paste_params.second.waypoints);
+        selected_features_paste_params.value().itinerary_id,
+        selected_features_paste_params.value().waypoints);
   }
-  if (!selected_features_paste_params.second.tracks.empty()) {
+  if (!selected_features_paste_params.value().tracks.empty()) {
     features.tracks = itinerary_dao.get_tracks(
         get_user_id(),
-        selected_features_paste_params.second.itinerary_id,
-        selected_features_paste_params.second.tracks);
+        selected_features_paste_params.value().itinerary_id,
+        selected_features_paste_params.value().tracks);
     for (auto &track : features.tracks)
       track.calculate_statistics();
   }
@@ -852,9 +852,9 @@ void ItineraryHandler::paste_itinerary_features()
 
 void ItineraryHandler::paste_items()
 {
-  if (location_history_paste_params.first)
+  if (location_history_paste_params.has_value())
     paste_locations();
-  if (selected_features_paste_params.first)
+  if (selected_features_paste_params.has_value())
     paste_itinerary_features();
 }
 
@@ -899,6 +899,7 @@ void ItineraryHandler::handle_authenticated_request(
     web::HTTPServerResponse& response)
 {
   const std::string action = request.get_param("action");
+  read_only = request.get_param("shared") == "true";
   // std::cout << "Action: \"" << action << "\"\n";
   // auto pp = request.get_post_params();
   // for (auto const &p : pp) {
@@ -925,14 +926,14 @@ void ItineraryHandler::handle_authenticated_request(
     session_dao.clear_copy_buffers(get_session_id());
     active_tab = features_tab;
     auto features = get_selected_feature_ids(request);
-    selected_features_paste_params.second =
-      paste_features(itinerary_id, features);
-    selected_features_paste_params.first =
-      !(selected_features_paste_params.second.routes.empty() &&
-        selected_features_paste_params.second.waypoints.empty() &&
-        selected_features_paste_params.second.tracks.empty());
-    if (selected_features_paste_params.first) {
-      json j = selected_features_paste_params.second;
+    auto pasted_features = paste_features(itinerary_id, features);
+    if (!(pasted_features.routes.empty() &&
+          pasted_features.waypoints.empty() &&
+          pasted_features.tracks.empty())) {
+      selected_features_paste_params = pasted_features;
+    }
+    if (selected_features_paste_params.has_value()) {
+      json j = selected_features_paste_params.value();
       session_dao.save_value(get_session_id(),
                              SessionPgDao::itinerary_features_key, j.dump());
       feature_copy_success = true;
@@ -943,10 +944,10 @@ void ItineraryHandler::handle_authenticated_request(
   } else if (action == "duplicate") {
     auto new_itinerary = itinerary_dao.get_itinerary_complete(get_user_id(),
                                                               itinerary_id);
-    if (new_itinerary.first) {
+    if (new_itinerary.has_value()) {
       const long new_itinerary_id =
         ItineraryImportHandler::duplicate_itinerary(get_user_id(),
-                                                    new_itinerary.second,
+                                                    new_itinerary.value(),
                                                     elevation_service);
       std::ostringstream url;
       url << get_uri_prefix() << "/itinerary?id=" << new_itinerary_id
@@ -956,7 +957,8 @@ void ItineraryHandler::handle_authenticated_request(
     }
   } else if (action == "attributes") {
     auto features = get_selected_feature_ids(request);
-    if (!features.routes.empty()) {
+    // When read-only, the attributes action is only valid for waypoints
+    if (!features.routes.empty() && !read_only) {
       long route_id = features.routes.front();
       std::ostringstream url;
       url << get_uri_prefix() << "/itinerary-route-name?itinerary_id=" << itinerary_id
@@ -970,7 +972,7 @@ void ItineraryHandler::handle_authenticated_request(
           << "&waypointId=" << waypoint_id;
       redirect(request, response, url.str());
       return;
-    } else if (!features.tracks.empty()) {
+    } else if (!features.tracks.empty() && !read_only) {
       long track_id = features.tracks.front();
       std::ostringstream url;
       url << get_uri_prefix() << "/itinerary-track-name?itinerary_id=" << itinerary_id
@@ -979,8 +981,6 @@ void ItineraryHandler::handle_authenticated_request(
       return;
     }
   } else if (action == "edit-path") {
-    const std::string shared = request.get_param("shared");
-    read_only = shared == "true";
     auto features = get_selected_feature_ids(request);
     if (!features.routes.empty()) {
       long route_id = features.routes.front();
@@ -1013,8 +1013,8 @@ void ItineraryHandler::handle_authenticated_request(
   }
   auto itinerary = itinerary_dao.get_itinerary_summary(get_user_id(),
                                                        itinerary_id);
-  if (!itinerary.first)
+  if (!itinerary.has_value())
     throw BadRequestException("Itinerary ID not found");
-  read_only = itinerary.second.shared_to_nickname.first;
-  build_form(response, itinerary.second);
+  read_only = itinerary.value().shared_to_nickname.has_value();
+  build_form(response, itinerary.value());
 }

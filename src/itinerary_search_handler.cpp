@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -100,7 +100,7 @@ void ItinerarySearchHandler::build_form(std::ostream &os)
     "      <div class=\"col-sm-8 col-lg-4\">\n"
     // Label for of the radius distance to perform an itinerary search with
     "        <label for=\"input-radius\">" << translate("Distance (kilometers)") << "</label>\n"
-    "        <input id=\"input-radius\" name=\"radius\" type=\"number\" step=\"0.001\" min=\"0.001\" max=\"" << ItinerarySearchResultsHandler::max_search_radius_kilometers << "\" required>\n"
+    "        <input id=\"input-radius\" name=\"radius\" type=\"number\" step=\"0.001\" min=\"0.001\" max=\"" << ItinerarySearchResultsHandler::max_search_radius_kilometers << "\" value=\"0.1\" required>\n"
     "      </div>\n"
     "      <div class=\"col-12\"><p id=\"position-text\"></p></div>\n"
     // Label of button to execute an itinerary search by distance radius

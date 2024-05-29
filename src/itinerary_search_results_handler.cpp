@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,6 +44,12 @@ void ItinerarySearchResultsHandler::build_form(
     <<
     "<div class=\"container-fluid\">\n";
   os << "  <h1>" << get_page_title() << "</h1>\n";
+  if (error_message.has_value()) {
+    os
+      << "  <div class=\"alert alert-danger\">\n"
+      << "    <p>" << x(error_message)
+      << "</p>\n  </div>\n";
+  }
   if (itineraries.empty()) {
     os
       <<
@@ -71,10 +77,10 @@ void ItinerarySearchResultsHandler::build_form(
         <<
         "      <tr>\n"
         "        <td>";
-      const auto date = std::chrono::duration_cast<std::chrono::seconds>(
-          it.start.second.time_since_epoch()
-        ).count();
-      if (it.start.first) {
+      if (it.start.has_value()) {
+        const auto date = std::chrono::duration_cast<std::chrono::seconds>(
+            it.start.value().time_since_epoch()
+          ).count();
         os
           << as::ftime("%a") << date << " "
           << as::date_medium << as::date << date
@@ -82,9 +88,9 @@ void ItinerarySearchResultsHandler::build_form(
       }
       os
         << "</td>\n"
-        "        <td><a href=\"" << get_uri_prefix() << "/itinerary?id=" << it.id.second << "\">" << x(it.title) << "</a></td>\n"
-        "        <td>" << (it.owner_nickname.first ? x(it.owner_nickname.second) : "") << "</td>\n"
-        "        <td>" << (it.shared.first && it.shared.second ? "&check;" : "") << "</td>\n";
+        "        <td><a href=\"" << get_uri_prefix() << "/itinerary?id=" << it.id.value() << "\">" << x(it.title) << "</a></td>\n"
+        "        <td>" << (it.owner_nickname.has_value() ? x(it.owner_nickname.value()) : "") << "</td>\n"
+        "        <td>" << (it.shared.has_value() && it.shared.value() ? "&check;" : "") << "</td>\n";
     } // for
     os
       <<
@@ -148,8 +154,12 @@ void ItinerarySearchResultsHandler::handle_authenticated_request(
                              j.dump());
     }
   }
-  longitude = std::stod(request.get_param("lng"));
-  latitude = std::stod(request.get_param("lat"));
+  try {
+    longitude = std::stod(request.get_param("lng"));
+    latitude = std::stod(request.get_param("lat"));
+  } catch (const std::invalid_argument &e) {
+    error_message = translate("Invalid position");
+  }
   radius = std::stod(request.get_param("radius"));
   if (radius > max_search_radius_kilometers)
     throw BadRequestException("Radius for itinerary search exceeds maximum");

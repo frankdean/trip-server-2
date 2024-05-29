@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,10 +61,10 @@ void ItinerarySharingReportHandler::build_form(
         <<
         "      <tr>\n"
         "        <td>";
-      const auto date = std::chrono::duration_cast<std::chrono::seconds>(
-          it.start.second.time_since_epoch()
-        ).count();
-      if (it.start.first) {
+      if (it.start.has_value()) {
+        const auto date = std::chrono::duration_cast<std::chrono::seconds>(
+            it.start.value().time_since_epoch()
+          ).count();
         os
           << as::ftime("%a") << date << " "
           << as::date_medium << as::date << date
@@ -72,7 +72,7 @@ void ItinerarySharingReportHandler::build_form(
       }
       os
         << "</td>\n"
-        "        <td><a href=\"" << get_uri_prefix() << "/itinerary-sharing?id=" << it.id.second << "&routing=itinerary-sharing-report&report-page=" << pagination.get_current_page() << "\">" << x(it.title) << "</a></td>\n"
+        "        <td><a href=\"" << get_uri_prefix() << "/itinerary-sharing?id=" << it.id.value() << "&routing=itinerary-sharing-report&report-page=" << pagination.get_current_page() << "\">" << x(it.title) << "</a></td>\n"
         "        <td>";
       for (const auto &nickname : it.nicknames) {
         os << nickname << ' ';

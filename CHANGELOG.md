@@ -2,6 +2,28 @@
 
 # Changelog
 
+## 2.5.0
+
+Refactored to run with [libpqxx][] version 7.x in addition to 6.x.  The
+`configure` script first looks for an installed version 7 before falling back
+to version 6.
+
+- Allow more general use of Vagrant provisioning scripts in other
+  environments, e.g. [Qemu][].  See the `bootstrap.sh` header for
+  brief instructions.
+- Update Vagrant scripts to use PostgreSQL 15 where available
+- Updated to use [OpenLayers][] 9.1.0, [Bootstrap][] 5.3.3 and [proj4js][]
+  2.11.0.
+- Fix fetching inactive shared tracks.
+- Only fetch active user shares when fetching nicknames for itinerary map.
+- Fix forbidden resources to be handled as forbidden instead of not authorized.
+- Fix read-only viewing of itinerary waypoint.
+- Handle invalid position/location when editing waypoints.
+- Fix previously input values lost from itinerary waypoint when invalid
+  position submitted.
+- Fix missing validation rules for latitude and longitude values of itinerary
+  waypoint.
+
 ## 2.4.2
 
 - Added a favicon
@@ -140,3 +162,9 @@ Improved slider control for simplifying paths making it appear more linear.
 ## 2.0.0
 
 - Initial Release
+
+[Bootstrap]: https://getbootstrap.com "Powerful, extensible, and feature-packed frontend toolkit"
+[OpenLayers]: https://openlayers.org "OpenLayers makes it easy to put a dynamic map in any web page"
+[Qemu]: https://www.qemu.org "A generic and open source machine emulator and virtualizer"
+[libpqxx]: https://pqxx.org/libpqxx/ "The official C++ client API for PostgreSQL"
+[proj4js]: https://github.com/proj4js/proj4js "JavaScript library to transform coordinates from one coordinate system to another, including datum transformations"

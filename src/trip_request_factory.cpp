@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -275,9 +275,9 @@ bool TripRequestFactory::is_application_prefix_uri(std::string uri) const
 bool TripRequestFactory::is_valid_session(std::string session_id,
                                           std::string user_id) const
 {
-  std::pair<bool, std::string> user =
+  std::optional<std::string> user =
     SessionManager::get_session_manager()->get_user_id_for_session(session_id);
-  bool retval = user.first && user.second == user_id;
+  bool retval = user.has_value() && user.value() == user_id;
   if (logger.is_level(Logger::debug))
     logger << Logger::debug
            << "The session for user ID \"" << user_id << "\" is "

@@ -15,10 +15,9 @@ passed to rescue services etc., to assist with locating the missing
 adventurer.
 
 Trip Server 2 is a port of [Trip Server v1][trip-server], written mostly in
-C++. Versions prior to v2.3.0 can be run alongside an existing Trip Server
-version 1.11.x installation, as these versions maintains database
-compatibility with version 1, by running an `--upgrade` option to upgrade a
-version 1 database to the current version.
+C++.
+
+[trip-server]: https://www.fdsd.co.uk/trip-server/ "TRIP - Trip Recording and Itinerary Planner v1"
 
 ### Features
 
@@ -60,6 +59,12 @@ The following features have been implemented:
 
 * Administration &ndash; tile usage report.
 
+[GPSLogger]: https://gpslogger.app "A battery efficient GPS logging application"
+[Markdown]: https://daringfireball.net/projects/markdown/ "A text-to-HTML conversion tool for web writers"
+[OpenStreetMap]: https://www.openstreetmap.org "OpenStreetMap"
+[TripLogger]: https://www.fdsd.co.uk/triplogger/ "TripLogger Remote for iOS"
+[gpx]: https://www.topografix.com/gpx.asp "The GPX Exchange Format"
+
 ## Documentation
 
 This document describes building the application.  Once built and installed,
@@ -87,15 +92,21 @@ The source is maintained in a [Git][] repository which can be cloned with:
 	$ cd ./trip-server-2/trip-server-common
 	$ git submodule update --init --recursive
 
+[Git]: https://git-scm.com "a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency"
+
 ## Demo Options
 
-### Docker
+### Docker/Podman
 
-You can use [Docker][] to run the application, using `docker compose`.
+You can use either [Docker][] or [Podman][] to run the application, using
+compose scripts.
 
 - `docker-compose.yml` runs the application without a tile server.
 - `docker-compose-map-demo.yml` runs the application with a tile server
   containing map data for Luxembourg.
+
+[Docker]: https://www.docker.com "Accelerate how you build, share and run applications"
+[Podman]: https://podman.io "The best free & open source container tools"
 
 1.  Navigate to a directory containing one of those docker compose files.
 
@@ -119,7 +130,14 @@ You can use [Docker][] to run the application, using `docker compose`.
     with Docker' section.  Refer to the [user guide][trip user guide] and
     [application manual][trip application manual] for more information.
 
-5.  Stop the containers with:
+5.  Login using one of the following users and credentials:
+
+	- user@trip.test  rasHuthlutcew7
+	- admin@trip.test 7TwilfOrucFeug
+
+6.  Select `Help` from the menu to view the user guide.
+
+7.  Stop the containers with:
 
         $ docker compose -f docker-compose-map-demo.yml down
 
@@ -220,7 +238,8 @@ You can use [Docker][] to run the application, using `docker compose`.
 These instructions are for building and installing from the source
 distribution tarball, which contains additional artefacts to those maintained
 under Git source control.  Building from a cloned Git repository requires
-additional packages to be installed as described below.
+additional packages to be installed as described in the next sub-sections,
+'Additional Resources'.
 
 Generally the application is built and installed with:
 
@@ -244,20 +263,52 @@ section in the `trip-server` info manual.
 
 See the `PostgreSQL Database Configuration` section in the instructions for
 [TripServer v1][trip-server] to install [PostgreSQL][] and create the database.
-Upgrade the database to support Trip Server v2 by running:
+Upgrade the database to support the latest version of Trip Server v2 by running:
 
 	$ trip-server --upgrade
+
+[PostgreSQL]: https://www.postgresql.org "A powerful, open source object-relational database system"
 
 The upgrade option is re-runable.  If the `pgcrypto` extension has already
 been created, a warning is issued but can be ignored.
 
-More detailed instructions for building on different platforms are in
-the following sections.
+You may need to add arguments to the `./configure` command.  Run `./configure
+--help` to see available options.  E.g. on a Raspberry Pi running Debian 10
+(Buster) or Debian 11 (Bullseye), the following is required to successfully
+link against the Boost Locale library:
+
+	$ ./configure --with-boost-locale=boost_locale
+
+If you are developing the application and need to add flags to the `make
+distcheck` command, set them in the `DISTCHECK_CONFIGURE_FLAGS` variable.  You
+can also pass flags to `make` with the `MAKEFLAGS` variable, e.g.
+
+	$ PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
+	MAKEFLAGS='-j 4' \
+	DISTCHECK_CONFIGURE_FLAGS='--with-boost-locale=boost_locale' \
+	make distcheck
+
+See <http://www.randspringer.de/boost/ucl-sbs.html> for help with the Boost
+library arguments.
+
+GDAL is only required for extracting elevation data from elevation tile
+datasets.  If you don't need this feature, disable GDAL.
+
+	$ ./configure --disable-gdal
+
+Cairo is only used to create dummy map tiles which may be useful in a
+development environment where you do not wish to use a map tile server.
+Enable it with:
+
+	$ ./configure --enable-cairo
+
+There are separate sections below with more information for building for
+'Debian', 'Fedora', 'FreeBSD' and 'macOS'.
 
 ### Additional Resources
 
 The following resources are included in the [tarball distributions of this
-application](http://www.fdsd.co.uk/trip-server-2/) and will need to be
+application][trip-server-2] and will need to be
 separately installed under `./resources/static/` when building from a git
 clone of the repository.  See `./Makefile.am` for details of their expected
 locations.
@@ -271,6 +322,7 @@ locations.
 [open-location-code]: https://github.com/google/open-location-code "a library to generate short codes, called “plus codes”, that can be used as digital addresses where street addresses don't exist"
 [OpenLayers]: https://openlayers.org "OpenLayers makes it easy to put a dynamic map in any web page"
 [proj4js]: https://github.com/proj4js/proj4js "JavaScript library to transform coordinates from one coordinate system to another, including datum transformations"
+[trip-server-2]: https://www.fdsd.co.uk/trip-server-2/ "TRIP - Trip Recording and Itinerary Planner v2"
 [zxcvbn]: https://github.com/dropbox/zxcvbn "Low-Budget Password Strength Estimation"
 
 ### Optional Text-based User Interface (TUI)
@@ -283,7 +335,7 @@ admin user.
     building Final Cut for [Linux][], to enable mouse support you need to also
     install the `gpm` library.  If you need to install additional libraries to
     fix a failed build, re-run Final Cut's `configure` script so that it
-    re-configures the build to use the libraries.
+    re-configures the build to use those libraries.
 
 	On Debian 11 (Bullseye), install the following packages:
 
@@ -299,7 +351,7 @@ admin user.
 		https://github.com/gansm/finalcut/archive/refs/tags/0.9.0.tar.gz
 		$ tar -xf finalcut-0.9.0.tar.gz
 		$ cd finalcut-0.9.0
-		$ autoreconf -i
+		$ autoreconf --install
 		$ ./configure
 		$ make
 		$ sudo make install
@@ -318,6 +370,9 @@ admin user.
 	`./configure` command should be:
 
 		$ ./configure CXX=/usr/bin/g++ CPPFLAGS=-I/opt/local/include
+
+[Linux]: https://www.kernel.org/
+[MacPorts]: https://www.macports.org "MacPorts Home Page"
 
 2.  Include the `--enable-tui` option when running `configure` for
     trip-server, e.g.:
@@ -365,40 +420,10 @@ To build the application:
 	$ ./configure
 	$ make
 
-You may need to add arguments to the `./configure` command.  Run `./configure
---help` to see available options.  E.g. on a Raspberry Pi running Debian 10
-(Buster) or Debian 11 (Bullseye), the following is required to successfully
-link against the Boost Locale library:
-
-	$ ./configure --with-boost-locale=boost_locale
-
-If you are developing the application and need to add flags to the
-`make distcheck` command, set them in the `DISTCHECK_CONFIGURE_FLAGS`
-variable, e.g.
-
-	$ DISTCHECK_CONFIGURE_FLAGS='--with-boost-locale=boost_locale' make distcheck
-
-See <http://www.randspringer.de/boost/ucl-sbs.html> for help with the Boost
-library arguments.
-
-GDAL is only required for extracting elevation data from elevation tile
-datasets.  If you don't need this feature, disable GDAL.
-
-	$ ./configure --disable-gdal
-
-Cairo is only used to create dummy map tiles which may be useful in a
-development environment where you do not wish to use a map tile server.
-Enable it with:
-
-	$ ./configure --enable-cairo
-
-The version of [nlohmann-json] in Debian 10 (Buster) is too old for this
+The version of [nlohmann-json][] in Debian 10 (Buster) is too old for this
 application.  Uninstall the package and download version `v3.11.2` or later of
-`json.hpp` from <https://github.com/nlohmann/json/releases> and manually
-install it under `/usr/local/include`
-
-	$ sudo mkdir /usr/local/include/nlohmann
-	$ sudo cp ~/Downloads/json.hpp /usr/local/include/nlohmann/
+`json.hpp` as described in the 'nlohmann/json' sub-section of the
+'Dependencies' section below.
 
 Building with GCC on ARM devices (e.g. Raspberry Pi) produces warnings about
 an ABI change in GCC 7.1.
@@ -421,8 +446,7 @@ Install:
 
 The build requires resources from the [Bootstrap][] and [OpenLayers][]
 distributions.  These are included in the
-[distribution tarballs of this
-application](http://www.fdsd.co.uk/trip-server-2/)
+[distribution tarballs of this application][trip-server-2]
 or can be downloaded from the respective websites.  (In this case, view the
 contents of `./Makefile.am` to determine the required versions and directory
 structure for the build.)
@@ -439,7 +463,7 @@ To re-create the required Gnu autotools files:
 
 	$ aclocal
 	$ autoheader
-	$ autoreconf -i
+	$ autoreconf --install
 	$ automake --add-missing --copy
 
 Optionally install the `uuid-runtime` package which runs a daemon that
@@ -453,21 +477,21 @@ For further ideas on configuring your environment, see the scripts and files
 under the `./provisioning` directory, which can be used to create a
 development environment using [Vagrant][]. See the `Testing and Developing
 Trip` section of the application manual (`info trip-server`) for more
-information on using and running the application with Vagrant and [Qemu][].
+information on using and running the application with both Vagrant and
+[Qemu][].
+
+[Qemu]: https://www.qemu.org "A generic and open source machine emulator and virtualizer"
+[Vagrant]: https://www.vagrantup.com "Development Environments Made Easy"
 
 ### Fedora
 
 Minimal packages required to build from the source distribution tarball, for
 Fedora version 40.
 
-The application requires a version 6.x of [libpqxx][] installed, which is
-older than that in this version of Fedora.  See the 'libpqxx' section below
-for instructions on installing `libpqxx`.
-
-The application also requires the `nlohmann/json` package, which is not
-included in the Fedora distribution.  Follow the instructions in the
-'nlohmann/json' section below to install it.  Tested on Fedora with
-`nlohmann/json` version 3.11.3.
+The application requires the `nlohmann/json` package, which is not included in
+the Fedora distribution.  Follow the instructions in the 'nlohmann/json'
+section below to install it.  Tested on Fedora with `nlohmann/json` version
+3.11.3.
 
 - gcc
 - gcc-c++
@@ -477,6 +501,7 @@ included in the Fedora distribution.  Follow the instructions in the
 - cmark
 - gdal-devel (optional)
 - libpq-devel
+- libpqxx-devel
 - yaml-cpp-devel
 - pugixml-devel
 - libuuid-devel
@@ -504,20 +529,17 @@ installed using `dnf`.
 ### FreeBSD
 
 Minimal packages required to build from the source distribution tarball, for
-FreeBSD version 13.2.
+FreeBSD version 14.
 
 - boost-all
 - cmark-devel
 - gdal (optional)
 - yaml-cpp
-- postgresql13-client
+- postgresql15-client
+- postgresql-libpqxx
 - pugixml
 - e2fsprogs-libuuid
 - nlohmann-json
-
-The application requires a version 6.x of [libpqxx][] installed, which is
-older than that in this version of FreeBSD.  See the 'libpqxx' section below
-for instructions on installing `libpqxx`.
 
 GDAL is only required for extracting elevation data from elevation tile
 datasets.  If you don't need this feature, disable GDAL.
@@ -538,11 +560,6 @@ installed using `pkg`.
 
 ### macOS
 
-The application requires a version 6.x of [libpqxx][] installed, which is
-older than that in [MacPorts][].  See the 'libpqxx' section below for
-instructions on installing `libpqxx`.  Tested on macOS with `libpqxx` version
-6.4.8.
-
 To build from a Git clone, install the following ports from [MacPorts][]:
 
 - autoconf
@@ -554,10 +571,11 @@ To build from a Git clone, install the following ports from [MacPorts][]:
 - gawk
 - gdal +postgresql15+proj9 (optional)
 - intltool
+- libpqxx
 - nlohmann-json
 - pkgconfig
 - postgresql13-server
-- postgis3 +postgresql13
+- postgis3 +postgresql15+proj9
 - pugixml
 - yaml-cpp
 
@@ -589,17 +607,12 @@ installation by specifying the `--with-boost` option to `configure`, e.g.:
 This section describes how to manually download and installed required
 dependencies, should they not be available as a package.
 
-#### GDAL
-
-GDAL is only required for extracting elevation data from elevation tile
-datasets.  If you don't need this feature, disable GDAL.
-
-	$ ./configure --disable-gdal
-
 #### libpqxx
 
-Download, build and install the latest 6.x release of libpqxx from
-<https://github.com/jtv/libpqxx/releases/tag/6.4.8>.
+Download, build and install the latest 6.x or 7.x release of [libpqxx][] from
+<https://github.com/jtv/libpqxx/releases/>.
+
+[libpqxx]: https://pqxx.org/libpqxx/ "The official C++ client API for PostgreSQL"
 
 `libpqxx` needs the `doxygen` and `xmlto` packages installed to build the
 reference documentation and tutorial.  Pass `--disable-documentation` to the
@@ -633,18 +646,3 @@ Download the appropriate version of `json.hpp` from
 ## Changelog
 
 See [CHANGELOG](./CHANGELOG.md)
-
-[GPSLogger]: http://code.mendhak.com/gpslogger/ "A battery efficient GPS logging application"
-[Git]: http://git-scm.com/ "a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency"
-[libpqxx]: http://pqxx.org/ "The official C++ client API for PostgreSQL"
-[Linux]: https://www.kernel.org/
-[MacPorts]: http://www.macports.org/ "MacPorts Home Page"
-[Markdown]: http://daringfireball.net/projects/markdown/ "A text-to-HTML conversion tool for web writers"
-[OpenStreetMap]: http://www.openstreetmap.org/ "OpenStreetMap"
-[PostgreSQL]: https://www.postgresql.org "A powerful, open source object-relational database system"
-[Qemu]: https://www.qemu.org "A generic and open source machine emulator and virtualizer"
-[TripLogger]: https://www.fdsd.co.uk/triplogger/ "TripLogger Remote for iOS"
-[Vagrant]: https://www.vagrantup.com "Development Environments Made Easy"
-[Docker]: https://www.docker.com
-[gpx]: http://www.topografix.com/gpx.asp "The GPX Exchange Format"
-[trip-server]: https://www.fdsd.co.uk/trip-server/ "TRIP - Trip Recording and Itinerary Planner"

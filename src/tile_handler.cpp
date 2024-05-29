@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -215,8 +215,8 @@ TilePgDao::tile_result TileHandler::find_tile(int provider_index,
   if (provider.cache == true) {
     TilePgDao dao;
     const auto tile_result = dao.get_tile(provider_index, z, x, y);
-    if (tile_result.first) {
-      DateTime dt(tile_result.second.expires);
+    if (tile_result.has_value()) {
+      DateTime dt(tile_result.value().expires);
       // std::cout << "Read tile from cache.  Expires: " << dt << '\n';
       // Treat as not expired when max_age is greater than zero and this tile
       // is still within that period
@@ -228,14 +228,14 @@ TilePgDao::tile_result TileHandler::find_tile(int provider_index,
         :
         std::chrono::system_clock::now();
 
-      if (tile_result.second.expires < keep_tiles_until) {
+      if (tile_result.value().expires < keep_tiles_until) {
         try {
           return fetch_remote_tile(provider_index, z, x, y);
         } catch (const tile_not_found_exception& ex) {
-          return tile_result.second;
+          return tile_result.value();
         }
       } else {
-        return tile_result.second;
+        return tile_result.value();
       }
     }
   }

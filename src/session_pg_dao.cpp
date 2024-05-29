@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -413,9 +413,9 @@ SessionPgDao::tile_report
     auto summary = tx.exec_params1(
         "SELECT time, count FROM tile_metric ORDER BY time DESC LIMIT 1");
     std::string date_str;
-    report.time.first = summary["time"].to(date_str);
-    report.time.second = dao_helper::convert_libpq_date_tz(date_str);
-    report.total.first = summary["count"].to(report.total.second);
+    summary["time"].to(date_str);
+    report.time = dao_helper::convert_libpq_date_tz(date_str);
+    report.total = summary["count"].as<long>();
     auto result = tx.exec_params(
         "SELECT year, month, max(count) AS cumulative_total FROM ("
         "SELECT time, extract(year from time) AS year, "
@@ -530,11 +530,11 @@ std::vector<SessionPgDao::user> SessionPgDao::search_users_by_nickname(
     std::vector<user> users;
     for (const auto r : result) {
       user u;
-      u.id.first = r["id"].to(u.id.second);
+      u.id = r["id"].as<long>();
       r["firstname"].to(u.firstname);
       r["lastname"].to(u.lastname);
       r["email"].to(u.email);
-      u.uuid.first = r["uuid"].to(u.uuid.second);
+      r["uuid"].to(u.uuid);
       r["nickname"].to(u.nickname);
       r["admin"].to(u.is_admin);
       users.push_back(u);
@@ -567,11 +567,12 @@ SessionPgDao::user SessionPgDao::get_user_details_by_user_id(
         sql,
         user_id);
     user u;
-    u.id.first = r["id"].to(u.id.second);
+    u.id = r["id"].as<long>();
     r["firstname"].to(u.firstname);
     r["lastname"].to(u.lastname);
     r["email"].to(u.email);
-    u.uuid.first = r["uuid"].to(u.uuid.second);
+    if (!r["uuid"].is_null())
+      r["uuid"].to(u.uuid);
     r["nickname"].to(u.nickname);
     r["admin"].to(u.is_admin);
     tx.commit();
@@ -588,21 +589,21 @@ long SessionPgDao::save(const SessionPgDao::user &user_details)
   try {
     work tx(*connection);
     long id;
-    if (user_details.id.first) {
-      id = user_details.id.second;
-      if (user_details.password.first) {
+    if (user_details.id.has_value()) {
+      id = user_details.id.value();
+      if (user_details.password.has_value()) {
         tx.exec_params(
             "UPDATE usertable "
             "SET firstname=$2, lastname=$3, email=$4, "
             "nickname=$5, "
             "password=crypt($6, gen_salt('bf')) "
             "WHERE id=$1",
-            user_details.id.second,
+            user_details.id,
             user_details.firstname,
             user_details.lastname,
             user_details.email,
             user_details.nickname,
-            user_details.password.first ? &user_details.password.second : nullptr
+            user_details.password
           );
       } else {
         tx.exec_params(
@@ -610,7 +611,7 @@ long SessionPgDao::save(const SessionPgDao::user &user_details)
             "SET firstname=$2, lastname=$3, email=$4, "
             "nickname=$5 "
             "WHERE id=$1",
-            user_details.id.second,
+            user_details.id,
             user_details.firstname,
             user_details.lastname,
             user_details.email,
@@ -625,8 +626,8 @@ long SessionPgDao::save(const SessionPgDao::user &user_details)
           user_details.firstname,
           user_details.lastname,
           user_details.email,
-          user_details.uuid.first ? &user_details.uuid.second : nullptr,
-          user_details.password.first ? &user_details.password.second : nullptr,
+          user_details.uuid,
+          user_details.password,
           user_details.nickname);
       r["id"].to(id);
     }

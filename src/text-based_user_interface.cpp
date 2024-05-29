@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -147,14 +147,13 @@ void TripMenu::add_user_option()
   user_edit_dialog.show();
   if (!user_edit_dialog.is_cancelled()) {
     SessionPgDao::user user;
-    user.uuid = std::make_pair(true, utils::UUID::generate_uuid());
+    user.uuid = utils::UUID::generate_uuid();
     user.is_admin = true;
     user.email = user_edit_dialog.get_email();
     user.firstname = user_edit_dialog.get_firstname();
     user.lastname = user_edit_dialog.get_lastname();
     user.nickname = user_edit_dialog.get_nickname();
-    user.password.first = true;
-    user.password.second = user_edit_dialog.get_password();
+    user.password = user_edit_dialog.get_password();
     user.is_admin = user_edit_dialog.is_admin();
     try  {
       SessionPgDao dao;

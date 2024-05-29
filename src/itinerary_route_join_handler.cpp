@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,16 +57,15 @@ void ItineraryRouteJoinHandler::join_paths(ItineraryPgDao &dao,
   // for joining
   std::map<long, ItineraryPgDao::route> temp_map;
   for (const auto &r : routes)
-    if (r.id.first)
-      temp_map[r.id.second] = r;
+    if (r.id.has_value())
+      temp_map[r.id.value()] = r;
   std::vector<ItineraryPgDao::route> ordered_routes;
   for (const auto &p : posted_paths_map)
     ordered_routes.push_back(temp_map.at(std::stol(p.second)));
 
   ItineraryPgDao::route joined_route;
-  if (!joined_path_name.empty()) {
-    joined_route.name.first = true;
-    joined_route.name.second = joined_path_name;
+  if (joined_path_name) {
+    joined_route.name = joined_path_name;
   }
   joined_route.color_key = joined_path_color_key;
 

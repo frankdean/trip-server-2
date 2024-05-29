@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,9 +69,9 @@ TripPgDao::~TripPgDao()
   TripPgDao::pool_manager->free_connection(connection);
 }
 
-// Error message displayed when a user attempts an operation they are not authorized for
-TripPgDao::NotAuthorized::NotAuthorized()
-  : BadRequestException(translate("User is not authorized for the requested operation"))
+// Error message displayed when a user attempts a forbidden operation
+TripPgDao::TripForbiddenException::TripForbiddenException()
+  : ForbiddenException(translate("User is forbidden to perform the requested operation"))
 {
 }
 

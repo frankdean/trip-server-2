@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "../config.h"
+#include <optional>
 #include "admin_status_handler.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 
@@ -45,14 +46,14 @@ void AdminStatusHandler::build_form(
     os <<
       "  <div id=\"tile-usage\">\n"
       "    <div>\n";
-    if (tile_report.total.first && tile_report.time.first) {
+    if (tile_report.total.has_value() && tile_report.time.has_value()) {
       const auto date = std::chrono::duration_cast<std::chrono::seconds>(
-          tile_report.time.second.time_since_epoch()
+          tile_report.time.value().time_since_epoch()
         ).count();
 
       os <<
         // Formatted count of the total number of map tiles downloaded
-        "      <p>" << format(translate("Fetched a total of {1,number} tiles, as at {2,ftime='%R %a'} {2,date=medium}")) % tile_report.total.second % date << "</p>\n";
+        "      <p>" << format(translate("Fetched a total of {1,number} tiles, as at {2,ftime='%R %a'} {2,date=medium}")) % tile_report.total.value() % date << "</p>\n";
     }
     os <<
       "      <div>\n"
@@ -104,7 +105,7 @@ void AdminStatusHandler::handle_authenticated_request(
   if (!is_admin) {
     response.content.clear();
     response.content.str("");
-    response.status_code = HTTPStatus::unauthorized;
+    response.status_code = HTTPStatus::forbidden;
     create_full_html_page_for_standard_response(response);
     return;
   }

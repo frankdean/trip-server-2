@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include "itinerary_pg_dao.hpp"
 #include "trip_request_handler.hpp"
 #include <string>
+#include <optional>
 #include <ostream>
 #include <vector>
 
@@ -44,15 +45,15 @@ protected:
   long itinerary_id;
   long path_id;
   /// The route or track name
-  std::pair<bool, std::string> name;
+  std::optional<std::string> name;
   /// The route or track color key
-  std::pair<bool, std::string> color_key;
+  std::optional<std::string> color_key;
   /// Option selecting to make a copy of the route
   bool make_copy;
   /// Option selecting to make a reversed copy of the route
   bool reverse_route;
   /// The total distance of the path or route
-  std::pair<bool, double> distance;
+  std::optional<double> distance;
   /// The available colors for selection
   std::vector<std::pair<std::string, std::string>> colors;
   virtual void handle_authenticated_request(

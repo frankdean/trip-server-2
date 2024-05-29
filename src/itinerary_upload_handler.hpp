@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include "itinerary_pg_dao.hpp"
 #include "trip_request_handler.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
+#include <optional>
 #include <pugixml.hpp>
 #include <string>
 
@@ -73,15 +74,15 @@ protected:
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
-  static std::pair<bool, std::string> child_node_as_string(
+  static std::optional<std::string> child_node_as_string(
       const pugi::xml_node &node, const pugi::char_t *child_name);
-  static std::pair<bool, double> child_node_as_double(
+  static std::optional<double> child_node_as_double(
       const pugi::xml_node &node, const pugi::char_t *child_name);
-  static std::pair<bool, float> child_node_as_float(
+  static std::optional<float> child_node_as_float(
       const pugi::xml_node &node, const pugi::char_t *child_name);
-  static std::pair<bool, long> child_node_as_long(
+  static std::optional<long> child_node_as_long(
       const pugi::xml_node &node, const pugi::char_t *child_name);
-  static std::pair<bool, std::chrono::system_clock::time_point>
+  static std::optional<std::chrono::system_clock::time_point>
       child_node_as_time_point(const pugi::xml_node &node,
                                const pugi::char_t *child_name);
 public:

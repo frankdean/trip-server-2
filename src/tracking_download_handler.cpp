@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -89,13 +89,13 @@ void TrackingDownloadHandler::handle_download(
     xml_node trkpt = trkseg.append_child("trkpt");
     trkpt.append_attribute("lat").set_value(loc.latitude);
     trkpt.append_attribute("lon").set_value(loc.longitude);
-    if (loc.altitude.first)
-      trkpt.append_child("ele").text() = loc.altitude.second;
+    if (loc.altitude.has_value())
+      trkpt.append_child("ele").text() = loc.altitude.value();
     DateTime tm(loc.time_point);
     trkpt.append_child("time").append_child(node_pcdata).
       set_value(tm.get_time_as_iso8601_gmt().c_str());
-    if (loc.hdop.first)
-      trkpt.append_child("hdop").text() = loc.hdop.second;
+    if (loc.hdop.has_value())
+      trkpt.append_child("hdop").text() = loc.hdop.value();
   }
   if (config->get_gpx_pretty()) {
     std::string indent;

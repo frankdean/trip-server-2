@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,11 +32,11 @@ using json = nlohmann::basic_json<nlohmann::ordered_map>;
 
 GeoMapUtils::GeoMapUtils() :
   paths(),
-  min_height(std::make_pair<bool, double>(false, 0)),
-  max_height(std::make_pair<bool, double>(false, 0)),
-  ascent(std::make_pair<bool, double>(false, 0)),
-  descent(std::make_pair<bool, double>(false, 0)),
-  last_altitude(std::make_pair<bool, double>(false, 0))
+  min_height(),
+  max_height(),
+  ascent(),
+  descent(),
+  last_altitude()
 {
 }
 
@@ -45,16 +45,16 @@ std::string location::to_string() const
   std::ostringstream os;
   os <<
     "id: ";
-  if (id.first)
-    os << id.second;
+  if (id.has_value())
+    os << id.value();
   else
     os << "[null]";
   os << ", "
     "longitude: " << std::fixed << std::setprecision(6) << longitude << ", "
     "latitude: " << latitude;
-  if (altitude.first) {
+  if (altitude.has_value()) {
     os << ", "
-       << "altitude: " << std::setprecision(1) << altitude.second;
+       << "altitude: " << std::setprecision(1) << altitude.value();
   }
   return os.str();
 }
@@ -62,14 +62,14 @@ std::string location::to_string() const
 YAML::Node location::encode(const location& rhs)
 {
   YAML::Node node;
-  if (rhs.id.first)
-    node["id"] = rhs.id.second;
+  if (rhs.id.has_value())
+    node["id"] = rhs.id.value();
   else
     node["id"] = YAML::Null;
   node["lng"] = rhs.longitude;
   node["lat"] = rhs.latitude;
-  if (rhs.altitude.first)
-    node["altitude"] = rhs.altitude.second;
+  if (rhs.altitude.has_value())
+    node["altitude"] = rhs.altitude.value();
   else
     node["altitude"] = YAML::Null;
   return node;
@@ -77,12 +77,12 @@ YAML::Node location::encode(const location& rhs)
 
 bool location::decode(const YAML::Node& node, location& rhs)
 {
-  if ((rhs.id.first = node["id"] && !node["id"].IsNull()))
-    rhs.id.second = node["id"].as<long>();
+  if (node["id"] && !node["id"].IsNull())
+    rhs.id = node["id"].as<long>();
   rhs.longitude = node["lng"].as<double>();
   rhs.latitude = node["lat"].as<double>();
-  if ((rhs.altitude.first = node["altitude"] && !node["altitude"].IsNull()))
-    rhs.altitude.second = node["altitude"].as<double>();
+  if (node["altitude"] && !node["altitude"].IsNull())
+    rhs.altitude = node["altitude"].as<double>();
   return true;
 }
 
@@ -90,37 +90,37 @@ std::string path_statistics::to_string() const
 {
   bool first = true;
   std::ostringstream os;
-  if (distance.first) {
-    os << "distance: " << distance.second;
+  if (distance.has_value()) {
+    os << "distance: " << distance.value();
     first = false;
   }
-  if (ascent.first) {
+  if (ascent.has_value()) {
     if (first)
       first = false;
     else
       os << ", ";
-    os << "ascent: " << ascent.second;
+    os << "ascent: " << ascent.value();
   }
-  if (descent.first) {
+  if (descent.has_value()) {
     if (first)
       first = false;
     else
       os << ", ";
-    os << "descent: " << descent.second;
+    os << "descent: " << descent.value();
   }
-  if (lowest.first) {
+  if (lowest.has_value()) {
     if (first)
       first = false;
     else
       os << ", ";
-    os << "lowest: " << lowest.second;
+    os << "lowest: " << lowest.value();
   }
-  if (highest.first) {
+  if (highest.has_value()) {
     if (first)
       first = false;
     else
       os << ", ";
-    os << "highest: " << highest.second;
+    os << "highest: " << highest.value();
   }
   return os.str();
 }
@@ -128,31 +128,31 @@ std::string path_statistics::to_string() const
 YAML::Node path_statistics::encode(const path_statistics& rhs)
 {
   YAML::Node node;
-  if (rhs.distance.first)
-    node["distance"] = rhs.distance.second;
-  if (rhs.ascent.first)
-    node["ascent"] = rhs.ascent.second;
-  if (rhs.descent.first)
-    node["descent"] = rhs.descent.second;
-  if (rhs.lowest.first)
-    node["lowest"] = rhs.lowest.second;
-  if (rhs.highest.first)
-    node["highest"] = rhs.highest.second;
+  if (rhs.distance.has_value())
+    node["distance"] = rhs.distance.value();
+  if (rhs.ascent.has_value())
+    node["ascent"] = rhs.ascent.value();
+  if (rhs.descent.has_value())
+    node["descent"] = rhs.descent.value();
+  if (rhs.lowest.has_value())
+    node["lowest"] = rhs.lowest.value();
+  if (rhs.highest.has_value())
+    node["highest"] = rhs.highest.value();
   return node;
 }
 
 bool path_statistics::decode(const YAML::Node& node, path_statistics& rhs)
 {
-  if ((rhs.distance.first = node["distance"] && !node["distance"].IsNull()))
-    rhs.distance.second = node["distance"].as<double>();
-  if ((rhs.ascent.first = node["ascent"] && !node["ascent"].IsNull()))
-    rhs.ascent.second = node["ascent"].as<double>();
-  if ((rhs.descent.first = node["descent"] && !node["descent"].IsNull()))
-    rhs.descent.second = node["descent"].as<double>();
-  if ((rhs.lowest.first =  node["lowest"] && !node["lowest"].IsNull()))
-    rhs.lowest.second = node["lowest"].as<double>();
-  if ((rhs.highest.first = node["highest"] && !node["highest"].IsNull()))
-    rhs.highest.second = node["highest"].as<double>();
+  if (node["distance"] && !node["distance"].IsNull())
+    rhs.distance = node["distance"].as<double>();
+  if (node["ascent"] && !node["ascent"].IsNull())
+    rhs.ascent = node["ascent"].as<double>();
+  if (node["descent"] && !node["descent"].IsNull())
+    rhs.descent = node["descent"].as<double>();
+  if (node["lowest"] && !node["lowest"].IsNull())
+    rhs.lowest = node["lowest"].as<double>();
+  if (node["highest"] && !node["highest"].IsNull())
+    rhs.highest = node["highest"].as<double>();
   return true;
 }
 
@@ -164,28 +164,26 @@ bool path_statistics::decode(const YAML::Node& node, path_statistics& rhs)
  */
 void GeoMapUtils::update_altitude_info(const location *loc)
 {
-  if (!loc->altitude.first)
+  if (!loc->altitude.has_value())
     return;
-  if (last_altitude.first) {
+  if (last_altitude.has_value()) {
     // See the GeoStatistics::upudate_statistics method
-    double diff = loc->altitude.second - last_altitude.second;
+    double diff = loc->altitude.value() - last_altitude.value();
     // std::cout << std::fixed << std::setprecision(1) << "Diff: " << diff << '\n';
     if (diff > 0) {
-      if (ascent.first) {
-        ascent.second += diff;
+      if (ascent.has_value()) {
+        ascent = ascent.value() + diff;
       } else {
-        ascent.first = true;
-        ascent.second = diff;
+        ascent = diff;
       }
     } else {
-      if (descent.first) {
-        descent.second -= diff;
+      if (descent.has_value()) {
+        descent = descent.value() - diff;
       } else {
-        descent.first = true;
-        descent.second = -diff;
+        descent = -diff;
       }
     }
-    last_altitude.second = loc->altitude.second;
+    last_altitude = loc->altitude;
   } else {
     last_altitude = loc->altitude;
   }
@@ -193,13 +191,13 @@ void GeoMapUtils::update_altitude_info(const location *loc)
   //           << "Ascent:  " << (ascent.first ? ascent.second : 0) << '\n'
   //           << "Descent: " << (descent.first ? descent.second : 0) << '\n';
 
-  if (max_height.first) {
-    max_height.second = std::max(max_height.second, loc->altitude.second);
+  if (max_height.has_value()) {
+    max_height = std::max(max_height.value(), loc->altitude.value());
   } else {
     max_height = loc->altitude;
   }
-  if (min_height.first) {
-    min_height.second = std::min(min_height.second, loc->altitude.second);
+  if (min_height.has_value()) {
+    min_height = std::min(min_height.value(), loc->altitude.value());
   } else {
     min_height = loc->altitude;
   }
@@ -280,8 +278,8 @@ nlohmann::basic_json<nlohmann::ordered_map> GeoMapUtils::as_geojson(const int in
         json coord;
         coord.push_back(loc.longitude);
         coord.push_back(loc.latitude);
-        if (loc.altitude.first)
-          coord.push_back(loc.altitude.second);
+        if (loc.altitude.has_value())
+          coord.push_back(loc.altitude.value());
         coords.push_back(coord);
       }
       json_paths.push_back(coords);
@@ -300,8 +298,8 @@ nlohmann::basic_json<nlohmann::ordered_map> GeoMapUtils::as_geojson(const int in
       json coord;
       coord.push_back(loc.longitude);
       coord.push_back(loc.latitude);
-      if (loc.altitude.first)
-        coord.push_back(loc.altitude.second);
+      if (loc.altitude.has_value())
+        coord.push_back(loc.altitude.value());
       coords.push_back(coord);
     }
     json geometry;
@@ -421,6 +419,16 @@ double GeoUtils::bearing_to_azimuth(
   return degrees;
 }
 
+std::string GeoStatistics::to_string() const
+{
+  std::stringstream os;
+  os << path_statistics::to_string();
+  os << ", last_location: " << *last_location;
+  if (last_altitude.has_value())
+    os << ", last_altitude: " << last_altitude.value();
+  return os.str();
+}
+
 /**
  *
  * \param local_stats statistics to update separately.  These will typically be
@@ -431,13 +439,13 @@ double GeoUtils::bearing_to_azimuth(
 void GeoStatistics::add_location(
     path_statistics &local_stats,
     std::unique_ptr<location> &local_last_location,
-    std::pair<bool, double> &local_last_altitude,
+    std::optional<double> &local_last_altitude,
     location &loc)
 {
   update_statistics(local_stats, local_last_location, local_last_altitude, loc);
   // std::cout << "After add_location: ";
-  // if (local_last_altitude.first)
-  //   std::cout << " last altitude: " << local_last_altitude.second;
+  // if (local_last_altitude.has_value())
+  //   std::cout << " last altitude: " << local_last_altitude.value();
   // std::cout << '\n';
   update_statistics(*this, last_location, last_altitude, loc);
 }
@@ -445,20 +453,19 @@ void GeoStatistics::add_location(
 void GeoStatistics::update_statistics(
     path_statistics &statistics,
     std::unique_ptr<location> &local_last_location,
-    std::pair<bool, double> &local_last_altitude,
+    std::optional<double> &local_last_altitude,
     location &loc)
 {
-  // std::cout << "Location: " << *loc << '\n';
+  // std::cout << "\nUpdating statistics for location: " << loc << '\n';
   if (local_last_location) {
     // std::cout << "Last location: " << *local_last_location << '\n';
     const double leg_distance = GeoUtils::distance(*local_last_location, loc);
-    if (statistics.distance.first) {
-      statistics.distance.second += leg_distance;
+    if (statistics.distance.has_value()) {
+      statistics.distance = statistics.distance.value() + leg_distance;
       // std::cout << "Added leg distance: " << leg_distance << '\n';
     } else {
-      statistics.distance.first = true;
       // std::cout << "Set leg distance: " << leg_distance << '\n';
-      statistics.distance.second = leg_distance;
+      statistics.distance = leg_distance;
     }
   // } else {
   //   std::cout << "Fresh leg\n";
@@ -470,44 +477,45 @@ void GeoStatistics::update_statistics(
   // }
   local_last_location = std::unique_ptr<location>(new location(loc));
 
-  if (loc.altitude.first) {
-    if (local_last_altitude.first) {
-      // std::cout << "Previous last altitude: " << local_last_altitude.second << '\n';
+  if (loc.altitude.has_value()) {
+    if (local_last_altitude.has_value()) {
+      // std::cout << "Previous last altitude: " << local_last_altitude.value() << '\n';
       const double altitude_change =
-        loc.altitude.second - local_last_altitude.second;
+        loc.altitude.value() - local_last_altitude.value();
       // std::cout << "Altitude change: " << altitude_change << '\n';
 
       if (altitude_change > 0) {
-        if (statistics.ascent.first) {
-          // std::cout << "Updating ascent to " << altitude_change << '\n';
-          statistics.ascent.second += altitude_change;
+        if (statistics.ascent.has_value()) {
+          // std::cout << "Updating ascent by " << altitude_change << '\n';
+          statistics.ascent = statistics.ascent.value() + altitude_change;
         } else {
           // std::cout << "Setting first ascent to " << altitude_change << '\n';
-          statistics.ascent.first = true;
-          statistics.ascent.second = altitude_change;
+          statistics.ascent = altitude_change;
         }
       } else if (altitude_change < 0) {
-        if (statistics.descent.first) {
-          statistics.descent.second += std::abs(altitude_change);
+        if (statistics.descent.has_value()) {
+          statistics.descent = statistics.descent.value() + std::abs(altitude_change);
         } else {
-          statistics.descent.first = true;
-          statistics.descent.second = std::abs(altitude_change);
+          statistics.descent = std::abs(altitude_change);
         }
       }
     }
     local_last_altitude = loc.altitude;
-    // if (loc.altitude.first)
-    //   std::cout << "Saving last altitude as: " << loc.altitude.second << '\n';
+    // if (local_last_altitude.has_value()) {
+    //   std::cout << "Saved last altitude as: " << local_last_altitude.value() << '\n';
+    // } else {
+    //   std::cout << "Saved last altitude as: [null]\n";
+    // }
 
-    if (statistics.lowest.first) {
-      statistics.lowest.second =
-        std::min(statistics.lowest.second, loc.altitude.second);
+    if (statistics.lowest.has_value()) {
+      statistics.lowest =
+        std::min(statistics.lowest.value(), loc.altitude.value());
     } else {
       statistics.lowest = loc.altitude;
     }
-    if (statistics.highest.first) {
-      statistics.highest.second =
-        std::max(statistics.highest.second, loc.altitude.second);
+    if (statistics.highest.has_value()) {
+      statistics.highest =
+        std::max(statistics.highest.value(), loc.altitude.value());
     } else {
       statistics.highest = loc.altitude;
     }

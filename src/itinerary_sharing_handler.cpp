@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ void ItinerarySharingHandler::build_form(HTTPServerResponse& response,
         <<
         "        <tr>\n"
         "          <td>" << x(share.nickname) << "</td>\n"
-        "          <td>" << (share.active.first && share.active.second ? "&#x2713;" : "") << "</td>\n"
+        "          <td>" << (share.active.has_value() && share.active.value() ? "&#x2713;" : "") << "</td>\n"
         "          <td><input type=\"checkbox\" name=\"shared_to_id[" << share.shared_to_id << "]\"></td>\n"
         "        </tr>\n";
     }

@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,37 +69,37 @@ void ItineraryTrackSegmentEditHandler::build_form(
       <<
       "    <div>\n"
       "      <p>\n";
-    if (segment.distance.first) {
-      const auto miles = segment.distance.second / kms_per_mile;
+    if (segment.distance.has_value()) {
+      const auto miles = segment.distance.value() / kms_per_mile;
       os
         <<
         // Displays segment distance in kilometers
-        "        <span>" << format(translate("{1,num=fixed,precision=2} km", "{1,num=fixed,precision=2} kms", segment.distance.second)) % segment.distance.second << "</span>\n"
+        "        <span>" << format(translate("{1,num=fixed,precision=2} km", "{1,num=fixed,precision=2} kms", segment.distance.value())) % segment.distance.value() << "</span>\n"
         // Displays segment distance in miles
         "        <span>"  << format(translate("{1,num=fixed,precision=2} mile", "{1,num=fixed,precision=2} miles", miles)) % miles << "</span>\n";
     }
-    if (segment.ascent.first)
+    if (segment.ascent.has_value())
       // Displays segment ascent in meters
-      os << "        <span> ↗︎" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % segment.ascent.second << "</span>\n";
-    if (segment.descent.first)
+      os << "        <span> ↗︎" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % segment.ascent.value() << "</span>\n";
+    if (segment.descent.has_value())
       // Displays segment descent in meters
-      os << "        <span> ↘︎" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % segment.descent.second << "</span>\n";
-    if (segment.ascent.first)
+      os << "        <span> ↘︎" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % segment.descent.value() << "</span>\n";
+    if (segment.ascent.has_value())
       // Displays segment ascent in feet
-      os << "        <span> ↗︎" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (segment.ascent.second / inches_per_meter / 12) << "</span>\n";
-    if (segment.descent.first)
+      os << "        <span> ↗︎" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (segment.ascent.value() / inches_per_meter / 12) << "</span>\n";
+    if (segment.descent.has_value())
       // Displays segment descent in feet
-      os << "        <span> ↘︎" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (segment.descent.second / inches_per_meter / 12) << "</span>\n";
-    if (segment.highest.first && segment.lowest.first) {
+      os << "        <span> ↘︎" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (segment.descent.value() / inches_per_meter / 12) << "</span>\n";
+    if (segment.highest.has_value() && segment.lowest.has_value()) {
       os <<
         // Displays segment highest point in meters
-        "        <span> " << format(translate("{1,num=fixed,precision=0}")) % segment.highest.second
+        "        <span> " << format(translate("{1,num=fixed,precision=0}")) % segment.highest.value()
         // Displays segment lowest point in meters
-         << "⇅" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % segment.lowest.second << "</span>\n"
+         << "⇅" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % segment.lowest.value() << "</span>\n"
         // Displays segment highest point in feet
-        "        <span> " << format(translate("{1,num=fixed,precision=0}")) % (segment.highest.second / inches_per_meter / 12)
+        "        <span> " << format(translate("{1,num=fixed,precision=0}")) % (segment.highest.value() / inches_per_meter / 12)
         // Displays segment lowest point in feet
-         << "&#x21c5;" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (segment.lowest.second / inches_per_meter / 12) << "</span>\n";
+         << "&#x21c5;" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (segment.lowest.value() / inches_per_meter / 12) << "</span>\n";
     }
     os
       <<
@@ -126,22 +126,22 @@ void ItineraryTrackSegmentEditHandler::build_form(
       "          <th class=\"text-end\">" << translate("HDOP") << "</th>\n"
       "        </tr>\n";
     for (const auto &point : segment.points) {
-      if (point.id.first) {
+      if (point.id.has_value()) {
         std::ostringstream label;
-        label << "select-point-" << point.id.second;
+        label << "select-point-" << point.id.value();
         os <<
           "        <tr>\n"
-          "          <td class=\"text-start\"><input id=\"" << label.str() << "\" type=\"checkbox\" name=\"point[" << point.id.second << "]\" value=\"" << point.id.second << "\"";
-          if (select_all || selected_point_id_map.find(point.id.second) != selected_point_id_map.end())
-            os << " checked";
+          "          <td class=\"text-start\"><input id=\"" << label.str() << "\" type=\"checkbox\" name=\"point[" << point.id.value() << "]\" value=\"" << point.id.value() << "\"";
+        if (select_all || selected_point_id_map.find(point.id.value()) != selected_point_id_map.end())
+          os << " checked";
         os << ">\n"
-          "            <label for=\"" << label.str() << "\">" << as::number << std::setprecision(0) << point.id.second << as::posix << "</label>\n"
+          "            <label for=\"" << label.str() << "\">" << as::number << std::setprecision(0) << point.id.value() << as::posix << "</label>\n"
           "          </td>\n"
           "          <td class=\"text-start\">";
-        if (point.time.first) {
+        if (point.time.has_value()) {
           const auto date = std::chrono::duration_cast<std::chrono::seconds>(
-            point.time.second.time_since_epoch()
-          ).count();
+              point.time.value().time_since_epoch()
+            ).count();
             // os << as::ftime("%a") << date << " "
           os << as::date_medium << as::datetime << date << as::posix;
         }
@@ -149,13 +149,13 @@ void ItineraryTrackSegmentEditHandler::build_form(
           "          <td class=\"text-end\">" << std::fixed << std::setprecision(6) << point.latitude << "</td>\n"
           "          <td class=\"text-end\">" << point.longitude << "</td>\n"
           "          <td class=\"text-end\">";
-        if (point.altitude.first)
-          os << std::fixed << std::setprecision(0) << point.altitude.second;
+        if (point.altitude.has_value())
+          os << std::fixed << std::setprecision(0) << point.altitude.value();
         os <<
           "</td>\n"
           "          <td class=\"text-end\">";
-        if (point.hdop.first)
-          os << as::number << std::fixed << std::setprecision(1) << point.hdop.second << as::posix;
+        if (point.hdop.has_value())
+          os << as::number << std::fixed << std::setprecision(1) << point.hdop.value() << as::posix;
         os << "</td>\n"
           "        </tr>\n";
       }
@@ -211,8 +211,8 @@ void ItineraryTrackSegmentEditHandler::build_form(
     // features["waypoints"] = json::array();
     json points;
     for (const auto point : segment.points) {
-      if (point.id.first)
-        points.push_back(point.id.second);
+      if (point.id.has_value())
+        points.push_back(point.id.value());
     }
     // features["points"] = points;
     json j{
@@ -274,15 +274,15 @@ void ItineraryTrackSegmentEditHandler::delete_points(
   auto track = dao.get_track(get_user_id(), itinerary_id, track_id);
   int segment_index = -1;
   for (auto it = track.segments.begin(); it != track.segments.end(); it++) {
-    if (it->id.first && it->id.second == segment_id) {
+    if (it->id.has_value() && it->id.value() == segment_id) {
       segment_index = std::distance(track.segments.begin(), it);
       it->points.erase(
           std::remove_if(
               it->points.begin(),
               it->points.end(),
           [&](const ItineraryPgDao::track_point &point) {
-            bool retval = point.id.first &&
-              selected_point_id_map.find(point.id.second) !=
+            bool retval = point.id.has_value() &&
+              selected_point_id_map.find(point.id.value()) !=
               selected_point_id_map.end();
             if (retval)
               dirty = true;
@@ -299,8 +299,8 @@ void ItineraryTrackSegmentEditHandler::delete_points(
         track);
     try {
       auto segment = track.segments.at(segment_index);
-      assert(segment.id.first);
-      segment_id = segment.id.second;
+      assert(segment.id.has_value());
+      segment_id = segment.id.value();
     } catch (const std::out_of_range &e) {
       std::cerr << "Error finding segment after deleting points: "
                 << e.what() << '\n';
@@ -325,13 +325,13 @@ void ItineraryTrackSegmentEditHandler::split_segment(
       track.segments.begin(),
       track.segments.end(),
       [find_id](const ItineraryPgDao::track_segment &segment) {
-        return segment.id.first && segment.id.second == find_id;
+        return segment.id.has_value() && segment.id.value() == find_id;
       }
     );
   if (current_segment != track.segments.end()) {
     // Add all the points that are greater than or equal to the split point to the new segment
     for (auto i = current_segment->points.begin(); i != current_segment->points.end(); i++)
-      if (i->id.first && i->id.second >= split_before_id)
+      if (i->id.has_value() && i->id.value() >= split_before_id)
         new_segment.points.push_back(*i);
     int count = 0;
     // Remove those same points from the current segment
@@ -340,7 +340,7 @@ void ItineraryTrackSegmentEditHandler::split_segment(
             current_segment->points.begin(),
             current_segment->points.end(),
             [split_before_id, &count](const ItineraryPgDao::track_point &point) {
-              bool retval = point.id.first && point.id.second >= split_before_id;
+              bool retval = point.id.has_value() && point.id.value() >= split_before_id;
               if (retval) {
                 // std::cout << "Removing point " << point.id.second << '\n';
                 count++;

@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include <chrono>
 #include <map>
 #include <memory>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -84,13 +85,13 @@ public:
   struct tracked_location : public location {
     virtual ~tracked_location() {}
     std::chrono::system_clock::time_point time_point;
-    std::pair<bool, float> hdop;
-    std::pair<bool, float> speed;
-    std::pair<bool, double> bearing;
-    std::pair<bool, int> satellite_count;
-    std::pair<bool, std::string> provider;
-    std::pair<bool, float> battery;
-    std::pair<bool, std::string> note;
+    std::optional<float> hdop;
+    std::optional<float> speed;
+    std::optional<double> bearing;
+    std::optional<int> satellite_count;
+    std::optional<std::string> provider;
+    std::optional<float> battery;
+    std::optional<std::string> note;
     virtual std::string to_string() const override;
     inline friend std::ostream& operator<<
         (std::ostream& out, const tracked_location& rhs) {
@@ -137,21 +138,21 @@ public:
   struct location_share_details {
     std::string shared_to_id;
     std::string shared_by_id;
-    std::pair<bool, int> recent_minutes;
-    std::pair<bool, int> max_minutes;
-    std::pair<bool, bool> active;
+    std::optional<int> recent_minutes;
+    std::optional<int> max_minutes;
+    std::optional<bool> active;
   };
 
   struct track_share {
     std::string nickname;
-    std::pair<bool, int> recent_minutes;
-    std::pair<bool, int> max_minutes;
-    std::pair<bool, bool> active;
+    std::optional<int> recent_minutes;
+    std::optional<int> max_minutes;
+    std::optional<bool> active;
   };
 
   struct location_update_check {
     std::string nickname;
-    std::pair<bool, long> min_threshold_id;
+    std::optional<long> min_threshold_id;
     bool update_available;
     location_update_check() :
       nickname(),
@@ -230,7 +231,7 @@ public:
                                std::vector<std::string> nicknames) {
     activate_track_shares(user_id, nicknames, false);
   }
-  std::pair<bool, location_share_details>
+  std::optional<location_share_details>
       get_tracked_location_share_details_by_sharer(
           std::string shared_to_nickname,
           std::string shared_by_user_id) const;
@@ -249,9 +250,9 @@ private:
       std::string shared_by_id,
       std::time_t date_from,
       std::time_t date_to,
-      std::pair<bool, int> max_minutes,
-      std::pair<bool, int> recent_minutes) const;
-  std::pair<bool, std::time_t>
+      std::optional<int> max_minutes,
+      std::optional<int> recent_minutes) const;
+  std::optional<std::time_t>
       get_most_recent_location_time(std::string shared_by_id) const;
   tracked_locations_result get_tracked_locations_for_user(
       const location_search_query_params& location_search, int maximum) const;
@@ -261,7 +262,7 @@ private:
       std::ostringstream& os,
       const pqxx::work& tx,
       const location_search_query_params& qp) const;
-  std::pair<bool, location_share_details>
+  std::optional<location_share_details>
       get_tracked_location_share_details_by_sharee(
           std::string shared_by_nickname,
           std::string shared_to_user_id) const;

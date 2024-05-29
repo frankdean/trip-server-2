@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,6 +40,11 @@ class AdminUserEditHandler : public TripAuthenticatedRequestHandler {
   std::string user_id;
   bool user_not_found;
   bool passwords_match_failure;
+  bool nickname_required_error;
+  bool email_required_error;
+  bool first_name_required_error;
+  bool last_name_required_error;
+  bool password_required_error;
   bool new_user_flag;
   bool save_failed_flag;
   void build_form(std::ostream &os,
@@ -60,6 +65,11 @@ public:
     user_id(),
     user_not_found(),
     passwords_match_failure(),
+    nickname_required_error(),
+    email_required_error(),
+    first_name_required_error(),
+    last_name_required_error(),
+    password_required_error(),
     new_user_flag(),
     save_failed_flag() {}
   virtual std::string get_handler_name() const override {

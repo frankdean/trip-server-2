@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #include "trip_request_handler.hpp"
 #include "itinerary_pg_dao.hpp"
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -41,8 +42,8 @@ protected:
   std::vector<long> path_ids;
   /// Action parameter
   std::string action;
-  std::string joined_path_name;
-  std::pair<bool, std::string> joined_path_color_key;
+  std::optional<std::string> joined_path_name;
+  std::optional<std::string> joined_path_color_key;
   /// The available colors for selection
   std::vector<std::pair<std::string, std::string>> colors;
   /// Holds the path ID from an `up` button submit

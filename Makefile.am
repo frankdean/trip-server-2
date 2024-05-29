@@ -2,9 +2,9 @@ SUBDIRS = src po tests doc
 
 # When running `distcheck` build with additional features that are normally
 # disabled by default
-AM_DISTCHECK_CONFIGURE_FLAGS = --enable-cairo --enable-directory-listing
+AM_DISTCHECK_CONFIGURE_FLAGS = --enable-cairo --enable-directory-listing --enable-tui
 
-EXTRA_DIST = m4/ChangeLog  .gitignore \
+EXTRA_DIST = m4/ChangeLog  .gitignore stamp-h1 \
 	RELEASE_PROCEDURE.md \
 	Vagrantfile \
 	doc/trip-server-ref.sgml \

@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #include "trip_pg_dao.hpp"
 #include <chrono>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -42,7 +43,7 @@ public:
   void save_tile(int server_id, int z, int x, int y,
                  const std::vector<char> &tile,
                  std::chrono::system_clock::time_point expires);
-  std::pair<bool, tile_result> get_tile(int server_id, int z, int x, int y);
+  std::optional<tile_result> get_tile(int server_id, int z, int x, int y);
 };
 
 } // namespace trip

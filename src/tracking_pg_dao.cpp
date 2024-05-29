@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,20 +63,20 @@ std::string TrackPgDao::tracked_location::to_string() const
     location::to_string() << ", "
     "time_point: \"" << dt.get_time_as_iso8601_gmt() << "\", " <<
     std::fixed << std::setprecision(1);
-  if (hdop.first)
-    os << "hdop: " << hdop.second << ", ";
-  if (speed.first)
-    os << "speed: " << speed.second << ", ";
+  if (hdop.has_value())
+    os << "hdop: " << hdop.value() << ", ";
+  if (speed.has_value())
+    os << "speed: " << speed.value() << ", ";
   os << std::setprecision(5);
-  if (bearing.first)
-    os << "bearing: " << bearing.second << ", ";
+  if (bearing.has_value())
+    os << "bearing: " << bearing.value() << ", ";
   os << std::setprecision(0);
-  if (satellite_count.first)
-    os << "satellite_count: " << satellite_count.second << ", ";
-  os << "provider: " << (provider.first ? '"' + provider.second + '"' : "null") << ", " << std::setprecision(1);
-  if (battery.first)
-    os <<"battery: " << battery.second << ", ";
-  os << "note: \"" << (note.first ? '"' + note.second + '"' : "null") << "\"";
+  if (satellite_count.has_value())
+    os << "satellite_count: " << satellite_count.value() << ", ";
+  os << "provider: " << (provider.has_value() ? '"' + provider.value() + '"' : "null") << ", " << std::setprecision(1);
+  if (battery.has_value())
+    os <<"battery: " << battery.value() << ", ";
+  os << "note: \"" << (note.has_value() ? '"' + note.value() + '"' : "null") << "\"";
   return os.str();
 }
 
@@ -256,7 +256,7 @@ TrackPgDao::tracked_location_query_params::tracked_location_query_params(
     std::string> &params) : tracked_location()
 {
   this->user_id = user_id;
-  id.first = false;
+  id = std::optional<long>();
   std::string s = get_value(params, "lat");
   if (s.empty())
     s = get_value(params, "latitude");
@@ -410,22 +410,27 @@ TrackPgDao::tracked_locations_result
   r = tx.exec(os.str());
   for (result::const_iterator i = r.begin(); i != r.end(); ++i) {
     tracked_location loc;
-    loc.id.first = i["id"].to(loc.id.second);
+    loc.id = i["id"].as<long>();
     i["lng"].to(loc.longitude);
     i["lat"].to(loc.latitude);
     std::string date_str;
     loc.time_point = dao_helper::convert_libpq_date_tz(i["time"].as<std::string>());
-    loc.hdop.first = i["hdop"].to(loc.hdop.second);
-    loc.altitude.first = i["altitude"].to(loc.altitude.second);
-    loc.speed.first = i["speed"].to(loc.speed.second);
-    loc.bearing.first = i["bearing"].to(loc.bearing.second);
-    loc.satellite_count.first = i["sat"].to(loc.satellite_count.second);
-    // This fails to compile with C++17, with a not-assignable message, but I
-    // don't see why it isn't assignable.
-    // <std::optional<int>> satellite_count  = satellite.as<std::optional<int>>();
-    loc.provider.first = i["provider"].to(loc.provider.second);
-    loc.battery.first = i["battery"].to(loc.battery.second);
-    loc.note.first = i["note"].to(loc.note.second);
+    if (!i["hdop"].is_null())
+      loc.hdop = i["hdop"].as<float>();
+    if (!i["altitude"].is_null())
+      loc.altitude = i["altitude"].as<double>();
+    if (!i["speed"].is_null())
+      loc.speed = i["speed"].as<float>();
+    if (!i["bearing"].is_null())
+      loc.bearing = i["bearing"].as<double>();
+    if (!i["sat"].is_null())
+      loc.satellite_count = i["sat"].as<int>();
+    if (!i["provider"].is_null())
+      loc.provider = i["provider"].as<std::optional<std::string>>();
+    if (!i["battery"].is_null())
+      loc.battery = i["battery"].as<float>();
+    if (!i["note"].is_null())
+      loc.note = i["note"].as<std::optional<std::string>>();
     retval.locations.push_back(loc);
   }
   tx.commit();
@@ -440,11 +445,11 @@ TrackPgDao::tracked_locations_result
  * \param shared_to_user_id the user ID of the user the data is being shared
  * to.
  *
- * \return a std::pair, the first element set to true if the query was
+ * \return a std::optional, the first element set to true if the query was
  * successful.  The second element constains details of the location sharing
  * for the requested sharing nickname.
  */
-std::pair<bool, TrackPgDao::location_share_details>
+std::optional<TrackPgDao::location_share_details>
     TrackPgDao::get_tracked_location_share_details_by_sharee(
         std::string shared_by_nickname,
         std::string shared_to_user_id) const
@@ -456,28 +461,28 @@ std::pair<bool, TrackPgDao::location_share_details>
     "JOIN usertable u1 ON u1.id=ls.shared_by_id "
     // "JOIN usertable u2 ON u2.id=ls.shared_to_id "
     "WHERE u1.nickname='" +
-    tx.esc(shared_by_nickname) + "' AND "
+    tx.esc(shared_by_nickname) + "' AND ls.active=true AND "
     "ls.shared_to_id='" + tx.esc(shared_to_user_id) + '\'';
 
   result r = tx.exec(sql);
-  location_share_details share_details;
-  auto retval = std::make_pair(false, share_details);
-  retval.first = !r.empty();
-  if (retval.first) {
-    retval.second.recent_minutes.first =
-      r[0]["recent_minutes"].to(retval.second.recent_minutes.second);
-    retval.second.max_minutes.first =
-      r[0]["max_minutes"].to(retval.second.max_minutes.second);
-    retval.second.active.first =
-      r[0]["active"].to(retval.second.active.second);
-    r[0]["shared_by_id"].to(retval.second.shared_by_id);
-    r[0]["shared_to_id"].to(retval.second.shared_to_id);
+  std::optional<TrackPgDao::location_share_details> retval;
+  if(!r.empty()) {
+    location_share_details share_details;
+    if (!r[0]["recent_minutes"].is_null())
+      share_details.recent_minutes = r[0]["recent_minutes"].as<int>();
+    if (!r[0]["max_minutes"].is_null())
+      share_details.max_minutes = r[0]["max_minutes"].as<int>();
+    if (!r[0]["active"].is_null())
+      share_details.active = r[0]["active"].as<bool>();
+    r[0]["shared_by_id"].to(share_details.shared_by_id);
+    r[0]["shared_to_id"].to(share_details.shared_to_id);
+    retval = share_details;
   }
   tx.commit();
   return retval;
 }
 
-std::pair<bool, TrackPgDao::location_share_details>
+std::optional<TrackPgDao::location_share_details>
     TrackPgDao::get_tracked_location_share_details_by_sharer(
         std::string shared_to_nickname,
         std::string shared_by_user_id) const
@@ -493,20 +498,18 @@ std::pair<bool, TrackPgDao::location_share_details>
         sql,
         shared_to_nickname,
         shared_by_user_id);
+    auto retval = std::optional<location_share_details>();
     location_share_details share_details;
-    auto retval = std::make_pair(false, share_details);
-    retval.first = true;
-    if (retval.first) {
-      retval.second.recent_minutes.first =
-        r["recent_minutes"].to(retval.second.recent_minutes.second);
-      retval.second.max_minutes.first =
-        r["max_minutes"].to(retval.second.max_minutes.second);
-      retval.second.active.first =
-        r["active"].to(retval.second.active.second);
-      r["shared_by_id"].to(retval.second.shared_by_id);
-      r["shared_to_id"].to(retval.second.shared_to_id);
-    }
+    if (!r["recent_minutes"].is_null())
+      share_details.recent_minutes = r["recent_minutes"].as<int>();
+    if (!r["max_minutes"].is_null())
+      share_details.max_minutes = r["max_minutes"].as<int>();
+    if (!r["active"].is_null())
+      share_details.active = r["active"].as<bool>();
+    r["shared_by_id"].to(share_details.shared_by_id);
+    r["shared_to_id"].to(share_details.shared_to_id);
     tx.commit();
+    retval = share_details;
     return retval;
   } catch (const std::exception &e) {
     std::cerr << "Exception in "
@@ -636,7 +639,7 @@ void TrackPgDao::check_new_locations_available(
         auto r = tx.exec_prepared1(
             ps_name_user_id,
             user_id,
-            c.min_threshold_id.first ? &c.min_threshold_id.second : nullptr,
+            c.min_threshold_id,
             from.get_time_as_iso8601_gmt());
         c.update_available = r[0].as<long>() > 0;
       } else {
@@ -644,7 +647,7 @@ void TrackPgDao::check_new_locations_available(
             ps_name,
             user_id,
             c.nickname,
-            c.min_threshold_id.first ? &c.min_threshold_id.second : nullptr,
+            c.min_threshold_id,
             from.get_time_as_iso8601_gmt());
         c.update_available = r[0].as<long>() > 0;
       }
@@ -657,7 +660,7 @@ void TrackPgDao::check_new_locations_available(
   }
 }
 
-std::pair<bool, std::time_t>
+std::optional<std::time_t>
     TrackPgDao::get_most_recent_location_time(std::string shared_by_id) const
 {
   work tx(*connection);
@@ -665,14 +668,17 @@ std::pair<bool, std::time_t>
       "SELECT max(\"time\") AS \"time\" FROM location WHERE user_id='" +
       tx.esc(shared_by_id) + '\''
     );
+  std::optional<std::time_t> retval;
   const bool success = !r.empty();
   if (success) {
     std::string date_str;
-    const bool success = r[0][0].to(date_str);
-    return std::make_pair(success, dao_helper::convert_libpq_date(date_str));
+    const bool ok = r[0][0].to(date_str);
+    if (ok)
+      retval = dao_helper::convert_libpq_date(date_str);
+    return retval;
   }
   tx.commit();
-  return std::make_pair(false, 0);
+  return retval;
 }
 
 /**
@@ -698,21 +704,21 @@ TrackPgDao::date_range TrackPgDao::constrain_shared_location_dates(
     std::string shared_by_id,
     std::time_t date_from,
     std::time_t date_to,
-    std::pair<bool, int> max_minutes,
-    std::pair<bool, int> recent_minutes) const
+    std::optional<int> max_minutes,
+    std::optional<int> recent_minutes) const
 {
   date_range retval;
   auto now = std::chrono::system_clock::now();
-  std::pair<bool, std::time_t> earliest_possible;
-  std::pair<bool, std::time_t> most_recent_from;
+  std::optional<std::time_t> earliest_possible;
+  std::optional<std::time_t> most_recent_from;
 
   // If max_minutes is set, calculate the earliest possible date as max
   // minutes before now
-  if (max_minutes.first && max_minutes.second > 0) {
+  if (max_minutes.has_value() && max_minutes.value() > 0) {
     // std::cout << "max_minutes: " << max_minutes.second << '\n';
-    std::chrono::minutes max_duration(max_minutes.second);
+    std::chrono::minutes max_duration(max_minutes.value());
     auto r = now - max_duration;
-    earliest_possible = std::make_pair(true, std::chrono::system_clock::to_time_t(r));
+    earliest_possible = std::chrono::system_clock::to_time_t(r);
   //   DateTime ep(earliest_possible.second);
   //   std::cout << "Based on max_minutes, earliest possible date is " << ep << '\n';
   // } else {
@@ -721,17 +727,17 @@ TrackPgDao::date_range TrackPgDao::constrain_shared_location_dates(
 
   // If recent_minutes is set, calculate the most_recent_from based on the
   // most recently recorded location.
-  if (recent_minutes.first && recent_minutes.second > 0) {
+  if (recent_minutes.has_value() && recent_minutes.value() > 0) {
     // std::cout << "recent_minutes: " << recent_minutes.second << '\n';
-    std::pair<bool, std::time_t> latest_time = get_most_recent_location_time(shared_by_id);
+    std::optional<std::time_t> latest_time = get_most_recent_location_time(shared_by_id);
     // if (latest_time.first) {
     // std::cout << "Most recent shared date: " << latest_time.second << '\n';
     // }
-    if (latest_time.first) {
-      std::chrono::minutes recent_duration(recent_minutes.second);
-      auto latest = std::chrono::system_clock::from_time_t(latest_time.second);
+    if (latest_time.has_value()) {
+      std::chrono::minutes recent_duration(recent_minutes.value());
+      auto latest = std::chrono::system_clock::from_time_t(latest_time.value());
       auto r = latest - recent_duration;
-      most_recent_from = std::make_pair(true, std::chrono::system_clock::to_time_t(r));
+      most_recent_from = std::chrono::system_clock::to_time_t(r);
       // DateTime mr(most_recent_from.second);
       // std::cout << "Based on recent_minutes, earliest possible date is " << mr << '\n';
     } else {
@@ -743,9 +749,9 @@ TrackPgDao::date_range TrackPgDao::constrain_shared_location_dates(
   // If earliest date (based on minutes before now) is more recent than the
   // date based on most recently recorded location, the most recently recorded
   // location criteria takes precedence.
-  if (most_recent_from.first &&
-      (!earliest_possible.first ||
-       earliest_possible.second < most_recent_from.second))
+  if (most_recent_from.has_value() &&
+      (!earliest_possible.has_value() ||
+       earliest_possible.value() < most_recent_from.value()))
     earliest_possible = most_recent_from;
 
   // earliest possible now reflects the earliest date the user can see the
@@ -753,9 +759,9 @@ TrackPgDao::date_range TrackPgDao::constrain_shared_location_dates(
 
   // If query from_date is earlier than the earliest allowed, set it to the
   // earliest allowed.
-  if (earliest_possible.first &&
-      date_from < earliest_possible.second) {
-    date_from = earliest_possible.second;
+  if (earliest_possible.has_value() &&
+      date_from < earliest_possible.value()) {
+    date_from = earliest_possible.value();
     // DateTime df(date_from);
     // std::cout << "Adjusted date from to " << df << '\n';
   }
@@ -775,30 +781,34 @@ TrackPgDao::tracked_locations_result TrackPgDao::get_shared_tracked_locations(
   tracked_locations_result retval;
 
   // Information about what is being shared by nickname to user_id
-  std::pair<bool, location_share_details> sharing_criteria =
+  std::optional<location_share_details> sharing_criteria =
     get_tracked_location_share_details_by_sharee(
         qp.nickname,
         qp.user_id);
 
-  if (sharing_criteria.first &&
-      sharing_criteria.second.active.first &&
-      sharing_criteria.second.active.second) {
+  if (sharing_criteria.has_value() &&
+      sharing_criteria.value().active.has_value() &&
+      sharing_criteria.value().active.value()) {
 
     date_range period = constrain_shared_location_dates(
-        sharing_criteria.second.shared_by_id,
+        sharing_criteria.value().shared_by_id,
         qp.date_from,
         qp.date_to,
-        sharing_criteria.second.max_minutes,
-        sharing_criteria.second.recent_minutes);
+        sharing_criteria.value().max_minutes,
+        sharing_criteria.value().recent_minutes);
 
     location_search_query_params modified_params = qp;
-    modified_params.user_id = sharing_criteria.second.shared_by_id;
+    modified_params.user_id = sharing_criteria.value().shared_by_id;
     modified_params.date_from = period.from;
     modified_params.date_to = period.to;
 
     // std::cout << "Performing tracked location search with: "
     //           << modified_params << '\n';
     retval = get_tracked_locations_for_user(modified_params, maximum);
+  } else {
+    // Search failed.  Set some sensible values.
+    retval.date_from = qp.date_from;
+    retval.date_to = qp.date_to;
   }
   return retval;
 }
@@ -920,14 +930,14 @@ void TrackPgDao::save_tracked_location(
       "$4, $5, $6, $7, $8, $9, $10, $11, $12)",
       qp.user_id, qp.longitude, qp.latitude,
       dt.get_time_as_iso8601_gmt(),
-      qp.hdop.first ? &qp.hdop.second : nullptr,
-      qp.altitude.first ? &qp.altitude.second : nullptr,
-      qp.speed.first ? &qp.speed.second : nullptr,
-      qp.bearing.first ? &qp.bearing.second : nullptr,
-      qp.satellite_count.first ? &qp.satellite_count.second : nullptr,
-      qp.provider.first ? &qp.provider.second : nullptr,
-      qp.battery.first ? &qp.battery.second : nullptr,
-      qp.note.first ? &qp.note.second : nullptr);
+      qp.hdop,
+      qp.altitude,
+      qp.speed,
+      qp.bearing,
+      qp.satellite_count,
+      qp.provider,
+      qp.battery,
+      qp.note);
   tx.commit();
 }
 
@@ -943,9 +953,9 @@ void TrackPgDao::save(const location_share_details& share)
         "SET recent_minutes=$3, max_minutes=$4, active=$5",
         share.shared_by_id,
         share.shared_to_id,
-        share.recent_minutes.first ? &share.recent_minutes.second : nullptr,
-        share.max_minutes.first ? &share.max_minutes.second : nullptr,
-        share.active.first ? &share.active.second : nullptr
+        share.recent_minutes,
+        share.max_minutes,
+        share.active
       );
     tx.commit();
   } catch (const std::exception& e) {
@@ -1034,10 +1044,14 @@ std::vector<TrackPgDao::track_share> TrackPgDao::get_track_sharing_by_user_id(
   std::vector<track_share> retval;
   for (result::const_iterator i = r.begin(); i != r.end(); ++i) {
     track_share ts;
-    ts.nickname = i["nickname"].as<std::string>();
-    ts.recent_minutes.first = i["recent_minutes"].to(ts.recent_minutes.second);
-    ts.max_minutes.first = i["max_minutes"].to(ts.max_minutes.second);
-    ts.active.first = i["active"].to(ts.active.second);
+    if (!i["nickname"].is_null())
+      ts.nickname = i["nickname"].as<std::string>();
+    if (!i["recent_minutes"].is_null())
+      ts.recent_minutes = i["recent_minutes"].as<int>();
+    if (!i["max_minutes"].is_null())
+      ts.max_minutes = i["max_minutes"].as<int>();
+    if (!i["active"].is_null())
+      ts.active = i["active"].as<bool>();
     retval.push_back(ts);
   }
   tx.commit();

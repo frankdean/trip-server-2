@@ -1,10 +1,10 @@
 // -*- mode: c++; fill-column: 80; indent-tabs-mode: nil; c-basic-offset: 2; -*-
-// vim: set tw=80 ts=2 sts=0 sw=2 et ft=cpp norl:
+// vim: set tw=80 ts=2 sts=0 sw=2 et ft=cpp norl: expandtab
 /*
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
 #include "../config.h"
 #include "itinerary_waypoint_edit_handler.hpp"
 #include "itinerary_handler.hpp"
@@ -53,8 +54,7 @@ void ItineraryWaypointEditHandler::do_preview_request(
   itinerary_id = std::stol(request.get_query_param("itineraryId"));
   const std::string wpt = request.get_query_param("waypointId");
   if (!wpt.empty()) {
-    waypoint_id.second = std::stol(wpt);
-    waypoint_id.first = true;
+    waypoint_id = std::stol(wpt);
   }
 }
 
@@ -72,7 +72,7 @@ void ItineraryWaypointEditHandler::append_pre_body_end(std::ostream& os) const
 void ItineraryWaypointEditHandler::build_form(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response,
-    ItineraryPgDao::waypoint* waypoint,
+    ItineraryPgDao::waypoint& waypoint,
     const std::vector<std::pair<std::string, std::string>> &georef_formats,
     const std::vector<std::pair<std::string, std::string>> &waypoint_symbols)
 {
@@ -86,7 +86,10 @@ void ItineraryWaypointEditHandler::build_form(
     "      <div class=\"col-12\">\n"
     "        <input type=\"hidden\" name=\"itineraryId\" value=\"" << itinerary_id << "\">\n"
     "        <input type=\"hidden\" name=\"waypoint_id\" value=\"";
-  append_value(response.content, waypoint->id.first, waypoint->id.second);
+  auto wpt_id = waypoint.id;
+  auto wpt_id_valid = wpt_id.has_value();
+  long wpt_id_value = wpt_id_valid ? wpt_id_value : 0;
+  append_optional_value(response.content, waypoint.id);
   response.content
     <<
     "\">\n"
@@ -96,21 +99,33 @@ void ItineraryWaypointEditHandler::build_form(
     "        <label for=\"input-name\">" << translate("Name") << "</label>\n"
     "        <input id=\"input-name\" name=\"name\" type=\"text\" size=\"30\" value=\"";
   append_value(response.content,
-               waypoint->id.first && waypoint->name.first,
-               x(waypoint->name.second));
+               waypoint.name.has_value(),
+               x(waypoint.name));
   response.content << "\"";
   append_element_disabled_flag(response.content, read_only);
   response.content
     <<
     ">\n"
-    "      </div>\n"
+    "      </div>\n";
+  if (invalid_position_text.has_value()) {
+    response.content
+      << "  <div class=\"alert alert-danger\">\n"
+      << "    <p>" << x(translate("Invalid position"))
+      << "</p>\n  </div>\n";
+  }
+  response.content
+    <<
     "      <div class=\"col-sm-8 col-lg-4\">\n"
     // Label for input of a location in a variety of formats
     "        <label for=\"input-position\">" << translate("Position") << "</label>\n"
     "        <input id=\"input-position\" name=\"position\" type=\"text\" size=\"30\" value=\"";
-  append_value(response.content, waypoint->id.first, waypoint->latitude);
-  append_value(response.content, waypoint->id.first, ',');
-  append_value(response.content, waypoint->id.first, waypoint->longitude);
+  if (invalid_position_text.has_value()) {
+    append_value(response.content, invalid_position_text.has_value(), x(invalid_position_text));
+  } else {
+    append_value(response.content, waypoint.id.has_value(), waypoint.latitude);
+    append_value(response.content, waypoint.id.has_value(), ',');
+    append_value(response.content, waypoint.id.has_value(), waypoint.longitude);
+  }
   response.content << "\"";
   append_element_disabled_flag(response.content, read_only);
   response.content
@@ -164,9 +179,7 @@ void ItineraryWaypointEditHandler::build_form(
     // Label for input of an altitude value
     "        <label for=\"input-altitude\">" << translate("Altitude") << "</label>\n"
     "        <input id=\"input-altitude\" name=\"altitude\" type=\"number\" min=\"-9999999\" max=\"99999999\" step=\"any\" value=\"";
-  append_value(response.content,
-               waypoint->id.first && waypoint->altitude.first,
-               waypoint->altitude.second);
+  append_optional_value(response.content, waypoint.altitude);
   response.content << "\"";
   append_element_disabled_flag(response.content, read_only);
   response.content
@@ -191,8 +204,8 @@ void ItineraryWaypointEditHandler::build_form(
       <<
       "          <option value=\"" << x(waypoint_symbol.first) << "\"";
     append_element_selected_flag(response.content,
-                                 waypoint->symbol.first &&
-                                 waypoint_symbol.first == waypoint->symbol.second) ;
+                                 waypoint.symbol.has_value() &&
+                                 waypoint_symbol.first == waypoint.symbol.value()) ;
     response.content
       <<
       ">" << x(waypoint_symbol.second) << "</option>\n";
@@ -205,10 +218,10 @@ void ItineraryWaypointEditHandler::build_form(
     // Label for input of a waypoint's time and date
     "        <label for=\"input-time\">" << translate("Time") << "</label>\n"
     "        <input id=\"input-time\" type=\"datetime-local\" name=\"time\" size=\"25\" step=\"1\" value=\"";
-  if (!waypoint->id.first && !waypoint->time.first)
-    waypoint->time = std::make_pair(true, std::chrono::system_clock::now());
-  if (waypoint->time.first)
-    response.content << dao_helper::datetime_as_html_input_value(waypoint->time.second);
+  if (!waypoint.id.has_value() && !waypoint.time.has_value())
+    waypoint.time = std::chrono::system_clock::now();
+  if (waypoint.time.has_value())
+    response.content << dao_helper::datetime_as_html_input_value(waypoint.time.value());
   response.content << "\"";
   append_element_disabled_flag(response.content, read_only);
   response.content
@@ -221,8 +234,8 @@ void ItineraryWaypointEditHandler::build_form(
     "        <label for=\"input-description\" style=\"vertical-align:top;\">" << translate("Description") << "</label>\n"
     "        <input id=\"input-description\" name=\"description\" type=\"text\" size=\"30\" value=\"";
   append_value(response.content,
-               waypoint->id.first && waypoint->description.first,
-               x(waypoint->description.second));
+               waypoint.description.has_value(),
+               x(waypoint.description));
   response.content << "\"";
   append_element_disabled_flag(response.content, read_only);
   response.content
@@ -237,8 +250,8 @@ void ItineraryWaypointEditHandler::build_form(
   append_element_disabled_flag(response.content, read_only);
   response.content << ">";
   append_value(response.content,
-               waypoint->id.first && waypoint->comment.first,
-               x(waypoint->comment.second));
+               waypoint.comment.has_value(),
+               x(waypoint.comment));
   append_element_disabled_flag(response.content, read_only);
   response.content
     <<
@@ -247,9 +260,9 @@ void ItineraryWaypointEditHandler::build_form(
     "      <div class=\"col-md-8 col-lg-4\">\n"
     "        <label for=\"input-samples\">" << translate("Garmin averaging sample count") << "</label>\n"
     "        <input id=\"input-samples\" name=\"samples\" type=\"number\" min=\"1\" max=\"99999\" value=\"";
-  append_value(response.content,
-               waypoint->id.first && waypoint->avg_samples.first,
-               waypoint->avg_samples.second);
+  append_optional_value(response.content,
+                        waypoint.avg_samples.has_value(),
+                        waypoint.avg_samples);
   response.content << '"';
   append_element_disabled_flag(response.content, read_only);
   response.content
@@ -260,8 +273,8 @@ void ItineraryWaypointEditHandler::build_form(
     "        <label for=\"input-type\">" << translate("OsmAnd category (type)") << "</label>\n"
     "        <input id=\"input-type\" name=\"type\" type=\"text\" value=\"";
   append_value(response.content,
-               waypoint->id.first && waypoint->type.first,
-               x(waypoint->type.second));
+               waypoint.type.has_value(),
+               x(waypoint.type));
   response.content << '"';
   append_element_disabled_flag(response.content, read_only);
   response.content
@@ -271,20 +284,20 @@ void ItineraryWaypointEditHandler::build_form(
     "      <div class=\"col-md-6 col-lg-4\">\n"
     "        <input id=\"input-ext-attrs\" name=\"ext-attrs\" type=\"hidden\" value=\"";
   append_value(response.content,
-               waypoint->id.first && waypoint->extended_attributes.first,
-               x(waypoint->extended_attributes.second));
+               waypoint.extended_attributes.has_value(),
+               x(waypoint.extended_attributes));
   response.content
     <<
     "\">\n"
     "        <label for=\"input-color\">" << translate("OsmAnd color") << "</label>\n"
     "        <input id=\"input-color\" name=\"color\" type=\"text\" placeholder=\"#ff001122\" pattern=\"^#[0-9a-fA-F]{1,8}$\" value=\"";
   // Extract OSMAnd color attribute from JSON
-  if (waypoint->extended_attributes.first) {
-    const json j_extended_attributes = json::parse(waypoint->extended_attributes.second);
+  if (waypoint.extended_attributes.has_value()) {
+    const json j_extended_attributes = json::parse(waypoint.extended_attributes.value());
     if (j_extended_attributes.contains(ItineraryUploadHandler::xml_osmand_color)) {
       const std::string osmand_color = j_extended_attributes.at(ItineraryUploadHandler::xml_osmand_color);
       append_value(response.content,
-                   waypoint->id.first && !osmand_color.empty(),
+                   !osmand_color.empty(),
                    x(osmand_color));
     }
   }
@@ -369,63 +382,72 @@ void ItineraryWaypointEditHandler::handle_authenticated_request(
     ItineraryPgDao::waypoint wpt;
     wpt.id = request.get_optional_post_param_long("waypoint_id");
     wpt.name = request.get_optional_post_param("name");
-    if (wpt.name.first)
-      dao_helper::trim(wpt.name.second);
-    wpt.longitude = std::stod(request.get_post_param("lng"));
-    wpt.latitude = std::stod(request.get_post_param("lat"));
+    try {
+      wpt.longitude = std::stod(request.get_post_param("lng"));
+      wpt.latitude = std::stod(request.get_post_param("lat"));
+      if (wpt.longitude > 180 || wpt.longitude < -180 ||
+          wpt.latitude > 90 || wpt.latitude < -90) {
+        invalid_position_text = request.get_post_param("position");
+      }
+    } catch (const std::invalid_argument &e) {
+      invalid_position_text = request.get_post_param("position");
+    }
     const auto time_str = request.get_optional_post_param("time");
-    wpt.time.first = time_str.first && !time_str.second.empty();
-    if (wpt.time.first)
-      wpt.time.second = DateTime(time_str.second).time_tp();
+    if (time_str.has_value() && !time_str.value().empty())
+      wpt.time = DateTime(time_str.value()).time_tp();
     wpt.altitude = request.get_optional_post_param_double("altitude");
     wpt.symbol = request.get_optional_post_param("wptSymbol");
     // Don't trim comment as trailing whitespace can be deliberate and necessary
-    wpt.comment = request.get_optional_post_param("comment");
+    wpt.comment = request.get_optional_post_param("comment", false);
     wpt.description = request.get_optional_post_param("description");
-    if (wpt.description.first)
-      dao_helper::trim(wpt.description.second);
     auto color = request.get_optional_post_param("color");
-    if (color.first) dao_helper::trim(color.second);
     const auto attrs = request.get_optional_post_param("ext-attrs");
     json j_extended_attributes;
-    if (attrs.first && !attrs.second.empty())
-      j_extended_attributes = json::parse(attrs.second);
-    if (color.first && !color.second.empty()) {
+    if (attrs.has_value() && !attrs.value().empty())
+      j_extended_attributes = json::parse(attrs.value());
+    if (color.has_value() && !color.value().empty()) {
       j_extended_attributes[ItineraryUploadHandler::xml_osmand_color]
-        = color.second;
+        = color.value();
     } else if (!j_extended_attributes.empty()) {
       j_extended_attributes.erase(ItineraryUploadHandler::xml_osmand_color);
     }
-    wpt.extended_attributes.first = !j_extended_attributes.empty();
-    if (wpt.extended_attributes.first)
-      wpt.extended_attributes.second = j_extended_attributes.dump();
+    if (!j_extended_attributes.empty())
+      wpt.extended_attributes = j_extended_attributes.dump();
     wpt.type = request.get_optional_post_param("type");
-    if (wpt.type.first)
-      dao_helper::trim(wpt.type.second);
     wpt.avg_samples = request.get_optional_post_param_long("samples");
 #ifdef HAVE_GDAL
     if (elevation_service) {
       auto altitude = elevation_service->get_elevation(
           wpt.longitude,
           wpt.latitude);
-      if (!wpt.altitude.first)
+      if (!wpt.altitude.has_value())
         wpt.altitude = altitude;
     }
 #endif
-    dao.save(get_user_id(), itinerary_id, wpt);
-    redirect(request, response,
-             get_uri_prefix() + "/itinerary?id=" +
-             std::to_string(itinerary_id) + "&active-tab=features");
+    if (!invalid_position_text.has_value()) {
+      dao.save(get_user_id(), itinerary_id, wpt);
+      redirect(request, response,
+               get_uri_prefix() + "/itinerary?id=" +
+               std::to_string(itinerary_id) + "&active-tab=features");
+      return;
+    }
+    // auto itinerary = dao.get_itinerary_summary(get_user_id(), itinerary_id);
+    // if (!itinerary.has_value())
+    //   throw BadRequestException("Itinerary ID not found");
+    read_only = false;
+    auto georef_formats = dao.get_georef_formats();
+    auto waypoint_symbols = dao.get_waypoint_symbols();
+    build_form(request, response, wpt, georef_formats, waypoint_symbols);
     return;
   }
   auto itinerary = dao.get_itinerary_summary(get_user_id(), itinerary_id);
-  if (!itinerary.first)
+  if (!itinerary.has_value())
     throw BadRequestException("Itinerary ID not found");
-  read_only = itinerary.second.shared_to_nickname.first;
+  read_only = itinerary.value().shared_to_nickname.has_value();
   auto georef_formats = dao.get_georef_formats();
   auto waypoint_symbols = dao.get_waypoint_symbols();
   ItineraryPgDao::waypoint waypoint;
-  if (waypoint_id.first)
-    waypoint = dao.get_waypoint(get_user_id(), itinerary_id, waypoint_id.second);
-  build_form(request, response, &waypoint, georef_formats, waypoint_symbols);
+  if (waypoint_id.has_value())
+    waypoint = dao.get_waypoint(get_user_id(), itinerary_id, waypoint_id.value());
+  build_form(request, response, waypoint, georef_formats, waypoint_symbols);
 }

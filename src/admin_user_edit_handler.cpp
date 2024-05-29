@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,30 +50,59 @@ void AdminUserEditHandler::build_form(
   os <<
     "  <div class=\"container-fluid bg-light\">\n"
     "    <form name=\"form\" method=\"post\">\n";
-  if (!new_user_flag && user_details.id.first) {
-    os << "      <input type=\"hidden\" name=\"user_id\" value=\"" << user_details.id.second << "\">\n";
+  if (!new_user_flag && user_details.id.has_value()) {
+    os << "      <input type=\"hidden\" name=\"user_id\" value=\"" << user_details.id.value() << "\">\n";
+  }
+  if (nickname_required_error) {
+    os <<
+      // Error message displayed when the nickname field is empty when editing a user record
+      "    <div id=\"nickname-required-error\" class=\"m-0 alert alert-danger\" role=\"alert\">" << translate("Nickname is required") << "    </div>\n";
   }
   os <<
     "      <div class=\"py-1\">\n"
     // Label for the user's nickname field
     "        <label for=\"nickname\">" << translate("Nickname") << "</label>\n"
     "        <input id=\"nickname\" name=\"nickname\" value=\"" << x(user_details.nickname) << "\" required>\n"
-    "      </div>\n"
+    "      </div>\n";
+  if (email_required_error) {
+    os <<
+      // Error message displayed when the email field is empty when editing a user record
+      "    <div id=\"email-required-error\" class=\"m-0 alert alert-danger\" role=\"alert\">" << translate("Email is required") << "    </div>\n";
+  }
+  os <<
     "      <div class=\"py-1\">\n"
     // Label for the user's email field
     "        <label for=\"email\">" << translate("Email") << "</label>\n"
     "        <input id=\"email\" name=\"email\" value=\"" << x(user_details.email) << "\" required>\n"
-    "      </div>\n"
+    "      </div>\n";
+  if (first_name_required_error) {
+    os <<
+      // Error message displayed when the first name field is empty when editing a user record
+      "    <div id=\"first-name-required-error\" class=\"m-0 alert alert-danger\" role=\"alert\">" << translate("First name is required") << "    </div>\n";
+  }
+  os <<
     "      <div class=\"py-1\">\n"
     // Label for the user's firstname field
     "        <label for=\"firstname\">" << translate("First name") << "</label>\n"
     "        <input id=\"firstname\" name=\"firstname\" value=\"" << x(user_details.firstname) << "\" required>\n"
-    "      </div>\n"
+    "      </div>\n";
+  if (last_name_required_error) {
+    os <<
+      // Error message displayed when the last name field is empty when editing a user record
+      "    <div id=\"last-name-required-error\" class=\"m-0 alert alert-danger\" role=\"alert\">" << translate("Last name is required") << "    </div>\n";
+  }
+  os <<
     "      <div class=\"py-1\">\n"
     // Label for the user's lastname field
     "        <label for=\"lastname\">" << translate("Last name") << "</label>\n"
-    "        <input id=\"lastname\" name=\"lastname\" value=\"" << x(user_details.lastname) << "\">\n"
-    "      </div>\n"
+    "        <input id=\"lastname\" name=\"lastname\" value=\"" << x(user_details.lastname) << "\" required>\n"
+    "      </div>\n";
+  if (password_required_error) {
+    os <<
+      // Error message displayed when the password field is empty when editing a user record
+      "    <div id=\"password-required-error\" class=\"m-0 alert alert-danger\" role=\"alert\">" << translate("Password is required") << "    </div>\n";
+  }
+  os <<
     "      <div id=\"div-password\" class=\"py-1\">\n";
   if (!new_user_flag) {
     // Instructions on using change password fields
@@ -144,31 +173,47 @@ void AdminUserEditHandler::save(
     SessionPgDao &session_dao)
 {
   SessionPgDao::user user_details;
-  try {
-    user_details.id.second = std::stol(request.get_post_param("user_id"));
-    user_details.id.first = true;
-  } catch (const std::invalid_argument &e) {
-    user_details.id.first = false;
-    user_details.uuid = std::make_pair(true, UUID::generate_uuid());
-  }
-  user_details.firstname = request.get_post_param("firstname");
-  user_details.lastname = request.get_post_param("lastname");
-  user_details.email = request.get_post_param("email");
-  user_details.nickname = request.get_post_param("nickname");
-  user_details.password.second = request.get_post_param("new-password");
-  user_details.password.first = !user_details.password.second.empty();
-  dao_helper::trim(user_details.firstname);
-  dao_helper::trim(user_details.lastname);
-  dao_helper::trim(user_details.email);
-  dao_helper::trim(user_details.nickname);
+  user_details.id = request.get_optional_post_param_long("user_id");
+  if (!user_details.id.has_value())
+    user_details.uuid = UUID::generate_uuid();
+  std::optional<std::string> v = request.get_optional_post_param("firstname");
+  if (v)
+    user_details.firstname = v.value();
+  else
+    first_name_required_error = true;
+  v = request.get_optional_post_param("lastname");
+  if (v)
+    user_details.lastname = v.value();
+  else
+    last_name_required_error = true;
+  v = request.get_optional_post_param("email");
+  if (v)
+    user_details.email = v.value();
+  else
+    email_required_error = true;
+  v = request.get_optional_post_param("nickname");
+  if (v)
+    user_details.nickname = v.value();
+  else
+    nickname_required_error = true;
 
-  if (user_details.password.first) {
+  user_details.password = request.get_optional_post_param("new-password");
+  if (new_user_flag && !user_details.password.has_value())
+    password_required_error = true;
+    
+  if (user_details.password.has_value()) {
     const auto confirm_password = request.get_post_param("confirm-password");
-    passwords_match_failure = confirm_password != user_details.password.second;
+    passwords_match_failure = confirm_password != user_details.password;
   }
+
   const auto s = request.get_post_param("admin-role");
   user_details.is_admin = (s == "on");
-  if (!passwords_match_failure) {
+  if (!(passwords_match_failure ||
+        nickname_required_error ||
+        email_required_error ||
+        first_name_required_error ||
+        last_name_required_error ||
+        password_required_error)) {
     try {
       session_dao.save(user_details);
       redirect(request, response, get_uri_prefix() + "/users");
@@ -195,7 +240,7 @@ void AdminUserEditHandler::handle_authenticated_request(
   if (!is_admin) {
     response.content.clear();
     response.content.str("");
-    response.status_code = HTTPStatus::unauthorized;
+    response.status_code = HTTPStatus::forbidden;
     create_full_html_page_for_standard_response(response);
     return;
   }

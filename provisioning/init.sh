@@ -3,7 +3,7 @@
 # This file is part of Trip Server 2, a program to support trip recording and
 # itinerary planning.
 #
-# Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+# Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

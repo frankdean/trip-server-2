@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,10 +53,10 @@ void ItinerarySharingEditHandler::build_form(
     "      <input type=\"hidden\" name=\"routing\" value=\"" << routing << "\">\n"
     "      <input type=\"hidden\" name=\"report-page\" value=\"" << report_page << "\">\n"
     "      <input type=\"hidden\" name=\"goto-page\" value=\"" << current_page << "\">\n";
-  if (shared_to_id.first)
+  if (shared_to_id.has_value())
     response.content
       <<
-      "      <input type=\"hidden\" name=\"shared_to_id\" value=\"" << shared_to_id.second << "\">\n";
+      "      <input type=\"hidden\" name=\"shared_to_id\" value=\"" << shared_to_id.value() << "\">\n";
   if (!is_new) {
     // If editing an existing user, the nickname is not submitted for the
     // disabled field, so include a hidden value to be posted
@@ -82,7 +82,7 @@ void ItinerarySharingEditHandler::build_form(
     // Label for checkbox indicating whether itinerary sharing is active for a specific nickname
     "      <label for=\"input-active\">" << translate("Active") << "</label>\n"
     "      <input id=\"input-active\" type=\"checkbox\" name=\"active\"";
-  if (itinerary_share.active.first && itinerary_share.active.second)
+  if (itinerary_share.active.has_value() && itinerary_share.active.value())
     response.content << " checked";
   response.content
     <<
@@ -104,11 +104,10 @@ void ItinerarySharingEditHandler::do_preview_request(
 {
   itinerary_id = std::stol(request.get_param("itinerary_id"));
   const std::string s = request.get_param("shared_to_id");
-  shared_to_id.first = !s.empty();
-  if (shared_to_id.first) {
-    shared_to_id.second = std::stol(s);
+  if (!s.empty()) {
+    shared_to_id = std::stol(s);
   }
-  is_new = !shared_to_id.first;
+  is_new = !shared_to_id.has_value();
   if (is_new) {
     // Title for the page when creating an itinerary share
     set_page_title(translate("Share Itinerary&mdash;New"));
@@ -135,8 +134,7 @@ void ItinerarySharingEditHandler::handle_authenticated_request(
   if (request.method == HTTPMethod::post) {
     const std::string s = request.get_post_param("active");
     if (!s.empty() && s == "on") {
-      itinerary_share.active.first = true;
-      itinerary_share.active.second = true;
+      itinerary_share.active = true;
     }
     const std::string action = request.get_post_param("action");
     if (action == "save") {
@@ -172,11 +170,11 @@ void ItinerarySharingEditHandler::handle_authenticated_request(
       redirect(request, response, os.str());
       return;
     }
-  } else if (!is_new && shared_to_id.first) {
+  } else if (!is_new && shared_to_id.has_value()) {
     ItineraryPgDao dao;
     itinerary_share = dao.get_itinerary_share(get_user_id(),
                                               itinerary_id,
-                                              shared_to_id.second);
+                                              shared_to_id.value());
   }
   build_form(response, itinerary_share);
 }

@@ -4,6 +4,7 @@
 /Dockerfile
 /Dockerfile-postgis
 /Dockerfile-tile-server
+/Dockerfile-trixie
 /INSTALL
 /Makefile
 /Makefile.in
@@ -82,8 +83,9 @@
 /tests/package.m4
 /tests/testsuite
 /tests/testsuite.log
+/trip-*.sha256sums
 /trip-*.tar.?z
+/trip-*.tar.bz2
 /trip-*.tar.sha256sums
 /trip-*.tar.zst
 /trip-*.zip
-/trip-*.tar.bz2

@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,20 +26,20 @@
 
 using namespace fdsd::trip;
 
-location p1(-0.134583, 51.500194, std::make_pair<bool, double>(true, 100));
-location p2(-0.491638, 51.493355, std::make_pair<bool, double>(true, 110));
-location p3(-1.093140, 51.500194, std::make_pair<bool, double>(true, 30));
-location p4(-1.562805, 51.518998, std::make_pair<bool, double>(true, 200));
-location p5(-3.1805419921875, 58.6054722343032, std::make_pair<bool, double>(true, 200));
-location p6(-1.2944233417511, 60.3088842900007, std::make_pair<bool, double>(true, 30));
-location p7(-7.108154296875, 62.1757596207084, std::make_pair<bool, double>(true, 40));
-location p8(-2.296142578125, 63.3816786930298, std::make_pair<bool, double>(true, 30));
+location p1(-0.134583, 51.500194, std::optional<double>(100));
+location p2(-0.491638, 51.493355, std::optional<double>(110));
+location p3(-1.093140, 51.500194, std::optional<double>(30));
+location p4(-1.562805, 51.518998, std::optional<double>(200));
+location p5(-3.1805419921875, 58.6054722343032, std::optional<double>(200));
+location p6(-1.2944233417511, 60.3088842900007, std::optional<double>(30));
+location p7(-7.108154296875, 62.1757596207084, std::optional<double>(40));
+location p8(-2.296142578125, 63.3816786930298, std::optional<double>(30));
 
-location p10(2.308502, 48.858955, std::make_pair<bool, double>(true, 42));
-location p11(2.325325, 48.885263, std::make_pair<bool, double>(true, 68));
-location p12(2.365150, 48.872732, std::make_pair<bool, double>(true, 42));
-location p13(2.363091, 48.855793, std::make_pair<bool, double>(true, 41));
-location p14(2.314854, 48.858052, std::make_pair<bool, double>(true, 38));
+location p10(2.308502, 48.858955, std::optional<double>(42));
+location p11(2.325325, 48.885263, std::optional<double>(68));
+location p12(2.365150, 48.872732, std::optional<double>(42));
+location p13(2.363091, 48.855793, std::optional<double>(41));
+location p14(2.314854, 48.858052, std::optional<double>(38));
 
 location p20(-8.4844798208508632, -6.602169639459575);
 location p21(-4.6028008208115141, 12.543667966533093);
@@ -217,11 +217,11 @@ bool test_stats_single_leg_ascent()
   };
   GeoStatistics geo;
   auto stats = geo.add_path(points.begin(), points.end());
-  bool retval = stats.ascent.first && stats.ascent.second == 10 &&
-    !stats.descent.first &&
-    stats.lowest.first && stats.lowest.second == 100 &&
-    stats.highest.first && stats.highest.second == 110 &&
-    stats.distance.first && stats.distance.second > 0;
+  bool retval = stats.ascent.has_value() && stats.ascent.value() == 10 &&
+    !stats.descent.has_value() &&
+    stats.lowest.has_value() && stats.lowest.value() == 100 &&
+    stats.highest.has_value() && stats.highest.value() == 110 &&
+    stats.distance.has_value() && stats.distance.value() > 0;
   if (!retval)
     std::cerr << "test_stats_single_leg_ascent() failed:\n" << stats << '\n';
   return retval;
@@ -235,11 +235,11 @@ bool test_stats_single_leg_descent()
   };
   GeoStatistics geo;
   auto stats = geo.add_path(points.begin(), points.end());
-  bool retval = !stats.ascent.first &&
-    stats.descent.first && stats.descent.second == 10 &&
-    stats.lowest.first && stats.lowest.second == 100 &&
-    stats.highest.first && stats.highest.second == 110 &&
-    stats.distance.first && stats.distance.second > 0;
+  bool retval = !stats.ascent.has_value() &&
+    stats.descent.has_value() && stats.descent.value() == 10 &&
+    stats.lowest.has_value() && stats.lowest.value() == 100 &&
+    stats.highest.has_value() && stats.highest.value() == 110 &&
+    stats.distance.has_value() && stats.distance.value() > 0;
   if (!retval)
     std::cerr << "test_stats_single_leg_descent() failed:\n" << stats << '\n';
   return retval;
@@ -249,18 +249,19 @@ bool test_stats()
 {
   GeoStatistics geo;
   auto stats = geo.add_path(test_points_1.begin(), test_points_1.end());
-  bool retval = stats.ascent.first && stats.ascent.second == 190 &&
-    stats.descent.first && stats.descent.second == 260 &&
-    stats.lowest.first && stats.lowest.second == 30 &&
-    stats.highest.first && stats.highest.second == 200 &&
-    stats.distance.first && stats.distance.second > 0 &&
-    geo.get_ascent().first && geo.get_ascent().second == stats.ascent.second &&
-    geo.get_descent().first && geo.get_descent().second == stats.descent.second &&
-    geo.get_lowest().first && geo.get_lowest().second == stats.lowest.second &&
-    geo.get_highest().first && geo.get_highest().second == stats.highest.second &&
-    geo.get_distance().first && geo.get_distance().second == stats.distance.second;
+  bool retval = stats.ascent.has_value() && stats.ascent.value() == 190 &&
+    stats.descent.has_value() && stats.descent.value() == 260 &&
+    stats.lowest.has_value() && stats.lowest.value() == 30 &&
+    stats.highest.has_value() && stats.highest.value() == 200 &&
+    stats.distance.has_value() && stats.distance.value() > 0 &&
+    geo.get_ascent().has_value() && geo.get_ascent().value() == stats.ascent.value() &&
+    geo.get_descent().has_value() && geo.get_descent().value() == stats.descent.value() &&
+    geo.get_lowest().has_value() && geo.get_lowest().value() == stats.lowest.value() &&
+    geo.get_highest().has_value() && geo.get_highest().value() == stats.highest.value() &&
+    geo.get_distance().has_value() && geo.get_distance().value() == stats.distance.value();
   if (!retval)
-    std::cerr << "test_stats() failed:\n" << stats << '\n';
+    std::cerr << "test_stats() failed:\n" << stats << '\n'
+              << geo << '\n';
   return retval;
 }
 
@@ -268,19 +269,19 @@ bool test_stats_distance()
 {
   GeoStatistics geo;
   auto stats = geo.add_path(test_points_2.begin(), test_points_2.end());
-  bool retval = stats.ascent.first && stats.ascent.second == 26 &&
-    stats.descent.first && stats.descent.second == 30 &&
-    stats.lowest.first && stats.lowest.second == 38 &&
-    stats.highest.first && stats.highest.second == 68 &&
-    stats.distance.first && stats.distance.second > 0 &&
-    geo.get_ascent().first && geo.get_ascent().second == stats.ascent.second &&
-    geo.get_descent().first && geo.get_descent().second == stats.descent.second &&
-    geo.get_lowest().first && geo.get_lowest().second == stats.lowest.second &&
-    geo.get_highest().first && geo.get_highest().second == stats.highest.second &&
-    geo.get_distance().first && geo.get_distance().second == stats.distance.second &&
-    std::abs(std::round((geo.get_distance().second - 11.829) * 1000) / 1000) < 1;
+  bool retval = stats.ascent.has_value() && stats.ascent.value() == 26 &&
+    stats.descent.has_value() && stats.descent.value() == 30 &&
+    stats.lowest.has_value() && stats.lowest.value() == 38 &&
+    stats.highest.has_value() && stats.highest.value() == 68 &&
+    stats.distance.has_value() && stats.distance.value() > 0 &&
+    geo.get_ascent().has_value() && geo.get_ascent().value() == stats.ascent.value() &&
+    geo.get_descent().has_value() && geo.get_descent().value() == stats.descent.value() &&
+    geo.get_lowest().has_value() && geo.get_lowest().value() == stats.lowest.value() &&
+    geo.get_highest().has_value() && geo.get_highest().value() == stats.highest.value() &&
+    geo.get_distance().has_value() && geo.get_distance().value() == stats.distance.value() &&
+    std::abs(std::round((geo.get_distance().value() - 11.829) * 1000) / 1000) < 1;
   if (!retval)
-    std::cerr << "test_stats_distance() failed:\n" << stats << '\n' << std::round(geo.get_distance().second) << '\n';
+    std::cerr << "test_stats_distance() failed:\n" << stats << '\n' << std::round(geo.get_distance().value()) << '\n';
   return retval;
 }
 
@@ -297,35 +298,35 @@ bool test_stats_distance_multi_path()
   part2.push_back(*i++);
   auto stats1 = geo.add_path(part1.begin(), part1.end());
   auto stats2 = geo.add_path(part2.begin(), part2.end());
-  bool retval = stats1.ascent.first && stats1.ascent.second == 26 &&
-    !stats1.descent.first &&
-    stats1.lowest.first && stats1.lowest.second == 42 &&
-    stats1.highest.first && stats1.highest.second == 68 &&
-    stats1.distance.first && stats1.distance.second > 0 &&
-    !stats2.ascent.first &&
-    stats2.descent.first && stats2.descent.second == 4 &&
-    stats2.lowest.first && stats2.lowest.second == 38 &&
-    stats2.highest.first && stats2.highest.second == 42 &&
-    stats2.distance.first && stats2.distance.second > 0 &&
-    geo.get_ascent().first && geo.get_ascent().second == 26 &&
-    geo.get_descent().first && geo.get_descent().second == 30 &&
-    geo.get_lowest().first && geo.get_lowest().second == 38 &&
-    geo.get_highest().first && geo.get_highest().second == 68 &&
-    geo.get_distance().first &&
-    std::abs(std::round(geo.get_distance().second
-                        - stats1.distance.second
+  bool retval = stats1.ascent.has_value() && stats1.ascent.value() == 26 &&
+    !stats1.descent.has_value() &&
+    stats1.lowest.has_value() && stats1.lowest.value() == 42 &&
+    stats1.highest.has_value() && stats1.highest.value() == 68 &&
+    stats1.distance.has_value() && stats1.distance.value() > 0 &&
+    !stats2.ascent.has_value() &&
+    stats2.descent.has_value() && stats2.descent.value() == 4 &&
+    stats2.lowest.has_value() && stats2.lowest.value() == 38 &&
+    stats2.highest.has_value() && stats2.highest.value() == 42 &&
+    stats2.distance.has_value() && stats2.distance.value() > 0 &&
+    geo.get_ascent().has_value() && geo.get_ascent().value() == 26 &&
+    geo.get_descent().has_value() && geo.get_descent().value() == 30 &&
+    geo.get_lowest().has_value() && geo.get_lowest().value() == 38 &&
+    geo.get_highest().has_value() && geo.get_highest().value() == 68 &&
+    geo.get_distance().has_value() &&
+    std::abs(std::round(geo.get_distance().value()
+                        - stats1.distance.value()
                         - 3.22847 // The distance between the first and second paths
-                        - stats2.distance.second)) < 1 &&
-    std::abs(std::round((geo.get_distance().second - 11.829) * 1000) / 1000) < 1;
+                        - stats2.distance.value())) < 1 &&
+    std::abs(std::round((geo.get_distance().value() - 11.829) * 1000) / 1000) < 1;
   if (!retval)
     std::cerr << "test_stats_distance_multi_path() failed:\n" << "stats1: " << stats1 << '\n'
               << "stats2: " << stats2 << '\n'
               << "Difference in total of separate distances: "
-              << std::abs(std::round(geo.get_distance().second
-                                     - stats1.distance.second
-                                     - stats2.distance.second)) << '\n'
+              << std::abs(std::round(geo.get_distance().value()
+                                     - stats1.distance.value()
+                                     - stats2.distance.value())) << '\n'
               << "overall distance: "
-              << std::round(geo.get_distance().second) << '\n';
+              << std::round(geo.get_distance().value()) << '\n';
   return retval;
 }
 

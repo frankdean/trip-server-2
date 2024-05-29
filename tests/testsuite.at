@@ -1,5 +1,5 @@
 AT_INIT
-AT_COPYRIGHT([Copyright (C) 2021-2022 Frank Dean])
+AT_COPYRIGHT([Copyright (C) 2022-2024 Frank Dean])
 AT_COLOR_TESTS
 AT_SETUP([generate-uuid])
 AT_CHECK_UNQUOTED(["${abs_top_builddir}"/src/test_uuid],,ignore,ignore)

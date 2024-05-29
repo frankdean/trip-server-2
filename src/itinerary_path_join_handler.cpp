@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,15 +38,7 @@ void ItineraryPathJoinHandler::build_form(
     const std::vector<ItineraryPgDao::path_summary> paths)
 {
   const auto first_path = paths.front();
-  if (joined_path_name.empty()) {
-    const std::string name = first_path.name.first ? first_path.name.second : "";
-    std::ostringstream new_name;
-    // Formatted default name when creating a joined path with a parameter of
-    // an existing path name
-    new_name << format(translate("{1} (joined)")) % name;
-    joined_path_name = new_name.str();
-  }
-  if (!joined_path_color_key.first)
+  if (!joined_path_color_key.has_value())
     joined_path_color_key = first_path.color_key;
   os <<
     "<div class=\"container-fluid\">\n"
@@ -54,48 +46,53 @@ void ItineraryPathJoinHandler::build_form(
     "  <form name=\"form\" method=\"post\">\n"
     "    <input type=\"hidden\" name=\"itineraryId\" value=\"" << itinerary_id << "\">\n"
     "    <table id=\"paths-table\" class=\"table table-striped\">\n";
+
   int position = 0;
   for (const auto &path : paths) {
-    if (path.id.first) {
+    if (!joined_path_name && path.name) {
+      joined_path_name = path.name;
+      append_name(joined_path_name, "(joined)");
+    }
+    if (path.id.has_value()) {
       os <<
         "      <tr>\n"
         "        <td>\n"
-        "        <input type=\"hidden\" name=\"path_id[" << position << "]\" value=\"" << path.id.second << "\">\n"
+        "        <input type=\"hidden\" name=\"path_id[" << position << "]\" value=\"" << path.id.value() << "\">\n"
         // Label for moving a track or path up in a list of paths being joined
-        "          <button class=\"btn btn-info mb-2\" name=\"up[" << position << "]\" value=\"" << path.id.second << "\" accesskey=\"u\">" << translate("Up") << "</button>\n"
+        "          <button class=\"btn btn-info mb-2\" name=\"up[" << position << "]\" value=\"" << path.id.value() << "\" accesskey=\"u\">" << translate("Up") << "</button>\n"
         // Label for moving a track or path down in a list of paths being joined
-        "          <button class=\"btn btn-info mb-2\" name=\"down[" << position << "]\" value=\"" << path.id.second << "\" accesskey=\"d\">" << translate("Down") << "</button>\n"
+        "          <button class=\"btn btn-info mb-2\" name=\"down[" << position << "]\" value=\"" << path.id.value() << "\" accesskey=\"d\">" << translate("Down") << "</button>\n"
         "        </td>\n"
         "        <td><span>";
-      if (path.name.first) {
-        os << x(path.name.second);
-      } else if (path.id.first) {
+      if (path.name.has_value()) {
+        os << x(path.name.value());
+      } else if (path.id.has_value()) {
         // Database ID of an item, typically a path, track or waypoint
-        os << format(translate("ID:&nbsp;{1,number=left}")) % path.id.second;
+        os << format(translate("ID:&nbsp;{1,number=left}")) % path.id.value();
       }
       os <<
         "</span></td>\n"
-        "        <td>" << (path.color_description.first ? x(path.color_description.second) : "") << "</td>\n"
+        "        <td>" << (path.color_description.has_value() ? x(path.color_description.value()) : "") << "</td>\n"
         "        <td>";
-      if (path.distance.first) {
+      if (path.distance.has_value()) {
         os <<
           // Shows distance in kilometers
-          format(translate("{1,num=fixed,precision=2}&nbsp;km")) % path.distance.second;
+          format(translate("{1,num=fixed,precision=2}&nbsp;km")) % path.distance.value();
       }
     }
     os
       <<
       "<td>\n"
       "        <td>";
-    if (path.distance.first) {
+    if (path.distance.has_value()) {
       os <<
         // Shows distance in miles
-        format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (path.distance.second / kms_per_mile);
+        format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (path.distance.value() / kms_per_mile);
     }
     os << "<td>\n";
-    if (path.ascent.first || path.descent.first) {
-      const double ascent = path.ascent.first ? path.ascent.second : 0;
-      const double descent = path.descent.first ? path.descent.second : 0;
+    if (path.ascent.has_value() || path.descent.has_value()) {
+      const double ascent = path.ascent.has_value() ? path.ascent.value() : 0;
+      const double descent = path.descent.has_value() ? path.descent.value() : 0;
       os
         <<
         "        <td>"
@@ -110,9 +107,9 @@ void ItineraryPathJoinHandler::build_form(
     } else {
       os << "        <td></td><td></td>\n";
     }
-    if (path.highest.first || path.lowest.first) {
-      const double highest = path.highest.first ? path.highest.second : 0;
-      const double lowest = path.lowest.first ? path.lowest.second : 0;
+    if (path.highest.has_value() || path.lowest.has_value()) {
+      const double highest = path.highest.has_value() ? path.highest.value() : 0;
+      const double lowest = path.lowest.has_value() ? path.lowest.value() : 0;
       os
         <<
         "        <td>"
@@ -147,7 +144,7 @@ void ItineraryPathJoinHandler::build_form(
     "        <option value=\"\">-- not set --</option>\n";
   for (const auto &c : colors) {
     os << "        <option value=\"" << x(c.first) << "\"";
-    append_element_selected_flag(os, joined_path_color_key.first && joined_path_color_key.second == c.first);
+    append_element_selected_flag(os, joined_path_color_key.has_value() && joined_path_color_key.value() == c.first);
     os << ">" << x(c.second) << "</option>\n";
   }
   os <<
@@ -194,10 +191,10 @@ void ItineraryPathJoinHandler::do_preview_request(
   if (request.method == HTTPMethod::post) {
     action = request.get_param("action");
     // std::cout << "Action: \"" << action << "\"\n";
-    joined_path_name = request.get_param("name");
+    joined_path_name = request.get_optional_post_param("name");
     const auto color_key = request.get_param("color_key");
-    if ((joined_path_color_key.first = !color_key.empty()))
-      joined_path_color_key.second = color_key;
+    if (!color_key.empty())
+      joined_path_color_key = color_key;
     down_action_map = request.extract_array_param_map("down");
     up_action_map = request.extract_array_param_map("up");
     posted_paths_map = request.extract_array_param_map("path_id");
@@ -226,8 +223,8 @@ void ItineraryPathJoinHandler::handle_authenticated_request(
       // std::cout << "Re-ordering paths read from DB\n";
       std::map<long, ItineraryPgDao::path_summary> temp_map;
       for (const auto &p : db_paths)
-        if (p.id.first)
-          temp_map[p.id.second] = p;
+        if (p.id.has_value())
+          temp_map[p.id.value()] = p;
       for (const auto &p : posted_paths_map)
         paths.push_back(temp_map.at(std::stol(p.second)));
       // for (const auto &path : paths) {

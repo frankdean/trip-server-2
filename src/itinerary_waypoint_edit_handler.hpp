@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #include "trip_request_handler.hpp"
 #include "itinerary_pg_dao.hpp"
+#include <optional>
 #include <vector>
 
 namespace fdsd {
@@ -39,8 +40,10 @@ class ElevationService;
 class ItineraryWaypointEditHandler : public TripAuthenticatedRequestHandler {
   std::shared_ptr<ElevationService> elevation_service;
   bool read_only;
+  /// Contains the user supplied position/location text when it couldn't be converted to a lat/lng
+  std::optional<std::string> invalid_position_text;
   long itinerary_id;
-  std::pair<bool, long> waypoint_id;
+  std::optional<long> waypoint_id;
   /// The format control code for displaying waypoint coordinates in e.g. '%i%d'
   std::string coord_format;
   /// The formatting code for ordering waypoint coordinates in, e.g. 'lat,lng'
@@ -48,7 +51,7 @@ class ItineraryWaypointEditHandler : public TripAuthenticatedRequestHandler {
   void build_form(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response,
-      ItineraryPgDao::waypoint* waypoint,
+      ItineraryPgDao::waypoint& waypoint,
       const std::vector<std::pair<std::string, std::string>> &georef_formats,
       const std::vector<std::pair<std::string, std::string>> &waypoint_symbols);
 protected:
@@ -66,6 +69,7 @@ public:
     TripAuthenticatedRequestHandler(config),
     elevation_service(elevation_service),
     read_only(true),
+    invalid_position_text(),
     itinerary_id(),
     waypoint_id(),
     coord_format(),

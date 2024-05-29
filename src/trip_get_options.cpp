@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ void TripGetOptions::show_version_info() const
 {
   std::cout
     << PACKAGE << " " << VERSION << '\n'
-    << "Copyright (C) 2022-2023 Frank Dean\n"
+    << "Copyright (C) 2022-2024 Frank Dean\n"
     << "This program comes with ABSOLUTELY NO WARRANTY.\n"
     << "This is free software, and you are welcome to redistribute it\n"
     << "under certain conditions.\n"

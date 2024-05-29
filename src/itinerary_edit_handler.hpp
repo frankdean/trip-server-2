@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #include "trip_request_handler.hpp"
 #include "itinerary_pg_dao.hpp"
+#include <optional>
 
 namespace fdsd {
 namespace web {
@@ -36,7 +37,7 @@ namespace trip {
 class ItineraryEditHandler : public TripAuthenticatedRequestHandler {
   bool is_new;
   bool no_title_error;
-  std::pair<bool, long> itinerary_id;
+  std::optional<long> itinerary_id;
   void build_form(web::HTTPServerResponse& response,
                   const ItineraryPgDao::itinerary_description& itinerary);
 protected:
@@ -50,7 +51,8 @@ public:
   ItineraryEditHandler(std::shared_ptr<TripConfig> config) :
     TripAuthenticatedRequestHandler(config),
     is_new(false),
-    no_title_error(false) { itinerary_id = std::make_pair(false, 0); }
+    no_title_error(false),
+    itinerary_id() {}
   virtual ~ItineraryEditHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItineraryEditHandler";

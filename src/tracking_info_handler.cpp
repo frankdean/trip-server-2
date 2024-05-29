@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,8 +71,8 @@ void TrackingInfoHandler::build_form(
     "  <p>" << translate("Use one of the following online tracking applications to log your journeys:") << "</p>\n"
     "    <ul>\n"
     "      <li><a href=\"https://www.fdsd.co.uk/triplogger/\" target=\"_blank\">TripLogger</a></li>\n"
-    "      <li><a href=\"http://code.mendhak.com/gpslogger/\" target=\"_blank\">GPSLogger for Android</a></li>\n"
-    "      <li><a href=\"http://osmand.net/\">OsmAnd</a>&mdash;<a href=\"https://osmand.net/docs/user/plugins/trip-recording\" target=\"_blank\">trip recording plug-in</a>\n"
+    "      <li><a href=\"https://gpslogger.app\" target=\"_blank\">GPSLogger for Android</a></li>\n"
+    "      <li><a href=\"https://osmand.net/\">OsmAnd</a>&mdash;<a href=\"https://osmand.net/docs/user/plugins/trip-recording\" target=\"_blank\">trip recording plug-in</a>\n"
     "      <li><a href=\"https://www.traccar.org/client/\" target=\"_blank\">Traccar Client</a></li>\n"
     "    </ul>\n"
     "\n"

@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "itinerary_pg_dao.hpp"
 #include "../trip-server-common/src/pagination.hpp"
 #include <boost/locale.hpp>
+#include <optional>
 #include <ostream>
 #include <string>
 
@@ -40,6 +41,7 @@ class ItinerarySearchResultsHandler : public TripAuthenticatedRequestHandler {
   double longitude;
   double latitude;
   double radius;
+  std::optional<std::string> error_message;
   void build_form(
       std::ostream &os,
       const web::Pagination& pagination,

@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022-2023 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ void ItineraryRouteEditHandler::build_form(std::ostream &os,
     "  <form name=\"form\" method=\"post\">\n"
     "    <input type=\"hidden\" name=\"id\" value=\"" << itinerary_id << "\">\n"
     "    <input type=\"hidden\" name=\"itineraryId\" value=\"" << itinerary_id << "\">\n"
-    "    <input type=\"hidden\" name=\"routeId\" value=\"" << route.id.second << "\">\n"
+    "    <input type=\"hidden\" name=\"routeId\" value=\"" << route.id.value() << "\">\n"
     "    <input type=\"hidden\" name=\"shared\" value=\"" << (read_only ? "true" : "false") << "\">\n"
     "    <input type=\"hidden\" name=\"active-tab\" value=\"features\">\n";
   if (route.points.empty()) {
@@ -58,65 +58,65 @@ void ItineraryRouteEditHandler::build_form(std::ostream &os,
   } else {
     os <<
       "    <div>";
-    if (route.name.first) {
+    if (route.name.has_value()) {
       // Formatted output of label and route name
-      os << format(translate("<strong>Name:</strong>&nbsp;{1}")) % x(route.name.second);
-    } else if (route.id.first) {
+      os << format(translate("<strong>Name:</strong>&nbsp;{1}")) % x(route.name.value());
+    } else if (route.id.has_value()) {
       // Database ID of an item, typically a route, track or waypoint
-      os << format(translate("<strong>ID:</strong>&nbsp;{1,number=left}")) % route.id.second;
+      os << format(translate("<strong>ID:</strong>&nbsp;{1,number=left}")) % route.id.value();
     }
     os << "</div>\n";
-    if (route.color_description.first) {
+    if (route.color_description.has_value()) {
       // Formatted output of label and route color
-      os << "    <div>" << format(translate("<strong>Color:</strong>&nbsp;{1}")) % x(route.color_description.second) << "</div>\n";
+      os << "    <div>" << format(translate("<strong>Color:</strong>&nbsp;{1}")) % x(route.color_description.value()) << "</div>\n";
     }
     os << "    <div class=\"mb-3\">\n";
-    if (route.distance.first) {
+    if (route.distance.has_value()) {
       // Shows the total distance for a route or route in kilometers
       os
-        << "      <span>&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;km")) % route.distance.second
+        << "      <span>&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;km")) % route.distance.value()
         // Shows the total distance for a route or route in miles
-        << "&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (route.distance.second / kms_per_mile) << "</span>\n";
+        << "&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (route.distance.value() / kms_per_mile) << "</span>\n";
     }
-    if (route.ascent.first) {
+    if (route.ascent.has_value()) {
       // Shows the total ascent for a route or route in meters
-      os << "      <span>&nbsp;↗︎" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % route.ascent.second << "</span>\n";
+      os << "      <span>&nbsp;↗︎" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % route.ascent.value() << "</span>\n";
     }
-    if (route.descent.first) {
+    if (route.descent.has_value()) {
       // Shows the total descent for a route or route in kilometers
-      os << "      <span>&nbsp;↘" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % route.descent.second << "</span>\n";
+      os << "      <span>&nbsp;↘" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % route.descent.value() << "</span>\n";
     }
-    if (route.ascent.first) {
+    if (route.ascent.has_value()) {
       // Shows the total ascent for a route or route in feet
-      os << "      <span>&nbsp;↗︎" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (route.ascent.second / inches_per_meter / 12) << "</span>\n";
+      os << "      <span>&nbsp;↗︎" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (route.ascent.value() / inches_per_meter / 12) << "</span>\n";
     }
-    if (route.descent.first) {
+    if (route.descent.has_value()) {
       // Shows the total descent for a route or route in feet
-      os << "      <span>&nbsp;↘" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (route.descent.second / inches_per_meter / 12) << "</span>\n";
+      os << "      <span>&nbsp;↘" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (route.descent.value() / inches_per_meter / 12) << "</span>\n";
     }
-    if (route.highest.first) {
+    if (route.highest.has_value()) {
       os
         // Shows the highest point of a route or route in meters
-        << "      <span>&nbsp;" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % route.highest.second << "</span>";
+        << "      <span>&nbsp;" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % route.highest.value() << "</span>";
     }
-    if (route.highest.first || route.lowest.first)
+    if (route.highest.has_value() || route.lowest.has_value())
       os << "&nbsp;⇅";
-    if (route.lowest.first) {
+    if (route.lowest.has_value()) {
       os
         // Shows the lowest point of a route or route in meters
-        << "<span>" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % route.lowest.second << "</span>\n";
+        << "<span>" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % route.lowest.value() << "</span>\n";
     }
-    if (route.highest.first) {
+    if (route.highest.has_value()) {
       os
         // Shows the highest point of a route or route in meters
-        << "      <span>&nbsp;" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (route.highest.second / inches_per_meter / 12) << "</span>";
+        << "      <span>&nbsp;" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (route.highest.value() / inches_per_meter / 12) << "</span>";
     }
-    if (route.highest.first || route.lowest.first)
+    if (route.highest.has_value() || route.lowest.has_value())
       os << "&nbsp;&#x21c5;";
-    if (route.lowest.first) {
+    if (route.lowest.has_value()) {
       os
         // Shows the lowest point of a route or route in meters
-        << "<span>" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (route.lowest.second / inches_per_meter / 12) << "</span>\n";
+        << "<span>" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (route.lowest.value() / inches_per_meter / 12) << "</span>\n";
     }
     os
       <<
@@ -148,41 +148,41 @@ void ItineraryRouteEditHandler::build_form(std::ostream &os,
       "          <th class=\"text-start\">" << translate("Symbol") << "</th>\n"
       "        </tr>\n";
     for (const auto &point : route.points) {
-      if (point.id.first) {
+      if (point.id.has_value()) {
         std::ostringstream label;
-        label << "select-point-" << point.id.second;
+        label << "select-point-" << point.id.value();
         os <<
           "        <tr>\n"
-          "          <td class=\"text-start\">\n            <input id=\"" << label.str() << "\" type=\"checkbox\" name=\"point[" << point.id.second << "]\" value=\"" << point.id.second << "\"";
-        if (select_all || selected_point_id_map.find(point.id.second) != selected_point_id_map.end())
+          "          <td class=\"text-start\">\n            <input id=\"" << label.str() << "\" type=\"checkbox\" name=\"point[" << point.id.value() << "]\" value=\"" << point.id.value() << "\"";
+        if (select_all || selected_point_id_map.find(point.id.value()) != selected_point_id_map.end())
           os << " checked";
         os << ">\n"
-          "            <label for=\"" << label.str() << "\">" << as::number << std::setprecision(0) << point.id.second << as::posix << "</label>\n"
+          "            <label for=\"" << label.str() << "\">" << as::number << std::setprecision(0) << point.id.value() << as::posix << "</label>\n"
           "          </td>\n"
           "          <td class=\"text-end\">" << std::fixed << std::setprecision(6) << point.latitude << "</td>\n"
           "          <td class=\"text-end\">" << point.longitude << "</td>\n"
           "          <td class=\"text-end\">";
-          if (point.altitude.first)
-            os << std::fixed << std::setprecision(0) << point.altitude.second;
-          os <<
-            "</td>\n"
-            "          <td class=\"text-start\">";
-          if (point.name.first)
-            os << x(point.name.second);
-          os << "</td>\n"
-            "          <td class=\"text-start\">";
-          if (point.comment.first)
-            os << x(point.comment.second);
-          os << "</td>\n"
-            "          <td class=\"text-start\">";
-          if (point.description.first)
-            os << x(point.description.second);
-          os << "</td>\n"
-            "          <td class=\"text-start\">";
-          if (point.symbol.first)
-            os << x(point.symbol.second);
-          os << "</td>\n"
-            "        </tr>\n";
+        if (point.altitude.has_value())
+          os << std::fixed << std::setprecision(0) << point.altitude.value();
+        os <<
+          "</td>\n"
+          "          <td class=\"text-start\">";
+        if (point.name.has_value())
+          os << x(point.name.value());
+        os << "</td>\n"
+          "          <td class=\"text-start\">";
+        if (point.comment.has_value())
+          os << x(point.comment.value());
+        os << "</td>\n"
+          "          <td class=\"text-start\">";
+        if (point.description.has_value())
+          os << x(point.description.value());
+        os << "</td>\n"
+          "          <td class=\"text-start\">";
+        if (point.symbol.has_value())
+          os << x(point.symbol.value());
+        os << "</td>\n"
+          "        </tr>\n";
       }
     }
     os <<
@@ -233,8 +233,8 @@ void ItineraryRouteEditHandler::build_form(std::ostream &os,
     json features;
     json points;
     for (const auto point : route.points) {
-      if (point.id.first)
-        points.push_back(point.id.second);
+      if (point.id.has_value())
+        points.push_back(point.id.value());
     }
     json j{
       {"itinerary_id", itinerary_id},
@@ -265,8 +265,8 @@ void ItineraryRouteEditHandler::delete_points(
           route.points.begin(),
           route.points.end(),
           [&](const ItineraryPgDao::route_point &point) {
-            bool retval = point.id.first &&
-              selected_point_id_map.find(point.id.second) !=
+            bool retval = point.id.has_value() &&
+              selected_point_id_map.find(point.id.value()) !=
               selected_point_id_map.end();
             if (retval)
               dirty = true;
@@ -287,18 +287,18 @@ void ItineraryRouteEditHandler::split_route(
   auto route = dao.get_route(get_user_id(), itinerary_id, route_id);
   ItineraryPgDao::route new_route(route);
   std::ostringstream os;
-  if (route.name.first) {
+  if (route.name.has_value()) {
     // Name given to new section of a split route.  The parameter is the name of
     // the original route.
     os << format(translate("{1} (split)"))
-      % route.name.second;
+      % route.name.value();
   } else {
     // Name given to new section of a split route which has no name.  The
     // parameter is the ID of the original route
     os << format(translate("ID: {1,number=left} (split)"))
-      % route.id.second;
+      % route.id.value();
   }
-  new_route.name = std::make_pair(true, os.str());
+  new_route.name = os.str();
 
   // Remove points from and after the split point
   route.points.erase(
@@ -306,7 +306,7 @@ void ItineraryRouteEditHandler::split_route(
           route.points.begin(),
           route.points.end(),
           [split_before_id](const ItineraryPgDao::route_point &point) {
-            return point.id.first && point.id.second >= split_before_id;
+            return point.id.has_value() && point.id.value() >= split_before_id;
           }),
       route.points.end());
   // Remove points from the new route before the split (copied from original)
@@ -315,7 +315,7 @@ void ItineraryRouteEditHandler::split_route(
           new_route.points.begin(),
           new_route.points.end(),
           [split_before_id](const ItineraryPgDao::route_point &point) {
-            return point.id.first && point.id.second < split_before_id;
+            return point.id.has_value() && point.id.value() < split_before_id;
           }),
       new_route.points.end());
   if (!new_route.points.empty()) {

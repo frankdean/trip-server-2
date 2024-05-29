@@ -3,7 +3,7 @@
 # This file is part of Trip Server 2, a program to support trip recording and
 # itinerary planning.
 #
-# Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+# Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,31 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+# Whilst this script is primarily intended as a Vagrant provisioning script,
+# it can also be run in a VM such as QEMU to setup up a working environment by
+# overriding the TRIP_SOURCE, USERNAME and GROUPNAME variables before running
+# the script.
+
 # Uncomment the following to debug the script
 #set -x
 
+# This is the folder where the Trip Server source code is available in the VM
+TRIP_SOURCE=${TRIP_SOURCE:-/vagrant}
+# The user and group name for building Trip Server
+USERNAME=${USERNAME:-vagrant}
+GROUPNAME=${GROUPNAME:-${USERNAME}}
+# Flags to pass to build, e.g. '--jobs 4'
+MAKEFLAGS=${MAKEFLAGS:-}
+
+echo "Source folder: ${TRIP_SOURCE}"
+echo "Username: ${USERNAME}"
+echo "Groupname: ${USERNAME}:${GROUPNAME}"
+echo "MAKEFLAGS: ${MAKEFLAGS}"
+
+export MAKEFLAGS
+
+# This version is only relevant if libpqxx 6.x is being installed.  Trip
+# Server supports either version 6 or 7.
 LIBPQXX_VERSION=6.4.8
 LIBPQXX_SHA256=3f7aba951822e01f1b9f9f353702954773323dd9f9dc376ffb57cb6bbd9a7a2f
 NLOHMANN_JSON_VERSION=v3.11.3
@@ -28,7 +50,7 @@ NLOHMANN_JSON_SHA256=9bea4c8066ef4a1c206b2be5a36302f8926f7fdc6087af5d20b417d0cf1
 FINALCUT_VERSION=0.9.0
 FINALCUT_SHA256=73ff5016bf6de0a5d3d6e88104668b78a521c34229e7ca0c6a04b5d79ecf666e
 
-DOWNLOAD_CACHE_DIR="/vagrant/provisioning/downloads"
+DOWNLOAD_CACHE_DIR="${TRIP_SOURCE}/provisioning/downloads"
 LIBPQXX_DOWNLOAD="libpqxx-${LIBPQXX_VERSION}.tar.gz"
 LIBPQXX_DOWNLOAD_URL="https://github.com/jtv/libpqxx/archive/refs/tags/${LIBPQXX_VERSION}.tar.gz"
 NLOHMANN_JSON_DOWNLOAD_URL="https://github.com/nlohmann/json/releases/download/${NLOHMANN_JSON_VERSION}/json.hpp"
@@ -36,13 +58,23 @@ FINALCUT_DOWNLOAD="finalcut-0.9.0.tar.gz"
 FINALCUT_DOWNLOAD_URL="https://github.com/gansm/finalcut/archive/refs/tags/${FINALCUT_VERSION}.tar.gz"
 
 SHASUM=shasum
-SU_CMD="su vagrant -c"
+SU_CMD="su $USERNAME -c"
 
 if [ -f /usr/lib/fedora-release ]; then
     SHASUM=sha256sum
 fi
-if [ ! -d "$DOWNLOAD_CACHE_DIR" ]; then
-    mkdir -p "$DOWNLOAD_CACHE_DIR"
+if [ ! -d "$DOWNLOAD_CACHE_DIR" ] || [-x /bin/freebsd-version ]; then
+    # Where the TRIP_SOURCE folder is mounted with 9p, whatever we do, from
+    # the host perspective, if we created the directory is is owned by root,
+    # even when we change the ownership from within the guest.  So, use a
+    # local folder for the downloads.
+    #
+    # Also the provisioning folder isn't synced on FreeBSD
+    DOWNLOAD_CACHE_DIR="/home/${USERNAME}/Downloads"
+    if [ ! -d "$DOWNLOAD_CACHE_DIR" ]; then
+	$SU_CMD "mkdir -p $DOWNLOAD_CACHE_DIR"
+    fi
+    echo "Using $DOWNLOAD_CACHE_DIR to cache downloads"
 fi
 
 function install_libpqxx_6
@@ -55,7 +87,7 @@ function install_libpqxx_6
 	fi
 	if [ ! -d "/usr/local/src/libpqxx-${LIBPQXX_VERSION}" ]; then
 	    if [ ! -r "${DOWNLOAD_CACHE_DIR}/LIBPQXX_DOWNLOAD" ]; then
-		curl -L --output "${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD}" $LIBPQXX_DOWNLOAD_URL
+		$SU_CMD "curl -L --output ${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD} $LIBPQXX_DOWNLOAD_URL"
 	    fi
 	fi
 	if [ -r "${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD}" ]; then
@@ -70,25 +102,22 @@ function install_libpqxx_6
 	    if [ ! -d "libpqxx-${LIBPQXX_VERSION}" ]; then
 		mkdir "libpqxx-${LIBPQXX_VERSION}"
 	    fi
-	    chown vagrant:vagrant "libpqxx-${LIBPQXX_VERSION}"
+	    chown ${USERNAME}:${GROUPNAME} libpqxx-${LIBPQXX_VERSION}
 	    $SU_CMD "tar -C /usr/local/src -xf ${DOWNLOAD_CACHE_DIR}/${LIBPQXX_DOWNLOAD}"
 	    cd "libpqxx-${LIBPQXX_VERSION}"
 	    pwd
 	    if [ -r configure ]; then
-		if [ -f /etc/rocky-release ]; then
-		    # Weirdly, pkg-config was appending a space to the include
-		    # path, presumably due to an incorrect configuration file
-		    # which caused 'configure' to fail, apparently unable to
-		    # build `libpqxx` by appending a known 'libpq' header
-		    # file. Proven by executing the following:
-		    # echo "x$(PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/pgsql-13/lib/pkgconfig pkg-config libpq --cflags)x"
-		    # So we pedantically specify the lib and include directories
-		    PG_LIBDIR=$(/usr/pgsql-13/bin/pg_config --libdir)
-		    $SU_CMD "./configure LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR} --with-postgres-include=$(/usr/pgsql-13/bin/pg_config --includedir) --with-postgres-lib=${PG_LIBDIR} --disable-documentation"
+		# configure command fails on VM running Debian arm64
+		PROCESSOR="$(uname -p)"
+		ARCH="$(arch)"
+		if [ "$PROCESSOR" -!= "unknown" ]; then
+		       $SU_CMD './configure --disable-documentation'
+		elif [ "$ARCH" == "aarch64" ]; then
+		    $SU_CMD "./configure --disable-documentation --build=arm"
 		else
-		    $SU_CMD './configure --disable-documentation'
+		    $SU_CMD "./configure --disable-documentation --build=$ARCH"
 		fi
-		$SU_CMD make
+		$SU_CMD "time make"
 		make install
 	    else
 		echo "configure file is missing"
@@ -103,7 +132,7 @@ function install_nlohmann_json
     if [ ! -r /usr/local/include/nlohmann/json.hpp ]; then
 	if [ ! -r "${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" ]; then
 	    # https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp
-	    curl -L --output "${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" $NLOHMANN_JSON_DOWNLOAD_URL
+	    $SU_CMD "curl -L --output ${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp $NLOHMANN_JSON_DOWNLOAD_URL"
 	fi
 	if [ -r "${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" ]; then
 	    echo "$NLOHMANN_JSON_SHA256  ${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" | $SHASUM -c -
@@ -122,7 +151,7 @@ function install_finalcut
     if [ ! -r /usr/local/include/final/final.h ]; then
 	if [ ! -d "/usr/local/src/finalcut-${FINALCUT_VERSION}" ]; then
 	    if [ ! -r "${DOWNLOAD_CACHE_DIR}/finalcut-${FINALCUT_VERSION}.tar.gz" ]; then
-		curl -L --output "${DOWNLOAD_CACHE_DIR}/${FINALCUT_DOWNLOAD}" $FINALCUT_DOWNLOAD_URL
+		$SU_CMD "curl -L --output ${DOWNLOAD_CACHE_DIR}/${FINALCUT_DOWNLOAD} $FINALCUT_DOWNLOAD_URL"
 	    fi
 	    if [ ! -r "${DOWNLOAD_CACHE_DIR}/finalcut-${FINALCUT_VERSION}.tar.gz" ]; then
 		echo "$FINALCUT_SHA256  ${DOWNLOAD_CACHE_DIR}/${FINALCUT_DOWNLOAD}" | $SHASUM -c -
@@ -134,17 +163,20 @@ function install_finalcut
 	fi
 
 	if [ ! -r /usr/local/include/final/final.h ]; then
+	    if [ ! -d /usr/local/src ]; then
+		mkdir /usr/local/src
+	    fi
 	    cd /usr/local/src
 	    if [ ! -d "finalcut-${FINALCUT_VERSION}" ]; then
 		mkdir "finalcut-${FINALCUT_VERSION}"
 	    fi
-	    chown vagrant:vagrant "finalcut-${FINALCUT_VERSION}"
+	    chown ${USERNAME}:${GROUPNAME} finalcut-${FINALCUT_VERSION}
 	    $SU_CMD "tar -C /usr/local/src -xf ${DOWNLOAD_CACHE_DIR}/${FINALCUT_DOWNLOAD}"
 	    cd "finalcut-${FINALCUT_VERSION}"
 	    pwd
 	    $SU_CMD "autoreconf --install"
-	    $SU_CMD "./configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig"
-	    $SU_CMD make
+	    $SU_CMD "./configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig CXXFLAGS=-Wno-dangling-reference"
+	    $SU_CMD "time make"
 	    make install
 	fi
     fi
@@ -158,11 +190,6 @@ function install_finalcut
 
 if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
     DNF_OPTIONS="--assumeyes"
-    dnf $DNF_OPTIONS install gcc gcc-c++ gawk boost-devel libpq-devel \
-	libpq-devel libuuid-devel gpm-devel ncurses-devel \
-	curl libX11 libXt libXmu \
-	vim autoconf automake info libtool \
-	intltool gdb valgrind git
 
     if [ -f /etc/rocky-release ]; then
 	# Rocky Linux fails to install the VirtualBox Guest Additions kernel with:
@@ -178,29 +205,48 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 	dnf $DNF_OPTIONS install epel-release
 	# https://forums.rockylinux.org/t/how-do-i-install-powertools-on-rocky-linux-9/7427/3
 	dnf $DNF_OPTIONS config-manager --set-enabled crb
+	# for Rocky 8 and above might need to do this as well
+	crb enable
+    fi
+
+    dnf $DNF_OPTIONS install gcc gcc-c++  \
+	libuuid-devel gpm-devel ncurses-devel \
+	curl libX11 libXt libXmu \
+	autoconf-archive texinfo texinfo-tex yarnpkg \
+	vim autoconf automake info libtool \
+	cairomm-devel \
+	intltool gdb valgrind git \
+	yaml-cpp-devel pugixml-devel screen cmark-devel
+
+    if [ -f /etc/rocky-release ]; then
 	dnf $DNF_OPTIONS install make perl kernel-devel kernel-headers \
-	    bzip2 dkms boost-locale autoconf-archive info yarnpkg \
-	    texinfo texinfo-tex cairomm-devel apg \
-	    yaml-cpp-devel pugixml-devel screen cmark-devel
+	    bzip2 dkms boost-locale
 	dnf $DNF_OPTIONS update 'kernel-*'
 
 	# postgresql & postgis - https://postgis.net/install/
+	# https://www.postgresql.org/download/linux/redhat/
 	dnf $DNF_OPTIONS install https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-	dnf $DNF_OPTIONS install postgresql13-devel postgis31_13
-	# The Rocky Linux box otherwise uninstalls this package with 'dnf autoremove'
+	# Disable the built-in PostgreSQL module:
+	dnf $DNF_OPTIONS module disable postgresql
+	dnf $DNF_OPTIONS install postgresql15-devel postgis34_15
+	# The Rocky Linux box otherwise uninstalls these packages if 'dnf autoremove' is run
 	dnf $DNF_OPTIONS mark install NetworkManager-initscripts-updown \
 	    grub2-tools-efi python3-configobj rdma-core
 
     elif [ -f /usr/lib/fedora-release ]; then
 	# The Fedora box otherwise uninstalls this package with 'dnf autoremove'
-	dnf $DNF_OPTIONS mark install linux-firmware-whence
+	dnf $DNF_OPTIONS mark install linux-firmware-whence gawk
 	dnf $DNF_OPTIONS install postgresql-server postgresql-contrib postgis \
-	    autoconf-archive texinfo texinfo-tex \
-	    yarnpkg gdal-devel cairomm-devel apg \
-	    yaml-cpp-devel pugixml-devel screen cmark-devel
+	    gdal-devel
     fi
 
-    install_libpqxx_6
+    # Handling of config-manager package updates appears to happen in the
+    # background so when we immediately go to install them they are apparently
+    # not available.  By installing these packages at this later point, they
+    # are much more likely to be available.
+    dnf $DNF_OPTIONS install boost-devel libpq-devel libpqxx-devel apg
+
+    #install_libpqxx_6
     install_finalcut
     install_nlohmann_json
     ldconfig /usr/local/lib
@@ -209,13 +255,13 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
     fi
 
     if [ -f /etc/rocky-release ]; then
-	if [ ! -r /var/lib/pgsql/13/data/postgresql.conf ]; then
-	    /usr/pgsql-13/bin/postgresql-13-setup initdb
+	if [ ! -r /var/lib/pgsql/15/data/postgresql.conf ]; then
+	    /usr/pgsql-15/bin/postgresql-15-setup initdb
 	fi
-	systemctl is-active postgresql-13 >/dev/null
+	systemctl is-active postgresql-15 >/dev/null
 	if [ $? -ne 0 ]; then
-	    systemctl enable postgresql-13
-	    systemctl start postgresql-13
+	    systemctl enable postgresql-15
+	    systemctl start postgresql-15
 	fi
     else
 	if [ ! -r /var/lib/pgsql/data/postgresql.conf ]; then
@@ -240,9 +286,10 @@ if [ -x /bin/freebsd-version ]; then
     FREEBSD_PKG_OPTIONS='--yes'
     pkg install $FREEBSD_PKG_OPTIONS pkgconf git boost-all yaml-cpp \
 	postgresql15-client postgresql15-contrib postgresql15-server \
+	postgresql-libpqxx \
 	postgis33 \
 	python3 pugixml e2fsprogs-libuuid nlohmann-json \
-	texinfo vim python3 valgrind apg \
+	texinfo vim python3 apg \
 	intltool gdb libtool autoconf-archive gettext automake cairomm \
 	cmark
     # Include the textlive-full package to allow building the PDF docs, which
@@ -253,18 +300,14 @@ if [ -x /bin/freebsd-version ]; then
 
     # Remove the downloaded packages after installation
     #rm -f /var/cache/pkg/*
-    
-    # Weirdly, on FreeBSD the /vagrant/provisioning folder isn't synced
-    DOWNLOAD_CACHE_DIR="/home/vagrant/downloads"
-    mkdir -p $DOWNLOAD_CACHE_DIR
-    install_libpqxx_6
+
     install_finalcut
     if [ "$VB_GUI" == "y" ]; then
 	pkg install $FREEBSD_PKG_OPTIONS lxde-meta
     fi
-    chsh -s /usr/local/bin/bash vagrant
+    chsh -s /usr/local/bin/bash ${USERNAME}
 
-    if [ ! -d /var/db/postgres/data13/postgresql.conf ]; then
+    if [ ! -d /var/db/postgres/data15/postgresql.conf ]; then
 	grep 'postgresql_enable' /etc/rc.conf
 	if [ $? -ne 0 ]; then
 	    cat >> /etc/rc.conf <<EOF
@@ -326,4 +369,16 @@ if [ -f /etc/debian_version ]; then
     install_finalcut
     ldconfig
 
+fi
+
+# Vi as default editor
+grep -E '^export\s+EDITOR' /home/${USERNAME}/.profile >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+	echo "export EDITOR=/usr/bin/vi" >>/home/${USERNAME}/.profile
+fi
+if [ ! -z "$MAKEFLAGS" ]; then
+    grep -E '^export\s+MAKEFLAGS' /home/${USERNAME}/.profile >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+	echo "export MAKEFLAGS='${MAKEFLAGS}'" >>/home/${USERNAME}/.profile
+    fi
 fi

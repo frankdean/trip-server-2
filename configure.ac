@@ -2,13 +2,17 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.4.2],[frank.dean@fdsd.co.uk])
-BOOTSTRAP_VERSION='5.3.2'
-OPENLAYERS_VERSION='7.5.2'
-PROJ4JS_VERSION='2.9.2'
+AC_INIT([trip],[2.5.0],[frank.dean@fdsd.co.uk])
+BOOTSTRAP_VERSION='5.3.3'
+OPENLAYERS_VERSION='8.1.0'
+PROJ4JS_VERSION='2.11.0'
 OLC_VERSION='1.0.4'
 ZXCVBN_VERSION='4.4.2'
-AC_COPYRIGHT([Copyright (C) 2022-2023 Frank Dean])
+AC_COPYRIGHT([Copyright (C) 2022-2024 Frank Dean])
+dnl May fix an issue where the make files perform a rebuild of configure.ac,
+dnl Makefile.am etc.  Run ./configure with --enable-maintainer-mode to
+dnl automatically re-run autoconf scripts.
+AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE([-Wall -Werror foreign dist-zip subdir-objects info-in-builddir])
 AC_CONFIG_SRCDIR([src/trip_request_factory.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -22,12 +26,12 @@ AC_ARG_ENABLE([keep-alive],
 	[use_keep_alive=no])
 AC_ARG_ENABLE([static-files],
     AS_HELP_STRING([--disable-static-files],
-	[Build to allow serving of static files (default yes)]),
+	[Build to allow HTTP serving of static files (default yes)]),
 	[use_static_files=${enableval}],
 	[use_static_files=yes])
 AC_ARG_ENABLE([directory-listing],
     AS_HELP_STRING([--enable-directory-listing],
-	[Build to allow directory listings (default no)]),
+	[Build to allow HTTP directory listings (default no)]),
 	[use_directory_listing=${enableval}],
 	[use_directory_listing=no])
 AC_ARG_ENABLE([boost-geometry],
@@ -70,7 +74,16 @@ AC_SEARCH_LIBS([pthread_create], [pthread])
 AX_BOOST_BASE([1.67],[],[AC_MSG_ERROR([Please install at least version 1.67 of the Boost Locale Library])])
 AX_BOOST_LOCALE
 
-PKG_CHECK_MODULES([LIBPQXX], [libpqxx >= 6.2.5 libpqxx < 7 libpq >= 11.14])
+PKG_CHECK_MODULES([LIBPQXX], [libpqxx >= 7.7.5 libpqxx < 8 libpq >= 11.14],
+			     [AC_SUBST([have_libpqxx7], [1])],
+			     [AC_SUBST([have_libpqxx7], [0])]
+			     )
+if test "${have_libpqxx7}" -eq 1; then
+   AC_DEFINE_UNQUOTED([HAVE_LIBPQXX7], [${have_libpqxx7}], [Build using libpqxx v7 instead of v6])
+else
+   PKG_CHECK_MODULES([LIBPQXX], [libpqxx >= 6.2.5 libpqxx < 7 libpq >= 11.14])
+fi
+
 PKG_CHECK_MODULES([LIBYAML], [yaml-cpp >= 0.6.2])
 PKG_CHECK_MODULES([LIBPUGIXML], [pugixml >= 1.11])
 PKG_CHECK_MODULES([LIBCMARK], [libcmark >= 0.29])
@@ -227,6 +240,7 @@ AC_CONFIG_FILES([Makefile po/Makefile.in
 		 Dockerfile
 		 Dockerfile-postgis
 		 Dockerfile-tile-server
+		 Dockerfile-trixie
 		 docker-entrypoint.sh
 		 docker-compose.yml
                  ])

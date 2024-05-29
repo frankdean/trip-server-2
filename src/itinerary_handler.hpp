@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #ifndef ITINERARY_HANDLER_HPP
 #define ITINERARY_HANDLER_HPP
 
+#include <optional>
 #include "trip_request_handler.hpp"
 #include "itinerary_pg_dao.hpp"
 #include "tracking_pg_dao.hpp"
@@ -68,15 +69,15 @@ private:
     features_tab
   };
   active_tab_type active_tab;
-  std::pair<bool, TrackPgDao::location_search_query_params>
+  std::optional<TrackPgDao::location_search_query_params>
       location_history_paste_params;
-  std::pair<bool, paste_features>
+  std::optional<paste_features>
       selected_features_paste_params;
 
-  std::pair<bool, TrackPgDao::location_search_query_params>
+  std::optional<TrackPgDao::location_search_query_params>
       get_location_history_paste_params();
 
-  std::pair<bool, paste_features>
+  std::optional<paste_features>
       get_selected_features_paste_params();
 
   void paste_items();

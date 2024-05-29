@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ void ItineraryTrackEditHandler::build_form(
     // "    <div class=\"container-fluid bg-light row g-3 my-3 pb-3 mx-0\">\n"
     "    <input type=\"hidden\" name=\"id\" value=\"" << itinerary_id << "\">\n"
     "    <input type=\"hidden\" name=\"itineraryId\" value=\"" << itinerary_id << "\">\n"
-    "    <input type=\"hidden\" name=\"trackId\" value=\"" << track.id.second << "\">\n"
+    "    <input type=\"hidden\" name=\"trackId\" value=\"" << track.id.value() << "\">\n"
     "    <input type=\"hidden\" name=\"shared\" value=\"" << (read_only ? "true" : "false") << "\">\n"
     "    <input type=\"hidden\" name=\"active-tab\" value=\"features\">\n";
   if (track.segments.empty()) {
@@ -63,66 +63,66 @@ void ItineraryTrackEditHandler::build_form(
     os
       <<
       "      <div>";
-    if (track.name.first) {
+    if (track.name.has_value()) {
       // Formatted output of label and track name
-      os << format(translate("<strong>Name:</strong>&nbsp;{1}")) % x(track.name.second);
-    } else if (track.id.first) {
+      os << format(translate("<strong>Name:</strong>&nbsp;{1}")) % x(track.name.value());
+    } else if (track.id.has_value()) {
       // Database ID of an item, typically a route, track or waypoint
-      os << format(translate("<strong>ID:</strong>&nbsp;{1,number=left}")) % track.id.second;
+      os << format(translate("<strong>ID:</strong>&nbsp;{1,number=left}")) % track.id.value();
     }
     os
       << "</div>\n";
-    if (track.color_description.first) {
+    if (track.color_description.has_value()) {
       // Formatted output of label and track color
-      os << "    <div>" << format(translate("<strong>Color:</strong>&nbsp;{1}")) % x(track.color_description.second) << "</div>\n";
+      os << "    <div>" << format(translate("<strong>Color:</strong>&nbsp;{1}")) % x(track.color_description.value()) << "</div>\n";
     }
     os << "      <div class=\"mb-3\">\n";
-    if (track.distance.first) {
+    if (track.distance.has_value()) {
       // Shows the total distance for a route or track in kilometers
       os
-        << "        <span>&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;km")) % track.distance.second
+        << "        <span>&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;km")) % track.distance.value()
         // Shows the total distance for a route or track in miles
-        << "&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (track.distance.second / kms_per_mile) << "</span>\n";
+        << "&nbsp;" << format(translate("{1,num=fixed,precision=2}&nbsp;mi")) % (track.distance.value() / kms_per_mile) << "</span>\n";
     }
-    if (track.ascent.first) {
+    if (track.ascent.has_value()) {
       // Shows the total ascent for a route or track in meters
-      os << "        <span>&nbsp;↗︎" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % track.ascent.second << "</span>\n";
+      os << "        <span>&nbsp;↗︎" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % track.ascent.value() << "</span>\n";
     }
-    if (track.descent.first) {
+    if (track.descent.has_value()) {
       // Shows the total descent for a route or track in kilometers
-      os << "        <span>&nbsp;↘" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % track.descent.second << "</span>\n";
+      os << "        <span>&nbsp;↘" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % track.descent.value() << "</span>\n";
     }
-    if (track.ascent.first) {
+    if (track.ascent.has_value()) {
       // Shows the total ascent for a route or track in feet
-      os << "        <span>&nbsp;↗︎" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (track.ascent.second / inches_per_meter / 12) << "</span>\n";
+      os << "        <span>&nbsp;↗︎" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (track.ascent.value() / inches_per_meter / 12) << "</span>\n";
     }
-    if (track.descent.first) {
+    if (track.descent.has_value()) {
       // Shows the total descent for a route or track in feet
-      os << "        <span>&nbsp;↘" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (track.descent.second / inches_per_meter / 12) << "</span>\n";
+      os << "        <span>&nbsp;↘" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (track.descent.value() / inches_per_meter / 12) << "</span>\n";
     }
-    if (track.highest.first) {
+    if (track.highest.has_value()) {
       os
         // Shows the highest point of a route or track in meters
-        << "        <span>&nbsp; " << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % track.highest.second << "</span>";
+        << "        <span>&nbsp; " << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % track.highest.value() << "</span>";
     }
-    if (track.highest.first || track.lowest.first)
+    if (track.highest.has_value() || track.lowest.has_value())
       os << " ⇅";
-    if (track.lowest.first) {
+    if (track.lowest.has_value()) {
       os
         // Shows the lowest point of a route or track in meters
-        << "        <span>" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % track.lowest.second << "</span>\n";
+        << "        <span>" << format(translate("{1,num=fixed,precision=0}&nbsp;m")) % track.lowest.value() << "</span>\n";
     }
-    if (track.highest.first) {
+    if (track.highest.has_value()) {
       os
         // Shows the highest point of a route or track in meters
-        << "        <span>&nbsp;" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (track.highest.second / inches_per_meter / 12) << "</span>";
+        << "        <span>&nbsp;" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (track.highest.value() / inches_per_meter / 12) << "</span>";
     }
-    if (track.highest.first || track.lowest.first)
+    if (track.highest.has_value() || track.lowest.has_value())
       os << " &#x21c5;";
-    if (track.lowest.first) {
+    if (track.lowest.has_value()) {
       os
         // Shows the lowest point of a route or track in meters
-        << "        <span>" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (track.lowest.second / inches_per_meter / 12) << "</span>\n";
+        << "        <span>" << format(translate("{1,num=fixed,precision=0}&nbsp;ft")) % (track.lowest.value() / inches_per_meter / 12) << "</span>\n";
     }
     os
       <<
@@ -141,20 +141,20 @@ void ItineraryTrackEditHandler::build_form(
       os <<
         "        <tr>\n"
         "          <td>\n"
-        "            <input type=\"checkbox\" name=\"segment[" << segment.id.second << "]\" value=\"" << segment.id.second << "\"";
-      if (select_all || selected_segment_id_map.find(segment.id.second) != selected_segment_id_map.end())
+        "            <input type=\"checkbox\" name=\"segment[" << segment.id.value() << "]\" value=\"" << segment.id.value() << "\"";
+      if (select_all || selected_segment_id_map.find(segment.id.value()) != selected_segment_id_map.end())
         os << " checked";
       os <<
         ">\n"
         "          </td>\n"
         "          <td><a href=\"" << get_uri_prefix()
          << "/itinerary-track-segment-edit?itineraryId=" << itinerary_id
-         << "&trackId=" << track.id.second
-         << "&segmentId=" << segment.id.second
+         << "&trackId=" << track.id.value()
+         << "&segmentId=" << segment.id.value()
          << "&track-page=" << pagination.get_current_page()
          << "&select-all=" << (select_all ? "on" : "")
          << "&shared=" << (read_only ? "true" : "false")
-         << "\">" << as::number << std::setprecision(0) << segment.id.second
+         << "\">" << as::number << std::setprecision(0) << segment.id.value()
          << as::posix << "</a></td>\n"
         "        </tr>\n";
     }
@@ -212,8 +212,8 @@ void ItineraryTrackEditHandler::build_form(
     features["waypoints"] = json::array();
     json segments;
     for (const auto segment : track.segments) {
-      if (segment.id.first)
-        segments.push_back(segment.id.second);
+      if (segment.id.has_value())
+        segments.push_back(segment.id.value());
     }
     features["segments"] = segments;
     json j{
@@ -270,8 +270,8 @@ void ItineraryTrackEditHandler::delete_segments(
           track.segments.begin(),
           track.segments.end(),
           [&](const ItineraryPgDao::track_segment &segment) {
-            bool retval = segment.id.first &&
-              selected_segment_id_map.find(segment.id.second) !=
+            bool retval = segment.id.has_value() &&
+              selected_segment_id_map.find(segment.id.value()) !=
               selected_segment_id_map.end();
             if (retval)
               dirty = true;
@@ -295,21 +295,21 @@ void ItineraryTrackEditHandler::split_track(
   auto track = dao.get_track(get_user_id(), itinerary_id, track_id);
   ItineraryPgDao::track new_track;
   std::ostringstream os;
-  if (track.name.first) {
+  if (track.name.has_value()) {
     // Name given to new section of a split track.  The parameter is the name of
     // the original track.
     os << format(translate("{1} (split)"))
-      % track.name.second;
+      % track.name.value();
   } else {
     // Name given to new section of a split track which has no name.  The
     // parameter is the ID of the original track
     os << format(translate("ID: {1,number=left} (split)"))
-      % track.id.second;
+      % track.id.value();
   }
-  new_track.name = std::make_pair(true, os.str());
+  new_track.name = os.str();
   new_track.color_key = track.color_key;
   for (auto ts : track.segments) {
-    if (ts.id.first && ts.id.second >= split_before_id)
+    if (ts.id.has_value() && ts.id.value() >= split_before_id)
       new_track.segments.push_back(ts);
   }
   // Remove the same segments from original track
@@ -318,7 +318,7 @@ void ItineraryTrackEditHandler::split_track(
           track.segments.begin(),
           track.segments.end(),
           [split_before_id](const ItineraryPgDao::track_segment &segment) {
-            return segment.id.first && segment.id.second >= split_before_id;
+            return segment.id.has_value() && segment.id.value() >= split_before_id;
           }),
       track.segments.end());
   new_track.calculate_statistics();
@@ -339,9 +339,9 @@ void ItineraryTrackEditHandler::merge_segments(
   auto track = dao.get_track(get_user_id(), itinerary_id, track_id);
   ItineraryPgDao::track_segment* target = nullptr;
   for (auto i = track.segments.begin(); i != track.segments.end(); i++) {
-    if (!i->id.first)
+    if (!i->id.has_value())
       throw std::invalid_argument("Segment has no ID");
-    if (selected_segment_id_map.find(i->id.second) != selected_segment_id_map.end()) {
+    if (selected_segment_id_map.find(i->id.value()) != selected_segment_id_map.end()) {
       if (target) {
         // Have we already found the end of one section
         if (complete) {

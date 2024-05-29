@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include "trip_pg_dao.hpp"
 #include "../trip-server-common/src/session.hpp"
 #include <chrono>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -52,12 +53,12 @@ protected:
   bool is_admin(pqxx::work &tx, std::string user_id);
 public:
   struct user {
-    std::pair<bool, long> id;
+    std::optional<long> id;
     std::string firstname;
     std::string lastname;
     std::string email;
-    std::pair<bool, std::string> uuid;
-    std::pair<bool, std::string> password;
+    std::optional<std::string> uuid;
+    std::optional<std::string> password;
     std::string nickname;
     bool is_admin;
     user() : id(),
@@ -81,8 +82,8 @@ public:
     tile_usage_metric() : month(), year(), cumulative_total(), quantity() {}
   };
   struct tile_report {
-    std::pair<bool, long> total;
-    std::pair<bool, std::chrono::system_clock::time_point> time;
+    std::optional<long> total;
+    std::optional<std::chrono::system_clock::time_point> time;
     std::vector<tile_usage_metric> metrics;
     tile_report() : total(), time(), metrics() {}
   };

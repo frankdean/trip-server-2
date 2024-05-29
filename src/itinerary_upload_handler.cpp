@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,16 +45,16 @@ std::string ItineraryUploadHandler::xml_osmand_color =
  * string.
  * \param node the parent node of the element to fetch
  * \param child_name the element name of the child's value to fetch
- * \return a std::pair<bool, std::string>, true indicating the element exists
+ * \return a std::optional<std::string>, true indicating the element exists
  */
-std::pair<bool, std::string>
+std::optional<std::string>
     ItineraryUploadHandler::child_node_as_string(
         const pugi::xml_node &node, const pugi::char_t *child_name)
 {
   auto t = node.child(child_name);
-  std::pair<bool, std::string> retval;
-  if ((retval.first = t.type() != pugi::node_null))
-    retval.second = t.child_value();
+  std::optional<std::string> retval;
+  if (t.type() != pugi::node_null)
+    retval = t.child_value();
   // std::cout << "child_node of node: " << node.name() << "> "
   //           << " => " << child_name << " \""
   //           << (retval.first ? retval.second : "[null]") << "\"\n";
@@ -66,21 +66,21 @@ std::pair<bool, std::string>
  * double.
  * \param node the parent node of the element to fetch
  * \param child_name the element name of the child's value to fetch
- * \return a std::pair<bool, double>, true indicating the element exists.
+ * \return a std::optional<double>, true indicating the element exists.
  * It is set to false if a numeric conversion exception occurs.
  */
-std::pair<bool, double> ItineraryUploadHandler::child_node_as_double(
+std::optional<double> ItineraryUploadHandler::child_node_as_double(
     const pugi::xml_node &node, const pugi::char_t *child_name)
 {
   auto t = node.child(child_name);
-  std::pair<bool, double> retval;
+  std::optional<double> retval;
   try {
-    if ((retval.first = t.type() != pugi::node_null))
-      retval.second = std::stod(t.child_value());
+    if (t.type() != pugi::node_null)
+      retval = std::stod(t.child_value());
   } catch (const std::invalid_argument &e) {
-    retval.first = false;
+    // swallow
   } catch (const std::out_of_range &e) {
-    retval.first = false;
+    // swallow
   }
   return retval;
 }
@@ -90,21 +90,21 @@ std::pair<bool, double> ItineraryUploadHandler::child_node_as_double(
  * float.
  * \param node the parent node of the element to fetch
  * \param child_name the element name of the child's value to fetch
- * \return a std::pair<bool, float>, true indicating the element exists.
+ * \return a std::optional<float>, true indicating the element exists.
  * It is set to false if a numeric conversion exception occurs.
  */
-std::pair<bool, float> ItineraryUploadHandler::child_node_as_float(
+std::optional<float> ItineraryUploadHandler::child_node_as_float(
     const pugi::xml_node &node, const pugi::char_t *child_name)
 {
   auto t = node.child(child_name);
-  std::pair<bool, float> retval;
+  std::optional<float> retval;
   try {
-    if ((retval.first = t.type() != pugi::node_null))
-      retval.second = std::stod(t.child_value());
+    if (t.type() != pugi::node_null)
+      retval = std::stod(t.child_value());
   } catch (const std::invalid_argument &e) {
-    retval.first = false;
+    // swallow
   } catch (const std::out_of_range &e) {
-    retval.first = false;
+    // swallow
   }
   return retval;
 }
@@ -114,21 +114,21 @@ std::pair<bool, float> ItineraryUploadHandler::child_node_as_float(
  * long.
  * \param node the parent node of the element to fetch
  * \param child_name the element name of the child's value to fetch
- * \return a std::pair<bool, long>, true indicating the element exists.
+ * \return a std::optional<long>, true indicating the element exists.
  * It is set to false if a numeric conversion exception occurs.
  */
-std::pair<bool, long> ItineraryUploadHandler::child_node_as_long(
+std::optional<long> ItineraryUploadHandler::child_node_as_long(
     const pugi::xml_node &node, const pugi::char_t *child_name)
 {
   auto t = node.child(child_name);
-  std::pair<bool, long> retval;
+  std::optional<long> retval;
   try {
-    if ((retval.first = t.type() != pugi::node_null))
-      retval.second = std::stol(t.child_value());
+    if (t.type() != pugi::node_null)
+      retval = std::stol(t.child_value());
   } catch (const std::invalid_argument &e) {
-    retval.first = false;
+    // swallow
   } catch (const std::out_of_range &e) {
-    retval.first = false;
+    // swallow
   }
   return retval;
 }
@@ -138,18 +138,18 @@ std::pair<bool, long> ItineraryUploadHandler::child_node_as_long(
  * time_point.
  * \param node the parent node of the element to fetch
  * \param child_name the element name of the child's value to fetch
- * \return a std::pair<bool, std::chrono::system_clock::time_point>, true
+ * \return a std::optional<std::chrono::system_clock::time_point>, true
  * indicating the element exists
  */
-std::pair<bool, std::chrono::system_clock::time_point>
+std::optional<std::chrono::system_clock::time_point>
     ItineraryUploadHandler::child_node_as_time_point(const pugi::xml_node &node,
                                                      const pugi::char_t *child_name)
 {
   auto t = node.child(child_name);
-  std::pair<bool, std::chrono::system_clock::time_point> retval;
-  if ((retval.first = t.type() != pugi::node_null)) {
+  std::optional<std::chrono::system_clock::time_point> retval;
+  if (t.type() != pugi::node_null) {
     utils::DateTime time(t.child_value());
-    retval.second = time.time_tp();
+    retval = time.time_tp();
   }
   return retval;
 }
@@ -219,10 +219,9 @@ void ItineraryUploadHandler::add_waypoint(
       if (name.rfind(osmand_ns_prefix, 0) == 0)
         extended_attributes[name] = i->child_value();
     }
-    wpt.extended_attributes.first = extended_attributes.size() > 0;
-    if (wpt.extended_attributes.first) {
+    if (!extended_attributes.empty()) {
       nlohmann::json j_extended_attributes(extended_attributes);
-      wpt.extended_attributes.second = j_extended_attributes.dump();
+      wpt.extended_attributes = j_extended_attributes.dump();
     }
 
     // Only handle the sample count for Garmin extensions - room to enhance in

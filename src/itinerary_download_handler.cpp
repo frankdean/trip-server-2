@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -78,38 +78,38 @@ void ItineraryDownloadHandler::handle_gpx_download(
     xml_node wpt_node = gpx.append_child("wpt");
     wpt_node.append_attribute("lon").set_value(wpt.longitude);
     wpt_node.append_attribute("lat").set_value(wpt.latitude);
-    if (wpt.altitude.first) {
-      wpt_node.append_child("ele").text() = wpt.altitude.second;
+    if (wpt.altitude.has_value()) {
+      wpt_node.append_child("ele").text() = wpt.altitude.value();
     }
-    if (wpt.time.first) {
-      DateTime time(wpt.time.second);
+    if (wpt.time.has_value()) {
+      DateTime time(wpt.time.value());
       wpt_node.append_child("time").append_child(node_pcdata)
         .set_value(time.get_time_as_iso8601_gmt().c_str());
     }
-    if (wpt.name.first) {
+    if (wpt.name.has_value()) {
       wpt_node.append_child("name").append_child(node_pcdata)
-        .set_value(wpt.name.second.c_str());
+        .set_value(wpt.name.value().c_str());
     } else {
       wpt_node.append_child("name").append_child(node_pcdata)
-        .set_value(("WPT: " + std::to_string(wpt.id.second)).c_str());
+        .set_value(("WPT: " + std::to_string(wpt.id.value())).c_str());
     }
-    if (wpt.comment.first)
+    if (wpt.comment.has_value())
       wpt_node.append_child("cmt").append_child(node_pcdata)
-        .set_value(wpt.comment.second.c_str());
-    if (wpt.description.first)
+        .set_value(wpt.comment.value().c_str());
+    if (wpt.description.has_value())
       wpt_node.append_child("desc").append_child(node_pcdata)
-        .set_value(wpt.description.second.c_str());
-    if (wpt.symbol.first)
+        .set_value(wpt.description.value().c_str());
+    if (wpt.symbol.has_value())
       wpt_node.append_child("sym").append_child(node_pcdata)
-        .set_value(wpt.symbol.second.c_str());
-    if (wpt.type.first)
+        .set_value(wpt.symbol.value().c_str());
+    if (wpt.type.has_value())
       wpt_node.append_child("type").append_child(node_pcdata)
-        .set_value(wpt.type.second.c_str());
-    if (wpt.extended_attributes.first || wpt.avg_samples.first) {
+        .set_value(wpt.type.value().c_str());
+    if (wpt.extended_attributes.has_value() || wpt.avg_samples.has_value()) {
       xml_node ext_node = wpt_node.append_child("extensions");
-      if (wpt.extended_attributes.first) {
+      if (wpt.extended_attributes.has_value()) {
         const json j_extended_attributes =
-          json::parse(wpt.extended_attributes.second);
+          json::parse(wpt.extended_attributes.value());
         if (!j_extended_attributes.empty()) {
           include_osmand_ns = true;
           for (auto& [key, value] : j_extended_attributes.items())
@@ -118,9 +118,9 @@ void ItineraryDownloadHandler::handle_gpx_download(
               .set_value(value.get<std::string>().c_str());
         }
       }
-      if (wpt.avg_samples.first) {
+      if (wpt.avg_samples.has_value()) {
         ext_node.append_child("wptx1:WaypointExtension")
-          .append_child("wptx1:Samples").text() = wpt.avg_samples.second;
+          .append_child("wptx1:Samples").text() = wpt.avg_samples.value();
         include_wptx1_ext = true;
       }
     }
@@ -128,21 +128,21 @@ void ItineraryDownloadHandler::handle_gpx_download(
   // Routes
   for (const auto &rte : routes) {
     xml_node rte_node = gpx.append_child("rte");
-    if (rte.name.first) {
+    if (rte.name.has_value()) {
       rte_node.append_child("name").append_child(node_pcdata)
-        .set_value(rte.name.second.c_str());
+        .set_value(rte.name.value().c_str());
     } else {
       rte_node.append_child("name").append_child(node_pcdata)
-        .set_value(("RTE: " + std::to_string(rte.id.second)).c_str());
+        .set_value(("RTE: " + std::to_string(rte.id.value())).c_str());
     }
-    if (rte.color_key.first) {
+    if (rte.color_key.has_value()) {
       xml_node rt_ext_node = rte_node.append_child("extensions")
         .append_child("gpxx:RouteExtension");
       // IsAutoNamed is mandatory for a RouteExtension in XSD
       rt_ext_node.append_child("gpxx:IsAutoNamed").append_child(node_pcdata)
         .set_value("false");
       rt_ext_node.append_child("gpxx:DisplayColor").append_child(node_pcdata)
-        .set_value(rte.color_key.second.c_str());
+        .set_value(rte.color_key.value().c_str());
       include_gpxx_ext = true;
     }
     int rtept_count = 0;
@@ -150,11 +150,11 @@ void ItineraryDownloadHandler::handle_gpx_download(
       xml_node rtept_node = rte_node.append_child("rtept");
       rtept_node.append_attribute("lon").set_value(p.longitude);
       rtept_node.append_attribute("lat").set_value(p.latitude);
-      if (p.altitude.first)
-        rtept_node.append_child("ele").text() = p.altitude.second;
-      if (p.name.first) {
+      if (p.altitude.has_value())
+        rtept_node.append_child("ele").text() = p.altitude.value();
+      if (p.name.has_value()) {
         rtept_node.append_child("name").append_child(node_pcdata)
-          .set_value(p.name.second.c_str());
+          .set_value(p.name.value().c_str());
       } else {
         // format unnamed points as 001 etc.
         std::ostringstream os;
@@ -162,32 +162,32 @@ void ItineraryDownloadHandler::handle_gpx_download(
         rtept_node.append_child("name").append_child(node_pcdata)
           .set_value(os.str().c_str());
       }
-      if (p.comment.first)
+      if (p.comment.has_value())
         rtept_node.append_child("cmt").append_child(node_pcdata)
-          .set_value(p.comment.second.c_str());
-      if (p.description.first)
+          .set_value(p.comment.value().c_str());
+      if (p.description.has_value())
         rtept_node.append_child("desc").append_child(node_pcdata)
-          .set_value(p.description.second.c_str());
-      if (p.symbol.first)
+          .set_value(p.description.value().c_str());
+      if (p.symbol.has_value())
         rtept_node.append_child("sym").append_child(node_pcdata)
-          .set_value(p.symbol.second.c_str());
+          .set_value(p.symbol.value().c_str());
     }
   }
   // Tracks
   for (const auto &trk : tracks) {
     xml_node trk_node = gpx.append_child("trk");
-    if (trk.name.first) {
+    if (trk.name.has_value()) {
       trk_node.append_child("name").append_child(node_pcdata)
-        .set_value(trk.name.second.c_str());
+        .set_value(trk.name.value().c_str());
     } else {
       trk_node.append_child("name").append_child(node_pcdata)
-        .set_value(("TRK: " + std::to_string(trk.id.second)).c_str());
+        .set_value(("TRK: " + std::to_string(trk.id.value())).c_str());
     }
-    if (trk.color_key.first) {
+    if (trk.color_key.has_value()) {
       xml_node ext_node = trk_node.append_child("extensions")
         .append_child("gpxx:TrackExtension");
       ext_node.append_child("gpxx:DisplayColor").append_child(node_pcdata)
-        .set_value(trk.color_key.second.c_str());
+        .set_value(trk.color_key.value().c_str());
       include_gpxx_ext = true;
     }
     for (const auto &trkseg : trk.segments) {
@@ -196,16 +196,16 @@ void ItineraryDownloadHandler::handle_gpx_download(
         xml_node trkpt_node = trkseg_node.append_child("trkpt");
         trkpt_node.append_attribute("lon").set_value(p.longitude);
         trkpt_node.append_attribute("lat").set_value(p.latitude);
-        if (p.altitude.first) {
-          trkpt_node.append_child("ele").text() = p.altitude.second;
+        if (p.altitude.has_value()) {
+          trkpt_node.append_child("ele").text() = p.altitude.value();
         }
-        if (p.time.first) {
-          DateTime time(p.time.second);
+        if (p.time.has_value()) {
+          DateTime time(p.time.value());
           trkpt_node.append_child("time").append_child(node_pcdata).
             set_value(time.get_time_as_iso8601_gmt().c_str());
         }
-        if (p.hdop.first) {
-          trkpt_node.append_child("hdop").text() = p.hdop.second;
+        if (p.hdop.has_value()) {
+          trkpt_node.append_child("hdop").text() = p.hdop.value();
         }
       }
     }
@@ -372,19 +372,19 @@ void ItineraryDownloadHandler::append_kml_waypoints(
     .set_value("Waypoints");
   for (const auto &w : waypoints) {
     auto placemark = folder.append_child("Placemark");
-    if (w.name.first || w.id.first) {
+    if (w.name.has_value() || w.id.has_value()) {
       auto name = placemark.append_child("name").append_child(node_pcdata);
-      if (w.name.first)
-        name.set_value(w.name.second.c_str());
-      else if (w.id.first)
-        name.set_value(("WPT: " + std::to_string(w.id.second)).c_str());
+      if (w.name.has_value())
+        name.set_value(w.name.value().c_str());
+      else if (w.id.has_value())
+        name.set_value(("WPT: " + std::to_string(w.id.value())).c_str());
     }
-    if (w.comment.first && !w.comment.second.empty()) {
+    if (w.comment.has_value() && !w.comment.value().empty()) {
       placemark.append_child("description").append_child(node_pcdata)
-        .set_value(w.comment.second.c_str());
+        .set_value(w.comment.value().c_str());
     }
-    if (w.time.first) {
-      DateTime dt(w.time.second);
+    if (w.time.has_value()) {
+      DateTime dt(w.time.value());
       placemark.append_child("TimeStamp").append_child("when")
         .append_child(node_pcdata)
         .set_value(dt.get_time_as_iso8601_gmt().c_str());
@@ -394,8 +394,8 @@ void ItineraryDownloadHandler::append_kml_waypoints(
     std::stringstream ss;
     ss << std::fixed << std::setprecision(6)
        << w.longitude << ',' << w.latitude;
-    if (w.altitude.first)
-      ss << ',' << std::setprecision(2) << w.altitude.second;
+    if (w.altitude.has_value())
+      ss << ',' << std::setprecision(2) << w.altitude.value();
     placemark.append_child("Point").append_child("coordinates")
       .append_child(node_pcdata)
       .set_value(ss.str().c_str());
@@ -413,12 +413,12 @@ void ItineraryDownloadHandler::append_kml_routes(
   for (auto &r : routes) {
     r.calculate_statistics();
     auto route_folder = folder.append_child("Folder");
-    if (r.name.first || r.id.first) {
+    if (r.name.has_value() || r.id.has_value()) {
       auto name = route_folder.append_child("name").append_child(node_pcdata);
-      if (r.name.first)
-        name.set_value(r.name.second.c_str());
-      else if (r.id.first)
-        name.set_value(("RTE: " + std::to_string(r.id.second)).c_str());
+      if (r.name.has_value())
+        name.set_value(r.name.value().c_str());
+      else if (r.id.has_value())
+        name.set_value(("RTE: " + std::to_string(r.id.value())).c_str());
     }
     auto points_folder = route_folder.append_child("Folder");
     points_folder.append_child("name").append_child(node_pcdata)
@@ -437,8 +437,8 @@ void ItineraryDownloadHandler::append_kml_routes(
         "<tr><td>Longitude: " << std::fixed << std::setprecision(6)
         << p.longitude << " </td></tr>\n"
         "<tr><td>Latitude: " <<  p.latitude << " </td></tr>\n";
-      if (p.altitude.first) {
-        data << "<tr><td>Altitude: " << std::setprecision(3) << p.altitude.second
+      if (p.altitude.has_value()) {
+        data << "<tr><td>Altitude: " << std::setprecision(3) << p.altitude.value()
              << " meters </td></tr>\n";
       }
       data << "</table>\n";
@@ -457,11 +457,11 @@ void ItineraryDownloadHandler::append_kml_routes(
       loc << std::fixed << std::setprecision(6)
           << p.longitude << ','
           << p.latitude;
-    if (p.altitude.first)
-      loc << ',' << std::setprecision(2) << p.altitude.second;
-    placemark.append_child("Point").append_child("coordinates")
-      .append_child(node_pcdata)
-      .set_value(loc.str().c_str());
+      if (p.altitude.has_value())
+        loc << ',' << std::setprecision(2) << p.altitude.value();
+      placemark.append_child("Point").append_child("coordinates")
+        .append_child(node_pcdata)
+        .set_value(loc.str().c_str());
     } // for points
 
     // linestring/path section
@@ -482,8 +482,8 @@ void ItineraryDownloadHandler::append_kml_routes(
       cc << std::fixed << std::setprecision(6)
          << p.longitude << ','
          << p.latitude;
-      if (p.altitude.first)
-        cc << ',' << std::setprecision(2) << p.altitude.second;
+      if (p.altitude.has_value())
+        cc << ',' << std::setprecision(2) << p.altitude.value();
       cc << '\n';
     }
     line_string.append_child("coordinates").append_child(node_pcdata)
@@ -505,12 +505,12 @@ void ItineraryDownloadHandler::append_kml_tracks(
     auto maximum_speed = t.calculate_maximum_speed();
     auto track_folder = folder.append_child("Folder");
     std::stringstream track_name;
-    if (t.name.first) {
-      track_name << t.name.second;
+    if (t.name.has_value()) {
+      track_name << t.name.value();
     } else {
       track_name << "TRK";
-      if (t.id.first)
-        track_name << ": " << t.id.second;
+      if (t.id.has_value())
+        track_name << ": " << t.id.value();
     }
     auto name = track_folder.append_child("name").append_child(node_pcdata);
     name.set_value(track_name.str().c_str());
@@ -520,51 +520,51 @@ void ItineraryDownloadHandler::append_kml_tracks(
     DateTime end;
     for (const auto &ts : t.segments)
       for (const auto &p : ts.points)
-        if (p.time.first)
-          time_span.update(p.time.second);
-    std::pair<bool, double> average_speed;
+        if (p.time.has_value())
+          time_span.update(p.time.value());
+    std::optional<double> average_speed;
     if (time_span.is_valid) {
       begin = DateTime(time_span.start);
       end = DateTime(time_span.finish);
-      if (t.distance.first) {
+      if (t.distance.has_value()) {
         std::chrono::duration<double, std::milli> diff =
           end.time_tp() - begin.time_tp();
         const double hours =
           std::chrono::duration_cast<std::chrono::milliseconds>(diff).count() / 3600000.0;
-        average_speed = std::make_pair(true, t.distance.second / hours);
+        average_speed = t.distance.value() / hours;
       }
     }
     std::stringstream dd;
     dd <<
       "<table>\n";
-    if (t.distance.first) {
+    if (t.distance.has_value()) {
       dd << "<tr><td><b>Distance</b> " << std::fixed << std::setprecision(1);
-      if (t.distance.second >= 1)
-        dd << t.distance.second << " km";
+      if (t.distance.value() >= 1)
+        dd << t.distance.value() << " km";
       else
-        dd << (t.distance.second * 1000.0) << " meters";
+        dd << (t.distance.value() * 1000.0) << " meters";
       dd << " </td></tr>\n";
     }
-    if (t.lowest.first)
+    if (t.lowest.has_value())
       dd << "<tr><td><b>Min Alt</b> " << std::fixed << std::setprecision(3)
-         << t.lowest.second << " meters </td></tr>\n";
-    if (t.highest.first)
+         << t.lowest.value() << " meters </td></tr>\n";
+    if (t.highest.has_value())
       dd << "<tr><td><b>Max Alt</b> "<< std::fixed << std::setprecision(3)
-         << t.highest.second << " meters </td></tr>\n";
-    if (maximum_speed.first) {
+         << t.highest.value() << " meters </td></tr>\n";
+    if (maximum_speed.has_value()) {
       dd << "<tr><td><b>Max Speed</b> " << std::fixed << std::setprecision(1);
-      if (maximum_speed.second >= 1)
-        dd << maximum_speed.second << " km/hour";
+      if (maximum_speed.value() >= 1)
+        dd << maximum_speed.value() << " km/hour";
       else
-        dd << (maximum_speed.second * 1000.0) << " meters/hour";
+        dd << (maximum_speed.value() * 1000.0) << " meters/hour";
       dd << " </td></tr>\n";
     }
-    if (average_speed.first) {
+    if (average_speed.has_value()) {
       dd << "<tr><td><b>Avg Speed</b> " << std::fixed << std::setprecision(1);
-      if (average_speed.second >= 1)
-        dd << average_speed.second << " km/hour";
+      if (average_speed.value() >= 1)
+        dd << average_speed.value() << " km/hour";
       else
-        dd << (average_speed.second * 1000.0) << " meters/hour";
+        dd << (average_speed.value() * 1000.0) << " meters/hour";
       dd << " </td></tr>\n";
     }
     if (time_span.is_valid) {
@@ -605,22 +605,22 @@ void ItineraryDownloadHandler::append_kml_tracks(
           "<tr><td>Longitude: " << std::fixed << std::setprecision(6)
           << p.longitude << " </td></tr>\n"
           "<tr><td>Latitude: " <<  p.latitude << " </td></tr>\n";
-        if (p.altitude.first)
-          data << "<tr><td>Altitude: " << std::setprecision(3) << p.altitude.second
+        if (p.altitude.has_value())
+          data << "<tr><td>Altitude: " << std::setprecision(3) << p.altitude.value()
                << " meters </td></tr>\n";
-        if (p.speed.first) {
+        if (p.speed.has_value()) {
           data << "<tr><td>Speed: " << std::setprecision(1);
-          if (p.speed.second >= 1)
-            data << p.speed.second << " km/hour";
+          if (p.speed.value() >= 1)
+            data << p.speed.value() << " km/hour";
           else
-            data << p.speed.second * 1000.0 << " meters/hour";
+            data << p.speed.value() * 1000.0 << " meters/hour";
           data << " </td></tr>\n";
         }
-        if (p.bearing.first)
-          data << "<tr><td>Heading: " << std::setprecision(1) << p.bearing.second
+        if (p.bearing.has_value())
+          data << "<tr><td>Heading: " << std::setprecision(1) << p.bearing.value()
                << " </td></tr>\n";
-        if (p.time.first) {
-          DateTime speed_date(p.time.second);
+        if (p.time.has_value()) {
+          DateTime speed_date(p.time.value());
           data << "<tr><td>Time: " << speed_date.get_time_as_iso8601_gmt()
              << " </td></tr>\n";
         }
@@ -635,8 +635,8 @@ void ItineraryDownloadHandler::append_kml_tracks(
         look_at.append_child("tilt").append_child(node_pcdata)
           .set_value(std::to_string(tilt).c_str());
 
-        if (p.time.first) {
-          DateTime dt(p.time.second);
+        if (p.time.has_value()) {
+          DateTime dt(p.time.value());
           placemark.append_child("TimeStamp").append_child("when")
             .append_child(node_pcdata)
             .set_value(dt.get_time_as_iso8601_gmt().c_str());
@@ -648,8 +648,8 @@ void ItineraryDownloadHandler::append_kml_tracks(
         loc << std::fixed << std::setprecision(6)
             << p.longitude << ','
             << p.latitude;
-        if (p.altitude.first)
-          loc << ',' << std::setprecision(2) << p.altitude.second;
+        if (p.altitude.has_value())
+          loc << ',' << std::setprecision(2) << p.altitude.value();
         placemark.append_child("Point").append_child("coordinates")
           .append_child(node_pcdata)
           .set_value(loc.str().c_str());
@@ -677,8 +677,8 @@ void ItineraryDownloadHandler::append_kml_tracks(
         cc << std::fixed << std::setprecision(6)
            << p.longitude << ','
            << p.latitude;
-        if (p.altitude.first)
-          cc << ',' << std::setprecision(2) << p.altitude.second;
+        if (p.altitude.has_value())
+          cc << ',' << std::setprecision(2) << p.altitude.value();
         cc << '\n';
       }
       line_string.append_child("coordinates").append_child(node_pcdata)
@@ -727,15 +727,15 @@ void ItineraryDownloadHandler::handle_kml_download(
       .set_value(end.get_time_as_iso8601_gmt().c_str());
   }
 
-  const auto center = bounding_box.first
-    ? bounding_box.second.get_center()
+  const auto center = bounding_box.has_value()
+    ? bounding_box->get_center()
     : location();
   double range = 20000.0; // Default distance in meters
-  if (bounding_box.first) {
+  if (bounding_box.has_value()) {
     // distance in kilometers
     double diagonal_distance =
-      GeoUtils::distance(bounding_box.second.top_left,
-                         bounding_box.second.bottom_right);
+      GeoUtils::distance(bounding_box.value().top_left,
+                         bounding_box.value().bottom_right);
     if (diagonal_distance < 1)
       diagonal_distance = 1;
     // Calculate range value in meters

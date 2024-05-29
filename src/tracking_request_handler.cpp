@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -127,7 +127,7 @@ void TrackingRequestHandler::build_form(
       for (auto const& location : locations_result.locations) {
         response.content <<
           "      <tr>\n"
-          "        <td class=\"text-end\">" << as::number << std::setprecision(0) << location.id.second << "</td>\n";
+          "        <td class=\"text-end\">" << as::number << std::setprecision(0) << location.id.value() << "</td>\n";
         const auto date = std::chrono::duration_cast<std::chrono::seconds>(
             location.time_point.time_since_epoch()
           ).count();
@@ -145,40 +145,40 @@ void TrackingRequestHandler::build_form(
           "        <td class=\"text-end\"><a href=\"" << get_uri_prefix() << "/map-point?lat=" << location.latitude << "&lng=" << location.longitude << "\">" << location.longitude << "</a></td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.altitude.first)
-          response.content << std::fixed << std::setprecision(0) << location.altitude.second;
+        if (location.altitude.has_value())
+          response.content << std::fixed << std::setprecision(0) << location.altitude.value();
 
         response.content << "</td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.hdop.first)
-          response.content << as::number << std::fixed << std::setprecision(1) << location.hdop.second;
+        if (location.hdop.has_value())
+          response.content << as::number << std::fixed << std::setprecision(1) << location.hdop.value();
 
         response.content << "</td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.speed.first)
-          response.content << std::fixed << std::setprecision(1) << location.speed.second;
+        if (location.speed.has_value())
+          response.content << std::fixed << std::setprecision(1) << location.speed.value();
 
         response.content << "</td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.bearing.first)
-          response.content << std::fixed << std::setprecision(0) << location.bearing.second;
+        if (location.bearing.has_value())
+          response.content << std::fixed << std::setprecision(0) << location.bearing.value();
 
         response.content << "</td>\n"
-          "        <td class=\"text-start\">" << (location.note.first ? x(location.note.second) : "") << "</td>\n"
-          "        <td class=\"text-start\">" << (location.provider.first ? x(location.provider.second) : "") << "</td>\n"
+          "        <td class=\"text-start\">" << (location.note.has_value() ? x(location.note.value()) : "") << "</td>\n"
+          "        <td class=\"text-start\">" << (location.provider.has_value() ? x(location.provider.value()) : "") << "</td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.satellite_count.first)
-          response.content << std::fixed << std::setprecision(0) << location.satellite_count.second;
+        if (location.satellite_count.has_value())
+          response.content << std::fixed << std::setprecision(0) << location.satellite_count.value();
 
         response.content << "</td>\n"
           "        <td class=\"text-end\">";
 
-        if (location.battery.first)
-          response.content << std::fixed << std::setprecision(1) << location.battery.second;
+        if (location.battery.has_value())
+          response.content << std::fixed << std::setprecision(1) << location.battery.value();
 
         response.content << "</td>\n"
           "      </tr>\n";

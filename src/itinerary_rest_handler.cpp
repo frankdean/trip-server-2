@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,14 +53,14 @@ nlohmann::basic_json<nlohmann::ordered_map>
       {"geometry", geoRoute.as_geojson()},
     };
     properties["type"] = "route";
-    if (r.id.first)
-      properties["id"] = r.id.second;
-    if (r.name.first)
-      properties["name"] = r.name.second;
-    if (r.color_key.first)
-      properties["color_code"] = r.color_key.second;
-    if (r.html_code.first)
-      properties["html_color_code"] = r.html_code.second;
+    if (r.id.has_value())
+      properties["id"] = r.id.value();
+    if (r.name.has_value())
+      properties["name"] = r.name.value();
+    if (r.color_key.has_value())
+      properties["color_code"] = r.color_key.value();
+    if (r.html_code.has_value())
+      properties["html_color_code"] = r.html_code.value();
     feature["properties"] = properties;
     json_features.push_back(feature);
   }
@@ -83,14 +83,14 @@ nlohmann::basic_json<nlohmann::ordered_map>
       {"geometry", geoTrack.as_geojson()},
     };
     properties["type"] = "track";
-    if (t.id.first)
-      properties["id"] = t.id.second;
-    if (t.name.first)
-      properties["name"] = t.name.second;
-    if (t.html_code.first)
-      properties["html_color_code"] = t.html_code.second;
-    if (t.color_key.first)
-      properties["color_code"] = t.color_key.second;
+    if (t.id.has_value())
+      properties["id"] = t.id.value();
+    if (t.name.has_value())
+      properties["name"] = t.name.value();
+    if (t.html_code.has_value())
+      properties["html_color_code"] = t.html_code.value();
+    if (t.color_key.has_value())
+      properties["color_code"] = t.color_key.value();
     feature["properties"] = properties;
     json_features.push_back(feature);
   }
@@ -109,14 +109,14 @@ nlohmann::basic_json<nlohmann::ordered_map>
     json properties{
       {"type", "track"}
     };
-    if (track.id.first)
-      properties["track_id"] = track.id.second;
-    if (ts.id.first)
-      properties["id"] = ts.id.second;
-    if (track.html_code.first)
-      properties["html_color_code"] = track.html_code.second;
-    if (track.color_key.first)
-      properties["color_code"] = track.color_key.second;
+    if (track.id.has_value())
+      properties["track_id"] = track.id.value();
+    if (ts.id.has_value())
+      properties["id"] = ts.id.value();
+    if (track.html_code.has_value())
+      properties["html_color_code"] = track.html_code.value();
+    if (track.color_key.has_value())
+      properties["color_code"] = track.color_key.value();
     json feature{
       {"type", "Feature"},
       {"properties", properties}
@@ -147,10 +147,10 @@ nlohmann::basic_json<nlohmann::ordered_map>
     feature["geometry"] = geometry;
 
     properties["type"] = "waypoint";
-    if (w.id.first)
-      properties["id"] = w.id.second;
-    if (w.name.first)
-      properties["name"] = w.name.second;
+    if (w.id.has_value())
+      properties["id"] = w.id.value();
+    if (w.name.has_value())
+      properties["name"] = w.name.value();
     feature["properties"] = properties;
     json_features.push_back(feature);
   }
@@ -179,10 +179,10 @@ nlohmann::basic_json<nlohmann::ordered_map>
     feature["geometry"] = geometry;
 
     properties["type"] = "waypoint";
-    if (w.id.first) {
-      properties["id"] = w.id.second;
+    if (w.id.has_value()) {
+      properties["id"] = w.id.value();
       std::ostringstream ss;
-      ss << as::number << std::setprecision(0) << w.id.second;
+      ss << as::number << std::setprecision(0) << w.id.value();
       properties["name"] = ss.str();
     }
     feature["properties"] = properties;
@@ -213,10 +213,10 @@ nlohmann::basic_json<nlohmann::ordered_map>
     feature["geometry"] = geometry;
 
     properties["type"] = "waypoint";
-    if (w.id.first) {
-      properties["id"] = w.id.second;
+    if (w.id.has_value()) {
+      properties["id"] = w.id.value();
       std::ostringstream ss;
-      ss << as::number << std::setprecision(0) << w.id.second;
+      ss << as::number << std::setprecision(0) << w.id.value();
       properties["name"] = ss.str();
     }
     feature["properties"] = properties;
@@ -348,8 +348,7 @@ std::vector<location> ItineraryRestHandler::get_coordinates(
       if (coord.size() > 2) {
         const auto alt_json = coord[2];
         if (alt_json.is_number()) {
-          loc.altitude.second = alt_json;
-          loc.altitude.first = true;
+          loc.altitude = alt_json;
         }
       }
       locations.push_back(loc);
@@ -392,13 +391,12 @@ void ItineraryRestHandler::save_simplified_track(
     ItineraryPgDao::itinerary_features features;
 #ifndef HAVE_BOOST_GEOMETRY
     ItineraryPgDao::track track;
-    if ((track.name.first = properties.find("name") != properties.end()))
-      track.name.second = properties["name"];
-    if ((track.color_key.first = properties.find("color_code") != properties.end()))
-      track.color_key.second = properties["color_code"];
-    if ((track.html_code.first =
-         properties.find("html_color_code") != properties.end()))
-      track.html_code.second = properties["html_color_code"];
+    if (properties.find("name") != properties.end())
+      track.name = properties["name"];
+    if (properties.find("color_code") != properties.end())
+      track.color_key = properties["color_code"];
+    if ( properties.find("html_color_code") != properties.end())
+      track.html_code = properties["html_color_code"];
 
     if (geometryFeatureType == "LineString") {
       const auto locations = get_coordinates(geometry["coordinates"]);
@@ -428,15 +426,7 @@ void ItineraryRestHandler::save_simplified_track(
       throw BadRequestException("Unexpected geometry feature type");
     }
     // A note appended to a path name which has been simplified
-    const std::string additional_note = translate("(simplified)");
-    if (track.name.first) {
-      if (!(track.name.second.empty() || additional_note.empty()))
-        track.name.second += " ";
-      track.name.second += additional_note;
-    } else {
-      track.name =
-        std::make_pair(true, additional_note);
-    }
+    append_name(track.name, translate("(simplified)"));
     features.tracks.push_back(track);
     // track.calculate_statistics();
     // dao.create_track(get_user_id(), itinerary_id, track);
@@ -454,17 +444,9 @@ void ItineraryRestHandler::save_simplified_track(
     for (auto &t : tracks) {
       ItineraryPgDao::track new_track(t);
       new_track.segments.clear();
-      new_track.id.first = false;
+      new_track.id = std::optional<long>();
       // A note appended to a path name which has been simplified
-      const std::string additional_note = translate("(simplified)");
-      if (new_track.name.first) {
-        if (!(new_track.name.second.empty() || additional_note.empty()))
-          new_track.name.second += " ";
-        new_track.name.second += additional_note;
-      } else {
-        new_track.name =
-          std::make_pair(true, additional_note);
-      }
+      append_name(new_track.name, translate("(simplified)"));
       for (auto &ts : t.segments) {
         std::vector<ItineraryPgDao::track_point> simplified_points;
         simplify(ts.points, simplified_points, tolerance);
@@ -473,7 +455,7 @@ void ItineraryRestHandler::save_simplified_track(
         //           << " points reduced from " << ts.points.size()
         //           << " to " << simplified_points.size() << " points\n";
         for (auto &point : simplified_points) {
-          point.id.first = false;
+          point.id = std::optional<long>();
         }
         ItineraryPgDao::track_segment new_segment(std::move(simplified_points));
         new_track.segments.push_back(new_segment);
@@ -543,15 +525,14 @@ ItineraryPgDao::route ItineraryRestHandler::create_route(
   auto locations = extract_locations(j_route);
   ItineraryPgDao::route route;
   const auto properties = j_route["properties"];
-  if ((route.id.first = properties.find("id") != properties.end()))
-    route.id.second = properties["id"];
-  if ((route.name.first = properties.find("name") != properties.end()))
-    route.name.second = properties["name"];
-  if ((route.color_key.first = properties.find("color_code") != properties.end()))
-    route.color_key.second = properties["color_code"];
-  if ((route.html_code.first =
-       properties.find("html_color_code") != properties.end()))
-    route.html_code.second = properties["html_color_code"];
+  if (properties.find("id") != properties.end())
+    route.id = properties["id"];
+  if (properties.find("name") != properties.end())
+    route.name = properties["name"];
+  if (properties.find("color_code") != properties.end())
+    route.color_key = properties["color_code"];
+  if (properties.find("html_color_code") != properties.end())
+    route.html_code = properties["html_color_code"];
 
   for (const auto& location : locations)
     route.points.push_back(ItineraryPgDao::route_point(location));
@@ -576,10 +557,10 @@ ItineraryPgDao::waypoint ItineraryRestHandler::create_waypoint(
   const auto j_waypoint = j["feature"];
   ItineraryPgDao::waypoint waypoint;
   const auto properties = j_waypoint["properties"];
-  if ((waypoint.id.first = properties.find("id") != properties.end()))
-    waypoint.id.second = properties["id"];
-  if (!waypoint.id.first && !waypoint.time.first)
-    waypoint.time = std::make_pair(true, std::chrono::system_clock::now());
+  if (properties.find("id") != properties.end())
+    waypoint.id = properties["id"];
+  if (!waypoint.id.has_value() && !waypoint.time.has_value())
+    waypoint.time = std::chrono::system_clock::now();
   auto coordinates = j_waypoint["geometry"]["coordinates"];
   waypoint.longitude = coordinates[0];
   waypoint.latitude = coordinates[1];
@@ -590,7 +571,7 @@ ItineraryPgDao::waypoint ItineraryRestHandler::create_waypoint(
         waypoint.latitude);
     // The altitude may have been manually set by the user, so only adjust when
     // we have elevation data
-    if (altitude.first)
+    if (altitude.has_value())
       waypoint.altitude = altitude;
   }
 #endif
@@ -622,17 +603,17 @@ void ItineraryRestHandler::handle_authenticated_request(
             if (type == "route") {
               auto route = create_route(j);
               dao.save(get_user_id(), itinerary_id, route);
-              if (route.id.first)
-                response.content << "{\"id\": " << route.id.second << "}\n";
+              if (route.id.has_value())
+                response.content << "{\"id\": " << route.id.value() << "}\n";
             } else if (type == "waypoint") {
               auto waypoint = create_waypoint(j);
               // Only the location will have changed for an existing waypoint.
-              if (waypoint.id.first) {
+              if (waypoint.id.has_value()) {
                 auto original_waypoint = dao.get_waypoint(
                     get_user_id(),
                     itinerary_id,
-                    waypoint.id.second);
-                if (original_waypoint.id.first == waypoint.id.first) {
+                    waypoint.id.value());
+                if (original_waypoint.id.has_value() == waypoint.id.has_value()) {
                   original_waypoint.longitude = waypoint.longitude;
                   original_waypoint.latitude = waypoint.latitude;
                   original_waypoint.altitude = waypoint.altitude;
@@ -640,8 +621,8 @@ void ItineraryRestHandler::handle_authenticated_request(
                 }
               }
               dao.save(get_user_id(), itinerary_id, waypoint);
-              if (waypoint.id.first)
-                response.content << "{\"id\": " << waypoint.id.second << "}\n";
+              if (waypoint.id.has_value())
+                response.content << "{\"id\": " << waypoint.id.value() << "}\n";
             } else {
               throw BadRequestException("Unexpected GeoJSON property type " + type);
             }

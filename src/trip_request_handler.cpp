@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -257,6 +257,16 @@ void TripAuthenticatedRequestHandler::append_footer_content(std::ostream& os) co
     "    <div id=\"footer\" class=\"fixed-bottom px-2 py-2 text-bg-secondary\">\n"
     "      <div id=\"version\" class=\"small\">" << package_name << " " <<  VERSION << "</div>\n"
     "    </div>\n";
+}
+
+void TripAuthenticatedRequestHandler::append_name(
+    std::optional<std::string>& name,
+    const std::string& suffix)
+{
+  if (!name || name.value().empty())
+    name = suffix;
+  else
+    name = name.value() + ' ' + suffix;
 }
 
 BaseRestHandler::BaseRestHandler(std::shared_ptr<TripConfig> config) :

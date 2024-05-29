@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #include "itinerary_pg_dao.hpp"
 #include "trip_request_handler.hpp"
+#include <optional>
 
 namespace fdsd {
 namespace web {
@@ -38,7 +39,7 @@ class ElevationService;
 class ItinerarySharingEditHandler :  public TripAuthenticatedRequestHandler {
   std::shared_ptr<ElevationService> elevation_service;
   long itinerary_id;
-  std::pair<bool, long> shared_to_id;
+  std::optional<long> shared_to_id;
   bool is_new;
   bool invalid_nickname_error;
   /// Used to determine which page to return to in the itinerary sharing list

@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -129,7 +129,7 @@ void ElevationTile::close()
   }
 }
 
-std::pair<bool, double>
+std::optional<double>
     ElevationTile::get_elevation(double longitude, double latitude)
 {
   if (dataset == NULL)
@@ -173,8 +173,10 @@ std::pair<bool, double>
   // if (!has_data) {
   //   std::cout << "No data\n";
   // }
-  auto retval = std::make_pair(has_data, elevation);
   CPLFree(scanline);
+  std::optional<double> retval;
+  if (has_data)
+    retval = elevation;
   return retval;
 }
 
@@ -265,7 +267,7 @@ void ElevationService::update_tile_cache()
  * and the second element containing the elevation value for the specified
  * coordinates.
  */
-std::pair<bool, double>
+std::optional<double>
     ElevationService::get_elevation(double longitude, double latitude)
 {
   while (!initialized) {
@@ -277,7 +279,7 @@ std::pair<bool, double>
     std::rethrow_exception(initialization_error);
   }
     // throw std::runtime_error("Failed to initialize elevation tiles service");
-  auto retval = std::pair<bool, double>();
+  auto retval = std::optional<double>();
   try {
     auto pos = std::find_if(tiles.begin(), tiles.end(),
                             [=] (std::unique_ptr<ElevationTile> &t) {

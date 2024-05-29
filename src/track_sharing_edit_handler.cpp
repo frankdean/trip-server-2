@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,10 +53,9 @@ void TrackSharingEditHandler::build_form(
     HTTPServerResponse& response,
     const TrackPgDao::location_share_details& share) const
 {
-  std::pair<bool, period_dhm> recent_dhm(share.recent_minutes.first,
-                                         share.recent_minutes.second);
-  std::pair<bool, period_dhm> max_dhm(share.max_minutes.first,
-                                      share.max_minutes.second);
+  std::optional<period_dhm> recent_dhm(share.recent_minutes);
+  std::optional<period_dhm> max_dhm(share.max_minutes);
+
   response.content
     <<
     "  <div class=\"container-fluid\">\n";
@@ -81,8 +80,8 @@ void TrackSharingEditHandler::build_form(
     "        " << translate("Share locations within last") << "\n"
     "        <input id=\"input-days\" name=\"recentDays\" type=\"number\" min=\"0\"\n"
     "               max=\"99999\" class=\"days\" ";
-  if (recent_dhm.first)
-    response.content << " value=\"" << recent_dhm.second.days << '"';
+  if (recent_dhm.has_value())
+    response.content << " value=\"" << recent_dhm.value().days << '"';
   response.content
     <<
     ">\n"
@@ -90,8 +89,8 @@ void TrackSharingEditHandler::build_form(
     "        <label for=\"input-days\">" << translate("days") << "</label>\n"
     "        <input id=\"input-hours\" name=\"recentHours\" type=\"number\" min=\"0\"\n"
     "               max=\"23\" class=\"hours\"";
-  if (recent_dhm.first)
-    response.content << " value=\"" << recent_dhm.second.hours << '"';
+  if (recent_dhm.has_value())
+    response.content << " value=\"" << recent_dhm.value().hours << '"';
   response.content
     <<
     ">\n"
@@ -99,8 +98,8 @@ void TrackSharingEditHandler::build_form(
     "        <label for=\"input-hours\">" << translate("hours") << "</label> and\n"
     "        <input id=\"input-minutes\" name=\"recentMinutes\" type=\"number\" min=\"0\"\n"
     "               max=\"59\" class=\"minutes\"";
-  if (recent_dhm.first)
-    response.content << " value=\"" << recent_dhm.second.minutes << '"';
+  if (recent_dhm.has_value())
+    response.content << " value=\"" << recent_dhm.value().minutes << '"';
   response.content
     <<
     ">\n"
@@ -114,8 +113,8 @@ void TrackSharingEditHandler::build_form(
     "        " << translate("Limit sharing to a maximum period of") << "\n"
     "        <input id=\"input-max-days\" name=\"maxDays\" type=\"number\" min=\"0\"\n"
     "               max=\"99999\" class=\"days\"";
-  if (max_dhm.first)
-    response.content << " value=\"" << max_dhm.second.days << '"';
+  if (max_dhm.has_value())
+    response.content << " value=\"" << max_dhm.value().days << '"';
   response.content
     <<
     ">\n"
@@ -123,8 +122,8 @@ void TrackSharingEditHandler::build_form(
     "        <label for=\"input-max-days\">" << translate("days") << "</label>\n"
     "        <input id=\"input-max-hours\" name=\"maxHours\" type=\"number\" min=\"0\"\n"
     "               max=\"23\" class=\"hours\"";
-  if (max_dhm.first)
-    response.content << " value=\"" << max_dhm.second.hours << '"';
+  if (max_dhm.has_value())
+    response.content << " value=\"" << max_dhm.value().hours << '"';
   response.content
     <<
     ">\n"
@@ -132,8 +131,8 @@ void TrackSharingEditHandler::build_form(
     "        <label for=\"input-max-hours\">" << translate("hours") << "</label> and\n"
     "        <input id=\"input-max-minutes\" name=\"maxMinutes\" type=\"number\" min=\"0\"\n"
     "               max=\"59\" class=\"minutes\"";
-  if (max_dhm.first)
-    response.content << " value=\"" << max_dhm.second.minutes << '"';
+  if (max_dhm.has_value())
+    response.content << " value=\"" << max_dhm.value().minutes << '"';
   response.content
     <<
     ">\n"
@@ -145,7 +144,7 @@ void TrackSharingEditHandler::build_form(
     "      <div id=\"div-active\" class=\"container-fluid bg-light py-3 my-3\">\n"
     // Label for checkbox indicating whether location sharing for a particular nickname is active
     "        <label for=\"input-active\" class=\"pe-1\">" << translate("Active") << "</label><input id=\"input-active\" type=\"checkbox\" name=\"active\" accesskey=\"a\"";
-  if (share.active.first && share.active.second)
+  if (share.active.has_value() && share.active.value())
     response.content << " checked";
   response.content
     <<
@@ -203,24 +202,22 @@ void TrackSharingEditHandler::handle_authenticated_request(
       share.shared_by_id = get_user_id();
       try {
         share.shared_to_id = dao.get_user_id_by_nickname(nickname);
-        share.active.first = false;
+        share.active = std::optional<bool>();
         int recent_minutes = convert_dhm_to_minutes(
             request.get_post_param("recentDays"),
             request.get_post_param("recentHours"),
             request.get_post_param("recentMinutes"));
-        share.recent_minutes.first = (recent_minutes > 0);
-        share.recent_minutes.second = recent_minutes;
+        if (recent_minutes > 0)
+          share.recent_minutes = recent_minutes;
         int max_minutes = convert_dhm_to_minutes(
             request.get_post_param("maxDays"),
             request.get_post_param("maxHours"),
             request.get_post_param("maxMinutes"));
-        share.max_minutes.first = (max_minutes > 0);
-        share.max_minutes.second = max_minutes;
+        if (max_minutes > 0)
+          share.max_minutes = max_minutes;
         const std::string s = request.get_post_param("active");
-        if (!s.empty() && s == "on") {
-          share.active.first = true;
-          share.active.second = true;
-        }
+        if (!s.empty() && s == "on")
+          share.active = true;
         dao.save(share);
         std::ostringstream os;
         os << get_uri_prefix() + "/sharing";
@@ -247,8 +244,8 @@ void TrackSharingEditHandler::handle_authenticated_request(
       if (!nickname.empty()) {
         TrackPgDao dao(elevation_service);
         auto result = dao.get_tracked_location_share_details_by_sharer(nickname, get_user_id());
-        if (result.first)
-          share = result.second;
+        if (result.has_value())
+          share = result.value();
         else
           share.shared_by_id = get_user_id();
       }

@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include "itinerary_pg_dao.hpp"
 #include <algorithm>
 #include <chrono>
+#include <optional>
 #include <stdexcept>
 #include <memory>
 #include <mutex>
@@ -74,7 +75,7 @@ public:
   static const int no_data;
   ElevationTile(std::string path, int cache_ms = 60000);
   ~ElevationTile();
-  std::pair<bool, double> get_elevation(double longitude, double latitude);
+  std::optional<double> get_elevation(double longitude, double latitude);
   class dataset_exception : public std::exception {
     std::string message;
   public:
@@ -102,7 +103,7 @@ public:
   ElevationService(std::string directory_path, long tile_cache_ms);
   ~ElevationService();
   void update_tile_cache();
-  std::pair<bool, double> get_elevation(double longitude, double latitude);
+  std::optional<double> get_elevation(double longitude, double latitude);
 
   /**
    * Iterates across the set of points, filling in elevation values where a
@@ -126,7 +127,7 @@ public:
     int elevation_count = 0;
     int points_count = 0;
     for (auto i = begin; i != end; ++i) {
-      if (i->altitude.first)
+      if (i->altitude.has_value())
         elevation_count++;
       points_count++;
     }
@@ -139,7 +140,7 @@ public:
         // std::cout << "Trying " << point->longitude << ", "
         //           << point->latitude << '\n';
 
-        if (!point->altitude.first || force) {
+        if (!point->altitude.has_value() || force) {
           auto altitude = get_elevation(point->longitude,
                                         point->latitude);
           // if (altitude.first) {
@@ -148,7 +149,7 @@ public:
           //             << point->latitude << '\n';
           // }
           if (force) {
-            if (altitude.first)
+            if (altitude.has_value())
               point->altitude = altitude;
           } else {
             point->altitude = altitude;

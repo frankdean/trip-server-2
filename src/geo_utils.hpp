@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -42,18 +43,18 @@ const double earth_mean_radius_kms = 6371; // https://en.wikipedia.org/wiki/Eart
 const double pi = 3.141592653589793;
 
 struct location {
-  std::pair<bool, long> id;
+  std::optional<long> id;
   double longitude;
   double latitude;
   // std::optional<double> altitude;
-  std::pair<bool, double> altitude;
+  std::optional<double> altitude;
   location() : id(),
                longitude(),
                latitude(),
                altitude() {}
   location(double lon,
            double lat,
-           std::pair<bool, double> altitude = std::pair<bool, double>())
+           std::optional<double> altitude = std::optional<double>())
     : id(),
       longitude(lon),
       latitude(lat),
@@ -61,8 +62,8 @@ struct location {
   location(long id,
            double lon,
            double lat,
-           std::pair<bool, double> altitude = std::pair<bool, double>())
-    : id(std::pair<bool, long>(true, id)),
+           std::optional<double> altitude = std::optional<double>())
+    : id(id),
       longitude(lon),
       latitude(lat),
       altitude(altitude) {}
@@ -77,11 +78,11 @@ struct location {
 };
 
 struct path_statistics {
-  std::pair<bool, double> distance;
-  std::pair<bool, double> ascent;
-  std::pair<bool, double> descent;
-  std::pair<bool, double> lowest;
-  std::pair<bool, double> highest;
+  std::optional<double> distance;
+  std::optional<double> ascent;
+  std::optional<double> descent;
+  std::optional<double> lowest;
+  std::optional<double> highest;
   path_statistics() :
     distance(),
     ascent(),
@@ -109,12 +110,12 @@ struct path_statistics {
  */
 class GeoMapUtils {
   std::vector<std::vector<location>> paths;
-  std::pair<bool, double> min_height;
-  std::pair<bool, double> max_height;
-  std::pair<bool, double> ascent;
-  std::pair<bool, double> descent;
+  std::optional<double> min_height;
+  std::optional<double> max_height;
+  std::optional<double> ascent;
+  std::optional<double> descent;
   /// The height of the last coordinate containing an altitude value
-  std::pair<bool, double> last_altitude;
+  std::optional<double> last_altitude;
   void update_altitude_info(const location *loc);
   void add_location(std::unique_ptr<location> &previous,
                     std::vector<location> &new_path,
@@ -151,16 +152,16 @@ public:
       paths.push_back(new_path);
   }
 
-  std::pair<bool, double> get_min_height() {
+  std::optional<double> get_min_height() {
     return min_height;
   }
-  std::pair<bool, double> get_max_height() {
+  std::optional<double> get_max_height() {
     return max_height;
   }
-  std::pair<bool, double> get_ascent() {
+  std::optional<double> get_ascent() {
     return ascent;
   }
-  std::pair<bool, double> get_descent() {
+  std::optional<double> get_descent() {
     return descent;
   }
 };
@@ -194,55 +195,60 @@ public:
 
 class GeoStatistics : path_statistics {
   std::unique_ptr<location> last_location;
-  std::pair<bool, double> last_altitude;
+  std::optional<double> last_altitude;
 public:
   GeoStatistics() : path_statistics(),
                     last_location(nullptr),
-                    last_altitude(false, 0) {
-    distance.first = true;
-    distance.second = 0;
+                    last_altitude() {
+    distance = 0;
+  }
+
+  virtual std::string to_string() const;
+  inline friend std::ostream& operator<<
+      (std::ostream& out, const GeoStatistics& rhs) {
+    return out << rhs.to_string();
   }
 
   static void update_statistics(path_statistics &statistics,
                                 std::unique_ptr<location> &local_last_location,
-                                std::pair<bool, double> &local_last_altitude,
+                                std::optional<double> &local_last_altitude,
                                 location &loc);
 
   void add_location(
       path_statistics &local_stats,
       std::unique_ptr<location> &local_last_location,
-      std::pair<bool, double> &local_last_altitude,
+      std::optional<double> &local_last_altitude,
       location &loc);
 
   template <typename Iterator>
   path_statistics add_path(Iterator begin, Iterator end) {
     path_statistics retval;
     std::unique_ptr<location> local_last_location = nullptr;
-    std::pair<bool, double> local_last_altitude;
+    std::optional<double> local_last_altitude;
     for (auto i = begin; i != end; ++i) {
       location location = *i;
       add_location(retval, local_last_location, local_last_altitude, location);
 
-      // std::cout << "Add path, after add_location: ";
-      // if (local_last_altitude.first)
-      //   std::cout << " last altitude: " << local_last_altitude.second;
+      // std::cout << ++debug_count << ": Add path, after add_location: ";
+      // if (local_last_altitude.has_value())
+      //   std::cout << " last altitude: " << local_last_altitude.value();
       // std::cout << '\n';
     }
     return retval;
   }
-  std::pair<bool, double> get_lowest() {
+  std::optional<double> get_lowest() {
     return lowest;
   }
-  std::pair<bool, double> get_highest() {
+  std::optional<double> get_highest() {
     return highest;
   }
-  std::pair<bool, double> get_ascent() {
+  std::optional<double> get_ascent() {
     return ascent;
   }
-  std::pair<bool, double> get_descent() {
+  std::optional<double> get_descent() {
     return descent;
   }
-  std::pair<bool, double> get_distance() {
+  std::optional<double> get_distance() {
     return distance;
   }
 };

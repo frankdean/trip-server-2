@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #ifndef TRIP_REQUEST_HANDLER_HPP
 #define TRIP_REQUEST_HANDLER_HPP
 
+#include <optional>
 #include "../trip-server-common/src/http_request_handler.hpp"
 #include "../trip-server-common/src/session.hpp"
 
@@ -170,7 +171,8 @@ protected:
     users
   };
 private:
-    menu_items menu_item;
+  menu_items menu_item;
+
 protected:
   virtual std::string get_redirect_uri(
       const web::HTTPServerRequest& request) const override;
@@ -208,6 +210,9 @@ protected:
   menu_items get_menu_item() const {
     return menu_item;
   }
+  /// Appends suffix to the name.  If name is null or empty, sets name to suffix.
+  static void append_name(std::optional<std::string>& name,
+                          const std::string& suffix);
 public:
   TripAuthenticatedRequestHandler(std::shared_ptr<TripConfig> config);
   virtual ~TripAuthenticatedRequestHandler() {}

@@ -4,7 +4,7 @@
     This file is part of Trip Server 2, a program to support trip recording and
     itinerary planning.
 
-    Copyright (C) 2022 Frank Dean <frank.dean@fdsd.co.uk>
+    Copyright (C) 2022-2024 Frank Dean <frank.dean@fdsd.co.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -82,7 +82,7 @@ void TilePgDao::save_tile(int server_id,
   //           << server_id << ' ' << z << ' ' << x << ' ' << y << "\n";
 }
 
-std::pair<bool, TilePgDao::tile_result> TilePgDao::get_tile(int server_id,
+std::optional<TilePgDao::tile_result> TilePgDao::get_tile(int server_id,
                                                  int z, int x, int y)
 {
   work tx(*connection);
@@ -91,7 +91,7 @@ std::pair<bool, TilePgDao::tile_result> TilePgDao::get_tile(int server_id,
   result r = tx.exec_params(sql, server_id, z, x, y);
   tx.commit();
   if (r.empty()) {
-    return std::make_pair(false, tile_result());
+    return tile_result();
   } else {
     tile_result t;
     DateTime expires(r[0]["expires"].as<std::string>());
@@ -102,6 +102,6 @@ std::pair<bool, TilePgDao::tile_result> TilePgDao::get_tile(int server_id,
     for (auto i = bs.cbegin(); i != bs.cend(); i++) {
       t.tile.push_back(*i);
     }
-    return std::make_pair(true, t);
+    return t;
   }
 }
