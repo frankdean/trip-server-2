@@ -207,7 +207,7 @@ compose scripts.
 1.  Run the Trip Server database container:
 
 			$ docker run --network trip-server --network-alias postgis \
-			-e POSTGRES_PASSWORD=secret -d fdean/trip-database:1.11.4
+			-e POSTGRES_PASSWORD=secret -d fdean/trip-database
 
 1.  Run the Trip Server web container:
 
