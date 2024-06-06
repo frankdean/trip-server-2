@@ -14,6 +14,8 @@ EXTRA_DIST = m4/ChangeLog  .gitignore stamp-h1 \
 	provisioning/apache2/etc-apache2-conf-available-renderd.conf \
 	provisioning/bootconfig.sh \
 	provisioning/bootstrap.sh \
+	provisioning/qemu-init.sh \
+	provisioning/podman-setup.sh \
 	provisioning/docker/tile_server_run.sh \
 	provisioning/init.sh \
 	provisioning/logrotate.d/trip \
