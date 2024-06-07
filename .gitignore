@@ -35,6 +35,7 @@
 /doc/trip-user-guide.t2p/
 /doc/version-ug.texi
 /doc/version.texi
+/docker-build.sh
 /docker-compose.yml
 /docker-entrypoint.sh
 /install-sh

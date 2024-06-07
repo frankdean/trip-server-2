@@ -1,5 +1,5 @@
 # -*- mode: dockerfile; -*- vim: set ft=dockerfile:
-FROM postgres:15-bookworm
+FROM docker.io/postgres:15-bookworm
 LABEL uk.co.fdsd.tripserver.postgis.version="@PACKAGE_VERSION@"
 
 ENV POSTGIS_MAJOR 3

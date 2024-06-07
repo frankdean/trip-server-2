@@ -1,5 +1,5 @@
 # -*- mode: dockerfile; -*- vim: set ft=dockerfile:
-FROM  debian:bookworm-slim AS build
+FROM docker.io/debian:bookworm-slim AS build
 RUN groupadd --gid 1000 trip \
     && useradd --uid 1000 --gid trip --shell /bin/bash --create-home trip
 RUN apt-get update \
@@ -36,6 +36,8 @@ WORKDIR /usr/local/src
 COPY ./${TRIP_SERVER_FILENAME} .
 RUN tar -xf $TRIP_SERVER_FILENAME
 WORKDIR "/usr/local/src/trip-${TRIP_SERVER_VERSION}"
+ARG MAKEFLAGS
+ENV MAKEFLAGS=${MAKEFLAGS:-'-j 1'}
 
 RUN ./configure --enable-cairo && make check
 RUN make html pdf
@@ -45,7 +47,7 @@ RUN make install install-html install-pdf
 
 WORKDIR /usr/local/etc
 
-FROM  debian:bookworm-slim
+FROM  docker.io/debian:bookworm-slim
 LABEL uk.co.fdsd.tripserver.version="@PACKAGE_VERSION@"
 
 RUN groupadd --gid 1000 trip \

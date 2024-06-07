@@ -41,47 +41,22 @@
 		$ grep 'ARG TRIP_SERVER_VERSION' Dockerfile
 		$ grep LABEL Dockerfile Dockerfile-postgis
 
-1.  Build the Docker images.  Either build them manually as follows, or add
-    the `--build` option to the `compose up` command in the section below.
+1.  Build the Docker images, e.g.
 
-	1.  Optionally, build the database image.  This only needs updating if
-		there have been any database schema changes.
-
-		Update `Dockerfile-postgis` to use the latest
+	1.  Optionally, Update `Dockerfile-postgis` to use the latest
 		[PostgreSQL build](https://hub.docker.com/_/postgres).
 
-			$ cd ./trip-server-2
-			$ docker pull docker.io/library/postgres:15-bookworm
-			$ docker build -f Dockerfile-postgis -t fdean/trip-database:latest .
+	1.  Build the `trip-database` and `trip-server` images:
 
-	1.  Build the `trip-server-2` image:
-
-		*  Run the Docker build:
-
-				$ cd ./trip-server-2
-				$ docker pull docker.io/library/debian:bookworm-slim
-				$ docker build -t fdean/trip-server-2:latest .
-
-			The `--no-cache` option may be required if Docker uses a cached
-			version of the `COPY` command when copying the distribution tarball to
-			the image.
-
-		*  Optionally, check the image labels with:
-
-				$ docker image inspect --format='{{println .Config.Labels}}' \
-				  fdean/trip-server-2:latest
-				$ docker image inspect --format='{{println .Config.Labels}}' \
-				  fdean/trip-database:latest
+			$ DOCKER=podman PUSH=y ./docker-build.sh
 
 1.	Test the Dockerfile
 
-	Omit the `--build` option if the images were built in the earlier steps.
-
-		$ docker compose up -d --build
+		$ docker compose up --no-recreate --detach
 		$ docker compose logs --follow
 
-	Stop the container with (use the `--volumes` switch to also remove
-    the database volume):
+	Stop the container, optionally with (use the `--volumes` switch to also
+    remove the database volume):
 
 		$ docker compose down --volumes
 
@@ -110,15 +85,7 @@
 
 1.  Push Docker images:
 
-		$ docker tag fdean/trip-server-2:latest fdean/trip-server-2:$VERSION
-		$ docker push fdean/trip-server-2:latest
-		$ docker push fdean/trip-server-2:$VERSION
-
-1.  Optionally, push database image:
-
-		$ docker tag fdean/trip-database:latest fdean/trip-database:$VERSION
-		$ docker push fdean/trip-database:latest
-		$ docker push fdean/trip-database:$VERSION
+		$ MAKEFLAGS='-j 4' DOCKER=podman PUSH=y ./docker-build.sh
 
 ## Validation
 
