@@ -8,7 +8,7 @@ RUN apt-get update \
     make g++ gawk \
     libboost-locale-dev libpqxx-dev libpugixml-dev libyaml-cpp-dev \
     nlohmann-json3-dev uuid-dev cairomm-1.0-dev libgdal-dev libcmark-dev \
-    texlive texinfo \
+    texlive texinfo vim.tiny \
     && rm -rf /var/lib/apt/lists/*
 
 RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \

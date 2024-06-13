@@ -294,14 +294,31 @@ nlohmann::basic_json<nlohmann::ordered_map> GeoMapUtils::as_geojson(const int in
   } else {
     auto path = paths.front();
     json coords = json::array();
+    // OpenLayers 9.x needs consistent coordinate array length throughout,
+    // either all length 2 or all length 3.
+    bool contains_elevation_data = false;
+    bool contains_null_elevation_data = false;
     for (const auto &loc : path) {
       json coord;
       coord.push_back(loc.longitude);
       coord.push_back(loc.latitude);
-      if (loc.altitude.has_value())
+      if (loc.altitude.has_value()) {
         coord.push_back(loc.altitude.value());
+        contains_elevation_data = true;
+      } else {
+        if (contains_elevation_data)
+          coord.push_back(nullptr);
+        else
+          contains_null_elevation_data = true;
+      }
       coords.push_back(coord);
     }
+    // Fix the array if some entries have elevation data (length 3) and some do
+    // not (length 2)
+    if (contains_elevation_data && contains_null_elevation_data)
+      for (auto &coord : coords)
+        if (coord.size() == 2)
+          coord.push_back(nullptr);
     json geometry;
     if (coords.empty()) {
       return "{}";

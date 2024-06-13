@@ -2,6 +2,13 @@
 
 # Changelog
 
+## 2.5.1-rc.0
+
+- Updated to use [OpenLayers][] 9.2.4
+
+- Fix for OpenLayers 9.x - Paths need to have consistent coordinate array
+  lengths, either all with elevation data or all without.
+
 ## 2.5.0
 
 Refactored to run with [libpqxx][] version 7.x in addition to 6.x.  The

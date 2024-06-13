@@ -136,7 +136,13 @@ bool test_linestring()
   GeoMapUtils g;
   g.add_path(test_path.begin(), test_path.end());
   const auto result = g.as_geojson();
-  return result.dump() == "{\"type\":\"LineString\",\"coordinates\":[[10.0,45.0],[20.0,43.0],[25.0,61.0]]}";
+  const auto expected = "{\"type\":\"LineString\",\"coordinates\":[[10.0,45.0],[20.0,43.0],[25.0,61.0]]}";
+  auto retval = result.dump() == expected;
+  if (!retval)
+    std::cerr << "test_linestring() failed\n"
+              << "Expected: " << expected
+              << "\n but was: " << result.dump() << '\n';
+  return retval;
 }
 
 // Simple test for a Point
@@ -147,7 +153,10 @@ bool test_point()
   GeoMapUtils g;
   g.add_path(test_path.begin(), test_path.end());
   const auto result = g.as_geojson();
-  return result.dump() == "{\"type\":\"Point\",\"coordinates\":[10.0,45.0]}";
+  auto retval = result.dump() == "{\"type\":\"Point\",\"coordinates\":[10.0,45.0]}";
+  if (!retval)
+    std::cerr << "test_point() failed\n";
+  return retval;
 }
 
 bool test_empty_path()

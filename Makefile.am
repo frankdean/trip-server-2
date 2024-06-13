@@ -7,6 +7,7 @@ AM_DISTCHECK_CONFIGURE_FLAGS = --enable-cairo --enable-directory-listing --enabl
 EXTRA_DIST = m4/ChangeLog  .gitignore stamp-h1 \
 	RELEASE_PROCEDURE.md \
 	Vagrantfile \
+	docker-build.sh \
 	doc/trip-server-ref.sgml \
 	docker-compose-map-demo.yml \
 	docker-compose-map-import.yml \
