@@ -81,8 +81,8 @@ The user guide can also be viewed with:
 The [user guide][trip user guide] and [application manual][trip application manual]
 are available online.
 
-[trip user guide]: https://www.fdsd.co.uk/trip-server-2/latest/docs/user-guide/
-[trip application manual]: https://www.fdsd.co.uk/trip-server-2/latest/docs/application-guide/
+[trip user guide]: https://www.fdsd.co.uk/trip-server-2/latest/trip-user-guide.html/
+[trip application manual]: https://www.fdsd.co.uk/trip-server-2/latest/trip-server.html/
 
 ## Source Control
 
