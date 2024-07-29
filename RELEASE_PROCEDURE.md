@@ -18,9 +18,12 @@
 
 1.  Create the distribution tarballs
 
+		$ autoreconf -i
 		$ ./configure
-		$ make check
-		$ make distcheck
+		$ make -j 8 check
+		$ PKG_CONFIG_PATH=\
+		/usr/local/lib/pkgconfig:/opt/local/lib/postgresql15/pkgconfig \
+		MAKEFLAGS='-j 8' make distcheck
 
 1.  Create SHA256 sums for the tarballs
 

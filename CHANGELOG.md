@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 2.5.1-rc.0
+## 2.5.1
 
 - Updated to use [OpenLayers][] 9.2.4
 
