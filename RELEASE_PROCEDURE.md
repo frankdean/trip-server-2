@@ -51,7 +51,7 @@
 
 	1.  Build the `trip-database` and `trip-server` images:
 
-			$ DOCKER=podman PUSH=y ./docker-build.sh
+			$ DOCKER=podman PUSH=n ./docker-build.sh
 
 1.	Test the Dockerfile
 
@@ -88,7 +88,7 @@
 
 1.  Push Docker images:
 
-		$ MAKEFLAGS='-j 4' DOCKER=podman PUSH=y ./docker-build.sh
+		$ MAKEFLAGS='-j 4' DOCKER=podman ./docker-build.sh
 
 ## Validation
 
