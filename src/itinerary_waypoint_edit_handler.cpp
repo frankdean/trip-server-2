@@ -122,6 +122,7 @@ void ItineraryWaypointEditHandler::build_form(
   if (invalid_position_text.has_value()) {
     append_value(response.content, invalid_position_text.has_value(), x(invalid_position_text));
   } else {
+    response.content << std::defaultfloat << std::setprecision(10);
     append_value(response.content, waypoint.id.has_value(), waypoint.latitude);
     append_value(response.content, waypoint.id.has_value(), ',');
     append_value(response.content, waypoint.id.has_value(), waypoint.longitude);
@@ -178,7 +179,8 @@ void ItineraryWaypointEditHandler::build_form(
     "      <div class=\"col-sm-6 col-md-8 col-lg-4\">\n"
     // Label for input of an altitude value
     "        <label for=\"input-altitude\">" << translate("Altitude") << "</label>\n"
-    "        <input id=\"input-altitude\" name=\"altitude\" type=\"number\" min=\"-9999999\" max=\"99999999\" step=\"any\" value=\"";
+    "        <input id=\"input-altitude\" name=\"altitude\" type=\"number\" min=\"-999999\" max=\"999999\" step=\"any\" value=\""
+                   << std::defaultfloat << std::setprecision(6);
   append_optional_value(response.content, waypoint.altitude);
   response.content << "\"";
   append_element_disabled_flag(response.content, read_only);

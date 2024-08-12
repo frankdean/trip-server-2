@@ -2,6 +2,10 @@
 
 # Changelog
 
+## 2.5.2-rc.1
+
+- Increase the precision of latitude and longitude values when editing waypoints
+
 ## 2.5.1
 
 - Updated to use [OpenLayers][] 9.2.4
