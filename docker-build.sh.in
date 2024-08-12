@@ -24,38 +24,39 @@ PUSH=${PUSH:-y}
 PUSH_DB=${PUSH_DB:-$PUSH}
 PUSH_TRIP=${PUSH_TRIP:-$PUSH}
 MAKEFLAGS=${MAKEFLAGS:-'-j 1'}
-BUILD_DB=${BUILD_DB:-y}
-BUILD_TRIP=${BUILD_TRIP:-y}
+BUILD=${BUILD:-y}
+BUILD_DB=${BUILD_DB:-$BUILD}
+BUILD_TRIP=${BUILD_TRIP:-$BUILD}
 DOCKER=${DOCKER:-docker}
 
 if [ $BUILD_DB == 'y' ];then
     ${DOCKER} pull docker.io/library/postgres:15-bookworm
     ${DOCKER} build --platform=linux/amd64 -f Dockerfile-postgis -t fdean/trip-database:latest-amd64 .
     ${DOCKER} build --platform=linux/arm64 -f Dockerfile-postgis -t fdean/trip-database:latest-arm64 .
-    if [ $PUSH_DB == 'y' ]; then
-	${DOCKER} push fdean/trip-database:latest-amd64
-	${DOCKER} push fdean/trip-database:latest-arm64
-	if [ -n "$(${DOCKER} images -q fdean/trip-database:latest 2> /dev/null)" ]; then
-	    ${DOCKER} manifest rm fdean/trip-database:latest
-	fi
-	${DOCKER} manifest create fdean/trip-database:latest fdean/trip-database:latest-amd64 fdean/trip-database:latest-arm64
-	${DOCKER} push fdean/trip-database:latest
+fi
+if [ $PUSH_DB == 'y' ]; then
+    ${DOCKER} push fdean/trip-database:latest-amd64
+    ${DOCKER} push fdean/trip-database:latest-arm64
+    if [ -n "$(${DOCKER} images -q fdean/trip-database:latest 2> /dev/null)" ]; then
+	${DOCKER} manifest rm fdean/trip-database:latest
     fi
+    ${DOCKER} manifest create fdean/trip-database:latest fdean/trip-database:latest-amd64 fdean/trip-database:latest-arm64
+    ${DOCKER} push fdean/trip-database:latest
 fi
 
 if [ $BUILD_TRIP == 'y' ];then
     ${DOCKER} pull docker.io/library/debian:bookworm-slim
     ${DOCKER} build --platform=linux/arm64 --build-arg MAKEFLAGS="$MAKEFLAGS" -t fdean/trip-server-2:latest-arm64 .
     ${DOCKER} build --platform=linux/amd64 --build-arg MAKEFLAGS="$MAKEFLAGS" -t fdean/trip-server-2:latest-amd64 .
-    if [ $PUSH_TRIP == 'y' ]; then
-	${DOCKER} push fdean/trip-server-2:latest-arm64
-	${DOCKER} push fdean/trip-server-2:latest-amd64
-	if [ -n "$(${DOCKER} images -q fdean/trip-server-2:latest 2> /dev/null)" ]; then
-	    ${DOCKER} manifest rm fdean/trip-server-2:latest
-	fi
-	${DOCKER} manifest create fdean/trip-server-2:latest fdean/trip-server-2:latest-amd64 fdean/trip-server-2:latest-arm64
-	${DOCKER} push fdean/trip-server-2:latest
+fi
+if [ $PUSH_TRIP == 'y' ]; then
+    ${DOCKER} push fdean/trip-server-2:latest-arm64
+    ${DOCKER} push fdean/trip-server-2:latest-amd64
+    if [ -n "$(${DOCKER} images -q fdean/trip-server-2:latest 2> /dev/null)" ]; then
+	${DOCKER} manifest rm fdean/trip-server-2:latest
     fi
+    ${DOCKER} manifest create fdean/trip-server-2:latest fdean/trip-server-2:latest-amd64 fdean/trip-server-2:latest-arm64
+    ${DOCKER} push fdean/trip-server-2:latest
 fi
 
 if [ $PUSH_DB == 'y' ]; then
