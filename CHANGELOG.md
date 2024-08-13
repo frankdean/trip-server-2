@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 2.5.2-rc.1
+## 2.5.2
 
 - Increase the precision of latitude and longitude values when editing waypoints
 
