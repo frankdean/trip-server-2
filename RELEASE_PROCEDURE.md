@@ -72,8 +72,6 @@
 
 ## Release
 
-1.  Tag the `master` branch of the parent project with release version number
-
 1.  Copy the builds, SHA256 sums, HTML and PDF docs to the Trip Server 2
     website
 
@@ -81,7 +79,7 @@
 
 1.  Update the symbolic link to point to the latest docs
 
-1.  Tag the master branch with the release number
+1.  Tag the `master` branch of the parent project with release version number
 
 1.  Push the master branch and check
     <https://www.fdsd.co.uk/trip-server-2/readme.html> has been updated
