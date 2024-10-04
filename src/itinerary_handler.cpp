@@ -624,7 +624,7 @@ void ItineraryHandler::build_form(web::HTTPServerResponse& response,
       "                <li><hr class=\"dropdown-divider\"></li> <!-- writable version -->\n"
       // Label for menu item to permanently delete the selected items
       "                <li><button class=\"dropdown-item\" accesskey=\"d\" formmethod=\"post\" name=\"action\" value=\"delete_features\" "
-      // Confirmation dialog text when deleting a one or more selected itinerary featues
+      // Confirmation dialog text when deleting a one or more selected itinerary features
       "onclick=\"return confirm('" << translate("Delete the selected waypoints, routes and tracks?") << "');\">" << translate("Delete selected items") << "</button></li> <!-- writable version -->\n"
       "                <li><hr class=\"dropdown-divider\"></li>\n";
   }

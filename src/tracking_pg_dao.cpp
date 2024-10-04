@@ -572,7 +572,7 @@ bool TrackPgDao::check_new_locations_available(
     tx.commit();
     return retval;
   } catch (const std::exception &e) {
-    std::cerr << "Exception whilst deleting itinerary featues: "
+    std::cerr << "Exception whilst deleting itinerary features: "
               << e.what();
     throw;
   }
@@ -654,7 +654,7 @@ void TrackPgDao::check_new_locations_available(
     }
     tx.commit();
   } catch (const std::exception &e) {
-    std::cerr << "Exception whilst deleting itinerary featues: "
+    std::cerr << "Exception whilst deleting itinerary features: "
               << e.what();
     throw;
   }

@@ -38,7 +38,7 @@ const std::string SessionPgDao::coordinate_format_key = "coordinate_format";
 const std::string SessionPgDao::tracks_query_key = "tracks";
 /// Used for copy-and-paste of location tracking history
 const std::string SessionPgDao::location_history_key = "location-history";
-/// Used for copy-and-paste of itinerary featues
+/// Used for copy-and-paste of itinerary features
 const std::string SessionPgDao::itinerary_features_key = "itinerary-features";
 /// Used to keep the last viewed page of itineraries
 const std::string SessionPgDao::itinerary_page_key = "itineraries";
