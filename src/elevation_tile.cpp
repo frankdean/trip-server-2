@@ -75,12 +75,6 @@ void ElevationTile::open()
 {
   // std::cout << "Opening tile: " << path << '\n';
 
-  // Note: Datasets can be opened from compressed tar or zip files
-  // https://gdal.org/user/virtual_file_systems.html
-  // The filename simply needs to be specified in the form of
-  // /vsitar//path/to.tar/path/within/tar.  Omit the double-slash to make the
-  // path relative to the current working directory.
-
   std::lock_guard<std::mutex> lock(dataset_mutex);
   if ((dataset = (GDALDataset *) GDALOpen(path.c_str(), GA_ReadOnly)) == NULL)
       throw dataset_exception("Failure opening dataset");
@@ -204,21 +198,60 @@ void ElevationService::init()
     for (const auto &entry : dir_list) {
       // std::cout << "Checking \"" << entry.name << "\"\n";
       try {
+        auto extension = FileUtils::get_extension(entry.name);
         if (entry.type != FileUtils::regular_file ||
-            FileUtils::get_extension(entry.name) != "tif")
+            (extension != "tif" && extension != "zip" && extension != "tgz"))
           continue;
 
-        std::unique_ptr<ElevationTile> tile(
-            new ElevationTile(
-                directory_path + FileUtils::path_separator + entry.name));
+        // Note: Datasets can be opened from compressed tar or zip files
+        // https://gdal.org/user/virtual_file_systems.html
+        // The filename simply needs to be specified in the form of
+        // /vsitar//path/to.tar/path/within/tar.  Omit the double-slash to make the
+        // path relative to the current working directory.
 
-        // If caching is enabled, close the tile after parsing it
-        if (tile_cache_ms > 0)
-          tile->close();
+        std::unique_ptr<ElevationTile> tile;
+        if (extension == "zip") {
+          auto name = entry.name;
+          auto p = name.find_last_of(".");
+          if (p != std::string::npos && p > 1) {
+            name = name.substr(0, p);
+            // std:: cout << "Name: \"" << name << "\"\n";
+          }
+          std::unique_ptr<ElevationTile> zipTile(
+              new ElevationTile(
+                  "/vsizip/" + directory_path + FileUtils::path_separator + entry.name +
+                  FileUtils::path_separator + name + ".tif")
+            );
+          tile = std::move(zipTile);
+        } else if (extension == "tgz") {
+          auto name = entry.name;
+          auto p = name.find_last_of(".");
+          if (p != std::string::npos && p > 1) {
+            name = name.substr(0, p);
+          }
+          std::unique_ptr<ElevationTile> gzipTile(
+              new ElevationTile(
+                  "/vsitar/" + directory_path + FileUtils::path_separator + entry.name +
+                  FileUtils::path_separator + name)
+            );
+          tile = std::move(gzipTile);
+        } else if (extension == "tif") {
+          std::unique_ptr<ElevationTile> tifTile(
+              new ElevationTile(
+                  directory_path + FileUtils::path_separator + entry.name)
+            );
+          tile = std::move(tifTile);
+        }
 
-        tiles.push_back(std::move(tile));
+        if (tile != nullptr) {
+          // If caching is enabled, close the tile after parsing it
+          if (tile_cache_ms > 0)
+            tile->close();
 
-        // std::cout << "Added \"" << entry.name << "\" to set of elevation tiles\n";
+          tiles.push_back(std::move(tile));
+
+          // std::cout << "Added \"" << entry.name << "\" to set of elevation tiles\n";
+        }
       } catch (const ElevationTile::dataset_exception &e) {
         std::cerr << "Error adding file: \"" << entry.name << "\" to elevation tile list: "
                   << e.what() << '\n';

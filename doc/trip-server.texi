@@ -786,7 +786,10 @@ From the main page of the CGIAR CSI website, follow the link to
 @code{SRTM Data} to download @code{zip} files that contain @code{tiff}
 files with 5m x 5m elevation data.
 
-Extract the @code{tiff} files to a folder,
+The @code{zip} files can be used directly or extracted as separate
+files.  Place either the @code{zip} files or the extracted @code{tiff}
+files in a folder.  Note the application will perform much better with
+extracted zip files as it doesn't have to keep uncompressing them.
 e.g. @code{/var/local/elevation-data} and configure an @code{elevation}
 section in @code{config.yaml}, e.g.
 
@@ -797,16 +800,18 @@ elevation:
 @end example
 
 When the Trip Server application is started, it reads all the
-@code{tiff} files in the folder specified by the
+@code{tiff} or @code{zip} files in the folder specified by the
 @code{elevation.datasetDir} parameter and creates an in memory index
 containing the area covered by each tile.  When elevation data is
 required for a specific location, the relevant tile is loaded, the
 response provided, and the tile retained in memory for the number of
 milliseconds specified by the @code{elevation.tileCacheMs} parameter.
 
-The @code{tiff} files take up a lot of space.  Where space is at a
-premium, consider storing them in a compressed file system, e.g.
-on Linux use @url{http://squashfs.sourceforge.net, Squashfs.}
+The extracted @code{tiff} files take up a lot of space.  Where space is
+at a premium, consider storing them in a compressed file system, e.g.
+on Linux use @url{http://squashfs.sourceforge.net, Squashfs.}  This is
+more cumbersome than using the @code{zip} files directly, but provides
+better performance.
 
 e.g.
 

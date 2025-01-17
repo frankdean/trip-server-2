@@ -2,6 +2,10 @@
 
 # Changelog
 
+## 2.5.3
+
+- Support loading elevation tiles directly from zip files.
+
 ## 2.5.2
 
 - Increase the precision of latitude and longitude values when editing waypoints
