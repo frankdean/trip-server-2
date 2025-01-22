@@ -114,9 +114,6 @@ public:
    *
    * \param skip_all_if_any_exist if there is already an elevation value for one
    * or more points, no points will be updated even if force has been specified.
-   *
-   * \return an object containing the lowest and highest altitudes, the total
-   * distance, ascent and descent.
    */
   template <typename Iterator>
   void fill_elevations(
