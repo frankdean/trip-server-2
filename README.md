@@ -466,8 +466,15 @@ To re-create the required Gnu autotools files:
 	$ autoreconf --install
 	$ automake --add-missing --copy
 
-Optionally install the `uuid-runtime` package which runs a daemon that
-`libuuid` uses to create secure UUIDs.
+When you run the `configure` script, add the `--enable-maintainer-mode`
+option, at least for the first build, otherwise the build is likely to fail
+with error messages similar to the following:
+
+	trip-user-guide.texi:7: @include: could not find version-ug.texi
+	trip-server.texi:7: @include: could not find version.texi
+
+For secure UUID creation, optionally install the `uuid-runtime` package which
+runs a daemon that `libuuid` uses to create secure UUIDs.
 
 To run Trip Server as a daemon, create a system user, e.g.
 
