@@ -425,6 +425,8 @@ application.  Uninstall the package and download version `v3.11.2` or later of
 `json.hpp` as described in the 'nlohmann/json' sub-section of the
 'Dependencies' section below.
 
+[nlohmann-json]: https://json.nlohmann.me "JSON for Modern C++"
+
 Building with GCC on ARM devices (e.g. Raspberry Pi) produces warnings about
 an ABI change in GCC 7.1.
 
