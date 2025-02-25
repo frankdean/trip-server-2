@@ -5,6 +5,11 @@
 ## 2.5.3
 
 - Support loading elevation tiles directly from zip files.
+- Uses a JSON file to maintain an index of tiles to increase startup speed.
+  The location of the index file must be writable, defaulting to
+  `.tile-index.json` in the tiles folder.  Can be configured using the
+  `datasetDirIndex` setting in `trip-server.yaml`.  See
+  `conf/trip-server-dist.yaml` in the source tree.
 
 ## 2.5.2
 

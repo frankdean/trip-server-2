@@ -242,7 +242,7 @@ bool test_fill_all_values_skip_true_all_empty()
   return retval;
 }
 
-#endif
+#endif // HAVE_GDAL
 
 int main(void)
 {
@@ -261,7 +261,13 @@ int main(void)
     std::cerr << "TRIP_ELEVATION_TILE_PATH not set.  Skipping elevation tile tests\n";
     return 0;
   }
-  service = std::unique_ptr<ElevationService>(new ElevationService(elevation_tile_dir, 0));
+  const std::string index_tile_pathname = elevation_tile_dir +
+    FileUtils::path_separator + ".tile-index.json";
+  service = std::unique_ptr<ElevationService>(
+      new ElevationService(elevation_tile_dir,
+                           index_tile_pathname,
+                           std::string(),
+                           0));
   try {
     return !(
         test_single_point() &&

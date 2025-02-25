@@ -71,6 +71,8 @@ class TripConfig {
   double default_average_kmh_hiking_speed;
   int elevation_tile_cache_ms;
   std::string elevation_tile_path;
+  std::string elevation_tile_index_pathname;
+  std::string proj_search_path;
   /// The maximum number of location tracking points for related operations.
   int maximum_location_tracking_points;
   YAML::Node default_triplogger_configuration;
@@ -126,6 +128,9 @@ public:
   }
   std::string get_elevation_tile_path() {
     return elevation_tile_path;
+  }
+  std::string get_elevation_tile_index_pathname() {
+    return elevation_tile_index_pathname;
   }
   int get_maximum_location_tracking_points() {
     return maximum_location_tracking_points;

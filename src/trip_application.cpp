@@ -45,9 +45,17 @@ TripApplication::TripApplication(std::string listen_address,
 {
   config = std::make_shared<TripConfig>(TripConfig(config_filename));
 #ifdef HAVE_GDAL
-  if (!config->get_elevation_tile_path().empty()) {
+  const std::string elevation_tile_path = config->get_elevation_tile_path();
+  if (!elevation_tile_path.empty()) {
+    std::string elevation_tile_index_pathname =
+      config->get_elevation_tile_index_pathname();
+    if (elevation_tile_index_pathname.empty()) {
+      elevation_tile_index_pathname = elevation_tile_path + "/.tile-index.json";
+    }
     elevation_service.reset(new ElevationService(
         config->get_elevation_tile_path(),
+        elevation_tile_index_pathname,
+        std::string(),
         config->get_elevation_tile_cache_ms()));
   }
 #endif

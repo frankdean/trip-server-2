@@ -27,6 +27,10 @@
 
 1.  Create SHA256 sums for the tarballs
 
+1.  Sign the tarballs:
+
+		gpg --sign --detach-sign --armor $TARBALL
+
 1.  Copy the tarballs to the download site
 
 1.  Build PDF and HTML docs

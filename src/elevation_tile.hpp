@@ -24,16 +24,26 @@
 
 #ifdef HAVE_GDAL
 
-#include "itinerary_pg_dao.hpp"
 #include <algorithm>
 #include <chrono>
+#include <functional>
 #include <optional>
 #include <stdexcept>
+#include <map>
 #include <memory>
 #include <mutex>
-#include <string>
-#include <thread>
 #include <vector>
+#include <set>
+#include <string>
+#ifdef HAVE_THREAD
+#include <thread>
+#endif
+#ifdef HAVE_NLOHMANN_JSON_HPP
+#include <nlohmann/json.hpp>
+#endif
+#ifdef HAVE_TARGETCONDITIONALS_H
+#include <TargetConditionals.h>
+#endif
 
 class GDALDataset;
 class GDALRasterBand;
@@ -49,33 +59,55 @@ class ElevationService;
  */
 class ElevationTile {
   friend class ElevationService;
-  std::string path;
-  int cache_ms;
-  double left;
-  double pixel_width;
-  double xskew;
+  enum geo_tiff_file_types {
+    unknown,
+    tar,
+    tgz,
+    tiff,
+    zip
+  };
+  std::string filename;
   double top;
-  double yskew;
-  double pixel_height;
   double right;
   double bottom;
+  double left;
+  double xskew;
+  double yskew;
+  double pixel_height;
+  double pixel_width;
   GDALDataset *dataset; // not thread-safe
   GDALRasterBand *band;
   OGRCoordinateTransformation *coordinate_transform;
   std::chrono::system_clock::time_point time;
   /// mutex used to protect non-thread-safe access to dataset pointer
-  std::mutex dataset_mutex;
+  static std::mutex dataset_mutex;
   /// Re-opens the dataset and creates the transformation object
-  void open();
+  void open(std::string directory_path);
   /// Deletes the dataset and the transformation object
   void close();
+  static std::string build_gdal_path_name(
+      std::string directory_path,
+      std::string filename);
+  static ElevationTile::geo_tiff_file_types get_geo_tiff_tile_type(const std::string filename);
+  std::optional<double> get_elevation(std::string directory_path,
+                                      double longitude,
+                                      double latitude);
+  static std::string strip_file_extension(std::string filename);
+#ifdef HAVE_NLOHMANN_JSON_HPP
+  ElevationTile(nlohmann::basic_json<nlohmann::ordered_map> j);
+#endif
 protected:
   static bool drivers_registered;
 public:
-  static const int no_data;
-  ElevationTile(std::string path, int cache_ms = 60000);
-  ~ElevationTile();
-  std::optional<double> get_elevation(double longitude, double latitude);
+  /// Constant indicating the coordinate has no elevation data
+  static const double no_data;
+  /// Constructs q new tile, loading it from the specified path
+  ElevationTile(std::string directory_path, std::string filename);
+  ~ElevationTile() {}
+#ifdef HAVE_NLOHMANN_JSON_HPP
+  static void from_json(const nlohmann::basic_json<nlohmann::ordered_map>& j, ElevationTile& t);
+  static void to_json(nlohmann::basic_json<nlohmann::ordered_map>& j, const ElevationTile& t);
+#endif
   class dataset_exception : public std::exception {
     std::string message;
   public:
@@ -86,6 +118,12 @@ public:
   };
 };
 
+#ifdef TARGET_OS_MACCATALYST
+typedef std::vector<ElevationTile> map_tile_type;
+#else
+typedef std::map<std::string, ElevationTile> map_tile_type;
+#endif
+
 /**
  * Manages all the ElevationTile instances and delegates calls to find an
  * elevation for a specified longitude and latitude to the relevant
@@ -93,17 +131,65 @@ public:
  */
 class ElevationService {
   std::string directory_path;
+  std::string index_pathname;
   long tile_cache_ms;
-  std::vector<std::unique_ptr<ElevationTile>> tiles;
+  /// Map keyed by filename (without full path)
+  map_tile_type tiles;
   bool initialized;
   std::exception_ptr initialization_error;
   void init();
+  /// @param filename (without path)
+  std::string build_gdal_path_name(std::string filename) const;
+#ifdef HAVE_THREAD
   std::unique_ptr<std::thread> init_thread;
+#endif
+#ifdef HAVE_NLOHMANN_JSON_HPP
+  void save_tile_index() const;
+  void load_tile_index();
+#endif
+
+#ifdef TARGET_OS_MACCATALYST
+  void add_tile(std::string filename, std::set<std::string> &deleted_tiles);
+#else
+  void add_tile(std::string filename, map_tile_type &deleted_tiles);
+#endif
+
 public:
-  ElevationService(std::string directory_path, long tile_cache_ms);
+  ElevationService(const std::string &directory_path,
+                   const std::string &index_pathname,
+                   const std::string &proj_search_path,
+                   long tile_cache_ms);
+  ElevationService(const char *directory_path,
+                   const char *index_pathname,
+                   const char *proj_search_path,
+                   long tile_cache_ms)
+    : ElevationService(std::string(directory_path),
+                       std::string(index_pathname),
+                       std::string(proj_search_path), tile_cache_ms) {}
   ~ElevationService();
-  void update_tile_cache();
+  /// Constant indicating the coordinate has no elevation data
+  static const double no_data;
   std::optional<double> get_elevation(double longitude, double latitude);
+  double get_elevation_as_double(double longitude, double latitude) {
+    const auto retval = get_elevation(longitude, latitude);
+    if (retval.has_value()) {
+      return retval.value();
+    } else {
+      return ElevationTile::no_data;
+    }
+  }
+  bool add_tile(const std::string &pathname);
+  bool add_tile(const char *pathname) {
+    return add_tile(std::string(pathname));
+  }
+  bool delete_tile(const std::string &filename);
+  bool delete_tile(const char *filename) {
+    return delete_tile(std::string(filename));
+  }
+  void update_tile_cache();
+  bool empty() {
+    return tiles.empty();
+  }
 
   /**
    * Iterates across the set of points, filling in elevation values where a
@@ -140,19 +226,12 @@ public:
         if (!point->altitude.has_value() || force) {
           auto altitude = get_elevation(point->longitude,
                                         point->latitude);
-          // if (altitude.first) {
-          //   std::cout << "Got altitude of: " << altitude.second
-          //             << " for " << point->longitude << ", "
-          //             << point->latitude << '\n';
-          // }
           if (force) {
             if (altitude.has_value())
               point->altitude = altitude;
           } else {
             point->altitude = altitude;
           }
-        // } else {
-        //   std::cout << "Ignoring point with altitude already set\n";
         }
       }
     }

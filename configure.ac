@@ -95,6 +95,9 @@ AM_CONDITIONAL([USE_CAIRO], [test x$use_cairo = xyes])
 if test "x${use_gdal}" = xyes; then
    PKG_CHECK_MODULES([LIBGDAL], [gdal >= 3.2.2])
    AC_DEFINE([HAVE_GDAL], [1], [Build to use GDAL library])
+   PKG_CHECK_MODULES([LIBPROJ], [proj >= 9.0.0],
+      [AC_DEFINE([HAVE_PROJ], [1], [Build to use PROJ library])],
+      [AC_MSG_RESULT([${LIBPROJ_PKG_ERRORS} - will not set PROJ search path for proj.db])])
    dnl GDAL_SYSTEM='elevation_tile.$(OBJEXT)'
    dnl AC_SUBST([GDAL_SYSTEM])
 fi
@@ -150,9 +153,9 @@ if test "x${use_keep_alive}" == xyes; then
    AC_DEFINE([ENABLE_KEEP_ALIVE], [1], [Enable HTTP keep alive])
 fi
 
-CXXFLAGS="${CXXFLAGS} -Wno-deprecated-declarations ${LIBPQXX_CFLAGS} ${LIBYAML_CFLAGS} ${LIBUUID_CFLAGS} ${BOOST_CPPFLAGS} ${LIBPUGIXML_CFLAGS} ${LIBGDAL_CFLAGS} ${LIBCAIROMM_CFLAGS} ${LIBCMARK_CFLAGS} ${FINALCUT_CFLAGS}"
+CXXFLAGS="${CXXFLAGS} -Wno-deprecated-declarations ${LIBPQXX_CFLAGS} ${LIBYAML_CFLAGS} ${LIBUUID_CFLAGS} ${BOOST_CPPFLAGS} ${LIBPUGIXML_CFLAGS} ${LIBGDAL_CFLAGS} ${LIBPROJ_CFLAGS} ${LIBCAIROMM_CFLAGS} ${LIBCMARK_CFLAGS} ${FINALCUT_CFLAGS}"
 dnl CPPFLAGS="${CPPFLAGS} ${XXXXXX_CPPFLAGS}"
-LIBS="${LIBS} ${LIBPQXX_LIBS} ${LIBYAML_LIBS} ${LIBUUID_LIBS} ${BOOST_LDFLAGS} ${BOOST_LOCALE_LIB} ${LIBPUGIXML_LIBS} ${LIBGDAL_LIBS} ${LIBCAIROMM_LIBS} ${LIBCMARK_LIBS} ${FINALCUT_LIBS}"
+LIBS="${LIBS} ${LIBPQXX_LIBS} ${LIBYAML_LIBS} ${LIBUUID_LIBS} ${BOOST_LDFLAGS} ${BOOST_LOCALE_LIB} ${LIBPUGIXML_LIBS} ${LIBGDAL_LIBS} ${LIBPROJ_LIBS} ${LIBCAIROMM_LIBS} ${LIBCMARK_LIBS} ${FINALCUT_LIBS}"
 
 # Checks for header files.
 dnl echo "Host_os: ${host_os}"
@@ -179,9 +182,13 @@ case $host in
   *)
 esac
 dnl AC_CHECK_HEADERS([getopt.h uuid/uuid.h ossp/uuid.h])
-AC_CHECK_HEADERS([getopt.h])
+dnl
+dnl The presence of TargetConditionals.h indicates we're probably building
+dnl using Xcode SDK so we can compile differently for macOS and iOS targets.
+AC_CHECK_HEADERS([getopt.h TargetConditionals.h])
 AC_CHECK_HEADERS([nlohmann/json.hpp],,
     [AC_MSG_ERROR([nlohmann/json.hpp not found.  Please install the nlohmann-json package.])])
+AC_CHECK_HEADERS([thread])
 
 # Check if the version of libuuid supports the uuid_generate_time_safe method
 if test "x${have_libuuid}" = xyes; then
@@ -232,6 +239,8 @@ AC_SUBST([OLC_VERSION])
 AC_DEFINE_UNQUOTED([OLC_VERSION], ["${OLC_VERSION}"], [The version of Open Location Code])
 AC_SUBST([ZXCVBN_VERSION])
 AC_DEFINE_UNQUOTED([ZXCVBN_VERSION], ["${ZXCVBN_VERSION}"], [The version of zxcvbn])
+
+AC_DEFINE([BUILD_FOR_IOS], [0], "Build for an iOS target")
 
 AC_CONFIG_FILES([Makefile po/Makefile.in
 	         doc/Makefile

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2025-01-17 16:15+0000\n"
+"POT-Creation-Date: 2025-02-25 18:09+0000\n"
 "PO-Revision-Date: 2023-12-17 17:34+0000\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: English (British) <(nothing)>\n"
@@ -322,8 +322,7 @@ msgstr "New"
 msgid "User Management"
 msgstr "User Management"
 
-#. Message displayed after loading elevation tiles
-#: src/elevation_tile.cpp:267
+#: src/elevation_tile.cpp:466
 #, c++-format
 msgid "Loaded {1} elevation tiles in {2} ms"
 msgstr "Loaded {1} elevation tiles in {2} ms"

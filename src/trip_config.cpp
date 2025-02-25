@@ -45,6 +45,8 @@ TripConfig::TripConfig(std::string filename) :
   default_average_kmh_hiking_speed(4),
   elevation_tile_cache_ms(),
   elevation_tile_path(),
+  elevation_tile_index_pathname(),
+  proj_search_path(),
   maximum_location_tracking_points(10000),
   default_triplogger_configuration()
 {
@@ -187,6 +189,9 @@ TripConfig::TripConfig(std::string filename) :
         elevation_tile_cache_ms = elevation_tiles["tileCacheMs"].as<int>();
       if (elevation_tiles["datasetDir"])
         elevation_tile_path = elevation_tiles["datasetDir"].as<std::string>();
+      if (elevation_tiles["datasetDirIndex"])
+        elevation_tile_index_pathname =
+          elevation_tiles["datasetDirIndex"].as<std::string>();
     }
   } catch (const YAML::BadFile& e) {
     syslog(LOG_ERR, "Failure reading \"%s\": %s",

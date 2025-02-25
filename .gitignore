@@ -86,7 +86,9 @@
 /tests/testsuite.log
 /trip-*.sha256sums
 /trip-*.tar.?z
+/trip-*.tar.?z.asc
 /trip-*.tar.bz2
 /trip-*.tar.sha256sums
 /trip-*.tar.zst
 /trip-*.zip
+/trip-*.zip.asc

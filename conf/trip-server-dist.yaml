@@ -68,6 +68,7 @@ db:
 elevation-local-disabled:
   tileCacheMs: 60000
   datasetDir: ./elevation-data/
+  datasetDirIndex: ./elevation-data/.tile-index.json
 elevation-remote-disabled:
   provider:
     userAgentInfo: (mailto:your.contact@email.address)
