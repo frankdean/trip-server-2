@@ -258,11 +258,12 @@ Optionally install the HTML and PDF documentation:
 
 By default links to the user guide within the application (e.g. the `Help`
 menu option), serve the locally installed user guide.  The location can be
-overridden in the application's configuration file, see the `Configuration`
+overridden in the application's configuration file, see the
+[Configuration](https://www.fdsd.co.uk/trip-server-2/latest/trip-server.html/Configuration.html)
 section in the `trip-server` info manual.
 
-See the `PostgreSQL Database Configuration` section in the instructions for
-[TripServer v1][trip-server] to install [PostgreSQL][] and create the database.
+See the [PostgreSQL Setup](https://www.fdsd.co.uk/trip-server-2/latest/trip-server.html/PostgreSQL-Setup.html)
+section for instructions to install [PostgreSQL][] and create the database.
 Upgrade the database to support the latest version of Trip Server v2 by running:
 
 	$ trip-server --upgrade
