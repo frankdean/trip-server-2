@@ -127,13 +127,6 @@ Itinerary Shortcut Keys
 * Itinerary Route Edit Shortcut Keys::
 * Itinerary Join Path Shortcut Keys::
 
-Itinerary Sharing Shortcut Keys
-
-* Itinerary Import Shortcut Keys::
-* Itinerary Track Edit Shortcut Keys::
-* Itinerary Track Segement Edit Shortcut Keys::
-* Itinerary Route Edit Shortcut Keys::
-
 @end detailmenu
 @end menu
 
@@ -1557,13 +1550,6 @@ New
 Close
 
 @end table
-
-@menu
-* Itinerary Import Shortcut Keys::
-* Itinerary Track Edit Shortcut Keys::
-* Itinerary Track Segement Edit Shortcut Keys::
-* Itinerary Route Edit Shortcut Keys::
-@end menu
 
 @node Itinerary Import Shortcut Keys, Itinerary Track Edit Shortcut Keys, Itinerary Sharing Shortcut Keys, Itinerary Shortcut Keys
 @subsubsection Itinerary Import Shortcut Keys
