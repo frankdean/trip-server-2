@@ -58,31 +58,6 @@ Copyright @copyright{} 2021-2023 Frank Dean
 @detailmenu
  --- The Detailed Node Listing ---
 
-Overview
-
-* Invoking trip-server::
-* Upgrading from Trip Server v1::
-* PostgreSQL Setup::
-* Configuration::
-* Internationalisation and Localisation::
-* Proxy Web Servers::
-* Testing and Developing Trip::
-* Miscellaneous::
-* Database Backup::
-
-
-Options
-
-* PostgreSQL Setup::
-* Configuration::
-* Proxy Web Servers::
-* Internationalisation and Localisation::
-* Upgrading from Trip Server v1::
-* Testing and Developing Trip::
-* Miscellaneous::
-* Database Backup::
-
-
 Upgrading from Trip Server v1
 
 * Database URI::
@@ -134,11 +109,6 @@ Vagrant
 * Trouble-shooting::
 * Vagrant Errors::
 
-Quick Start Using Vagrant
-
-* Trouble-shooting::
-* Vagrant Errors::
-
 Docker
 
 * Building the Docker Containers::
@@ -173,19 +143,6 @@ Useful Queries for Testing
 
 This document describes using @code{trip-server} --- Trip Recording and
 Itinerary Planning, version @value{VERSION}, @value{UPDATED}.
-
-@menu
-* Invoking trip-server::
-* Upgrading from Trip Server v1::
-* PostgreSQL Setup::
-* Configuration::
-* Internationalisation and Localisation::
-* Proxy Web Servers::
-* Testing and Developing Trip::
-* Miscellaneous::
-* Database Backup::
-
-@end menu
 
 @node Invoking trip-server, Upgrading from Trip Server v1, Overview, Top
 @chapter Invoking trip-server
@@ -300,18 +257,6 @@ when compiled with the @code{--enable-tui} configure option.
 Verbose output
 
 @end table
-
-@menu
-* PostgreSQL Setup::
-* Configuration::
-* Proxy Web Servers::
-* Internationalisation and Localisation::
-* Upgrading from Trip Server v1::
-* Testing and Developing Trip::
-* Miscellaneous::
-* Database Backup::
-
-@end menu
 
 @node Upgrading from Trip Server v1, PostgreSQL Setup, Invoking trip-server, Top
 @chapter Upgrading from Trip Server v1
@@ -1219,11 +1164,6 @@ the same private LAN as the host VM.  Note the
 @url{https://www.vagrantup.com/docs/networking/public_network.html,
 warnings in the Vagrant documentation for this setting}, as for
 convenience, @strong{the VM is insecure by default and design}.
-
-@menu
-* Trouble-shooting::
-* Vagrant Errors::
-@end menu
 
 @node Trouble-shooting, Vagrant Errors, Quick Start Using Vagrant, Vagrant
 @subsection Trouble-shooting
