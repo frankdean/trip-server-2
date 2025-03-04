@@ -76,6 +76,8 @@ void MyAccountHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)request; // unused
+  (void)response; // unused
   set_menu_item(account);
   // Title of the My Account page
   set_page_title(translate("My Account"));

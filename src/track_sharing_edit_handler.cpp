@@ -35,6 +35,7 @@ void TrackSharingEditHandler::do_preview_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
+  (void)response; // unused
   is_new = (request.get_param("new") == "true");
   nickname = request.get_param("nickname");
   dao_helper::trim(nickname);

@@ -60,7 +60,7 @@ bool TileHandler::can_handle(
     request.uri.compare(0, wanted_url.length(), wanted_url) == 0;
 }
 
-tile_provider TileHandler::get_provider(int provider_index) const
+tile_provider TileHandler::get_provider(std::vector<tile_provider>::size_type provider_index) const
 {
   auto providers = config->get_providers();
   if (provider_index < 0 || provider_index >= providers.size()) {

@@ -149,6 +149,7 @@ void ItinerarySharingHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)response; // unused
   itinerary_id = std::stol(request.get_query_param("id"));
   set_page_title(translate("Itinerary Sharing"));
   // set_menu_item(unknown);

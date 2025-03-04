@@ -211,7 +211,7 @@ void ItineraryTrackEditHandler::build_form(
     features["routes"] = json::array();
     features["waypoints"] = json::array();
     json segments;
-    for (const auto segment : track.segments) {
+    for (const auto &segment : track.segments) {
       if (segment.id.has_value())
         segments.push_back(segment.id.value());
     }
@@ -238,6 +238,7 @@ void ItineraryTrackEditHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)response;  // unused
   itinerary_id = std::stol(request.get_param("itineraryId"));
   track_id = std::stol(request.get_param("trackId"));
   const std::string shared = request.get_param("shared");
@@ -263,6 +264,7 @@ void ItineraryTrackEditHandler::delete_segments(
     const HTTPServerRequest& request,
     ItineraryPgDao &dao)
 {
+  (void)request; // unused
   auto track = dao.get_track(get_user_id(), itinerary_id, track_id);
   bool dirty = false;
   track.segments.erase(
@@ -291,6 +293,7 @@ void ItineraryTrackEditHandler::split_track(
     const HTTPServerRequest& request,
     ItineraryPgDao &dao)
 {
+  (void)request; // unused
   long split_before_id = selected_segment_ids.front();
   auto track = dao.get_track(get_user_id(), itinerary_id, track_id);
   ItineraryPgDao::track new_track;
@@ -334,8 +337,9 @@ void ItineraryTrackEditHandler::merge_segments(
     const HTTPServerRequest& request,
     ItineraryPgDao &dao)
 {
+  (void)request; // unused
   bool complete = false;
-  bool contiguous = true;
+  // bool contiguous = true;
   auto track = dao.get_track(get_user_id(), itinerary_id, track_id);
   ItineraryPgDao::track_segment* target = nullptr;
   for (auto i = track.segments.begin(); i != track.segments.end(); i++) {
@@ -345,7 +349,7 @@ void ItineraryTrackEditHandler::merge_segments(
       if (target) {
         // Have we already found the end of one section
         if (complete) {
-          contiguous = false;
+          // contiguous = false;
         } else {
           // std::cout << "Adding segment id " << i->id.second << " to segment " << target->id.second << '\n';
           for (const auto &p : i->points)

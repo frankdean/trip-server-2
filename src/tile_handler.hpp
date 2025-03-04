@@ -42,7 +42,7 @@ struct tile_provider;
 
 class TileHandler : public fdsd::trip::BaseRestHandler {
   static const std::regex tile_url_re;
-  tile_provider get_provider(int provider_index) const;
+  tile_provider get_provider(std::vector<tile_provider>::size_type provider_index) const;
   TilePgDao::tile_result fetch_remote_tile(
       int provider_index,
       int z,

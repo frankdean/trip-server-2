@@ -786,7 +786,7 @@ void ItineraryDownloadHandler::set_content_headers(HTTPServerResponse& response)
   response.set_header("Content-Type", get_mime_type(download_type == gpx ? "gpx" : "kml"));
   std::time_t now = std::chrono::system_clock::to_time_t(
       std::chrono::system_clock::now());
-  std::tm tm = *std::localtime(&now);
+  std::localtime(&now);
   std::ostringstream filename;
   filename << "trip-itinerary-" << itinerary_id << (download_type == gpx ? ".gpx" : ".kml");
     // std::put_time(&tm, "%FT%T%z") << ".gpx";

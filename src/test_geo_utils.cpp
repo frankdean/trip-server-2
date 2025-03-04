@@ -342,7 +342,7 @@ bool test_stats_distance_multi_path()
 bool test_extend_bounding_box_01()
 {
   bounding_box box(p20);
-  for (const auto p : test_points_3)
+  for (const auto &p : test_points_3)
     box.extend(p);
   auto center = box.get_center();
   bool retval =
@@ -366,7 +366,7 @@ bool test_extend_bounding_box_01()
 bool test_extend_bounding_box_02()
 {
   bounding_box box(p30);
-  for (const auto p : test_points_4)
+  for (const auto &p : test_points_4)
     box.extend(p);
   auto center = box.get_center();
   bool retval =
@@ -393,7 +393,7 @@ bool test_extend_bounding_box_02()
 bool test_extend_bounding_box_03()
 {
   bounding_box box(p40);
-  for (const auto p : test_points_5)
+  for (const auto &p : test_points_5)
     box.extend(p);
   auto center = box.get_center();
   bool retval =
@@ -420,7 +420,7 @@ bool test_extend_bounding_box_03()
 bool test_extend_bounding_box_04()
 {
   bounding_box box(p50);
-  for (const auto p : test_points_6)
+  for (const auto &p : test_points_6)
     box.extend(p);
   auto center = box.get_center();
   bool retval =

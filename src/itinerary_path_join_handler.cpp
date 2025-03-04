@@ -182,6 +182,7 @@ void ItineraryPathJoinHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)response; // unused
   itinerary_id = std::stol(request.get_param("itineraryId"));
   const std::vector<std::string> str_path_ids =
     UriUtils::split_params(request.get_query_param("path-ids"), ",");
@@ -243,7 +244,7 @@ void ItineraryPathJoinHandler::handle_authenticated_request(
   } else if (!up_action_map.empty()) {
     for (const auto &i : up_action_map) {
       // std::cout << "Moving \"" << i.first << "\" -> \"" << i.second << "\"  up\n";
-      const int target = i.first -1;
+      const std::vector<ItineraryPgDao::path_summary>::size_type target = i.first -1;
       if (target < 0) {
         std::rotate(paths.begin(), paths.begin() + 1, paths.end());
       } else {
@@ -258,7 +259,7 @@ void ItineraryPathJoinHandler::handle_authenticated_request(
   } else if (!down_action_map.empty()) {
     for (const auto &i : down_action_map) {
       // std::cout << "Moving \"" << i.first << "\" -> \"" << i.second << "\"  down\n";
-      const int target = i.first +1;
+      const std::vector<ItineraryPgDao::path_summary>::size_type target = i.first +1;
       if (target >= paths.size()) {
         std::rotate(paths.rbegin(), paths.rbegin() + 1, paths.rend());
       } else {

@@ -56,7 +56,7 @@ void ItinerarySharingReportHandler::build_form(
       // Colunn heading showing which nicknames and itinerary is shared with
       "        <th>" << translate("Sharing with") << "</th>\n"
       "      </tr>\n";
-    for (const auto it : itineraries) {
+    for (const auto &it : itineraries) {
       os
         <<
         "      <tr>\n"
@@ -111,6 +111,8 @@ void ItinerarySharingReportHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)request; // unused
+  (void)response;
   // Page title of the itinerary shares report page
   set_page_title(translate("Itinerary Shares Report"));
   set_menu_item(unknown);

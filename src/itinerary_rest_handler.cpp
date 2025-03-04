@@ -431,7 +431,7 @@ void ItineraryRestHandler::save_simplified_track(
     // track.calculate_statistics();
     // dao.create_track(get_user_id(), itinerary_id, track);
 #else
-    const auto original_tolerance = tolerance;
+    // const auto original_tolerance = tolerance;
     // tolerance = 0.0001;
     // std::cout << std::fixed << std::setprecision(3)
     //           << "Original tolerance " << original_tolerance << " : "

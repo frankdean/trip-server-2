@@ -110,7 +110,7 @@ void SessionPgDao::remove_value(std::string session_id,
 void SessionPgDao::remove_values(std::string session_id,
                                  const std::vector<std::string> &keys)
 {
-  for (const auto key : keys)
+  for (const auto &key : keys)
     remove_value(session_id, key);
 }
 
@@ -123,7 +123,7 @@ void SessionPgDao::clear_copy_buffers(std::string session_id)
                      itinerary_features_key}));
 }
 
-void SessionPgDao::create_session_table(bool overwrite)
+void SessionPgDao::create_session_table()
 {
   work tx(*connection);
   try {
@@ -161,7 +161,7 @@ void SessionPgDao::save_sessions(const session_map sessions)
       insert_session_sql
     );
   work tx(*connection);
-  for (const auto session : sessions) {
+  for (const auto &session : sessions) {
     tx.exec_prepared(insert_session_ps_name,
                      session.first,
                      session.second.get_user_id(),

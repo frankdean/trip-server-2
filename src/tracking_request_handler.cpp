@@ -59,6 +59,8 @@ void TrackingRequestHandler::do_preview_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
+  (void)request; // unused
+  (void)response; // unused
   // Title tor the location tracking page
   set_page_title(translate("Tracks"));
   set_menu_item(tracks);

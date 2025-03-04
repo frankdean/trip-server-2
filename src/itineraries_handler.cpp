@@ -74,7 +74,7 @@ void ItinerariesHandler::build_page(
       // Colunn heading indicating whether the itinerary is shared with one or more other users
       "        <th>" << translate("Sharing") << "</th>\n"
       "      </tr>\n";
-    for (const auto it : itineraries) {
+    for (const auto &it : itineraries) {
       response.content
         <<
         "      <tr>\n"
@@ -152,6 +152,8 @@ void ItinerariesHandler::do_preview_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
+  (void)request; // unused
+  (void)response;
   set_page_title(translate("Itineraries"));
   set_menu_item(itineraries);
 }

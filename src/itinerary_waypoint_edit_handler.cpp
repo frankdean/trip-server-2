@@ -44,6 +44,7 @@ void ItineraryWaypointEditHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)response; // unused
   // The title of the Itinerary Waypoint page
   set_page_title(translate("Itinerary Waypoint"));
   set_menu_item(unknown);
@@ -76,6 +77,7 @@ void ItineraryWaypointEditHandler::build_form(
     const std::vector<std::pair<std::string, std::string>> &georef_formats,
     const std::vector<std::pair<std::string, std::string>> &waypoint_symbols)
 {
+  (void)request; // unused
   response.content
     <<
     "<div class=\"container-fluid\">\n"
@@ -86,9 +88,6 @@ void ItineraryWaypointEditHandler::build_form(
     "      <div class=\"col-12\">\n"
     "        <input type=\"hidden\" name=\"itineraryId\" value=\"" << itinerary_id << "\">\n"
     "        <input type=\"hidden\" name=\"waypoint_id\" value=\"";
-  auto wpt_id = waypoint.id;
-  auto wpt_id_valid = wpt_id.has_value();
-  long wpt_id_value = wpt_id_valid ? wpt_id_value : 0;
   append_optional_value(response.content, waypoint.id);
   response.content
     <<

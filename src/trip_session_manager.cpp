@@ -30,10 +30,10 @@ using namespace fdsd::trip;
 
 const std::string TripSessionManager::session_id_cookie_name = "TRIP_SESSION_ID";
 
-void TripSessionManager::create_session_table(bool overwrite)
+void TripSessionManager::create_session_table()
 {
   SessionPgDao dao;
-  dao.create_session_table(overwrite);
+  dao.create_session_table();
 }
 
 void TripSessionManager::session_updated(std::string session_id,

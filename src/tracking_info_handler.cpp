@@ -38,6 +38,8 @@ void TrackingInfoHandler::do_preview_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
+  (void)request; // unused
+  (void)response; // unused
   set_page_title("Tracker Info");
   set_menu_item(tracker_info);
 }

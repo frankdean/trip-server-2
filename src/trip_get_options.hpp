@@ -26,7 +26,7 @@
 
 namespace fdsd
 {
-namespace utils { class GetOptions; }
+namespace utils { struct GetOptions; }
 namespace trip
 {
 

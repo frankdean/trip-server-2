@@ -108,7 +108,7 @@ void AdminUserManagementHandler::build_form(
       "          <th>" << translate("Admin") << "</th>\n"
       "          <th></th>\n"
       "        </tr>\n";
-    for (const auto user : users) {
+    for (const auto &user : users) {
       if (user.id.has_value()) {
         os <<
           "        <tr>\n"
@@ -174,6 +174,8 @@ void AdminUserManagementHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)request; // unused
+  (void)response;
   // Page title of the admin user's User Management page
   set_page_title(translate("User Management"));
   set_menu_item(users);

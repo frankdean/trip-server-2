@@ -127,6 +127,8 @@ void ItinerarySearchHandler::do_preview_request(
     const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response)
 {
+  (void)request; // unused
+  (void)response;
   // Page title of the itinerary search by location page
   set_page_title(translate("Itinerary Search by Location"));
   set_menu_item(unknown);
@@ -178,6 +180,8 @@ void ItinerarySearchHandler::handle_authenticated_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)request; // unused
+  (void)response;
   ItineraryPgDao dao;
   extract_session_defaults(dao);
   georef_formats = dao.get_georef_formats();

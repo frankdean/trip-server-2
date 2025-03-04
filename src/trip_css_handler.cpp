@@ -30,6 +30,7 @@ void TripCssHandler::append_stylesheet_content(
     const fdsd::web::HTTPServerRequest& request,
     fdsd::web::HTTPServerResponse& response) const
 {
+  (void)request; // unused
   response.set_header("Last-Modified", "Thu, 11 Aug 2022 13:39:53 GMT");
   response.content <<
     ".visually-hidden {\n"

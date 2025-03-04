@@ -36,12 +36,10 @@ using namespace fdsd::trip;
 
 TripApplication::TripApplication(std::string listen_address,
                                  std::string port,
-                                 std::string config_filename,
-                                 std::string locale) :
+                                 std::string config_filename) :
   Application(
     listen_address,
-    port,
-    locale)
+    port)
 {
   config = std::make_shared<TripConfig>(TripConfig(config_filename));
 #ifdef HAVE_GDAL

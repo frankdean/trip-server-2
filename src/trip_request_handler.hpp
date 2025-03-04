@@ -197,7 +197,10 @@ protected:
   virtual void append_pre_body_end(std::ostream& os) const override;
   virtual void do_preview_request(
       const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response) override {}
+      web::HTTPServerResponse& response) override {
+    (void)request; // unused
+    (void)response;
+  }
   virtual void handle_authenticated_request(
       const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response) override;
@@ -233,19 +236,45 @@ public:
 
 class BaseRestHandler : public TripAuthenticatedRequestHandler {
 protected:
-  virtual void append_doc_type(std::ostream& os) const override {}
-  virtual void append_html_start(std::ostream& os) const override {}
-  virtual void append_head_start(std::ostream& os) const override {}
-  virtual void append_head_section(std::ostream& os) const override {}
-  virtual void append_head_title_section(std::ostream& os) const override {}
-  virtual void append_head_content(std::ostream& os) const override {}
-  virtual void append_head_end(std::ostream& os) const override {}
-  virtual void append_body_start(std::ostream& os) const override {}
-  virtual void append_header_content(std::ostream& os) const override {}
-  virtual void append_footer_content(std::ostream& os) const override {}
-  virtual void append_pre_body_end(std::ostream& os) const override {}
-  virtual void append_body_end(std::ostream& os) const override {}
-  virtual void append_html_end(std::ostream& os) const override {}
+  virtual void append_doc_type(std::ostream& os) const override {
+    (void)os; // unused
+  }
+  virtual void append_html_start(std::ostream& os) const override {
+    (void)os; // unused
+  }
+  virtual void append_head_start(std::ostream& os) const override {
+    (void)os; // unused
+  }
+  virtual void append_head_section(std::ostream& os) const override {
+    (void)os; // unused
+  }
+  virtual void append_head_title_section(std::ostream& os) const override {
+    (void)os; // unused
+  }
+  virtual void append_head_content(std::ostream& os) const override {
+    (void)os; // unused
+  }
+  virtual void append_head_end(std::ostream& os) const override {
+    (void)os; // unused
+  }
+  virtual void append_body_start(std::ostream& os) const override {
+    (void)os; // unused
+  }
+  virtual void append_header_content(std::ostream& os) const override {
+    (void)os; // unused
+  }
+  virtual void append_footer_content(std::ostream& os) const override {
+    (void)os; // unused
+  }
+  virtual void append_pre_body_end(std::ostream& os) const override {
+    (void)os; // unused
+  }
+  virtual void append_body_end(std::ostream& os) const override {
+    (void)os; // unused
+  }
+  virtual void append_html_end(std::ostream& os) const override {
+    (void)os; // unused
+  }
   virtual void set_content_headers(web::HTTPServerResponse& response) const override;
 public:
   BaseRestHandler(std::shared_ptr<TripConfig> config);

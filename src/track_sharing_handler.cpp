@@ -36,6 +36,8 @@ void TrackSharingHandler::do_preview_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
+  (void)request; // unused
+  (void)response;
   // Title for the track sharing page
   set_page_title(translate("Track Sharing"));
   set_menu_item(track_sharing);
@@ -169,7 +171,6 @@ void TrackSharingHandler::handle_authenticated_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
-  const int max_page_size = 10;
   TrackPgDao dao(elevation_service);
   if (request.method == HTTPMethod::post) {
     const std::string action = request.get_post_param("action");

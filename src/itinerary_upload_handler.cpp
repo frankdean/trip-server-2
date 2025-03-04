@@ -158,6 +158,7 @@ void ItineraryUploadHandler::build_form(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
+  (void)request; // unused
   response.content
     <<
     "  <div class=\"container-fluid bg-light my-3\">\n"
@@ -184,6 +185,7 @@ void ItineraryUploadHandler::do_preview_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
+  (void)response; // unused
   set_page_title(translate("Itinerary Upload"));
   try {
     itinerary_id = std::stol(request.get_param("id"));

@@ -40,7 +40,7 @@ protected:
   virtual void session_updated(std::string session_id,
                                const fdsd::web::Session& session) const override;
   virtual void persist_invalidated_session(const std::string session_id) override;
-  void create_session_table(bool overwrite = false);
+  void create_session_table();
 public:
   TripSessionManager(std::shared_ptr<TripConfig> config) : SessionManager(), config(config) {}
   virtual ~TripSessionManager() {}

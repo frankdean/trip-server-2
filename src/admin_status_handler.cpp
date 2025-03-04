@@ -91,6 +91,8 @@ void AdminStatusHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)request; // unused
+  (void)response;
   // Page title of the admin user's User Management page
   set_page_title(translate("System Status"));
   set_menu_item(status);
@@ -100,6 +102,7 @@ void AdminStatusHandler::handle_authenticated_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)request; // unused
   SessionPgDao session_dao;
   const bool is_admin = session_dao.is_admin(get_user_id());
   if (!is_admin) {

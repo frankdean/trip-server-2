@@ -160,6 +160,7 @@ void AdminUserEditHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)response; // unused
   user_id = request.get_param("id");
   new_user_flag = user_id.empty();
   // Page title of the admin user's User Management page

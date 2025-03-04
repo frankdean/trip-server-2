@@ -630,7 +630,6 @@ protected:
                             std::string user_id,
                             long itinerary_id);
   std::vector<itinerary_share> get_itinerary_shares(pqxx::work &tx,
-                                                    std::string user_id,
                                                     long itinerary_id,
                                                     std::uint32_t offset = 0,
                                                     int limit = -1);

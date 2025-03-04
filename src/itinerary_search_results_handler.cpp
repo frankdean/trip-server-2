@@ -72,7 +72,7 @@ void ItinerarySearchResultsHandler::build_form(
       // Colunn heading indicating whether the itinerary is shared with one or more other users
       "        <th>" << translate("Sharing") << "</th>\n"
       "      </tr>\n";
-    for (const auto it : itineraries) {
+    for (const auto &it : itineraries) {
       os
         <<
         "      <tr>\n"
@@ -131,6 +131,8 @@ void ItinerarySearchResultsHandler::do_preview_request(
     const web::HTTPServerRequest& request,
       web::HTTPServerResponse& response)
 {
+  (void)request; // unused
+  (void)response;
   // Page title of the itinerary search results page
   set_page_title(translate("Itinerary Search Results"));
   set_menu_item(unknown);

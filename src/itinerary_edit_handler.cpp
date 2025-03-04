@@ -127,6 +127,7 @@ void ItineraryEditHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)response;
   const std::string id  = request.get_param("id");
   is_new = id.empty();
   if (is_new) {

@@ -73,8 +73,8 @@ class ElevationTile {
   double left;
   double xskew;
   double yskew;
-  double pixel_height;
   double pixel_width;
+  double pixel_height;
   GDALDataset *dataset; // not thread-safe
   GDALRasterBand *band;
   OGRCoordinateTransformation *coordinate_transform;

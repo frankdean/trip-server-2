@@ -35,6 +35,7 @@ void ItinerarySimplifyHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)response; // unused
   // Page title for the simplify track page
   set_page_title(translate("Simplify Track"));
   itinerary_id = std::stol(request.get_query_param("id"));
@@ -45,6 +46,7 @@ void ItinerarySimplifyHandler::build_form(
     web::HTTPServerResponse& response,
     const ItineraryPgDao::selected_feature_ids &features)
 {
+  (void)request; // unused
   json j{
     {"itinerary_id", itinerary_id},
     {"features", features}

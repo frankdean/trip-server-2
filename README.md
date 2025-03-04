@@ -607,6 +607,13 @@ is symptomatic of this issue.  E.g.
 	./configure PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
 	CXX=/usr/bin/g++
 
+During development you may also like to include the following flags to include
+more warnings:
+
+	CXXFLAGS=-Wall -Wextra
+
+See <https://best.openssf.org/Compiler-Hardening-Guides/Compiler-Options-Hardening-Guide-for-C-and-C++>
+
 A specific version of Boost can be specified with the location of the boost
 installation by specifying the `--with-boost` option to `configure`, e.g.:
 

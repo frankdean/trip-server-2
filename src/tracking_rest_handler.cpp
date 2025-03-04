@@ -102,6 +102,7 @@ nlohmann::basic_json<nlohmann::ordered_map>
         std::ostream &os,
         TrackPgDao &dao)
 {
+  (void)os; // unused
   // std::cout << "Fetching live map updates as geojson\n";
   int max_hdop = -1;
   try {

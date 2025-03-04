@@ -69,8 +69,8 @@ void ItineraryRouteJoinHandler::join_paths(ItineraryPgDao &dao,
   }
   joined_route.color_key = joined_path_color_key;
 
-  for (const auto r : ordered_routes)
-    for (const auto p : r.points)
+  for (const auto &r : ordered_routes)
+    for (const auto &p : r.points)
       joined_route.points.push_back(p);
 
   joined_route.calculate_statistics();

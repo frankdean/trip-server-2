@@ -61,7 +61,9 @@ protected:
       web::HTTPServerResponse& response) override;
   virtual void load_path_data(
       const web::HTTPServerRequest &request, ItineraryPgDao &dao) = 0;
-  virtual void insert_extra_form_controls(std::ostream &os) {}
+  virtual void insert_extra_form_controls(std::ostream &os) {
+    (void)os; // unused
+  }
   virtual void save_path(ItineraryPgDao &dao) = 0;
 public:
   ItineraryPathNameEdit(std::shared_ptr<TripConfig> config) :

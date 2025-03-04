@@ -210,7 +210,7 @@ void ItineraryTrackSegmentEditHandler::build_form(
     // features["routes"] = json::array();
     // features["waypoints"] = json::array();
     json points;
-    for (const auto point : segment.points) {
+    for (const auto &point : segment.points) {
       if (point.id.has_value())
         points.push_back(point.id.value());
     }
@@ -238,6 +238,8 @@ void ItineraryTrackSegmentEditHandler::do_preview_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
+  (void)request; // unused
+  (void)response;
   itinerary_id = std::stol(request.get_param("itineraryId"));
   track_id = std::stol(request.get_param("trackId"));
   segment_id = std::stol(request.get_param("segmentId"));
@@ -270,6 +272,7 @@ void ItineraryTrackSegmentEditHandler::delete_points(
     const HTTPServerRequest& request,
     ItineraryPgDao &dao)
 {
+  (void)request; // unused
   bool dirty = false;
   auto track = dao.get_track(get_user_id(), itinerary_id, track_id);
   int segment_index = -1;
@@ -315,6 +318,7 @@ void ItineraryTrackSegmentEditHandler::split_segment(
     const HTTPServerRequest& request,
     ItineraryPgDao &dao)
 {
+  (void)request; // unused
   long split_before_id = selected_point_ids.front();
   // std::cout << "Splitting segment at point ID: " << split_before_id << '\n';
   auto track = dao.get_track(get_user_id(), itinerary_id, track_id);

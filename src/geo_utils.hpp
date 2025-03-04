@@ -122,8 +122,7 @@ class GeoMapUtils {
                     location &loc);
 public:
   GeoMapUtils();
-  nlohmann::basic_json<nlohmann::ordered_map> as_geojson(const int indent = -1,
-                  const char indent_char = ' ') const;
+  nlohmann::basic_json<nlohmann::ordered_map> as_geojson() const;
 
   /**
    * Adds the passed path to the list of paths.  Any coordinates that cross the
@@ -171,6 +170,7 @@ struct bounding_box {
   location bottom_right;
   bounding_box() : top_left(), bottom_right() {}
   bounding_box(location loc) : top_left(loc), bottom_right(loc) {}
+  virtual ~bounding_box() {}
   void extend(const location &location);
   location get_center() const;
   virtual std::string to_string() const;

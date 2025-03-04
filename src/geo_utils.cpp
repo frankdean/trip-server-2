@@ -221,8 +221,8 @@ void GeoMapUtils::add_location(std::unique_ptr<location> &previous,
 {
   update_altitude_info(&loc);
   if (previous) {
-    if (previous->longitude > 90 && loc.longitude < -90 ||
-        previous->longitude < -90 && loc.longitude > 90) {
+    if ((previous->longitude > 90 && loc.longitude < -90) ||
+        (previous->longitude < -90 && loc.longitude > 90)) {
       // Paths that cross the antimeridian pose problems when displayed on the
       // map.  We try to calculate the actual position the path intersects the
       // antimeridian and create extra points at roughly where the intersection
@@ -267,8 +267,7 @@ void GeoMapUtils::add_location(std::unique_ptr<location> &previous,
  * path, a LineString is returned.  For each path that contains only one
  * point, a Point is returned.
  */
-nlohmann::basic_json<nlohmann::ordered_map> GeoMapUtils::as_geojson(const int indent,
-  const char indent_char) const
+nlohmann::basic_json<nlohmann::ordered_map> GeoMapUtils::as_geojson() const
 {
   if (paths.size() > 1) {
     json json_paths = json::array();

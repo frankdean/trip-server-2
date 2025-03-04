@@ -102,6 +102,7 @@ void ItinerarySharingEditHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)response; // unused
   itinerary_id = std::stol(request.get_param("itinerary_id"));
   const std::string s = request.get_param("shared_to_id");
   if (!s.empty()) {

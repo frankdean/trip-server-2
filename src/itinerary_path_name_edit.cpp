@@ -104,6 +104,8 @@ void ItineraryRouteNameEdit::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)response; // unused
+  (void)request; // unused
   set_page_title(translate("Itinerary Route"));
   set_menu_item(unknown);
 }
@@ -111,6 +113,7 @@ void ItineraryRouteNameEdit::do_preview_request(
 void ItineraryRouteNameEdit::load_path_data(
     const HTTPServerRequest &request, ItineraryPgDao &dao)
 {
+  (void)request; // unused
   auto route = dao.get_route_summary(get_user_id(), itinerary_id, path_id);
   if (!route.id.has_value())
     throw BadRequestException("Route ID not set");
@@ -149,6 +152,8 @@ void ItineraryTrackNameEdit::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)response; // unused
+  (void)request; // unused
   set_page_title(translate("Itinerary Track"));
   set_menu_item(unknown);
 }
@@ -156,6 +161,7 @@ void ItineraryTrackNameEdit::do_preview_request(
 void ItineraryTrackNameEdit::load_path_data(
     const HTTPServerRequest &request, ItineraryPgDao &dao)
 {
+  (void)request; // unused
   auto track = dao.get_track_summary(get_user_id(), itinerary_id, path_id);
   if (!track.id.has_value())
     throw BadRequestException("Track ID not set");

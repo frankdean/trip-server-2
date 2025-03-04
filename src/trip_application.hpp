@@ -46,8 +46,7 @@ protected:
 public:
   TripApplication(std::string listen_address,
                   std::string port,
-                  std::string config_filename,
-                  std::string locale = "");
+                  std::string config_filename);
   std::string get_db_connect_string() const;
   int get_worker_count() const;
   int get_pg_pool_size() const;

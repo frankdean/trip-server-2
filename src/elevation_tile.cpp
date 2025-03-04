@@ -385,6 +385,8 @@ ElevationService::ElevationService(const std::string &directory_path,
       proj_context_set_search_paths(nullptr, 1, vc.data());
       // std::cout << "Set proj.db search path to " << proj_search_path << '\n';
     }
+    #else
+    (void)proj_search_path; // unused
     #endif
     #ifndef HAVE_THREAD
     init();

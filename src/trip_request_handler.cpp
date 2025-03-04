@@ -131,6 +131,7 @@ void TripAuthenticatedRequestHandler::handle_authenticated_request(
       const HTTPServerRequest& request,
       HTTPServerResponse& response)
 {
+  (void)request; // unused
   response.content
     << "<h1>Successfully logged in!</h1>\n"
     "<p>Click <a href=\""

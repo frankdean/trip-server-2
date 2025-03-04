@@ -690,6 +690,7 @@ void ItineraryHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)response; // unused
   set_menu_item(itinerary);
   std::string id = request.get_query_param("id");
   if (id.empty()) {

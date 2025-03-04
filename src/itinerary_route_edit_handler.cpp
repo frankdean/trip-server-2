@@ -232,7 +232,7 @@ void ItineraryRouteEditHandler::build_form(std::ostream &os,
       "<div id=\"itinerary-route-map\"></div>\n";
     json features;
     json points;
-    for (const auto point : route.points) {
+    for (const auto &point : route.points) {
       if (point.id.has_value())
         points.push_back(point.id.value());
     }
@@ -258,6 +258,7 @@ void ItineraryRouteEditHandler::delete_points(
     const web::HTTPServerRequest& request,
     ItineraryPgDao &dao)
 {
+  (void)request; // unused
   bool dirty = false;
   auto route = dao.get_route(get_user_id(), itinerary_id, route_id);
   route.points.erase(
@@ -283,6 +284,7 @@ void ItineraryRouteEditHandler::split_route(
     const web::HTTPServerRequest& request,
     ItineraryPgDao &dao)
 {
+  (void)request; // unused
   long split_before_id = selected_point_ids.front();
   auto route = dao.get_route(get_user_id(), itinerary_id, route_id);
   ItineraryPgDao::route new_route(route);
@@ -330,6 +332,7 @@ void ItineraryRouteEditHandler::reverse_route(
     const web::HTTPServerRequest& request,
     ItineraryPgDao &dao)
 {
+  (void)request; // unused
   auto route = dao.get_route(get_user_id(), itinerary_id, route_id);
   std::reverse(route.points.begin(), route.points.end());
   route.calculate_statistics();
@@ -340,6 +343,7 @@ void ItineraryRouteEditHandler::do_preview_request(
     const web::HTTPServerRequest& request,
     web::HTTPServerResponse& response)
 {
+  (void)response; // unused
   itinerary_id = std::stol(request.get_param("itineraryId"));
   route_id = std::stol(request.get_param("routeId"));
   const std::string shared = request.get_param("shared");

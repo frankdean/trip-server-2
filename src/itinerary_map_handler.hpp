@@ -47,8 +47,8 @@ public:
   ItineraryMapHandler(std::shared_ptr<TripConfig> config,
                       std::shared_ptr<ElevationService> elevation_service) :
     BaseMapHandler(config),
-    elevation_service(elevation_service),
-    itinerary_id() {}
+    itinerary_id(),
+    elevation_service(elevation_service) {}
   virtual ~ItineraryMapHandler() {}
   virtual std::string get_handler_name() const override {
     return "ItineraryMapHandler";

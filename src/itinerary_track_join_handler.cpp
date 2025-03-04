@@ -69,8 +69,8 @@ void ItineraryTrackJoinHandler::join_paths(ItineraryPgDao &dao,
   }
   joined_track.color_key = joined_path_color_key;
 
-  for (const auto r : ordered_tracks)
-    for (const auto seg : r.segments)
+  for (const auto &r : ordered_tracks)
+    for (const auto &seg : r.segments)
       joined_track.segments.push_back(seg);
 
   joined_track.calculate_statistics();

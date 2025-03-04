@@ -44,6 +44,7 @@ void TrackLoggingHandler::do_handle_request(
     const HTTPServerRequest& request,
     HTTPServerResponse& response)
 {
+  (void)response; // unused
   std::string uuid_str;
   std::map<std::string, std::string> params;
   // Must handle both get and post

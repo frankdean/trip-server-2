@@ -422,7 +422,7 @@ std::optional<ItineraryPgDao::itinerary_complete>
       // Don't leak details of whom another user may also be sharing an
       // itinerary with.
       if (has_user_itinerary_modification_access(tx, user_id, itinerary_id))
-          itinerary.shares = get_itinerary_shares(tx, user_id, itinerary_id);
+          itinerary.shares = get_itinerary_shares(tx, itinerary_id);
 
       itinerary.routes = get_routes(tx, user_id, itinerary_id);
       itinerary.waypoints = get_waypoints(tx, user_id, itinerary_id);
@@ -1263,9 +1263,9 @@ void ItineraryPgDao::create_track_points(
     "(itinerary_track_segment_id, geog, time, hdop, altitude) "
     "VALUES ($1, ST_SetSRID(ST_POINT($2, $3),4326), $4, $5, $6) "
     "RETURNING id";
-  int count = 0;
+  // int count = 0;
   for (auto &p : segment.points) {
-    count++;
+    // count++;
     std::optional<std::string> timestr;
     if (p.time.has_value())
       timestr = DateTime(p.time.value()).get_time_as_iso8601_gmt();
@@ -1924,7 +1924,6 @@ long ItineraryPgDao::get_itinerary_shares_count(std::string user_id,
 
 std::vector<ItineraryPgDao::itinerary_share>
     ItineraryPgDao::get_itinerary_shares(pqxx::work &tx,
-                                         std::string user_id,
                                          long itinerary_id,
                                          std::uint32_t offset,
                                          int limit)
@@ -1968,7 +1967,7 @@ std::vector<ItineraryPgDao::itinerary_share>
 {
   work tx(*connection);
   validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
-  auto shares = get_itinerary_shares(tx, user_id, itinerary_id, offset, limit);
+  auto shares = get_itinerary_shares(tx, itinerary_id, offset, limit);
   tx.commit();
   return shares;
 }
