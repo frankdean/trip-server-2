@@ -91,7 +91,7 @@ TripRequestFactory::TripRequestFactory(
   // pre_login_handlers.push_back(
   //     std::make_shared<TripRequestHandler>(
   //         TripRequestHandler(get_uri_prefix())));
-#ifdef ALLOW_STATIC_FILES
+#ifdef ENABLE_STATIC_FILES
   pre_login_handlers.push_back(
       std::make_shared<FileRequestHandler>(
           FileRequestHandler(get_uri_prefix(),

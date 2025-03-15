@@ -156,7 +156,7 @@ fi
 # Don't build if we appear to already have an installed version of trip-server
 if [ ! -x /usr/local/bin/trip-server ]; then
     if [ -r /usr/lib/fedora-release ] || [ -x /bin/freebsd-version ]; then
-	$SU_CMD "cd /home/${USERNAME}/build && pwd && ${TRIP_SOURCE}/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' --disable-gdal --enable-cairo --enable-tui"
+	$SU_CMD "cd /home/${USERNAME}/build && pwd && ${TRIP_SOURCE}/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' CPPFLAGS='-I/usr/local/include' --disable-gdal --enable-cairo --enable-tui"
     elif [ -f /etc/rocky-release ]; then
 	# Weirdly, pkg-config was appending a spurious '-L' with the '--libs'
 	# parameter for 'libpqxx', proven with the following command:

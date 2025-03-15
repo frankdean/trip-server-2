@@ -554,13 +554,13 @@ FreeBSD version 14.
 GDAL is only required for extracting elevation data from elevation tile
 datasets.  If you don't need this feature, disable GDAL.
 
-	$ ./configure --disable-gdal
+	$ ./configure CPPFLAGS='-I/usr/local/include' --disable-gdal
 
 Cairo is only used to create dummy map tiles which may be useful in a
 development environment where you do not wish to use a map tile server.
 Enable it with:
 
-	$ ./configure --enable-cairo
+	$ ./configure CPPFLAGS='-I/usr/local/include' --enable-cairo
 
 To build from source other than a tarball release, e.g. a git clone, examine
 the contents of `./provisioning/bootstrap.sh` to see which packages are
@@ -589,6 +589,12 @@ To build from a Git clone, install the following ports from [MacPorts][]:
 - pugixml
 - yaml-cpp
 
+When including packages installed with [MacPorts][] you may need to specify
+the include directory in `CPPFLAGS` when running `configure` if headers are
+not found.  e.g.
+
+	./configure CPPFLAGS='-I/opt/local/include'
+
 **Note:** If `make distcheck` fails on macOS, install the `texinfo` and
 `texlive` packages from [MacPorts][], as the behaviour of the system installed
 `/usr/bin/texi2dvi` differs from the GNU version.
@@ -605,7 +611,7 @@ the libraries by setting the `CXX` variable.  Linking errors to the libraries
 is symptomatic of this issue.  E.g.
 
 	./configure PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
-	CXX=/usr/bin/g++
+	CXX=/usr/bin/g++ CPPFLAGS='-I/opt/local/include'
 
 During development you may also like to include the following flags to include
 more warnings:

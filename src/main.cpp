@@ -134,13 +134,13 @@ int main(int argc, char *argv[])
     //          ) % messages_path
     //        << Logger::endl;
 
-#ifdef ALLOW_STATIC_FILES
+#ifdef ENABLE_STATIC_FILES
     if (!options.doc_root.empty()) {
       if (options.doc_root.substr(options.doc_root.length() -1, 1) != "/")
         options.doc_root.append("/");
       application.set_root_directory(options.doc_root);
     }
-#endif // ALLOW_STATIC_FILES
+#endif // ENABLE_STATIC_FILES
     // Initialize the global database pool and user session managers
     const std::string db_connect_str = application.get_db_connect_string();
     // std::cout << "Connecting to database with connect string: \""
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
       << options.listen_address << ':' << options.port
       << application.get_application_prefix_url();
     syslog(LOG_INFO, "%s", msg01.str().c_str());
-#ifdef ALLOW_STATIC_FILES
+#ifdef ENABLE_STATIC_FILES
     // Output when the application has been built to allow serving static files.
     syslog(LOG_INFO, "%s", translate("The application has been built to serve static files.").str().c_str());
     std::stringstream msg02;
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
         translate("Static files will be served from the {1} directory.")) %
       options.doc_root;
     syslog(LOG_INFO, "%s", msg02.str().c_str());
-#ifdef ALLOW_DIRECTORY_LISTING
+#ifdef ENABLE_DIRECTORY_LISTING
     std::stringstream msg03;
     msg03 <<
       // Output when the application has been built to allow listing the

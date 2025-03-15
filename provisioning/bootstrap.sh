@@ -175,7 +175,11 @@ function install_finalcut
 	    cd "finalcut-${FINALCUT_VERSION}"
 	    pwd
 	    $SU_CMD "autoreconf --install"
-	    $SU_CMD "./configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig CXXFLAGS=-Wno-dangling-reference"
+	    if [-x /bin/freebsd-version ]; then
+		$SU_CMD "./configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig"
+	    else
+		$SU_CMD "./configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig CXXFLAGS=-Wno-dangling-reference"
+	    fi
 	    $SU_CMD "time make"
 	    make install
 	fi

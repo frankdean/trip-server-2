@@ -34,7 +34,7 @@ int TripGetOptions::tui_flag = 0;
 
 TripGetOptions::TripGetOptions() : GetOptions()
 {
-#ifdef ALLOW_STATIC_FILES
+#ifdef ENABLE_STATIC_FILES
   doc_root=DATADIR "/" PACKAGE "/resources";
 #endif
 }
@@ -45,7 +45,7 @@ const char TripGetOptions::short_opts[] = "hs:p:c:vuVe"
 #ifdef HAVE_TUI
   "i"
 #endif
-#ifdef ALLOW_STATIC_FILES
+#ifdef ENABLE_STATIC_FILES
   "r:"
 #endif
   ;
@@ -55,7 +55,7 @@ struct option TripGetOptions::long_options[] = {
   {"help",                no_argument,       NULL,             'h'},
   {"listen",              required_argument, NULL,             's'},
   {"port",                required_argument, NULL,             'p'},
-#ifdef ALLOW_STATIC_FILES
+#ifdef ENABLE_STATIC_FILES
   {"root",                required_argument, NULL,             'r'},
 #endif
   {"config-file",         required_argument, NULL,             'c'},
@@ -120,7 +120,7 @@ void TripGetOptions::usage(std::ostream& os) const
     << "  -s, --listen=ADDRESS\t\t\t" << translate("listen address, e.g. 0.0.0.0") << '\n'
     // Command line short description for the --port option
     << "  -p, --port=PORT\t\t\t" << translate("port number, e.g. 8080") << '\n'
-#ifdef ALLOW_STATIC_FILES
+#ifdef ENABLE_STATIC_FILES
     // Command line short description for the --root option
     << "  -r, --root=DIRECTORY\t\t\t" << translate("document root directory") << '\n'
 #endif
@@ -137,7 +137,7 @@ void TripGetOptions::usage(std::ostream& os) const
     // Command line short description for the --verbose option
     << "  -V, --verbose\t\t\t\t" << translate("verbose output") << '\n';
 #else
-#ifdef ALLOW_STATIC_FILES
+#ifdef ENABLE_STATIC_FILES
   // Example usage when the application is configured to serve static files
   os << format(translate("Usage: {1} <address> <port> <doc_root>")) % program_name;
 #else
@@ -149,7 +149,7 @@ void TripGetOptions::usage(std::ostream& os) const
     // Heading before showing command line usage
     << translate("Example:\n")
     << "    http-server-sync 0.0.0.0 8080"
-#ifdef ALLOW_STATIC_FILES
+#ifdef ENABLE_STATIC_FILES
     << " ."
 #endif
     << '\n';
