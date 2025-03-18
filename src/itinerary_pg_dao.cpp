@@ -550,7 +550,7 @@ long ItineraryPgDao::save(
       start = DateTime(itinerary.start.value()).get_time_as_iso8601_gmt();
     if (itinerary.finish.has_value())
       finish = DateTime(itinerary.finish.value()).get_time_as_iso8601_gmt();
-    long id;
+    long id = -1;
     if (itinerary.id.has_value()) {
       id = itinerary.id.value();
       tx.exec_params(

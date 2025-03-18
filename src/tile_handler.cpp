@@ -193,7 +193,7 @@ TilePgDao::tile_result TileHandler::create_test_tile(int z, int x, int y)
   r.expires = std::chrono::system_clock::now() + std::chrono::hours(24);
   surface->write_to_png_stream(
       [&r] (const unsigned char* data, unsigned int length) {
-        for (int i = 0; i < length; i++)
+        for (unsigned int i = 0; i < length; i++)
           r.tile.push_back(data[i]);
         return CAIRO_STATUS_SUCCESS;
       });

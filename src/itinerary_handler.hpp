@@ -149,13 +149,9 @@ public:
     return "ItineraryHandler";
   }
   virtual bool can_handle(
-      const web::HTTPServerRequest& request) const override {
-    return compare_request_regex(request.uri, "/itinerary($|\\?.*)");
-  }
-  virtual std::unique_ptr<web::BaseRequestHandler> new_instance() const override {
-    return std::unique_ptr<ItineraryHandler>(
-        new ItineraryHandler(config, elevation_service));
-  }
+      const web::HTTPServerRequest& request) const override;
+  virtual std::unique_ptr<web::BaseRequestHandler>
+      new_instance() const override;
   static ItineraryPgDao::selected_feature_ids get_selected_feature_ids(
       const web::HTTPServerRequest& request);
 };

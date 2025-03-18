@@ -1019,3 +1019,16 @@ void ItineraryHandler::handle_authenticated_request(
   read_only = itinerary.value().shared_to_nickname.has_value();
   build_form(response, itinerary.value());
 }
+
+bool ItineraryHandler::can_handle(
+    const web::HTTPServerRequest& request) const
+{
+  return compare_request_regex(request.uri, "/itinerary($|\\?.*)");
+}
+
+std::unique_ptr<fdsd::web::BaseRequestHandler>
+    ItineraryHandler::new_instance() const
+{
+  return std::unique_ptr<ItineraryHandler>(
+      new ItineraryHandler(config, elevation_service));
+}

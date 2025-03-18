@@ -22,10 +22,13 @@
 #ifndef TRIP_SESSION_HPP
 #define TRIP_SESSION_HPP
 
+#include "../trip-server-common/src/session.hpp"
+#include <memory>
+#include <string>
+
 namespace fdsd {
 
 namespace web {
-  class SessionManager;
   class Session;
 }
 

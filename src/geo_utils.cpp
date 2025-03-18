@@ -116,9 +116,7 @@ std::string path_statistics::to_string() const
     os << "lowest: " << lowest.value();
   }
   if (highest.has_value()) {
-    if (first)
-      first = false;
-    else
+    if (!first)
       os << ", ";
     os << "highest: " << highest.value();
   }

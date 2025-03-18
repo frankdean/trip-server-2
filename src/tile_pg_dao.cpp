@@ -70,13 +70,30 @@ void TilePgDao::save_tile(int server_id,
     "ON CONFLICT (server_id, z, x, y) DO UPDATE "
     "SET server_id=$1, z=$2, x=$3, y=$4, updated=now(), "
     "expires=$5, image=$6::bytea";
-  binarystring image(tile.data(), tile.size());
-
+#ifdef HAVE_LIBPQXX7
+#ifdef ENABLE_LIBPQXX_BINARYSTRING
+  // 'binarystring' is deprecated
+  const binarystring image(tile.data(), tile.size());
   tx.exec_params(sql,
                  server_id,
                  z, x, y,
                  expiry_time.get_time_as_iso8601_gmt(),
                  image);
+#else
+  tx.exec_params(sql,
+                 server_id,
+                 z, x, y,
+                 expiry_time.get_time_as_iso8601_gmt(),
+                 binary_cast(tile));
+#endif // ENABLE_LIBPQXX_BINARYSTRING
+#else // !HAVE_LIBPQXX7
+  const binarystring image(tile.data(), tile.size());
+  tx.exec_params(sql,
+                 server_id,
+                 z, x, y,
+                 expiry_time.get_time_as_iso8601_gmt(),
+                 image);
+#endif // HAVE_LIBPQXX7
   tx.commit();
   // std::cout << "Saved tile"
   //           << server_id << ' ' << z << ' ' << x << ' ' << y << "\n";
@@ -98,10 +115,22 @@ std::optional<TilePgDao::tile_result> TilePgDao::get_tile(int server_id,
     t.tile = std::vector<char>();
     t.expires = expires.time_tp();
     field image = r[0]["image"];
+#ifdef HAVE_LIBPQXX7
+#ifdef ENABLE_LIBPQXX_BINARYSTRING
+    // 'binarystring' is deprecated
     binarystring bs(image);
-    for (auto i = bs.cbegin(); i != bs.cend(); i++) {
+    for (auto i = bs.cbegin(); i != bs.cend(); i++)
       t.tile.push_back(*i);
-    }
+#else
+    auto bs = image.as<std::basic_string<std::byte>>();
+    for (auto i = bs.cbegin(); i != bs.cend(); i++)
+      t.tile.push_back((char) *i);
+#endif // ENABLE_LIBPQXX_BINARYSTRING
+#else // !HAVE_LIBPQXX7
+    binarystring bs(image);
+    for (auto i = bs.cbegin(); i != bs.cend(); i++)
+      t.tile.push_back(*i);
+#endif // HAVE_LIBPQXX7
     return t;
   }
 }
