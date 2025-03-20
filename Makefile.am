@@ -95,7 +95,6 @@ oldir = $(pkgdatadir)/resources/static/openlayers-$(OPENLAYERS_VERSION)
 dist_ol_DATA = \
 	resources/static/openlayers-$(OPENLAYERS_VERSION)/LICENSE.md \
 	resources/static/openlayers-$(OPENLAYERS_VERSION)/ol.css \
-	resources/static/openlayers-$(OPENLAYERS_VERSION)/ol.js.LICENSE.txt \
 	resources/static/openlayers-$(OPENLAYERS_VERSION)/ol.js.map \
 	resources/static/openlayers-$(OPENLAYERS_VERSION)/ol.js
 

@@ -2,6 +2,15 @@
 
 # Changelog
 
+## 2.5.4
+
+* Upgrade `openlayers` to version 10.4.0.
+* Upgrade `proj4js` to version 2.15.0.
+* Refactor `libpqxx` usage to handle deprecation warning.
+* Refactor configure.ac.
+* Fixes to C++ compiler warnings with -Wextra.
+* Fix texinfo warnings in trip-server.texi and trip-user-guide.texi.
+
 ## 2.5.3
 
 - Support loading elevation tiles directly from zip files.
