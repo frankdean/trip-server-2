@@ -122,7 +122,9 @@ std::optional<TilePgDao::tile_result> TilePgDao::get_tile(int server_id,
     for (auto i = bs.cbegin(); i != bs.cend(); i++)
       t.tile.push_back(*i);
 #else
-    auto bs = image.as<std::basic_string<std::byte>>();
+    // See https://github.com/jtv/libpqxx/issues/726 and https://github.com/jtv/libpqxx/pull/751
+    // and `NEWS` in libpqxx source, section 7.9.0 release
+    auto bs = image.as<pqxx::bytes>();
     for (auto i = bs.cbegin(); i != bs.cend(); i++)
       t.tile.push_back((char) *i);
 #endif // ENABLE_LIBPQXX_BINARYSTRING
