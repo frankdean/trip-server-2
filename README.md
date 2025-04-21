@@ -643,7 +643,7 @@ reference documentation and tutorial.  Pass `--disable-documentation` to the
 
 When running the `./configure` command to build this application, define the
 `PKG_CONFIG_PATH` to include where `libpqxx.pc` and `libpq.pc` are installed.
-Also, it is safest to build the all the libraries with the same compiler as
+Also, it is safest to build all the libraries with the same compiler as
 the Trip application will be built with.  You may need to specify the compiler
 by defining the `CXX` environment variable when building both `libpqxx` and
 Trip.
