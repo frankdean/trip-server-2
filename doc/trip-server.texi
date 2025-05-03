@@ -939,43 +939,28 @@ module}.
 @subsection Reverse Proxy Configuration
 @cindex Reverse Proxy Configuration
 
-Configure Apache 2 to enable the @code{mod_proxy} and
-@code{proxy_wstunnels} modules.  On Debian this can be done with:
+Configure Apache 2 to enable the @code{proxy} and
+@code{http_proxy} modules.  On Debian this can be done with:
 
 @example
 $ sudo a2enmod proxy
-$ sudo a2enmod proxy_wstunnel
-$ sudo a2enmod rewrite
+$ sudo a2enmod http_proxy
 @end example
 
 The application should be run over HTTPS to keep the login credentials
 secure, otherwise others can see and re-use those credentials.
 
-Modify the server configuration to implement the following Apache
-rewrite rules.  Note that the default @code{socket.io} path is prefixed
-with @code{wstrack\} so that multiple applications using websockets can
-be run on the same Apache server using different prefixes.  (TRIP uses
-websockets to provide updates to the tracking map.)  The TRIP web client
-app will prefix the path when it is not calling a localhost URL.  These
-rules need to be in a @code{<VirtualHost _default_:443/>} or
-@code{<Directory/>} section of the @code{mod_ssl} configuration file.
-
-@example
-RewriteEngine on
-RewriteCond %@{REQUEST_URI@}  ^/wstrack/socket.io  [NC]
-RewriteCond %@{QUERY_STRING@} transport=websocket    [NC]
-RewriteRule /wstrack/(.*)           ws://localhost:8080/$1 [P,L]
-@end example
+Modify the Apache server configuration to implement proxying to the Trip
+Server application.  These rules need to be in a @code{<VirtualHost
+_default_:443/>} or @code{<Directory/>} section of the @code{mod_ssl}
+configuration file.
 
 Add the following to @code{trip.conf} outside the @code{<directory\>} directive:
 
 @example
 <IfModule mod_proxy.c>
-  ProxyPass /wstrack/socket.io/ http://localhost:8080/socket.io/
-  ProxyPassReverse /wstrack/socket.io/ http://localhost:8080/socket.io/
-
-  ProxyPass /trip/rest http://localhost:8080
-  ProxyPassReverse /trip/rest http://localhost:8080
+  ProxyPass /trip" "http://localhost:8080/trip"
+  ProxyPassReverse "/trip" "http://localhost:8080/trip"
 </IfModule>
 @end example
 
@@ -987,9 +972,9 @@ It is useful to ensure all users use HTTPS by providing a redirect rule to
 redirect any HTTP requests to use HTTPS.  However, some logging clients do not
 support HTTP, so it may be preferable to exclude the logging patterns from
 redirection.  Generally, the logging URLs will be of the form
-@code{http://$@{HOST@}:$@{PORT@}/trip/rest/log_point}.
+@code{http://$@{HOST@}:$@{PORT@}/trip/app/rest/log_point}.
 
-This rule will redirect URLs excepting those like @code{/trip/rest/}
+This rule will redirect URLs excepting those like @code{/trip/app/rest/}
 which can then be used by tracker clients that do not support HTTPS or
 redirections, to log locations without being redirected.
 
@@ -1011,7 +996,14 @@ root.
 
 A workaround is to configure the Apache server to redirect both HTTP and
 HTTPS requests that match the pattern of Traccar Client logging requests
-to the @code{/trip/rest/log_point} URL prefix.
+to the @code{/trip/app/rest/log_point} URL prefix.
+
+Configure Apache 2 to enable the @code{rewrite} module.  On Debian this
+can be done with:
+
+@example
+$ sudo a2enmod rewrite
+@end example
 
 To support using the Traccar Client, enter the following in
 the Apache @code{<VirtualHost/>} sections:
@@ -1022,7 +1014,7 @@ the Apache @code{<VirtualHost/>} sections:
         RewriteEngine On
         RewriteCond "%@{QUERY_STRING@}" \
         "^id=[\da-f]@{8@}-[\da-f]@{4@}-[\da-f]@{4@}-[\da-f]@{4@}-[\da-f]@{12@}&timestamp=\d+&lat=[-.\d]+&lon=[-.\d]+"
-        RewriteRule ^/ /trip/rest/log_point [PT,QSA]
+        RewriteRule ^/ /trip/app/rest/log_point [PT,QSA]
 </IfModule>
 @end example
 
