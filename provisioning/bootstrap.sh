@@ -386,3 +386,5 @@ if [ ! -z "$MAKEFLAGS" ]; then
 	echo "export MAKEFLAGS='${MAKEFLAGS}'" >>/home/${USERNAME}/.profile
     fi
 fi
+
+adduser trip --system --group --home /nonexistent --no-create-home --quiet

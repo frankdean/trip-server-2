@@ -19,11 +19,25 @@
 1.  Create the distribution tarballs
 
 		$ autoreconf -i
-		$ ./configure
+
+	on macOS:
+
+		$ ./configure CXX=/usr/bin/g++ \
+		'CXXFLAGS=-Wno-deprecated-builtins -Wno-deprecated-literal-operator '\
+		'-Wno-unused-but-set-variable' \
+		PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:"\
+		"$(pg_config --libdir)/pkgconfig" \
+		--enable-cairo --enable-tui --enable-maintainer-mode
 		$ make -j 8 check
 		$ PKG_CONFIG_PATH=\
 		/usr/local/lib/pkgconfig:/opt/local/lib/postgresql15/pkgconfig \
 		MAKEFLAGS='-j 8' make distcheck
+
+	on Debian:
+
+		$ ./configure --enable-cairo --enable-tui
+		$ make -j 4 check
+		$ MAKEFLAGS='-j 4' make distcheck
 
 1.  Create SHA256 sums for the tarballs
 
@@ -48,6 +62,18 @@
 		$ grep 'ARG TRIP_SERVER_VERSION' Dockerfile
 		$ grep LABEL Dockerfile Dockerfile-postgis
 
+1.	Test the Dockerfile
+
+		$ docker build --platform=linux/arm64 --build-arg MAKEFLAGS='-j 4' \
+		-t fdean/trip-server-2:latest .
+		$ docker compose up --no-recreate --detach
+		$ docker logs --follow trip-server-2_web_1
+
+	Stop the container, optionally with (use the `--volumes` switch to also
+    remove the database volume):
+
+		$ docker compose down --volumes
+
 1.  Build the Docker images, e.g.
 
 	1.  Optionally, Update `Dockerfile-postgis` to use the latest
@@ -56,16 +82,6 @@
 	1.  Build the `trip-database` and `trip-server` images:
 
 			$ DOCKER=podman PUSH=n ./docker-build.sh
-
-1.	Test the Dockerfile
-
-		$ docker compose up --no-recreate --detach
-		$ docker compose logs --follow
-
-	Stop the container, optionally with (use the `--volumes` switch to also
-    remove the database volume):
-
-		$ docker compose down --volumes
 
 ## Installation
 

@@ -161,14 +161,17 @@ check_PROGRAMS = test_uuid test_dao_helper test_date_utils test_file_utils \
 
 test_uuid_SOURCES = ../trip-server-common/src/test_uuid.cpp
 test_dao_helper_SOURCES = ../trip-server-common/src/test_dao_helper.cpp \
+	../trip-server-common/src/get_options.cpp \
 	../trip-server-common/src/date_utils.cpp \
 	../trip-server-common/src/date_utils.hpp \
 	../trip-server-common/src/logger.cpp \
 	../trip-server-common/src/logger.hpp
 test_date_utils_SOURCES = ../trip-server-common/src/test_date_utils.cpp \
+	../trip-server-common/src/get_options.cpp \
 	../trip-server-common/src/logger.cpp \
 	../trip-server-common/src/logger.hpp
 test_file_utils_SOURCES = ../trip-server-common/src/test_file_utils.cpp \
+	../trip-server-common/src/get_options.cpp \
 	../trip-server-common/src/date_utils.cpp \
 	../trip-server-common/src/date_utils.hpp \
 	../trip-server-common/src/logger.cpp \
@@ -196,6 +199,7 @@ test_geo_utils_SOURCES = test_geo_utils.cpp \
 	../trip-server-common/src/get_options.cpp
 
 test_http_request_SOURCES = ../trip-server-common/src/test_http_request.cpp \
+	../trip-server-common/src/get_options.cpp \
 	../trip-server-common/src/uri_utils.cpp \
 	../trip-server-common/src/debug_utils.cpp
 

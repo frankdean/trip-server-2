@@ -154,6 +154,9 @@ AC_DEFINE_UNQUOTED([ZXCVBN_VERSION], ["${ZXCVBN_VERSION}"], [The version of zxcv
 
 AC_DEFINE([BUILD_FOR_IOS], [0], "Build for an iOS target")
 
+# Configure and install systemd service file
+SYSTEMD_CONF
+
 AC_CONFIG_FILES([Makefile po/Makefile.in
 	         doc/Makefile
                  src/Makefile

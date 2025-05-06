@@ -2,12 +2,20 @@ SUBDIRS = src po tests doc
 
 # When running `distcheck` build with additional features that are normally
 # disabled by default
-AM_DISTCHECK_CONFIGURE_FLAGS = --enable-cairo --enable-directory-listing --enable-tui
+AM_DISTCHECK_CONFIGURE_FLAGS = \
+	--with-systemdsystemunitdir=$$dc_install_base/$(systemdsystemunitdir) \
+	--enable-cairo --enable-directory-listing --enable-tui
+
+# if HAVE_SYSTEMD
+#     systemdsystemunit_DATA = \
+#     conf/trip.service
+# endif
 
 EXTRA_DIST = m4/ChangeLog  .gitignore stamp-h1 \
 	RELEASE_PROCEDURE.md \
 	Vagrantfile \
 	docker-build.sh \
+	conf/trip.service \
 	doc/trip-server-ref.sgml \
 	docker-compose-map-demo.yml \
 	docker-compose-map-import.yml \
@@ -46,7 +54,8 @@ dist-hook:
 	rm -f `find $(distdir)/resources -type f '(' -name '.*' -o -name '*~' ')'`
 
 dist_sysconf_DATA = conf/trip-server-dist.yaml
-dist_doc_DATA = README.md CHANGELOG.md
+dist_doc_DATA = README.md CHANGELOG.md \
+	conf/trip.service
 
 # nobase_dist_pkgdata_DATA = resources/static/css/trip.css \
 # 	resources/static/js/map.js

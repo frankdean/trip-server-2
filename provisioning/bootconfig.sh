@@ -186,15 +186,6 @@ if [ -x /home/${USERNAME}/build/src/trip-server ]; then
     fi
 fi
 
-# Configure systemd if it appears to be installed
-if [ -d /etc/systemd/system ] && [ ! -e /etc/systemd/system/trip-server-2.service ]; then
-    systemctl is-active trip-server-2.service >/dev/null
-    if [ $? -ne 0 ]; then
-	cp ${TRIP_SOURCE}/provisioning/systemd/trip-server-2.service /etc/systemd/system/
-	# systemctl enable trip-server-2.service 2>/dev/null
-	# systemctl start trip-server-2.service 2>/dev/null
-    fi
-fi
 if [ ! -e /var/log/trip.log ]; then
     touch /var/log/trip.log
 fi

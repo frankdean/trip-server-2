@@ -1,7 +1,7 @@
 \input texinfo.tex   @c -*-texinfo-*-
 @c %**start of header
 @setfilename trip-server.info
-@documentencoding US-ASCII
+@documentencoding UTF-8
 @c Automake automatically updates version.texi to @set VERSION and
 @c @set UPDATED to appropriate values.
 @include version.texi

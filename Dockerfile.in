@@ -7,8 +7,8 @@ RUN apt-get update \
     procps locales coreutils tar xz-utils ca-certificates tzdata \
     make g++ gawk \
     libboost-locale-dev libpqxx-dev libpugixml-dev libyaml-cpp-dev \
-    nlohmann-json3-dev uuid-dev cairomm-1.0-dev libgdal-dev libcmark-dev \
-    texlive texinfo vim.tiny \
+    nlohmann-json3-dev uuid-dev uuid-runtime cairomm-1.0-dev \
+    libcmark-dev texlive texinfo vim.tiny \
     && rm -rf /var/lib/apt/lists/*
 
 RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \
@@ -39,7 +39,7 @@ WORKDIR "/usr/local/src/trip-${TRIP_SERVER_VERSION}"
 ARG MAKEFLAGS
 ENV MAKEFLAGS=${MAKEFLAGS:-'-j 1'}
 
-RUN ./configure --enable-cairo && make check
+RUN ./configure --enable-cairo --disable-gdal && make check
 RUN make html pdf
 
 USER root
@@ -50,16 +50,19 @@ WORKDIR /usr/local/etc
 FROM  docker.io/debian:bookworm-slim
 LABEL uk.co.fdsd.tripserver.version="@PACKAGE_VERSION@"
 
+RUN mkdir /run/uuidd
+RUN chmod ugo+rw /run/uuidd
+
 RUN groupadd --gid 1000 trip \
     && useradd --uid 1000 --gid trip --shell /bin/bash --create-home trip
 
 RUN apt-get update \
     && apt-get full-upgrade --yes --allow-change-held-packages \
     && apt-get install -y --no-install-recommends \
-    locales tzdata \
+    procps locales tzdata \
     libboost-locale1.74.0 libpugixml1v5 libyaml-cpp0.7 \
     uuid libpqxx-6.4 libcairomm-1.0-1v5 libcmark0.30.2 \
-    postgresql postgresql-contrib postgis
+    postgresql postgresql-contrib postgis uuid-runtime
 
 RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \
     sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
@@ -89,4 +92,4 @@ EXPOSE 8080
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-CMD ["trip-server"]
+CMD [ "sh", "-c", "uuidd && trip-server"]
