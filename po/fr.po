@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2025-05-05 16:36+0100\n"
-"PO-Revision-Date: 2023-12-17 18:37+0000\n"
+"POT-Creation-Date: 2025-05-06 19:27+0100\n"
+"PO-Revision-Date: 2025-05-17 11:20+0100\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -99,10 +99,8 @@ msgstr ""
 
 #. Error message displayed when the first name field is empty when editing a user record
 #: src/admin_user_edit_handler.cpp:81
-#, fuzzy
-#| msgid "&First name"
 msgid "First name is required"
-msgstr "&Prénom"
+msgstr "Le prénom est obligatoire"
 
 #. Label for the user's firstname field
 #: src/admin_user_edit_handler.cpp:86
@@ -121,10 +119,8 @@ msgstr ""
 
 #. Error message displayed when the password field is empty when editing a user record
 #: src/admin_user_edit_handler.cpp:103
-#, fuzzy
-#| msgid "Password reset"
 msgid "Password is required"
-msgstr "Réinitialisez mot de passe"
+msgstr "Mot de passe est obligatoire"
 
 #. Instructions on using change password fields
 #: src/admin_user_edit_handler.cpp:109
@@ -297,7 +293,7 @@ msgstr ""
 #. Label for button to reset the password of the selected user
 #: src/admin_user_management_handler.cpp:158
 msgid "Password reset"
-msgstr "Réinitialisez mot de passe"
+msgstr "Réinitialiser le mot de passe"
 
 #. Label for button to create a new user
 #. Button title for creating something new
@@ -426,7 +422,7 @@ msgstr ""
 #. Label for the button which resets the form's input criteria to that originally displayed
 #: src/itinerary_edit_handler.cpp:120 src/tracking_request_handler.cpp:322
 msgid "Reset"
-msgstr "Remettre"
+msgstr "Réinitialiser"
 
 #. Title for the page when creating and editing a new itinerary
 #: src/itinerary_edit_handler.cpp:135
@@ -629,7 +625,7 @@ msgstr ""
 #. Label for the button to display a map showing the tracked locations
 #: src/itinerary_handler.cpp:565 src/tracking_request_handler.cpp:303
 msgid "Show map"
-msgstr "Affiche la carte"
+msgstr "Afficher la carte"
 
 #. Label for menu item to create a new itinerary waypoint
 #: src/itinerary_handler.cpp:576
@@ -719,12 +715,12 @@ msgstr ""
 #. Label for menu item to download the selected routes, tracks and waypoints as a GPX format (GPS data) file
 #: src/itinerary_handler.cpp:653
 msgid "Download GPX"
-msgstr "Télécharge GPX"
+msgstr "Télécharger GPX"
 
 #. Label for menu item to download the selected routes, tracks and waypoints as a KML format (GPS data) file
 #: src/itinerary_handler.cpp:655
 msgid "Download KML"
-msgstr "Télécharge KML"
+msgstr "Télécharger KML"
 
 #. Label for menu item to download the entire Itinerary in a YAML formatted text file
 #: src/itinerary_handler.cpp:658
@@ -1088,7 +1084,7 @@ msgstr ""
 
 #: src/itinerary_sharing_handler.cpp:40 src/itinerary_sharing_handler.cpp:154
 msgid "Itinerary Sharing"
-msgstr "Partage d'itinéraire"
+msgstr "Partager d'itinéraire"
 
 #. Message displayed when there are no itinerary sharing records to show
 #: src/itinerary_sharing_handler.cpp:51
@@ -1357,7 +1353,7 @@ msgstr ""
 #. Label for link to change password
 #: src/my_account_handler.cpp:57
 msgid "Change password"
-msgstr "Changez mot de passe"
+msgstr "Changer mot de passe"
 
 #. Describes what the upload settings section of the My Account page can be used for
 #: src/my_account_handler.cpp:62
@@ -1539,12 +1535,12 @@ msgstr "Vous devez entrer une valeur pour chaque champ"
 #. Title of the page when creating the sharing of tracked locations with another user
 #: src/track_sharing_edit_handler.cpp:44
 msgid "Track Sharing&mdash;New"
-msgstr "Traces Partage&mdash;Nouveau"
+msgstr "Partager des pistes&mdash;Nouveau"
 
 #. Title of the page when editing the sharing of tracked locations with another user
 #: src/track_sharing_edit_handler.cpp:47
 msgid "Track Sharing&mdash;Edit"
-msgstr "Traces Partage&mdash;Éditer"
+msgstr "Partage des pistes&mdash;Éditer"
 
 #. Prompt to input the nickname to share location tracking with
 #: src/track_sharing_edit_handler.cpp:70
@@ -1599,7 +1595,7 @@ msgstr ""
 #: src/track_sharing_handler.cpp:42 src/track_sharing_handler.cpp:55
 #: src/trip_request_handler.cpp:201
 msgid "Track Sharing"
-msgstr "Traces Partage"
+msgstr "Partager des pistes"
 
 #. Message displayed when there are no track sharing records to show
 #: src/track_sharing_handler.cpp:61
@@ -1846,7 +1842,7 @@ msgstr ""
 #. The title of the location tracking page
 #: src/tracking_request_handler.cpp:65 src/tracking_request_handler.cpp:80
 msgid "Tracks"
-msgstr "Traces"
+msgstr "Pistes"
 
 #. Message displayed when copying location tracking query parameters into the copy buffer of the location tracking page is successful
 #: src/tracking_request_handler.cpp:86
@@ -1897,7 +1893,7 @@ msgstr "Pile"
 #. The input to select another user's nickname to view their shared location tracks
 #: src/tracking_request_handler.cpp:248
 msgid "Display shared user's tracks"
-msgstr "Affiche les points partagés"
+msgstr "Afficher les pistes partagés"
 
 #. The maximum Horizontal Dilution of Precision (accuracy in metres) to filter locations by
 #: src/tracking_request_handler.cpp:279
@@ -1912,7 +1908,7 @@ msgstr "Laisse l'entrée vide pour pas de maximum"
 #. Whether the user wishes to filter the results to only include those with notes attached
 #: src/tracking_request_handler.cpp:296
 msgid "Show notes only"
-msgstr "Affiche les notes seulement"
+msgstr "Afficher les notes seulement"
 
 #. Label for the button to perform the search that lists the tracked locations
 #: src/tracking_request_handler.cpp:301
@@ -1935,12 +1931,12 @@ msgstr "Voulez-vous télécharger les points?"
 #. Label for the button to download the tracks as an XML data file
 #: src/tracking_request_handler.cpp:318
 msgid "Download tracks"
-msgstr "Télécharge les points"
+msgstr "Télécharger les pistes"
 
 #. Label for the button to make a copy of the tracked locations
 #: src/tracking_request_handler.cpp:320
 msgid "Copy"
-msgstr "Copie"
+msgstr "Copier"
 
 #. Message displayed to the user when they attempt to exceed the
 #. maxmium amount of locations that can be displayed on the map
@@ -1966,17 +1962,17 @@ msgstr ""
 #. Command line short description for the --help option
 #: src/trip_get_options.cpp:116
 msgid "show this help, then exit"
-msgstr "affiche cette aide, puis quitte"
+msgstr "afficher cette aide, puis quitte"
 
 #. Command line short description for the --version option
 #: src/trip_get_options.cpp:118
 msgid "show version information, then exit"
-msgstr "affiche les informations de version, puis quitte"
+msgstr "afficher les informations de version, puis quitte"
 
 #. Command line short description for the --listen option
 #: src/trip_get_options.cpp:120
 msgid "listen address, e.g. 0.0.0.0"
-msgstr "adresse d'écoute"
+msgstr "adresse por écouter sur"
 
 #. Command line short description for the --port option
 #: src/trip_get_options.cpp:122
@@ -2001,7 +1997,7 @@ msgstr "nom de fichier de configuration"
 #. Command line short description for the --upgrade option
 #: src/trip_get_options.cpp:132
 msgid "upgrade database"
-msgstr "optimise la base de données"
+msgstr "optimiser la base de données"
 
 #. Command line short description for the --interactive option
 #: src/trip_get_options.cpp:135
@@ -2038,17 +2034,17 @@ msgstr ""
 #: src/trip_request_handler.cpp:74
 #: trip-server-common/src/http_request_handler.cpp:760
 msgid "Login"
-msgstr "Login"
+msgstr "Connecter"
 
 #. Menu item to select the location tracking page
 #: src/trip_request_handler.cpp:187
 msgid "Tracking"
-msgstr "Suit"
+msgstr "Suivre des pistes"
 
 #. Menu item to select the tracker information page
 #: src/trip_request_handler.cpp:194
 msgid "Tracker Info"
-msgstr "Information de suivi"
+msgstr "Informations suivi"
 
 #. Menu item for an admin user to administer user accounts, create, delete, reset password
 #: src/trip_request_handler.cpp:216

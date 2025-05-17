@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2025-05-05 16:36+0100\n"
-"PO-Revision-Date: 2023-12-17 17:34+0000\n"
+"POT-Creation-Date: 2025-05-06 19:27+0100\n"
+"PO-Revision-Date: 2025-05-17 11:30+0100\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: English (British) <(nothing)>\n"
 "Language: en_GB\n"
@@ -61,10 +61,8 @@ msgstr "User not found"
 
 #. Error message displayed when the nickname field is empty when editing a user record
 #: src/admin_user_edit_handler.cpp:59
-#, fuzzy
-#| msgid "Nickname does not exist"
 msgid "Nickname is required"
-msgstr "Nickname does not exist"
+msgstr "Nickname is required"
 
 #. Label for the user's nickname field
 #. "      <div class=\"mb-3\">\n"
@@ -92,7 +90,7 @@ msgstr "Nickname"
 #. Error message displayed when the email field is empty when editing a user record
 #: src/admin_user_edit_handler.cpp:70
 msgid "Email is required"
-msgstr ""
+msgstr "Email is required"
 
 #. Label for the user's email field
 #. Column heading for email in list of users
@@ -102,10 +100,8 @@ msgstr "Email"
 
 #. Error message displayed when the first name field is empty when editing a user record
 #: src/admin_user_edit_handler.cpp:81
-#, fuzzy
-#| msgid "First name"
 msgid "First name is required"
-msgstr "First name"
+msgstr "First name is required"
 
 #. Label for the user's firstname field
 #: src/admin_user_edit_handler.cpp:86
@@ -114,10 +110,8 @@ msgstr "First name"
 
 #. Error message displayed when the last name field is empty when editing a user record
 #: src/admin_user_edit_handler.cpp:92
-#, fuzzy
-#| msgid "Last name"
 msgid "Last name is required"
-msgstr "Last name"
+msgstr "Last name is required"
 
 #. Label for the user's lastname field
 #: src/admin_user_edit_handler.cpp:97
@@ -126,10 +120,8 @@ msgstr "Last name"
 
 #. Error message displayed when the password field is empty when editing a user record
 #: src/admin_user_edit_handler.cpp:103
-#, fuzzy
-#| msgid "Password reset"
 msgid "Password is required"
-msgstr "Password reset"
+msgstr "Password is required"
 
 #. Instructions on using change password fields
 #: src/admin_user_edit_handler.cpp:109
@@ -1078,7 +1070,7 @@ msgstr "Itinerary Search Results"
 #: src/itinerary_search_results_handler.cpp:163
 #: src/itinerary_waypoint_edit_handler.cpp:112
 msgid "Invalid position"
-msgstr ""
+msgstr "Invalid position"
 
 #. Message displayed when an entered nickname does not exist
 #: src/itinerary_sharing_edit_handler.cpp:46
@@ -2111,10 +2103,8 @@ msgid "Example:\n"
 msgstr "Example:\n"
 
 #: src/trip_pg_dao.cpp:74
-#, fuzzy
-#| msgid "User is not authorized for the requested operation"
 msgid "User is forbidden to perform the requested operation"
-msgstr "User is not authorised for the requested operation"
+msgstr "User is forbidden to perform the requested operation"
 
 #. Title for the login page
 #: src/trip_request_handler.cpp:74
@@ -2159,7 +2149,7 @@ msgstr "Logout"
 
 #: src/trip_request_handler.cpp:260
 msgid "source code"
-msgstr ""
+msgstr "source code"
 
 #. Warning issued to terminal if no map tile providers have been configured
 #: src/trip_request_handler.cpp:338
@@ -2204,6 +2194,3 @@ msgid "Creating database pool with {1} connection"
 msgid_plural "Creating database pool with {1} connections"
 msgstr[0] "Creating database pool with {1} connection"
 msgstr[1] "Creating database pool with {1} connections"
-
-#~ msgid "{1} (joined)"
-#~ msgstr "{1} (joined)"
