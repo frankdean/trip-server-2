@@ -6,9 +6,8 @@
 
 * Include installing systemd service file
 * Switch licence to GNU Affero General Public License
-* Upgrade `bootstrap` to version 5.3.5.
-* Upgrade `openlayers` to version 10.4.0.
-* Upgrade `proj4js` to version 2.15.0.
+* Upgrade `bootstrap` to version 5.3.7.
+* Upgrade `proj4js` to version 2.16.1.
 * Refactor `libpqxx` usage to handle deprecation warning.
 * Refactor configure.ac.
 * Fixes to C++ compiler warnings with -Wextra.
