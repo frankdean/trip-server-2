@@ -579,13 +579,13 @@ To build from a Git clone, install the following ports from [MacPorts][]:
 - cairomm (optional)
 - cmark
 - gawk
-- gdal +postgresql15+proj9 (optional)
+- gdal +postgresql15 (optional)
 - intltool
 - libpqxx
 - nlohmann-json
 - pkgconfig
 - postgresql13-server
-- postgis3 +postgresql15+proj9
+- postgis3
 - pugixml
 - yaml-cpp
 
@@ -624,6 +624,18 @@ A specific version of Boost can be specified with the location of the boost
 installation by specifying the `--with-boost` option to `configure`, e.g.:
 
 	./configure --with-boost=/opt/local/libexec/boost/1.81
+
+To enble `configure` to find the `proj` library, add it to the
+`PKG_CONFIG_PATH` variable, i.e.
+
+	./configure PKG_CONFIG_PATH=/opt/local/lib/proj9/lib/pkgconfig
+
+Therefore a typical build on macOS might be:
+
+	./configure CXX=/usr/bin/g++ \
+	CXXFLAGS=-Wno-deprecated-builtins \
+	"PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/opt/local/lib/proj9/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
+	--enable-tui --enable-maintainer-mode
 
 ### Dependencies
 
