@@ -2,13 +2,16 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.5.4],[frank.dean@fdsd.co.uk])
+AC_INIT([trip],[2.5.4-rc.3],[frank.dean@fdsd.co.uk])
 TRIP_SOURCE_URL=[https://www.fdsd.co.uk/trip-server-2/]
 AC_SUBST([TRIP_SOURCE_URL])
 AC_DEFINE_UNQUOTED([TRIP_SOURCE_URL], ["${TRIP_SOURCE_URL}"], [The download URL for this application's source code])
-BOOTSTRAP_VERSION='5.3.5'
+BOOTSTRAP_VERSION='5.3.7'
 OPENLAYERS_VERSION='9.2.4'
-PROJ4JS_VERSION='2.15.0'
+# WARNING: proj4js releases include alpha releases without it being stated in
+# the Github release version number.  Check the version attribute in
+# package.json.
+PROJ4JS_VERSION='2.16.1'
 OLC_VERSION='1.0.4'
 ZXCVBN_VERSION='4.4.2'
 AC_COPYRIGHT([Copyright (C) 2022-2025 Frank Dean])
