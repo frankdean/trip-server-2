@@ -20,24 +20,29 @@
 
 		$ autoreconf -i
 
+	on Debian:
+
+		$ ./configure --enable-cairo --enable-tui --enable-maintainer-mode
+		$ make -j 4 check
+		$ MAKEFLAGS='-j 4' make distcheck
+
 	on macOS:
 
-		$ ./configure CXX=/usr/bin/g++ \
+		$ ./configure CXX=/opt/local/bin/clang++-mp-20 \
 		'CXXFLAGS=-Wno-deprecated-builtins -Wno-deprecated-literal-operator '\
 		'-Wno-unused-but-set-variable' \
 		PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:"\
+		"/opt/local/lib/proj9/lib/pkgconfig:"\
 		"$(pg_config --libdir)/pkgconfig" \
 		--enable-cairo --enable-tui --enable-maintainer-mode
 		$ make -j 8 check
-		$ PKG_CONFIG_PATH=\
-		/usr/local/lib/pkgconfig:/opt/local/lib/postgresql15/pkgconfig \
+		$ PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:"\
+		"/opt/local/lib/proj9/lib/pkgconfig:"\
+		"/opt/local/lib/postgresql15/pkgconfig" \
+		DISTCHECK_CONFIGURE_FLAGS='CXX=/opt/local/bin/clang++-mp-20 '\
+		'CXXFLAGS=-Wno-deprecated-builtins\ -Wno-deprecated-literal-operator\ '\
+		'-Wno-unused-but-set-variable' \
 		MAKEFLAGS='-j 8' make distcheck
-
-	on Debian:
-
-		$ ./configure --enable-cairo --enable-tui
-		$ make -j 4 check
-		$ MAKEFLAGS='-j 4' make distcheck
 
 1.  Create SHA256 sums for the tarballs
 

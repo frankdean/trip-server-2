@@ -370,7 +370,7 @@ admin user.
 	Where MacPorts has been installed under the `/opt/local` prefix, the
 	`./configure` command should be:
 
-		$ ./configure CXX=/usr/bin/g++ CPPFLAGS=-I/opt/local/include
+		$ ./configure CXX=/opt/local/bin/clang++-mp-20 CPPFLAGS=-I/opt/local/include
 
 [Linux]: https://www.kernel.org/
 [MacPorts]: https://www.macports.org "MacPorts Home Page"
@@ -606,12 +606,17 @@ compiler flag to disable warnings in the Boost libraries related to
 	./configure PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
 	CXXFLAGS=-Wno-deprecated-builtins
 
+**Note**: If `libpqxx` is installed via MacPorts, as of the time of writing,
+MacPorts compiles it with the MacPorts install of Clang 20.  Therefore use
+`CXX=/opt/local/bin/clang++-mp-20` when configuring Trip, assuming MacPorts is
+installed in the default location of `/opt/local`.
+
 It is safest to build the application with the same compiler used to compile
 the libraries by setting the `CXX` variable.  Linking errors to the libraries
 is symptomatic of this issue.  E.g.
 
 	./configure PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
-	CXX=/usr/bin/g++ CPPFLAGS='-I/opt/local/include'
+	CXX=/opt/local/bin/clang++-mp-20 CPPFLAGS='-I/opt/local/include'
 
 During development you may also like to include the following flags to include
 more warnings:
@@ -632,7 +637,7 @@ To enble `configure` to find the `proj` library, add it to the
 
 Therefore a typical build on macOS might be:
 
-	./configure CXX=/usr/bin/g++ \
+	./configure CXX=/opt/local/bin/clang++-mp-20 \
 	CXXFLAGS=-Wno-deprecated-builtins \
 	"PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/opt/local/lib/proj9/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
 	--enable-tui --enable-maintainer-mode
@@ -644,7 +649,8 @@ dependencies, should they not be available as a package.
 
 #### libpqxx
 
-Download, build and install the latest 6.x or 7.x release of [libpqxx][] from
+Alternavitley, if not using MacPorts, download, build and install the latest
+6.x or 7.x release of [libpqxx][] from
 <https://github.com/jtv/libpqxx/releases/>.
 
 [libpqxx]: https://pqxx.org/libpqxx/ "The official C++ client API for PostgreSQL"
@@ -655,17 +661,16 @@ reference documentation and tutorial.  Pass `--disable-documentation` to the
 
 When running the `./configure` command to build this application, define the
 `PKG_CONFIG_PATH` to include where `libpqxx.pc` and `libpq.pc` are installed.
-Also, it is safest to build all the libraries with the same compiler as
-the Trip application will be built with.  You may need to specify the compiler
-by defining the `CXX` environment variable when building both `libpqxx` and
-Trip.
+Also, it is safest to build all the libraries with the same compiler as the
+Trip application will be built with.  You may also need to specify the
+compiler by defining the `CXX` environment variable when building both
+`libpqxx` and Trip to ensure both use the same compiler.
 
 e.g.:
 
 	$ export PATH="/opt/local/lib/postgresql15/bin:$PATH"
 	$ ./configure \
-	PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig" \
-	CXX=/usr/bin/g++
+	PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig"
 	$ make
 	$ sudo make install
 
