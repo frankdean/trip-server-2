@@ -1,25 +1,29 @@
 # -*- mode: dockerfile; -*- vim: set ft=dockerfile:
-FROM alpine:3.18.3 AS scratch
+FROM alpine:3.22.0 AS scratch
 WORKDIR /scratch
-ADD https://github.com/gravitystorm/openstreetmap-carto/archive/refs/tags/v5.7.0.tar.gz openstreetmap-carto-5.7.0.tar.gz
-ADD https://github.com/openstreetmap/mod_tile/archive/refs/tags/0.6.1.tar.gz mod_tile-0.6.1.tar.gz
-# ADD https://download.geofabrik.de/europe/monaco-latest.osm.pbf monaco-latest.osm.pbf
+# Copy these env variables to the next container too
+ENV CARTO_VERSION 5.9.0
+ENV MOD_TILE_VERSION 0.8.1
+ADD https://github.com/gravitystorm/openstreetmap-carto/archive/refs/tags/v${CARTO_VERSION}.tar.gz openstreetmap-carto-${CARTO_VERSION}.tar.gz
+ADD https://github.com/openstreetmap/mod_tile/archive/refs/tags/v${MOD_TILE_VERSION}.tar.gz mod_tile-${MOD_TILE_VERSION}.tar.gz
 # ADD https://download.geofabrik.de/europe/monaco-latest.osm.pbf monaco-latest.osm.pbf
 # ADD https://download.geofabrik.de/europe/monaco-latest.osm.pbf.md5 monaco-latest.osm.pbf.md5
 # ADD https://download.geofabrik.de/europe/monaco.poly monaco.poly
-RUN tar -xf openstreetmap-carto-5.7.0.tar.gz \
-    && tar -xf mod_tile-0.6.1.tar.gz
+RUN tar -xf openstreetmap-carto-${CARTO_VERSION}.tar.gz \
+    && tar -xf mod_tile-${MOD_TILE_VERSION}.tar.gz
 
-FROM postgres:15.4-bookworm AS build
-LABEL uk.co.fdsd.osm-mod-tile.version="@PACKAGE_VERSION@"
+FROM docker.io/postgres:15.13-bookworm
+LABEL uk.co.fdsd.tripserver.postgis.version="@PACKAGE_VERSION@"
 
 ENV POSTGIS_MAJOR 3
-ENV POSTGIS_VERSION 3.4.0+dfsg-1.pgdg120+1
+ENV POSTGIS_VERSION 3.3.2+dfsg-1+b1
+ENV POSTGIS_SCRIPTS_VERSION 3.3.2+dfsg-1
 RUN apt-get update \
-    && apt-cache showpkg postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR \
-    && apt-get install -y --force-yes --no-install-recommends \
+    && apt-get full-upgrade --yes --allow-change-held-packages \
+    && apt-cache showpkg postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR
+RUN apt-get install -y --no-install-recommends \
     postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR=$POSTGIS_VERSION \
-    postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR-scripts=$POSTGIS_VERSION \
+    postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR-scripts=$POSTGIS_SCRIPTS_VERSION \
     procps locales coreutils \
 #    tar xz-utils ca-certificates tzdata \
     apache2 libapache2-mod-tile renderd openstreetmap-carto sudo \
@@ -44,8 +48,10 @@ ENV LANG en_GB.utf8
 # ENV LC_ALL ${LANG}
 
 RUN mkdir /var/www/example-map
-COPY --from=scratch /scratch/openstreetmap-carto-5.7.0/patterns /usr/share/openstreetmap-carto-common/patterns/
-COPY --from=scratch /scratch/mod_tile-0.6.1/utils/example-map/index.html /var/www/example-map/
+ENV CARTO_VERSION 5.9.0
+ENV MOD_TILE_VERSION 0.8.1
+COPY --from=scratch /scratch/openstreetmap-carto-${CARTO_VERSION}/patterns /usr/share/openstreetmap-carto-common/patterns/
+COPY --from=scratch /scratch/mod_tile-${MOD_TILE_VERSION}/utils/example-map/index.html /var/www/example-map/
 COPY provisioning/apache2/etc-apache2-conf-available-renderd.conf /etc/apache2/conf-available/renderd.conf
 RUN ln -s /usr/share/javascript/leaflet /var/www/example-map/leaflet
 
@@ -61,7 +67,9 @@ HOST=localhost\n\
 TILESIZE=256\n\
 MAXZOOM=20' >> /etc/renderd.conf \
     && sed -i 's,/usr/share/fonts/truetype,/usr/share/fonts,g' /etc/renderd.conf \
-    && sed -i -e 's~/renderd-example/tiles~/tile~' -e 's/maxZoom: 12/maxZoom: 20/' \
+    && sed -i -e 's~http://localhost:8081/tiles/renderd-example~/tile~' \
+    -e 's/maxZoom: 12/maxZoom: 20/' \
+    -e 's~var layerControl~// var layerControl~' \
     /var/www/example-map/index.html \
     && sed -i -e 's~<Font face-name="Noto Emoji Regular" />~~g' \
     -e 's~<Font face-name="Noto Emoji Bold" />~~g' \
