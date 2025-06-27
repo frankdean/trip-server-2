@@ -43,7 +43,16 @@ export MAKEFLAGS
 
 SU_CMD="su ${USERNAME} -c"
 
-if [ -x /bin/freebsd-version ]; then
+if [ -r /usr/lib/os-release ]; then
+    source /usr/lib/os-release
+elif [ -r /var/run/os-release ]; then
+    source /var/run/os-release
+fi
+
+echo "ID: $ID"
+echo "$PRETTY_NAME"
+
+if [ "$ID" == "freebsd" ]; then
     SU_CMD="su -l ${USERNAME} -c"
 
     grep -E '^\s*:lang=en_GB.UTF-8' /home/${USERNAME}/.login_conf >/dev/null 2>&1
@@ -59,10 +68,11 @@ fi
 # Create trip-server configuration file from distribution file
 # signingKey and resourceSigningKey only needed for trip v1
 
-SIGNING_KEY=$(apg  -m 12 -x 14 -M s -t -n 20 | tail -n 1 | cut -d ' ' -f 1 -)
-if [ -x /bin/freebsd-version ]; then
+if [ "$ID" == "freebsd" ]; then
     # Slightly different options for apg-go implementation for some distributions
     SIGNING_KEY=$(apg  -mL 12 -x 14 -M s -t -n 20 | tail -n 1 | cut -d ' ' -f 1 -)
+else
+    SIGNING_KEY=$(apg  -m 12 -x 14 -M s -t -n 20 | tail -n 1 | cut -d ' ' -f 1 -)
 fi
 if [ $? -ne 0 ]; then
     echo "apg is not installed"
@@ -74,7 +84,7 @@ if [ $? -ne 0 ] || [ -L /usr/local/etc/trip-server.yaml ]; then
     rm -f /usr/local/etc/trip-server.yaml
 fi
 if [ ! -e /usr/local/etc/trip-server.yaml ]; then
-    if [ -x /bin/freebsd-version ]; then
+    if [ "$ID" == "freebsd" ]; then
 	# FreeBSD different location for PostgreSQL socket
 	sed "s/level: 0/level: 4/; s/signingKey.*/signingKey: ${SIGNING_KEY}/; s/resourceSigningKey.*/resourceSigningKey: ${SIGNING_KEY}/; s/uri: .*/uri: postgresql:\/\/%2Ftmp\/trip/;" ${TRIP_SOURCE}/conf/trip-server-dist.yaml >/usr/local/etc/trip-server.yaml
     else
@@ -155,21 +165,40 @@ if [ ! -d /home/${USERNAME}/build/provisioning ]; then
 fi
 # Don't build if we appear to already have an installed version of trip-server
 if [ ! -x /usr/local/bin/trip-server ]; then
-    if [ -r /usr/lib/fedora-release ] || [ -x /bin/freebsd-version ]; then
+    if [ "$ID" == "fedora" ] || [ "$ID" == "freebsd" ]; then
 	$SU_CMD "cd /home/${USERNAME}/build && pwd && ${TRIP_SOURCE}/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' CPPFLAGS='-I/usr/local/include' --disable-gdal --enable-cairo --enable-tui"
-    elif [ -f /etc/rocky-release ]; then
-	# Weirdly, pkg-config was appending a spurious '-L' with the '--libs'
-	# parameter for 'libpqxx', proven with the following command:
-	# PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/pgsql-13/lib/pkgconfig pkg-config libpqxx --libs
-	# So we override pkg-config...
-	PG_LIBDIR=$(/usr/pgsql-15/bin/pg_config --libdir)
-	# SUCCESS -> $SU_CMD "pwd && ${TRIP_SOURCE}/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
-	# SUCCESS -> $SU_CMD "pwd && ${TRIP_SOURCE}/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
-	$SU_CMD "pwd && ${TRIP_SOURCE}/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal --enable-cairo --enable-tui"
-    else
-	$SU_CMD "${TRIP_SOURCE}/configure CXXFLAGS='-g -O0' --disable-gdal --enable-cairo --enable-tui"
-    fi
+    elif [ "$ID" == "rocky" ]; then
+	if [ $(echo "$VERSION_ID == 9.5" |bc -l) -eq 1 ]; then
+	    # Weirdly, pkg-config was appending a spurious '-L' with the '--libs'
+	    # parameter for 'libpqxx', proven with the following command:
+	    # PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/pgsql-13/lib/pkgconfig pkg-config libpqxx --libs
+	    # So we override pkg-config...
+	    PG_LIBDIR=$(/usr/pgsql-15/bin/pg_config --libdir)
+	    # SUCCESS -> $SU_CMD "pwd && ${TRIP_SOURCE}/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
+	    # SUCCESS -> $SU_CMD "pwd && ${TRIP_SOURCE}/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal"
+	    $SU_CMD "pwd && ${TRIP_SOURCE}/configure LIBPQXX_LIBS="'"-lpqxx -lpq"'" LDFLAGS=-L${PG_LIBDIR} PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:${PG_LIBDIR}/pkgconfig CXXFLAGS='-g -O0' --disable-gdal --enable-cairo --enable-tui"
+	elif [ $(echo "$VERSION_ID == 9.6" |bc -l) -eq 1 ]; then
 
+	    # There is a bug in pkg-config when run inside the configure
+	    # script.  Fails to find valid version of libpqxx 7.10.0 and libpq
+	    # 16.9 although the same command with apparently identical
+	    # PKG_CONFIG_PATH works outside the configure script. I.e.
+	    # PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/local/lib/pkgconfig:/usr/pgsql-16/lib/pkgconfig /usr/bin/pkg-config --exist --print-errors "libpqxx >= 7.7.5 libpqxx < 8 libpq >= 11.14" && echo "ok"
+	    # So settings CFLAGS and LIBS manually
+
+
+
+	    $SU_CMD "${TRIP_SOURCE}/configure PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/local/lib/pkgconfig:$(/usr/pgsql-16/bin/pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' CPPFLAGS='-I/usr/local/include' --disable-gdal --enable-cairo --enable-tui"
+	else
+	    # Rocky Linux 10.0 installs cairomm-1.16 where configure.ac expects cairomm-1.0.  Using output of the following
+	    LIBCAIROMM_LIBS="$(PKG_CONFIG_PATH=/usr/lib64/pkgconfig pkg-config cairomm-1.16 --libs)"
+	    LIBCAIROMM_CFLAGS="$(PKG_CONFIG_PATH=/usr/lib64/pkgconfig pkg-config cairomm-1.16 --cflags)"
+	    # trip-server does not currently build with cairomm-1.16
+	    $SU_CMD "${TRIP_SOURCE}/configure LIBCAIROMM_LIBS='${LIBCAIROMM_LIBS}' LIBCAIROMM_CFLAGS='${LIBCAIROMM_CFLAGS}' PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/local/lib/pkgconfig:$(/usr/pgsql-16/bin/pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' CPPFLAGS='-I/usr/local/include' --disable-gdal --enable-tui"
+	fi
+    else
+	$SU_CMD "${TRIP_SOURCE}/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' --disable-gdal --enable-cairo --enable-tui"
+    fi
     $SU_CMD "pwd && time make -C /home/${USERNAME}/build check"
     if [ $? -eq 0 ] && [ -x /home/${USERNAME}/build/src/trip-server ]; then
 	echo "Installing trip-server"

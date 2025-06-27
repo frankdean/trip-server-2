@@ -60,10 +60,24 @@ FINALCUT_DOWNLOAD_URL="https://github.com/gansm/finalcut/archive/refs/tags/${FIN
 SHASUM=shasum
 SU_CMD="su $USERNAME -c"
 
-if [ -f /usr/lib/fedora-release ]; then
+if [ -r /usr/lib/os-release ]; then
+    source /usr/lib/os-release
+elif [ -r /var/run/os-release ]; then
+    source /var/run/os-release
+fi
+
+echo "ID: $ID"
+echo "$PRETTY_NAME"
+
+if [ -z $ID ];then
+    echo "Unable to determine OS"
+    exit 1;
+fi
+
+if [ "$ID" == "fedora" ] || [ "$ID" == "rocky" ]; then
     SHASUM=sha256sum
 fi
-if [ ! -d "$DOWNLOAD_CACHE_DIR" ] || [-x /bin/freebsd-version ]; then
+if [ ! -d "$DOWNLOAD_CACHE_DIR" ] || [ "$ID" == "freebsd" ]; then
     # Where the TRIP_SOURCE folder is mounted with 9p, whatever we do, from
     # the host perspective, if we created the directory is is owned by root,
     # even when we change the ownership from within the guest.  So, use a
@@ -142,6 +156,7 @@ function install_nlohmann_json
 	    fi
 	    mkdir /usr/local/include/nlohmann
 	    cp "${DOWNLOAD_CACHE_DIR}/nlohmann-json-${NLOHMANN_JSON_VERSION}.hpp" /usr/local/include/nlohmann/json.hpp
+	    chmod go+r /usr/local/include/nlohmann/json.hpp
 	fi
     fi
 }
@@ -175,7 +190,7 @@ function install_finalcut
 	    cd "finalcut-${FINALCUT_VERSION}"
 	    pwd
 	    $SU_CMD "autoreconf --install"
-	    if [-x /bin/freebsd-version ]; then
+	    if [ "$ID" == "freebsd" ]; then
 		$SU_CMD "./configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig"
 	    else
 		$SU_CMD "./configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig CXXFLAGS=-Wno-dangling-reference"
@@ -192,10 +207,10 @@ function install_finalcut
 #
 ##############################################################################
 
-if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
+if [ "$ID" == "rocky" ] || [ "$ID" == "fedora" ]; then
     DNF_OPTIONS="--assumeyes"
 
-    if [ -f /etc/rocky-release ]; then
+    if [ "$ID" == "rocky" ]; then
 	# Rocky Linux fails to install the VirtualBox Guest Additions kernel with:
 	#
 	# > Could not find the X.Org or XFree86 Window System, skipping.
@@ -203,41 +218,54 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 	#
 	# Installed xorg-x11-server-Xorg manually - do we need to install it?
 
-	# rockylinux: Error: Unable to find a match: postgis autoconf-archive texinfo texinfo-tex yarnpkg
-
 	dnf $DNF_OPTIONS update --refresh
 	dnf $DNF_OPTIONS install epel-release
 	# https://forums.rockylinux.org/t/how-do-i-install-powertools-on-rocky-linux-9/7427/3
-	dnf $DNF_OPTIONS config-manager --set-enabled crb
+	dnf $DNF_OPTIONS config-manager --enable crb
 	# for Rocky 8 and above might need to do this as well
 	crb enable
     fi
 
     dnf $DNF_OPTIONS install gcc gcc-c++  \
-	libuuid-devel gpm-devel ncurses-devel \
+	libuuid-devel uuidd gpm-devel ncurses-devel \
 	curl libX11 libXt libXmu \
 	autoconf-archive texinfo texinfo-tex yarnpkg \
 	vim autoconf automake info libtool \
-	cairomm-devel \
 	intltool gdb valgrind git \
-	yaml-cpp-devel pugixml-devel screen cmark-devel
+	yaml-cpp-devel pugixml-devel screen cmark-devel \
+	bc apg openssl-devel
 
-    if [ -f /etc/rocky-release ]; then
-	dnf $DNF_OPTIONS install make perl kernel-devel kernel-headers \
-	    bzip2 dkms boost-locale
-	dnf $DNF_OPTIONS update 'kernel-*'
-
+    if [ "$ID" == "rocky" ]; then
 	# postgresql & postgis - https://postgis.net/install/
 	# https://www.postgresql.org/download/linux/redhat/
-	dnf $DNF_OPTIONS install https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-	# Disable the built-in PostgreSQL module:
-	dnf $DNF_OPTIONS module disable postgresql
-	dnf $DNF_OPTIONS install postgresql15-devel postgis34_15
-	# The Rocky Linux box otherwise uninstalls these packages if 'dnf autoremove' is run
-	dnf $DNF_OPTIONS mark install NetworkManager-initscripts-updown \
-	    grub2-tools-efi python3-configobj rdma-core
+	# --disablerepo=* fixes Error: Failed to download metadata for repo 'pgdg-common': repomd.xml GPG signature verification error: Signing key not found
+	# which seems to stop all dnf commands from working.
+	# https://yum.postgresql.org/news/pgdg-rpm-repo-gpg-key-update/
+	ARCH="$(arch)"
+	if [ "$ARCH" == "aarch64" ]; then
+	    dnf --disablerepo=* $DNF_OPTIONS install https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-aarch64/pgdg-redhat-repo-latest.noarch.rpm
+	else
+	    dnf --disablerepo=* $DNF_OPTIONS install https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+	fi
 
-    elif [ -f /usr/lib/fedora-release ]; then
+	# Disable the built-in PostgreSQL module:
+	#dnf $DNF_OPTIONS module disable postgresql
+	dnf $DNF_OPTIONS install postgresql16-devel postgis34_16
+	# Note that Rocky Linux box uninstalls some of these packages if 'dnf
+	# autoremove' is run, so we mark them as explicitly installed.
+	dnf $DNF_OPTIONS mark install NetworkManager-initscripts-updown \
+	    grub2-tools-efi python3-configobj rdma-core \
+	    make perl kernel-devel kernel-headers \
+	    bzip2 dkms boost-locale
+	dnf $DNF_OPTIONS update 'kernel-*'
+	if [ $(echo "$VERSION_ID >= 10.0" |bc -l) -eq 1 ]; then
+	    dnf $DNF_OPTIONS install cairomm1.16-devel
+	else
+	    dnf $DNF_OPTIONS install cairomm-devel
+	fi
+
+    elif [ "$ID" == "fedora" ]; then
+	dnf $DNF_OPTIONS install cairomm-devel
 	# The Fedora box otherwise uninstalls this package with 'dnf autoremove'
 	dnf $DNF_OPTIONS mark install linux-firmware-whence gawk
 	dnf $DNF_OPTIONS install postgresql-server postgresql-contrib postgis \
@@ -248,7 +276,7 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
     # background so when we immediately go to install them they are apparently
     # not available.  By installing these packages at this later point, they
     # are much more likely to be available.
-    dnf $DNF_OPTIONS install boost-devel libpq-devel libpqxx-devel apg
+    dnf $DNF_OPTIONS install boost-devel libpq-devel libpqxx-devel
 
     #install_libpqxx_6
     install_finalcut
@@ -258,14 +286,14 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 	dnf $DNF_OPTIONS group install lxde-desktop
     fi
 
-    if [ -f /etc/rocky-release ]; then
-	if [ ! -r /var/lib/pgsql/15/data/postgresql.conf ]; then
-	    /usr/pgsql-15/bin/postgresql-15-setup initdb
+    if [ "$ID" == "rocky" ]; then
+	if [ ! -r /var/lib/pgsql/16/data/postgresql.conf ]; then
+	    /usr/pgsql-16/bin/postgresql-16-setup initdb
 	fi
-	systemctl is-active postgresql-15 >/dev/null
+	systemctl is-active postgresql-16 >/dev/null
 	if [ $? -ne 0 ]; then
-	    systemctl enable postgresql-15
-	    systemctl start postgresql-15
+	    systemctl enable postgresql-16
+	    systemctl start postgresql-16
 	fi
     else
 	if [ ! -r /var/lib/pgsql/data/postgresql.conf ]; then
@@ -277,8 +305,7 @@ if [ -f /etc/rocky-release ] || [ -f /usr/lib/fedora-release ]; then
 	    systemctl start postgresql.service
 	fi
     fi
-
-    exit 0;
+    useradd --home-dir /nonexistent --system trip 2>/dev/null
 fi
 
 ##############################################################################
@@ -286,10 +313,13 @@ fi
 # FreeBSD provisioning
 #
 ##############################################################################
-if [ -x /bin/freebsd-version ]; then
+if [ "$ID" == "freebsd" ]; then
+    FREEBSD_POSTGRESQL_VERSION=16
     FREEBSD_PKG_OPTIONS='--yes'
     pkg install $FREEBSD_PKG_OPTIONS pkgconf git boost-all yaml-cpp \
-	postgresql15-client postgresql15-contrib postgresql15-server \
+	postgresql${FREEBSD_POSTGRESQL_VERSION}-client \
+	postgresql${FREEBSD_POSTGRESQL_VERSION}-contrib \
+	postgresql${FREEBSD_POSTGRESQL_VERSION}-server \
 	postgresql-libpqxx \
 	postgis33 \
 	python3 pugixml e2fsprogs-libuuid nlohmann-json \
@@ -311,7 +341,7 @@ if [ -x /bin/freebsd-version ]; then
     fi
     chsh -s /usr/local/bin/bash ${USERNAME}
 
-    if [ ! -d /var/db/postgres/data15/postgresql.conf ]; then
+    if [ ! -d /var/db/postgres/data${FREEBSD_POSTGRESQL_VERSION} ]; then
 	grep 'postgresql_enable' /etc/rc.conf
 	if [ $? -ne 0 ]; then
 	    cat >> /etc/rc.conf <<EOF
@@ -322,7 +352,9 @@ EOF
 	/usr/local/etc/rc.d/postgresql start
 	# Note that the socket is created at /tmp/.s.PGSQL.5432
     fi
-    exit 0;
+    # adduser trip --system --group --home /nonexistent --no-create-home --quiet
+    pw useradd -n trip -c 'trip daemon' -d /nonexistent -s /usr/sbin/nologin -w no 2>/dev/null
+    # pw groupadd -n trip -M trip -q
 fi
 
 ##############################################################################
@@ -330,7 +362,7 @@ fi
 # Debian provisioning
 #
 ##############################################################################
-if [ -f /etc/debian_version ]; then
+if [ "debian" == "$ID" ]; then
     export DEBIAN_FRONTEND=noninteractive
     DEB_OPTIONS="--yes --allow-change-held-packages"
     apt-get update
@@ -373,12 +405,20 @@ if [ -f /etc/debian_version ]; then
     install_finalcut
     ldconfig
 
+    adduser trip --system --group --home /nonexistent --no-create-home --quiet
 fi
 
 # Vi as default editor
-grep -E '^export\s+EDITOR' /home/${USERNAME}/.profile >/dev/null 2>&1
-if [ $? -ne 0 ]; then
+if [ -f /home/${USERNAME}/.bash_profile ]; then
+    grep -E '^export\s+EDITOR' /home/${USERNAME}/.bash_profile >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+	echo "export EDITOR=/usr/bin/vi" >>/home/${USERNAME}/.bash_profile
+    fi
+else
+    grep -E '^export\s+EDITOR' /home/${USERNAME}/.profile >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
 	echo "export EDITOR=/usr/bin/vi" >>/home/${USERNAME}/.profile
+    fi
 fi
 if [ ! -z "$MAKEFLAGS" ]; then
     grep -E '^export\s+MAKEFLAGS' /home/${USERNAME}/.profile >/dev/null 2>&1
@@ -386,5 +426,3 @@ if [ ! -z "$MAKEFLAGS" ]; then
 	echo "export MAKEFLAGS='${MAKEFLAGS}'" >>/home/${USERNAME}/.profile
     fi
 fi
-
-adduser trip --system --group --home /nonexistent --no-create-home --quiet
