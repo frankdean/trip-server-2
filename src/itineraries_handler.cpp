@@ -79,10 +79,10 @@ void ItinerariesHandler::build_page(
         <<
         "      <tr>\n"
         "        <td>";
-      const auto date = std::chrono::duration_cast<std::chrono::seconds>(
-          it.start->time_since_epoch()
-        ).count();
       if (it.start.has_value()) {
+        const auto date = std::chrono::duration_cast<std::chrono::seconds>(
+            it.start->time_since_epoch()
+          ).count();
         response.content
           << as::ftime("%a") << date << " "
           << as::date_medium << as::date << date
