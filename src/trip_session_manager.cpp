@@ -53,10 +53,16 @@ void TripSessionManager::persist_sessions()
 
 void TripSessionManager::load_sessions()
 {
-  std::lock_guard<std::mutex> lock(session_mutex);
-  SessionPgDao dao;
-  dao.load_sessions(sessions);
-  session_mutex.unlock();
+  {
+    std::lock_guard<std::mutex> lock(session_mutex);
+    SessionPgDao dao;
+    dao.load_sessions(sessions);
+    // Calling unlock when not locked results in undefined behavior.  On FreeBSD
+    // 14.2 & 14.3 SIGTRAP is invoked on exiting this method's scope if we
+    // unlock it manually beforehand, so force the scope to terminate before
+    // calling expire_sessions().
+    // session_mutex.unlock();
+  }
   expire_sessions();
 }
 
