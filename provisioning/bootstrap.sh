@@ -359,10 +359,10 @@ fi
 
 ##############################################################################
 #
-# Debian provisioning
+# Debian/Ubuntu provisioning
 #
 ##############################################################################
-if [ "debian" == "$ID" ]; then
+if [ "debian" == "$ID" ] || [ "ubuntu" == "$ID" ]; then
     export DEBIAN_FRONTEND=noninteractive
     DEB_OPTIONS="--yes --allow-change-held-packages"
     apt-get update
