@@ -1159,6 +1159,7 @@ void ItineraryPgDao::create_waypoints(
         w.type,
         w.avg_samples);
   }
+  connection->unprepare(ps_name);
 }
 
 void ItineraryPgDao::create_waypoints(
@@ -1838,14 +1839,6 @@ void ItineraryPgDao::auto_color_paths(std::string user_id,
   work tx(*connection);
   try {
     validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
-    connection->prepare(
-        "auto-color-track",
-        "UPDATE itinerary_track SET color=$3 WHERE itinerary_id=$1 AND id=$2"
-      );
-    connection->prepare(
-        "auto-color-route",
-        "UPDATE itinerary_route SET color=$3 WHERE itinerary_id=$1 AND id=$2"
-      );
     auto color_result = tx.exec_params("SELECT key FROM path_color ORDER BY key");
     for (const auto &r : color_result)
       colors.push_back(r[0].as<std::string>());
@@ -1875,25 +1868,39 @@ void ItineraryPgDao::auto_color_paths(std::string user_id,
       sorted_tracks.push_back(r[0].as<long>());
 
     auto color = colors.begin();
-    for (const auto &id : sorted_routes) {
-      tx.exec_prepared(
+    if (!sorted_routes.empty()) {
+      connection->prepare(
           "auto-color-route",
-          itinerary_id,
-          id,
-          *color);
-      color++;
-      if (color == colors.end())
-        color = colors.begin();
+          "UPDATE itinerary_route SET color=$3 WHERE itinerary_id=$1 AND id=$2"
+        );
+      for (const auto &id : sorted_routes) {
+        tx.exec_prepared(
+            "auto-color-route",
+            itinerary_id,
+            id,
+            *color);
+        color++;
+        if (color == colors.end())
+          color = colors.begin();
+      }
+      connection->unprepare("auto-color-route");
     }
-    for (const auto &id : sorted_tracks) {
-      tx.exec_prepared(
+    if (!sorted_tracks.empty()) {
+      connection->prepare(
           "auto-color-track",
-          itinerary_id,
-          id,
-          *color);
-      color++;
-      if (color == colors.end())
-        color = colors.begin();
+          "UPDATE itinerary_track SET color=$3 WHERE itinerary_id=$1 AND id=$2"
+        );
+      for (const auto &id : sorted_tracks) {
+        tx.exec_prepared(
+            "auto-color-track",
+            itinerary_id,
+            id,
+            *color);
+        color++;
+        if (color == colors.end())
+          color = colors.begin();
+      }
+      connection->unprepare("auto-color-track");
     }
     tx.commit();
   } catch (const std::exception &e) {
@@ -2030,6 +2037,8 @@ void ItineraryPgDao::save(std::string user_id,
                           long itinerary_id,
                           std::vector<itinerary_share> &shares)
 {
+  if (shares.empty())
+    return;
   work tx(*connection);
   try {
     validate_user_itinerary_modification_access(tx, user_id, itinerary_id);
@@ -2048,6 +2057,7 @@ void ItineraryPgDao::save(std::string user_id,
         );
     }
     tx.commit();
+    connection->unprepare("save-itinerary-shares");
   } catch (const std::exception &e) {
     std::cerr << "Exception saving itinerary shares: "
               << e.what() << '\n';
@@ -3196,6 +3206,7 @@ std::vector<ItineraryPgDao::track_segment> ItineraryPgDao::get_track_segments(
         track_id,
         ids_sql
       );
+    std::vector<track_segment> retval;
     // use prepared statement to fetch each of the sets of points
     connection->prepare(
         "fetch-segment-points",
@@ -3206,7 +3217,6 @@ std::vector<ItineraryPgDao::track_segment> ItineraryPgDao::get_track_segments(
         "JOIN itinerary_track t ON ts.itinerary_track_id=t.id "
         "WHERE t.itinerary_id=$1 AND tp.itinerary_track_segment_id=$2 "
         "ORDER BY tp.id");
-    std::vector<track_segment> retval;
     for (const auto &seg : segments_result) {
       track_segment trkseg;
       trkseg.id = seg["id"].as<long>();
@@ -3246,6 +3256,7 @@ std::vector<ItineraryPgDao::track_segment> ItineraryPgDao::get_track_segments(
       }
     }
     tx.commit();
+    connection->unprepare("fetch-segment-points");
     return retval;
   } catch (const std::exception &e) {
     std::cerr << "Exception getting track segments: "
@@ -3277,25 +3288,28 @@ void ItineraryPgDao::save_updated_statistics(
         track.highest
       );
     const std::string ps_name = "update_track_segment_stats";
-    connection->prepare(
-        ps_name,
-        "UPDATE itinerary_track_segment "
-        "SET distance=$3, ascent=$4, descent=$5, lowest=$6, highest=$7 "
-        "WHERE id=$2 AND itinerary_track_id=$1"
-      );
-    for (const auto &ts : track.segments) {
-      if (!ts.id.has_value())
-        throw std::invalid_argument("Track segment ID not set");
-      tx.exec_prepared(
+    if (!track.segments.empty()) {
+      connection->prepare(
           ps_name,
-          track.id,
-          ts.id,
-          ts.distance,
-          ts.ascent,
-          ts.descent,
-          ts.lowest,
-          ts.highest
+          "UPDATE itinerary_track_segment "
+          "SET distance=$3, ascent=$4, descent=$5, lowest=$6, highest=$7 "
+          "WHERE id=$2 AND itinerary_track_id=$1"
         );
+      for (const auto &ts : track.segments) {
+        if (!ts.id.has_value())
+          throw std::invalid_argument("Track segment ID not set");
+        tx.exec_prepared(
+            ps_name,
+            track.id,
+            ts.id,
+            ts.distance,
+            ts.ascent,
+            ts.descent,
+            ts.lowest,
+            ts.highest
+          );
+      }
+      connection->unprepare(ps_name);
     }
     tx.commit();
   } catch (const std::exception &e) {
@@ -3506,6 +3520,7 @@ std::vector<ItineraryPgDao::itinerary_share_report>
       }
       itineraries.push_back(i);
     }
+    connection->unprepare("itinerary-share-nicknames");
     return itineraries;
   } catch (const std::exception &e) {
     std::cerr << "Error fetching itinerary share report: "

@@ -572,7 +572,7 @@ bool TrackPgDao::check_new_locations_available(
     tx.commit();
     return retval;
   } catch (const std::exception &e) {
-    std::cerr << "Exception whilst deleting itinerary features: "
+    std::cerr << "Exception checking for new location updates: "
               << e.what();
     throw;
   }
@@ -619,13 +619,7 @@ void TrackPgDao::check_new_locations_available(
   work tx(*connection);
   try {
     const std::string user_nickname = get_nickname_for_user_id(tx, user_id);
-    const std::string ps_name_user_id = "new-location-checks-user-id";
     const std::string ps_name = "new-location-checks-nickname";
-    connection->prepare(
-        ps_name_user_id,
-        "SELECT COUNT(*) FROM location loc "
-        "WHERE loc.user_id=$1 AND (loc.id > $2 OR $2 IS NULL) AND time >= $3"
-      );
     connection->prepare(
         ps_name,
         "SELECT COUNT(*) FROM location loc "
@@ -636,8 +630,9 @@ void TrackPgDao::check_new_locations_available(
     const DateTime from(since);
     for (auto &c : criteria) {
       if (c.nickname == user_nickname) {
-        auto r = tx.exec_prepared1(
-            ps_name_user_id,
+        auto r = tx.exec_params1(
+            "SELECT COUNT(*) FROM location loc "
+            "WHERE loc.user_id=$1 AND (loc.id > $2 OR $2 IS NULL) AND time >= $3",
             user_id,
             c.min_threshold_id,
             from.get_time_as_iso8601_gmt());
@@ -653,8 +648,9 @@ void TrackPgDao::check_new_locations_available(
       }
     }
     tx.commit();
+    connection->unprepare(ps_name);
   } catch (const std::exception &e) {
-    std::cerr << "Exception whilst deleting itinerary features: "
+    std::cerr << "Exception checking for user date since datetime : "
               << e.what();
     throw;
   }
@@ -1061,6 +1057,8 @@ std::vector<TrackPgDao::track_share> TrackPgDao::get_track_sharing_by_user_id(
 void TrackPgDao::delete_track_shares(std::string user_id,
                                      std::vector<std::string> nicknames)
 {
+  if (nicknames.empty())
+    return;
   try {
     const std::string ps_name = "delete-track-shares";
     connection->prepare(
@@ -1077,6 +1075,7 @@ void TrackPgDao::delete_track_shares(std::string user_id,
           nickname);
     }
     tx.commit();
+    connection->unprepare(ps_name);
   } catch (const std::exception &e) {
     std::cerr << "Exception deleting track shares: "
               << e.what() << '\n';
@@ -1088,6 +1087,8 @@ void TrackPgDao::activate_track_shares(std::string user_id,
                                        std::vector<std::string> nicknames,
                                        bool activate)
 {
+  if (nicknames.empty())
+    return;
   try {
     const std::string ps_name = "activate-track-shares";
     connection->prepare(
@@ -1105,6 +1106,7 @@ void TrackPgDao::activate_track_shares(std::string user_id,
           activate);
     }
     tx.commit();
+    connection->unprepare(ps_name);
   } catch (const std::exception &e) {
     std::cerr << "Exception activating track shares: "
               << e.what() << '\n';
