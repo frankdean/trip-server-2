@@ -215,6 +215,14 @@ if [ -x /home/${USERNAME}/build/src/trip-server ]; then
     fi
 fi
 
+# Setup for systemd
+if [ -d /etc/systemd/system ] && [ ! -e /etc/systemd/system/trip-server-2.service ]; then
+    sed -e "s/User=.*/User=$USERNAME/" -e "s/Group=.*/Group=$GROUPNAME/" \
+	${TRIP_SOURCE}/provisioning/systemd/trip-server-2.service \
+	>/etc/systemd/system/trip-server-2.service
+    systemctl daemon-reload
+fi
+
 if [ ! -e /var/log/trip.log ]; then
     touch /var/log/trip.log
 fi
