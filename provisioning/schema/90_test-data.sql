@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.13 (Debian 13.13-0+deb11u1)
--- Dumped by pg_dump version 13.13 (Debian 13.13-0+deb11u1)
+-- Dumped from database version 15.13 (Debian 15.13-0+deb12u1)
+-- Dumped by pg_dump version 15.13 (Debian 15.13-0+deb12u1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -34,6 +34,7 @@ ALTER TABLE IF EXISTS ONLY public.itinerary_route_point DROP CONSTRAINT IF EXIST
 ALTER TABLE IF EXISTS ONLY public.itinerary_route DROP CONSTRAINT IF EXISTS itinerary_route_itinerary_id_fkey;
 DROP INDEX IF EXISTS public.location_geog_idx;
 DROP INDEX IF EXISTS public.itinerary_waypoint_geog_idx;
+DROP INDEX IF EXISTS public.itinerary_title_idx;
 DROP INDEX IF EXISTS public.itineary_track_point_geog_idx;
 DROP INDEX IF EXISTS public.itineary_route_point_geog_idx;
 DROP INDEX IF EXISTS public.idx_time_inverse;
@@ -175,7 +176,8 @@ CREATE TABLE public.itinerary (
     user_id integer NOT NULL,
     archived boolean DEFAULT false,
     start timestamp with time zone,
-    finish timestamp with time zone
+    finish timestamp with time zone,
+    textsearchable tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, ((title || ' '::text) || COALESCE(description, ''::text)))) STORED
 );
 
 
@@ -4922,6 +4924,13 @@ CREATE INDEX itineary_track_point_geog_idx ON public.itinerary_track_point USING
 
 
 --
+-- Name: itinerary_title_idx; Type: INDEX; Schema: public; Owner: trip
+--
+
+CREATE INDEX itinerary_title_idx ON public.itinerary USING gin (to_tsvector('english'::regconfig, ((title || ' '::text) || COALESCE(description, ''::text))));
+
+
+--
 -- Name: itinerary_waypoint_geog_idx; Type: INDEX; Schema: public; Owner: trip
 --
 
@@ -5064,7 +5073,7 @@ ALTER TABLE ONLY public.user_role
 
 
 --
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: pg_database_owner
 --
 
 GRANT USAGE ON SCHEMA public TO trip_role;

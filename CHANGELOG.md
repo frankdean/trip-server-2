@@ -4,8 +4,11 @@
 
 ## 2.5.4
 
-* Include installing systemd service file
-* Switch licence to GNU Affero General Public License
+* Switch licence to GNU Affero General Public License.
+* Implemented full text search of itinerary titles and descriptions.  The
+  **database schema should be updated** using the `trip-server --upgrade`
+  option.
+* Include installing systemd service file in VM provisioning script.
 * Upgrade `bootstrap` to version 5.3.7.
 * Upgrade `proj4js` to version 2.16.1.
 * Refactor `libpqxx` usage to handle deprecation warning.

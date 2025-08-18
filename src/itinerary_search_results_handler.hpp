@@ -29,6 +29,7 @@
 #include <optional>
 #include <ostream>
 #include <string>
+#include <vector>
 
 namespace fdsd {
 namespace web {
@@ -38,6 +39,7 @@ namespace web {
 namespace trip {
 
 class ItinerarySearchResultsHandler : public TripAuthenticatedRequestHandler {
+  std::string action;
   double longitude;
   double latitude;
   double radius;
@@ -45,7 +47,15 @@ class ItinerarySearchResultsHandler : public TripAuthenticatedRequestHandler {
   void build_form(
       std::ostream &os,
       const web::Pagination& pagination,
-      const std::vector<ItineraryPgDao::itinerary_summary> itineraries);
+      const std::vector<ItineraryPgDao::itinerary_summary>& itineraries);
+  const std::string get_current_page_from_session(
+      const web::HTTPServerRequest& request) const;
+  void handle_full_text_search(
+      const web::HTTPServerRequest& request,
+      web::HTTPServerResponse& response);
+  void handle_location_search(
+      const web::HTTPServerRequest& request,
+      web::HTTPServerResponse& response);
 protected:
   virtual void do_preview_request(
       const web::HTTPServerRequest& request,
@@ -56,6 +66,7 @@ protected:
 public:
   ItinerarySearchResultsHandler(std::shared_ptr<TripConfig> config) :
     TripAuthenticatedRequestHandler(config),
+    action(),
     longitude(),
     latitude(),
     radius() {}

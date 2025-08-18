@@ -92,7 +92,7 @@ public:
   static const std::string location_history_key;
   static const std::string itinerary_features_key;
   static const std::string itinerary_page_key;
-  static const std::string itinerary_radius_search_page_key;
+  static const std::string itinerary_search_page_key;
   void save_value(std::string session_id, std::string key, std::string value);
   std::string get_value(std::string session_id, std::string key);
   void remove_value(std::string session_id, std::string key);
@@ -124,6 +124,11 @@ public:
       SessionPgDao::search_type search_type,
       std::uint32_t offset,
       int limit);
+  /**
+   * \return current value of default_text_search_config, stripped of pg_catalog
+   * prefix, e.g. 'english'.  Defaults to 'english' it not set.
+   */
+  std::string get_default_text_search_config();
   void upgrade();
 };
 

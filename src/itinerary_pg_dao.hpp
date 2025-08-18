@@ -565,6 +565,17 @@ public:
           std::uint32_t offset,
           int limit);
 
+  long itinerary_full_text_search_count(
+      std::string user_id,
+      const std::vector<std::string> &terms) const;
+
+  const std::vector<ItineraryPgDao::itinerary_summary>
+      itinerary_full_text_search(
+          std::string user_id,
+          const std::vector<std::string> &terms,
+          std::uint32_t offset,
+          int limit) const;
+
   long get_shared_itinerary_report_count(std::string user_id);
 
   std::vector<ItineraryPgDao::itinerary_share_report>

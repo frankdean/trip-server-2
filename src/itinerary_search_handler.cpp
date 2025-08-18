@@ -39,6 +39,23 @@ void ItinerarySearchHandler::build_form(std::ostream &os)
     <<
     "<div class=\"container-fluid\">\n"
     "<h1>" << get_page_title() << "</h1>\n"
+    // Title of the itinerary full text search form
+    "<h2>" << translate("By Text") << "</h2>"
+    "  <form name=\"form\" method=\"post\" action=\"" << get_uri_prefix() << "/itinerary-search-result\">\n"
+    "    <div class=\"container-fluid bg-light row g-3 my-3 pb-3 mx-0\">\n"
+    // "      <div class=\"col-sm-8 col-lg-4\">\n"
+    // Label for itinerary full text search input
+    "        <label for=\"search-text\">" << translate("Enter words to search itinerary titles and descriptions.  Separate words with spaces.") << "</label>\n"
+    "        <input id=\"search-text\" name=\"search-text\" type=\"text\" required>\n"
+    // "      </div>\n"
+    // Label of button to execute an itinerary search by distance radius
+    "      <div>\n"
+    "        <button id=\"btn-text-search\" class=\"btn btn-lg btn-success\" accesskey=\"s\" name=\"action\" value=\"search-itinerary-text\">" << translate("Search text") << "</button>\n"
+    "      </div>\n"
+    "    </div>\n"
+    "  </form>\n"
+    // Title of the itinerary search by location form
+    "<h2>" << translate("By Location") << "</h2>"
     "  <form name=\"form\" method=\"post\" action=\"" << get_uri_prefix() << "/itinerary-search-result\">\n"
     "    <div class=\"container-fluid bg-light row g-3 my-3 pb-3 mx-0\">\n"
     "      <div class=\"col-12\">\n"
@@ -105,7 +122,7 @@ void ItinerarySearchHandler::build_form(std::ostream &os)
     "      <div class=\"col-12\"><p id=\"position-text\"></p></div>\n"
     // Label of button to execute an itinerary search by distance radius
     "      <div>\n"
-    "        <button id=\"btn-search\" class=\"btn btn-lg btn-success\" accesskey=\"s\" name=\"action\" value=\"search\">" << translate("Search") << "</button>\n"
+    "        <button id=\"btn-search\" class=\"btn btn-lg btn-success\" accesskey=\"l\" name=\"action\" value=\"search-location\">" << translate("Search location") << "</button>\n"
     "      </div>\n"
     "    </div>\n"
     "  </form>\n"
@@ -129,8 +146,8 @@ void ItinerarySearchHandler::do_preview_request(
 {
   (void)request; // unused
   (void)response;
-  // Page title of the itinerary search by location page
-  set_page_title(translate("Itinerary Search by Location"));
+  // Page title of the itinerary search page
+  set_page_title(translate("Itinerary Search"));
   set_menu_item(unknown);
 }
 
@@ -141,7 +158,7 @@ void ItinerarySearchHandler::extract_session_defaults(
   SessionPgDao session_dao;
   session_dao.remove_value(
       get_session_id(),
-      SessionPgDao::itinerary_radius_search_page_key);
+      SessionPgDao::itinerary_search_page_key);
   // Get any previously copied waypoint coordinates;
   const std::string p =
     session_dao.get_value(get_session_id(),

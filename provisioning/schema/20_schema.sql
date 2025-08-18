@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.13 (Debian 13.13-0+deb11u1)
--- Dumped by pg_dump version 13.13 (Debian 13.13-0+deb11u1)
+-- Dumped from database version 15.13 (Debian 15.13-0+deb12u1)
+-- Dumped by pg_dump version 15.13 (Debian 15.13-0+deb12u1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -15,20 +15,6 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
-
---
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
 
 --
 -- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
@@ -86,7 +72,8 @@ CREATE TABLE public.itinerary (
     user_id integer NOT NULL,
     archived boolean DEFAULT false,
     start timestamp with time zone,
-    finish timestamp with time zone
+    finish timestamp with time zone,
+    textsearchable tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, ((title || ' '::text) || COALESCE(description, ''::text)))) STORED
 );
 
 
@@ -873,6 +860,13 @@ CREATE INDEX itineary_track_point_geog_idx ON public.itinerary_track_point USING
 
 
 --
+-- Name: itinerary_title_idx; Type: INDEX; Schema: public; Owner: trip
+--
+
+CREATE INDEX itinerary_title_idx ON public.itinerary USING gin (to_tsvector('english'::regconfig, ((title || ' '::text) || COALESCE(description, ''::text))));
+
+
+--
 -- Name: itinerary_waypoint_geog_idx; Type: INDEX; Schema: public; Owner: trip
 --
 
@@ -1015,7 +1009,7 @@ ALTER TABLE ONLY public.user_role
 
 
 --
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: pg_database_owner
 --
 
 GRANT USAGE ON SCHEMA public TO trip_role;

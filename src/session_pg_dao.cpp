@@ -43,7 +43,7 @@ const std::string SessionPgDao::itinerary_features_key = "itinerary-features";
 /// Used to keep the last viewed page of itineraries
 const std::string SessionPgDao::itinerary_page_key = "itineraries";
 /// Used to keep the last viewed page of itinerary radius search results
-const std::string SessionPgDao::itinerary_radius_search_page_key = "itinerary-search-page-key";
+const std::string SessionPgDao::itinerary_search_page_key = "itinerary-search-page-key";
 
 const std::string SessionPgDao::insert_session_ps_name = "session_insert";
 
@@ -320,6 +320,26 @@ bool SessionPgDao::is_admin(std::string user_id)
   return !r.empty() && r[0][0].as<int>() > 0;
 }
 
+std::string SessionPgDao::get_default_text_search_config()
+{
+  try {
+#ifdef HAVE_LIBPQXX7
+    const auto config = connection->get_var("default_text_search_config");
+#else
+    const auto config = connection->get_variable("default_text_search_config");
+#endif
+    const auto p = config.find('.');
+    if (p != std::string::npos && p + 1 < config.size())
+      return config.substr(p + 1);
+    else
+      return config;
+  } catch (const std::exception &e) {
+    std::cerr << "libpqxx exception querying default_text_search_config: "
+              << e.what() << '\n';
+  }
+  return "english";
+}
+
 void SessionPgDao::upgrade()
 {
   try {
@@ -402,6 +422,46 @@ void SessionPgDao::upgrade()
     throw;
   }
 
+  // Full text search
+  const auto language = get_default_text_search_config();
+  try {
+    work tx(*connection);
+    auto r = tx.exec("SELECT COUNT(*) FROM information_schema.columns "
+                      "WHERE table_name='itinerary' AND "
+                      "column_name = 'textsearchable'");
+    if (r[0][0].as<int>() == 0) {
+      r = tx.exec(
+          "ALTER TABLE itinerary "
+          "ADD COLUMN textsearchable tsvector GENERATED ALWAYS "
+          "AS (to_tsvector('" + tx.esc(language) + "', title || ' ' || "
+          "coalesce(description, ''))) STORED");
+      tx.commit();
+    }
+  } catch(const std::exception &e) {
+    std::cerr << "Error adding column for itinerary table full text search: "
+              << typeid(e).name() << ' '
+              << e.what();
+    throw;
+  }
+
+  try {
+    work tx(*connection);
+    auto r = tx.exec("SELECT COUNT(*) FROM pg_indexes "
+                "WHERE tablename='itinerary' AND "
+                "indexname='itinerary_title_idx'");
+    if (r[0][0].as<int>() == 0) {
+      r = tx.exec(
+          "CREATE INDEX itinerary_title_idx ON itinerary "
+          "USING GIN (to_tsvector('" + tx.esc(language) + "', title || ' ' || "
+          "coalesce(description, '')))");
+      tx.commit();
+    }
+  } catch(const std::exception &e) {
+    std::cerr << "Error creating index for itinerary table full text search: "
+              << typeid(e).name() << ' '
+              << e.what();
+    throw;
+  }
 }
 
 SessionPgDao::tile_report

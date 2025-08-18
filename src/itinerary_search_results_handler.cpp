@@ -23,7 +23,9 @@
 #include "itinerary_search_results_handler.hpp"
 #include "itinerary_pg_dao.hpp"
 #include "session_pg_dao.hpp"
+#include "../trip-server-common/src/dao_helper.hpp"
 #include "../trip-server-common/src/http_response.hpp"
+#include "../trip-server-common/src/uri_utils.hpp"
 #include <boost/locale.hpp>
 #include <nlohmann/json.hpp>
 
@@ -38,7 +40,7 @@ const int ItinerarySearchResultsHandler::max_search_radius_kilometers = 50;
 void ItinerarySearchResultsHandler::build_form(
     std::ostream &os,
     const Pagination& pagination,
-    const std::vector<ItineraryPgDao::itinerary_summary> itineraries)
+    const std::vector<ItineraryPgDao::itinerary_summary>& itineraries)
 {
   os
     <<
@@ -96,7 +98,7 @@ void ItinerarySearchResultsHandler::build_form(
       <<
       "      </tr>\n"
       "    </table>\n"
-      "  </div>\n" // #itineraries div
+      "  </div>\n" // <!-- #itineraries div -->\n"
       "  <div id=\"div-buttons\">\n"
       "    <form name=\"form\">\n"
       "    <input type=\"hidden\" name=\"lng\" value=\"" << longitude  << "\">\n"
@@ -122,14 +124,22 @@ void ItinerarySearchResultsHandler::build_form(
     os
       <<
       "    </form>\n"
-      "  </div>\n"
-      "</div>\n";
+      "  </div>\n";
   }
+  os
+    <<
+    "  <div class=\"py-2\">\n"
+    "    <form name=\"form\" class=\"css-form\">\n"
+    // Button title for starting a new search
+    "      <button id=\"btn-search\" accesskey=\"s\" class=\"btn btn-lg btn-primary\" formmethod=\"get\" formaction=\"" << get_uri_prefix() << "/itinerary-search\">" << translate("New search") << "</button>\n"
+    "    </form>\n"
+    "  </div>\n"
+    "</div>\n"; // <!-- class=\"container-fluid\" -->\n";
 }
 
 void ItinerarySearchResultsHandler::do_preview_request(
     const web::HTTPServerRequest& request,
-      web::HTTPServerResponse& response)
+    web::HTTPServerResponse& response)
 {
   (void)request; // unused
   (void)response;
@@ -138,9 +148,41 @@ void ItinerarySearchResultsHandler::do_preview_request(
   set_menu_item(unknown);
 }
 
-void ItinerarySearchResultsHandler::handle_authenticated_request(
-    const web::HTTPServerRequest& request,
-    web::HTTPServerResponse& response)
+const std::string ItinerarySearchResultsHandler::get_current_page_from_session(
+    const HTTPServerRequest& request) const
+{
+  std::string page = request.get_param("page");
+  SessionPgDao session_dao;
+  if (page.empty()) {
+    // Use JSON object so we can easily extend in the future,
+    // e.g. filtering, sorting etc.
+    try {
+      const auto json_str = session_dao.get_value(
+          get_session_id(),
+          SessionPgDao::itinerary_search_page_key);
+      if (!json_str.empty()) {
+        json j = json::parse(json_str);
+        page = j["page"];
+      }
+    } catch (const nlohmann::detail::parse_error &e) {
+      std::cerr << "JSON parse error parsing session value for "
+                << SessionPgDao::itinerary_search_page_key
+                << " key\n";
+    }
+  } else {
+    json j;
+    // if (j.contains("page"))
+    j["page"] = page;
+    session_dao.save_value(get_session_id(),
+                           SessionPgDao::itinerary_search_page_key,
+                           j.dump());
+  }
+  return page;
+}
+
+void ItinerarySearchResultsHandler::handle_location_search(
+    const HTTPServerRequest& request,
+    HTTPServerResponse& response)
 {
   if (request.method == HTTPMethod::post) {
     // Save the selected position formatting to the user's session
@@ -179,38 +221,14 @@ void ItinerarySearchResultsHandler::handle_authenticated_request(
       radius_meters);
   // std::cout << "Search result count: " << total_count << '\n';
   std::map<std::string, std::string> query_map;
+  query_map["action"] = action;
   query_map["lng"] = std::to_string(longitude);
   query_map["lat"] = std::to_string(latitude);
   query_map["radius"] = std::to_string(radius);
   Pagination pagination(get_uri_prefix() + "/itinerary-search-result",
                         query_map,
                         total_count);
-  std::string page = request.get_param("page");
-  SessionPgDao session_dao;
-  if (page.empty()) {
-    // Use JSON object so we can easily extend in the future,
-    // e.g. filtering, sorting etc.
-    try {
-      const auto json_str = session_dao.get_value(
-          get_session_id(),
-          SessionPgDao::itinerary_radius_search_page_key);
-      if (!json_str.empty()) {
-        json j = json::parse(json_str);
-        page = j["page"];
-      }
-    } catch (const nlohmann::detail::parse_error &e) {
-      std::cerr << "JSON parse error parsing session value for "
-                << SessionPgDao::itinerary_radius_search_page_key
-                << " key\n";
-    }
-  } else {
-    json j;
-    // if (j.contains("page"))
-    j["page"] = page;
-    session_dao.save_value(get_session_id(),
-                           SessionPgDao::itinerary_radius_search_page_key,
-                           j.dump());
-  }
+  const std::string page = get_current_page_from_session(request);
   try {
     if (!page.empty())
       pagination.set_current_page(std::stoul(page));
@@ -221,7 +239,7 @@ void ItinerarySearchResultsHandler::handle_authenticated_request(
   //     user_id,
   //     pagination.get_offset(),
   //     pagination.get_limit());
-  auto itineraries = dao.itinerary_radius_search(
+  const auto itineraries = dao.itinerary_radius_search(
       user_id,
       longitude,
       latitude,
@@ -229,4 +247,61 @@ void ItinerarySearchResultsHandler::handle_authenticated_request(
       pagination.get_offset(),
       pagination.get_limit());
   build_form(response.content, pagination, itineraries);
+}
+
+void ItinerarySearchResultsHandler::handle_full_text_search(
+    const HTTPServerRequest& request,
+    HTTPServerResponse& response)
+{
+  std::string text = request.get_param("search-text");
+  dao_helper::trim(text);
+  const auto terms = UriUtils::split_params(text, " ");
+  if (terms.empty()) {
+    build_form(response.content, Pagination(), std::vector<ItineraryPgDao::itinerary_summary>());
+    return;
+  }
+  ItineraryPgDao dao;
+  const std::string user_id = get_user_id();
+  const long total_count = dao.itinerary_full_text_search_count(
+      user_id,
+      terms);
+  std::map<std::string, std::string> query_map;
+  query_map["action"] = action;
+  query_map["search-text"] = text;
+  Pagination pagination(get_uri_prefix() + "/itinerary-search-result",
+                        query_map,
+                        total_count);
+  const std::string page = get_current_page_from_session(request);
+  try {
+    if (!page.empty())
+      pagination.set_current_page(std::stoul(page));
+  } catch (const std::logic_error& e) {
+    std::cerr << "Error converting string to page number\n";
+  }
+  const auto itineraries = dao.itinerary_full_text_search(
+      user_id,
+      terms,
+      pagination.get_offset(),
+      pagination.get_limit());
+  build_form(response.content, pagination, itineraries);
+}
+
+void ItinerarySearchResultsHandler::handle_authenticated_request(
+    const web::HTTPServerRequest& request,
+    web::HTTPServerResponse& response)
+{
+  // std::cout << "Post params\n";
+  // for (auto const& p : request.get_post_params()) {
+  //   std::cout << p.first << " -> " << p.second << '\n';
+  // }
+  // std::cout << "Query params\n";
+  // for (auto const& p : request.get_query_params()) {
+  //   std::cout << p.first << " -> " << p.second << '\n';
+  // }
+  action = request.get_param("action");
+  if (action == "search-location") {
+    handle_location_search(request, response);
+  } else if (action == "search-itinerary-text") {
+    handle_full_text_search(request, response);
+  }
 }

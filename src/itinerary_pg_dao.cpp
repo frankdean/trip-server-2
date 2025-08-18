@@ -3458,6 +3458,111 @@ std::vector<ItineraryPgDao::itinerary_summary>
   }
 }
 
+long ItineraryPgDao::itinerary_full_text_search_count(
+        std::string user_id,
+        const std::vector<std::string> &terms) const
+{
+  std::string terms_sql;
+  bool first = true;
+  for (auto const& term : terms) {
+    if (!first)
+      terms_sql.append(" & ");
+    terms_sql.append(term);
+    first = false;
+  }
+  const std::string sql =
+    "SELECT sum(count) FROM ("
+    "SELECT COUNT(*) "
+    "FROM itinerary i "
+    "WHERE i.archived != true AND i.user_id=$1 AND "
+    "textsearchable @@ to_tsquery($2) "
+    "UNION "
+    "SELECT COUNT(*) "
+    "FROM itinerary i2 "
+    "JOIN itinerary_sharing s ON i2.id=s.itinerary_id "
+    "JOIN usertable u3 ON u3.id=i2.user_id "
+    "WHERE s.active=true AND i2.archived != true AND "
+    "s.shared_to_id=$1 AND "
+    "textsearchable @@ to_tsquery($2) "
+    ") AS q";
+  try {
+    work tx(*connection);
+    auto r = tx.exec_params1(sql, user_id, terms_sql);
+    tx.commit();
+    return r[0].as<long>();
+  } catch (const std::exception &e) {
+    std::cerr << "Error executing itinerary full text search count: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
+const std::vector<ItineraryPgDao::itinerary_summary>
+    ItineraryPgDao::itinerary_full_text_search(
+        std::string user_id,
+        const std::vector<std::string> &terms,
+        std::uint32_t offset,
+        int limit) const
+{
+  try {
+    work tx(*connection);
+    std::string terms_sql;
+    bool first = true;
+    for (auto const& term : terms) {
+      if (!first)
+        terms_sql.append(" & ");
+      terms_sql.append(term);
+      first = false;
+    }
+    const std::string sql =
+      "SELECT i.id, i.start, i.finish, i.title, null AS nickname "
+      "FROM itinerary i "
+      "WHERE i.archived != true AND i.user_id=$1 AND "
+      "textsearchable @@ to_tsquery($2) "
+      "UNION "
+      "SELECT i2.id, i2.start, i2.finish, i2.title, u3.nickname "
+      "FROM itinerary i2 "
+      "JOIN itinerary_sharing s ON i2.id=s.itinerary_id "
+      "JOIN usertable u3 ON u3.id=i2.user_id "
+      "WHERE s.active=true AND i2.archived != true AND "
+      "s.shared_to_id=$1 AND "
+      "textsearchable @@ to_tsquery($2) "
+      "ORDER BY start DESC, finish DESC, title, id DESC OFFSET $3 LIMIT $4";
+    auto result = tx.exec_params(
+        sql,
+        user_id,
+        terms_sql,
+        offset,
+        limit
+      );
+    std::vector<ItineraryPgDao::itinerary_summary> itineraries;
+    for (auto r : result) {
+      itinerary_summary it;
+      it.id = r["id"].as<long>();
+      std::string s;
+      if (r["start"].to(s)) {
+        DateTime start(s);
+        it.start = start.time_tp();
+      }
+      if (r["finish"].to(s)) {
+        DateTime finish(s);
+        it.finish = finish.time_tp();
+      }
+      r["title"].to(it.title);
+      if (!r["nickname"].is_null())
+        it.owner_nickname = r["nickname"].as<std::string>();
+      it.shared = it.owner_nickname.has_value() && !it.owner_nickname.value().empty();
+      itineraries.push_back(it);
+    }
+    tx.commit();
+    return itineraries;
+  } catch (const std::exception &e) {
+    std::cerr << "Error executing itinerary full text search: "
+              << e.what() << '\n';
+    throw;
+  }
+}
+
 long ItineraryPgDao::get_shared_itinerary_report_count(
         std::string user_id)
 {
