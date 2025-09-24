@@ -69,6 +69,10 @@ tile_provider TileHandler::get_provider(std::vector<tile_provider>::size_type pr
   return providers[provider_index];
 }
 
+/**
+ * \throws TileHandler::tile_not_found_exception if the tile cannot be retrieved
+ * from the remote server.
+ */
 TilePgDao::tile_result TileHandler::fetch_remote_tile(
     int provider_index,
     int z,
@@ -99,7 +103,7 @@ TilePgDao::tile_result TileHandler::fetch_remote_tile(
         << "\" z: " << z
         << " x: " << x
         << " y: " << y
-        << " status code: " << client.status_code << '\n';
+        << " status code: " << client.status_code;
     throw tile_not_found_exception(msg.str());
   }
   TilePgDao dao;
@@ -202,6 +206,10 @@ TilePgDao::tile_result TileHandler::create_test_tile(int z, int x, int y)
 
 #endif
 
+/**
+ * \throws TileHandler::tile_not_found_exception if the tile cannot be retrieved
+ * from the remote server.
+ */
 TilePgDao::tile_result TileHandler::find_tile(int provider_index,
                                          int z,
                                          int x,
@@ -264,6 +272,9 @@ void TileHandler::handle_authenticated_request(
         DateTime expires(result.expires);
         response.set_header("Expires", expires.get_time_as_rfc7231());
         return;
+      } catch (const tile_not_found_exception& ex) {
+        std::cerr << "Warning: " << ex.what() << '\n';
+        response.status_code = HTTPStatus::not_found;
       } catch (const std::length_error& e) {
         // drop through to bad request
       } catch (const std::exception &e)  {

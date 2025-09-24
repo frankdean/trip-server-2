@@ -108,7 +108,7 @@ std::optional<TilePgDao::tile_result> TilePgDao::get_tile(int server_id,
   result r = tx.exec_params(sql, server_id, z, x, y);
   tx.commit();
   if (r.empty()) {
-    return tile_result();
+    return std::optional<tile_result>();
   } else {
     tile_result t;
     DateTime expires(r[0]["expires"].as<std::string>());

@@ -5,6 +5,7 @@
 ## 2.5.4
 
 * Switch licence to GNU Affero General Public License.
+* Treat failure to retrieve remote tiles as HTTP 404 not found
 * Implemented full text search of itinerary titles and descriptions.  The
   **database schema should be updated** using the `trip-server --upgrade`
   option.

@@ -35,7 +35,9 @@
 		"/opt/local/lib/proj9/lib/pkgconfig:"\
 		"$(pg_config --libdir)/pkgconfig" \
 		--enable-cairo --enable-tui --enable-maintainer-mode
+
 		$ make -j 8 check
+
 		$ PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:"\
 		"/opt/local/lib/proj9/lib/pkgconfig:"\
 		"/opt/local/lib/postgresql15/pkgconfig" \
