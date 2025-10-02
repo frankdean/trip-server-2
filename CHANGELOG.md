@@ -2,6 +2,10 @@
 
 # Changelog
 
+## 2.5.5
+
+* Fix handling GET and POST query parameters containing '?', '+' or '#'
+
 ## 2.5.4
 
 * Switch licence to GNU Affero General Public License.
