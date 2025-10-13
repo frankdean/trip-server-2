@@ -190,6 +190,11 @@ std::optional<double> ElevationTile::get_elevation(std::string directory_path,
   if (dataset == nullptr) {
     open(directory_path);
   }
+  if (coordinate_transform == nullptr) {
+    std::cerr << "Unable to transform lon: " << longitude << " lat: " << latitude
+              << ", coordinate transformation object is nullptr\n";
+    return std::optional<double>();
+  }
   std::lock_guard<std::mutex> lock(dataset_mutex);
   time = std::chrono::system_clock::now();
   double x = longitude;
