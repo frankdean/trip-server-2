@@ -21,6 +21,7 @@ EXTRA_DIST = m4/ChangeLog  .gitignore stamp-h1 \
 	docker-compose-map-import.yml \
 	docker-compose-map-server.yml \
 	provisioning/apache2/etc-apache2-conf-available-renderd.conf \
+	provisioning/apache2/etc-apache2-conf-available-trip.conf \
 	provisioning/bootconfig.sh \
 	provisioning/bootstrap.sh \
 	provisioning/qemu-init.sh \

@@ -5,6 +5,9 @@
 ## 2.5.5
 
 * Fix handling GET and POST query parameters containing '?', '+' or '#'
+* Bug fix - UB when coordinate transformation object is nullptr
+* Update documentation for Itinerary Full Text Search
+* Added info on proxying HTTP map tile requests to HTTPS
 
 ## 2.5.4
 
