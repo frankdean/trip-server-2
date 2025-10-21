@@ -124,6 +124,7 @@ Running the Application with docker-compose
 
 Miscellaneous
 
+* Full Text Searching::
 * Useful Queries::
 
 Useful Queries
@@ -1752,10 +1753,23 @@ The following sections mostly relate to information around system
 maintenance and application development.
 
 @menu
+* Full Text Searching::
 * Useful Queries::
 @end menu
 
-@node Useful Queries,  , Miscellaneous, Miscellaneous
+@node Full Text Searching, Useful Queries, Miscellaneous, Miscellaneous
+@section Full Text Searching
+@cindex Search, Full Text
+@cindex Full Text Searching
+
+Full text searching uses a dictionary based on the default language for
+the PostgreSQL installation.
+
+For more information, see
+@url{https://www.postgresql.org/docs/16/textsearch.html,Full Text
+Search} in the PostgreSQL Manual.
+
+@node Useful Queries,  , Full Text Searching, Miscellaneous
 @section Useful Queries
 @cindex Useful Queries
 

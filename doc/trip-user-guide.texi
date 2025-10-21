@@ -1148,14 +1148,26 @@ lost when converting to a track.
 @cindex Itinerary Search
 @cindex Search, itinerary
 
-Itineraries can be searched for by their location and a radius.  Click
-the @code{Search} button at the bottom of the @code{Itineraries} list
-page.
+Itineraries can be searched using either a full text based search or by
+location and a radius.  Click the @code{Search} button at the bottom of
+the @code{Itineraries} list page to show the search form.
 
-Enter the position of the centre of the area to search, in any of the
-formats supported when adding a waypoint.  @ref{Add Waypoint} Enter the
-radius in kilometres in the @code{Distance} input field.  (E.g. 0.125
-for 125 metres.)  Click @code{Search} to perform the search.
+Full text searches search the title and description of the itinerary
+using keywords.  Enter all the required keywords separated with spaces.
+All the keywords must exist within the combined itinerary title and
+description for a successful match.  A dictionary for the default
+language is used such that words like ``track'' will match variants like
+``tracking'', ``tracked'', ``tracks'', ``run'' will match ``running'',
+``ran'' etc.  @strong{Note:} that using
+@url{https://en.wikipedia.org/wiki/Stop_word, stop words} such as
+``the'', ``a'', ``in'' in the search terms are ignored.  Searching using
+only stop words will not find any itineraries.
+
+For a location search, enter the position of the centre of the area to
+search, in any of the formats supported when adding a waypoint.
+@ref{Add Waypoint} Enter the radius in kilometres in the @code{Distance}
+input field.  (E.g. 0.125 for 125 metres.)  Click @code{Search} to
+perform the search.
 
 @quotation
 @strong{Note:} If a waypoint been copied using the
