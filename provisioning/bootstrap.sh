@@ -388,7 +388,7 @@ if [ "debian" == "$ID" ] || [ "ubuntu" == "$ID" ]; then
     apt-get install $DEB_OPTIONS apt-transport-https
     apt-get install $DEB_OPTIONS g++ git postgresql postgresql-contrib postgis \
 	    libpqxx-dev screen autoconf autoconf-doc automake autoconf-archive \
-	    libtool gettext valgrind uuid-dev uuid-runtime make nginx apg \
+	    libtool gettext valgrind uuid-dev uuid-runtime make apache2 nginx apg \
 	    libboost-locale-dev libpugixml-dev autopoint intltool gdb \
 	    libyaml-cpp-dev nlohmann-json3-dev libcmark-dev \
 	    docbook2x texlive info texinfo curl libgdal-dev libcairomm-1.0-dev \

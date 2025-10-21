@@ -72,6 +72,17 @@ server {
 	#}
 }
 
+server {
+	listen 8088 default_server;
+	listen [::]:8088 default_server;
+
+	location /tile-proxy/osm/ {
+		allow 127.0.0.1;
+		deny all;
+		rewrite ^/tile-proxy/osm/(.*) /$1 break;
+		proxy_pass https://tile.openstreetmap.org;
+	}
+}
 
 # Virtual Host configuration for example.com
 #

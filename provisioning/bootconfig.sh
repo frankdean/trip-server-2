@@ -31,6 +31,7 @@ TRIP_SOURCE=${TRIP_SOURCE:-/vagrant}
 # The user and group name for building Trip Server
 USERNAME=${USERNAME:-vagrant}
 GROUPNAME=${GROUPNAME:-${USERNAME}}
+WEBSERVER=${WEBSERVER:-nginx}
 # Flags to pass to build, e.g. '--jobs 4'
 MAKEFLAGS=${MAKEFLAGS:-}
 
@@ -38,6 +39,7 @@ echo "Source folder: ${TRIP_SOURCE}"
 echo "Username: ${USERNAME}"
 echo "Groupname: ${USERNAME}:${GROUPNAME}"
 echo "MAKEFLAGS: ${MAKEFLAGS}"
+echo "WEBSERVER: ${WEBSERVER}"
 
 export MAKEFLAGS
 
@@ -152,9 +154,57 @@ if [ -d /etc/nginx ]; then
 	rm -f default
 	ln -fs ../sites-available/trip
     fi
-    systemctl restart nginx
+    if [ "$WEBSERVER" == "nginx" ]; then
+	systemctl is-active apache2 >/dev/null
+	if [ $? -eq 0 ]; then
+	    systemctl stop apache2
+	fi
+	systemctl is-enabled apache2 >/dev/null
+	if [ $? -eq 0 ]; then
+	    systemctl disable apache2
+	fi
+	systemctl is-enabled nginx >/dev/null
+	if [ $? -ne 0 ]; then
+	    systemctl enable nginx
+	fi
+	systemctl is-active nginx >/dev/null
+	if [ $? -ne 0 ]; then
+	    systemctl start nginx
+	fi
+    fi
 fi
-
+# Setup Apache2 as an example
+if [ -d /etc/apache2 ]; then
+    if [ ! -e /etc/apache2/sites-available/trip.conf ]; then
+	cp ${TRIP_SOURCE}/provisioning/apache2/etc-apache2-conf-available-trip.conf /etc/apache2/sites-available/trip.conf
+	a2enmod proxy_http
+	a2enmod rewrite
+	if [ -e /etc/apache2/sites-enabled/000-default.conf ]; then
+	    a2dissite 000-default.conf
+	fi
+	if [ ! -e /etc/apache2/sites-enabled/trip.conf ]; then
+	    a2ensite trip.conf
+	fi
+    fi
+    if [ "$WEBSERVER" == "apache2" ]; then
+	systemctl is-active nginx >/dev/null
+	if [ $? -eq 0 ]; then
+	    systemctl stop nginx
+	fi
+	systemctl is-enabled nginx >/dev/null
+	if [ $? -eq 0 ]; then
+	    systemctl disable nginx
+	fi
+	systemctl is-enabled apache2 >/dev/null
+	if [ $? -ne 0 ]; then
+	    systemctl enable apache2
+	fi
+	systemctl is-active apache2 >/dev/null
+	if [ $? -ne 0 ]; then
+	    systemctl start apache2
+	fi
+    fi
+fi
 # Build the application
 if [ ! -d /home/${USERNAME}/build ]; then
     $SU_CMD "mkdir /home/${USERNAME}/build"

@@ -84,6 +84,10 @@ Configuration
 * Tile Server Configuration::
 * Elevation Data::
 
+Tile Server Configuration
+
+* Using HTTPS with Tile Servers::
+
 Proxy Web Servers
 
 * Nginx Web Server::
@@ -708,12 +712,94 @@ sequence they have been defined.
 
 @set dockerurl https://www.docker.com
 
-For development, if no map tile provider is configured, dummy tiles are
+For development, if the application was compiled with
+@code{--enable-cairo} and no map tile provider is configured, dummy
+tiles are
 displayed showing the x, y & z coordinates of the tile.  Alternatively, you
 can use @url{@value{dockerurl},Docker} to run a small tile server.  See
 the section on Docker in this application's README in the source distribution
 and the various @code{docker-compose-map-*.yaml} configuration files for
 hints.
+
+@menu
+* Using HTTPS with Tile Servers::
+@end menu
+
+@node Using HTTPS with Tile Servers,  , Tile Server Configuration, Tile Server Configuration
+@subsection Using HTTPS with Tile Servers
+@cindex HTTPS
+@cindex Apache
+@cindex Nginx
+@cindex Tile Servers
+@cindex Map Tiles
+
+@set apacheurl http://httpd.apache.org/
+@set nginxurl https://nginx.org
+
+The @url{@value{osmurl},OpenStreetMap} tile server redirects HTTP
+requests to HTTPS but Trip Server does not support using HTTPS requests.
+Either @url{@value{apacheurl},Apache} or @url{@value{nginxurl},Nginx}
+can be configured to forward HTTP requests to an HTTPS tile server.
+
+See also @xref{Proxy Web Servers}
+
+Configure the tile server in @code{trip-server.yaml} to use
+@code{http://localhost:8088} with a path prefixed with
+@code{/tile-proxy}, e.g.
+
+@example
+        protocol: "http:"
+        host: localhost
+        port: "8088"
+        path: /tile-proxy/osm/@{z@}/@{x@}/@{y@}.png
+        method: GET
+@end example
+
+Then configure the Apache or Nginx web server to forward those requests
+to the HTTPS tile server.
+
+@subsubsection Apache
+
+Enable the @code{proxy_http} and @code{rewrite} Apache modules:
+
+@example
+a2enable proxy_http
+a2enmod rewrite
+@end example
+
+Add a configuration element similar to the following example:
+
+@example
+Listen 8088
+<VirtualHost localhost:8088>
+  LogLevel warn
+  ErrorLog $@{APACHE_LOG_DIR@}/proxy-error.log
+  CustomLog $@{APACHE_LOG_DIR@}/proxy-access.log combined
+  <IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Modify the target host to the tile server URL
+    rewriteRule "^/tile-proxy/osm/(.*)$" "https://tile.openstreetmap.org/$1" [P]
+  </IfModule>
+</VirtualHost>
+@end example
+
+@subsubsection Nginx
+
+Add a configuration element similar to the following example:
+
+@example
+server @{
+	listen 8088 default_server;
+	listen [::]:8088 default_server;
+
+	location /tile-proxy/osm/ @{
+		allow 127.0.0.1;
+		deny all;
+		rewrite ^/tile-proxy/osm/(.*) /$1 break;
+		proxy_pass https://tile.openstreetmap.org;
+	@}
+@}
+@end example
 
 @node Elevation Data,  , Tile Server Configuration, Configuration
 @section Elevation Data
@@ -920,7 +1006,7 @@ examining the working Vagrant installation.
 @cindex Apache
 
 Optionally, the application can be run behind an
-@url{http://httpd.apache.org/, Apache} server, proxying requests to the
+@url{@value{apacheurl},Apache} server, proxying requests to the
 application.
 
 This has the benefit of allowing the application to co-exist with other
@@ -944,7 +1030,7 @@ Configure Apache 2 to enable the @code{proxy} and
 
 @example
 $ sudo a2enmod proxy
-$ sudo a2enmod http_proxy
+$ sudo a2enmod proxy_http
 @end example
 
 The application should be run over HTTPS to keep the login credentials
@@ -959,7 +1045,7 @@ Add the following to @code{trip.conf} outside the @code{<directory\>} directive:
 
 @example
 <IfModule mod_proxy.c>
-  ProxyPass /trip" "http://localhost:8080/trip"
+  ProxyPass "/trip" "http://localhost:8080/trip"
   ProxyPassReverse "/trip" "http://localhost:8080/trip"
 </IfModule>
 @end example
@@ -984,6 +1070,8 @@ HTTP server.
 @example
 RedirectMatch ^/trip/app/(.*)$ https://$@{MY_HOST@}/trip/app/$1
 @end example
+
+See also @xref{Using HTTPS with Tile Servers}
 
 @node Redirecting Traccar Client URLs,  , Redirecting to HTTPS, Apache
 @subsection Redirecting Traccar Client URLs
@@ -1051,13 +1139,13 @@ This option provides a working example of the application running in a
 @url{https://www.virtualbox.org, VirtualBox} virtual machine (VM) for
 those @url{https://www.vagrantup.com/downloads.html, [operating systems
 supported by Vagrant.}  This also provides a complete example of running
-the application behind the @url{https://nginx.org, Nginx} ("engine x")
+the application behind the @url{@value{nginxurl},Nginx} (``engineX'')
 HTTP reverse proxy server.  It is suitable for development or
 demonstration, but not as a production system.
 
 **Note:** Installing all the required software, including the Vagrant
 box involves downloading approximately 600MB of data.  Perhaps more of
-an "easy-start" rather than a "quick-start".
+an ``easy-start'' rather than a ``quick-start''.
 
 @enumerate
 @item
@@ -1216,7 +1304,7 @@ The vbguest plugin host and guest versions should now match.
 
 For further information, see the
 @url{https://stackoverflow.com/questions/20308794/how-to-upgrade-to-virtualbox-guest-additions-on-vm-box#35678489,
-stackoverflow answer, "Existing VM".}
+stackoverflow answer, ``Existing VM''.}
 
 @node Vagrant Errors,  , Trouble-shooting, Vagrant
 @subsection Vagrant Errors

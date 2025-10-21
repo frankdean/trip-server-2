@@ -42,9 +42,9 @@ tile:
       refererInfo: http://link_to_deployed_application_information
       options:
         protocol: "http:"
-        host: tile.openstreetmap.org
-        port: "80"
-        path: /{z}/{x}/{y}.png
+        host: localhost
+        port: "8088"
+        path: /tile-proxy/osm/{z}/{x}/{y}.png
         method: GET
       mapLayer:
         name: OSM Mapnik
