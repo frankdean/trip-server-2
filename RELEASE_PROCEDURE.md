@@ -48,11 +48,11 @@
 
 1.  Create SHA256 sums for the tarballs
 
-1.  Sign the tarballs:
+1.  Sign the SHA256 sums file:
 
-		gpg --sign --detach-sign --armor $TARBALL
+		gpg --sign --detach-sign --armor $SHA256SUMS
 
-1.  Copy the tarballs to the download site
+1.  Copy the release files to the download site
 
 1.  Build PDF and HTML docs
 
