@@ -38,7 +38,7 @@ if [ $PUSH_DB == 'y' ]; then
     ${DOCKER} push fdean/trip-database:latest-amd64
     ${DOCKER} push fdean/trip-database:latest-arm64
     if [ -n "$(${DOCKER} images -q fdean/trip-database:latest 2> /dev/null)" ]; then
-	${DOCKER} manifest rm fdean/trip-database:latest
+	${DOCKER} image rm fdean/trip-database:latest
     fi
     ${DOCKER} manifest create fdean/trip-database:latest fdean/trip-database:latest-amd64 fdean/trip-database:latest-arm64
     ${DOCKER} push fdean/trip-database:latest
@@ -53,7 +53,7 @@ if [ $PUSH_TRIP == 'y' ]; then
     ${DOCKER} push fdean/trip-server-2:latest-arm64
     ${DOCKER} push fdean/trip-server-2:latest-amd64
     if [ -n "$(${DOCKER} images -q fdean/trip-server-2:latest 2> /dev/null)" ]; then
-	${DOCKER} manifest rm fdean/trip-server-2:latest
+	${DOCKER} image rm fdean/trip-server-2:latest
     fi
     ${DOCKER} manifest create fdean/trip-server-2:latest fdean/trip-server-2:latest-amd64 fdean/trip-server-2:latest-arm64
     ${DOCKER} push fdean/trip-server-2:latest

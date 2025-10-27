@@ -88,7 +88,7 @@
 
 	1.  Build the `trip-database` and `trip-server` images:
 
-			$ DOCKER=podman PUSH=n ./docker-build.sh
+			$ MAKEFLAGS='-j 4' DOCKER=podman PUSH=n ./docker-build.sh
 
 ## Installation
 
