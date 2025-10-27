@@ -124,7 +124,7 @@ function install_libpqxx_6
 		# configure command fails on VM running Debian arm64
 		PROCESSOR="$(uname -p)"
 		ARCH="$(arch)"
-		if [ "$PROCESSOR" -!= "unknown" ]; then
+		if [ "$PROCESSOR" != "unknown" ]; then
 		       $SU_CMD './configure --disable-documentation'
 		elif [ "$ARCH" == "aarch64" ]; then
 		    $SU_CMD "./configure --disable-documentation --build=arm"
