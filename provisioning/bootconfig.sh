@@ -38,6 +38,7 @@ MAKEFLAGS=${MAKEFLAGS:-}
 echo "Source folder: ${TRIP_SOURCE}"
 echo "Username: ${USERNAME}"
 echo "Groupname: ${USERNAME}:${GROUPNAME}"
+USERHOME=${USERHOME:-"/home/${USERNAME}"}
 echo "MAKEFLAGS: ${MAKEFLAGS}"
 echo "WEBSERVER: ${WEBSERVER}"
 
@@ -57,9 +58,9 @@ echo "$PRETTY_NAME"
 if [ "$ID" == "freebsd" ]; then
     SU_CMD="su -l ${USERNAME} -c"
 
-    grep -E '^\s*:lang=en_GB.UTF-8' /home/${USERNAME}/.login_conf >/dev/null 2>&1
+    grep -E '^\s*:lang=en_GB.UTF-8' ${USERHOME}/.login_conf >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-	cat >> /home/${USERNAME}/.login_conf <<"EOF" >/dev/null 2>&1
+	cat >> ${USERHOME}/.login_conf <<"EOF" >/dev/null 2>&1
 me:\
 	:charset=ISO8859-15:\
 	:lang=en_GB.UTF-8:
@@ -206,17 +207,17 @@ if [ -d /etc/apache2 ]; then
     fi
 fi
 # Build the application
-if [ ! -d /home/${USERNAME}/build ]; then
-    $SU_CMD "mkdir /home/${USERNAME}/build"
+if [ ! -d ${USERHOME}/build ]; then
+    $SU_CMD "mkdir ${USERHOME}/build"
 fi
-cd /home/${USERNAME}/build
-if [ ! -d /home/${USERNAME}/build/provisioning ]; then
-    $SU_CMD "cp -a ${TRIP_SOURCE}/provisioning /home/${USERNAME}/build/"
+cd ${USERHOME}/build
+if [ ! -d ${USERHOME}/build/provisioning ]; then
+    $SU_CMD "cp -a ${TRIP_SOURCE}/provisioning ${USERHOME}/build/"
 fi
 # Don't build if we appear to already have an installed version of trip-server
 if [ ! -x /usr/local/bin/trip-server ]; then
     if [ "$ID" == "fedora" ] || [ "$ID" == "freebsd" ]; then
-	$SU_CMD "cd /home/${USERNAME}/build && pwd && ${TRIP_SOURCE}/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' CPPFLAGS='-I/usr/local/include' --disable-gdal --enable-cairo --enable-tui"
+	$SU_CMD "cd ${USERHOME}/build && pwd && ${TRIP_SOURCE}/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' CPPFLAGS='-I/usr/local/include' --disable-gdal --enable-cairo --enable-tui"
     elif [ "$ID" == "rocky" ]; then
 	if [ $(echo "$VERSION_ID == 9.5" |bc -l) -eq 1 ]; then
 	    # Weirdly, pkg-config was appending a spurious '-L' with the '--libs'
@@ -249,14 +250,14 @@ if [ ! -x /usr/local/bin/trip-server ]; then
     else
 	$SU_CMD "${TRIP_SOURCE}/configure PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$(pg_config --libdir)/pkgconfig CXXFLAGS='-g -O0' --disable-gdal --enable-cairo --enable-tui"
     fi
-    $SU_CMD "pwd && time make -C /home/${USERNAME}/build check"
-    if [ $? -eq 0 ] && [ -x /home/${USERNAME}/build/src/trip-server ]; then
+    $SU_CMD "pwd && time make -C ${USERHOME}/build check"
+    if [ $? -eq 0 ] && [ -x ${USERHOME}/build/src/trip-server ]; then
 	echo "Installing trip-server"
 	make install
     fi
 fi
 
-if [ -x /home/${USERNAME}/build/src/trip-server ]; then
+if [ -x ${USERHOME}/build/src/trip-server ]; then
     RESULT=$($SU_CMD "echo 'SELECT count(*) AS session_table_exists FROM session' | psql trip 2>&1") >/dev/null 2>&1
     echo $RESULT | grep -E 'ERROR:\s+relation "session" does not exist' >/dev/null 2>&1
     if [ $? -eq 0 ]; then

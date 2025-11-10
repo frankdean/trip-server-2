@@ -31,6 +31,7 @@ TRIP_SOURCE=${TRIP_SOURCE:-/vagrant}
 # The user and group name for building Trip Server
 USERNAME=${USERNAME:-vagrant}
 GROUPNAME=${GROUPNAME:-${USERNAME}}
+USERHOME=${USERHOME:-"/home/${USERNAME}"}
 # Flags to pass to build, e.g. '--jobs 4'
 MAKEFLAGS=${MAKEFLAGS:-}
 
@@ -84,7 +85,7 @@ if [ ! -d "$DOWNLOAD_CACHE_DIR" ] || [ "$ID" == "freebsd" ]; then
     # local folder for the downloads.
     #
     # Also the provisioning folder isn't synced on FreeBSD
-    DOWNLOAD_CACHE_DIR="/home/${USERNAME}/Downloads"
+    DOWNLOAD_CACHE_DIR="${USERHOME}/Downloads"
     if [ ! -d "$DOWNLOAD_CACHE_DIR" ]; then
 	$SU_CMD "mkdir -p $DOWNLOAD_CACHE_DIR"
     fi
@@ -410,20 +411,20 @@ if [ "debian" == "$ID" ] || [ "ubuntu" == "$ID" ]; then
 fi
 
 # Vi as default editor
-if [ -f /home/${USERNAME}/.bash_profile ]; then
-    grep -E '^export\s+EDITOR' /home/${USERNAME}/.bash_profile >/dev/null 2>&1
+if [ -f ${USERHOME}/.bash_profile ]; then
+    grep -E '^export\s+EDITOR' ${USERHOME}/.bash_profile >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-	echo "export EDITOR=/usr/bin/vi" >>/home/${USERNAME}/.bash_profile
+	echo "export EDITOR=/usr/bin/vi" >>${USERHOME}/.bash_profile
     fi
 else
-    grep -E '^export\s+EDITOR' /home/${USERNAME}/.profile >/dev/null 2>&1
+    grep -E '^export\s+EDITOR' ${USERHOME}/.profile >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-	echo "export EDITOR=/usr/bin/vi" >>/home/${USERNAME}/.profile
+	echo "export EDITOR=/usr/bin/vi" >>${USERHOME}/.profile
     fi
 fi
 if [ ! -z "$MAKEFLAGS" ]; then
-    grep -E '^export\s+MAKEFLAGS' /home/${USERNAME}/.profile >/dev/null 2>&1
+    grep -E '^export\s+MAKEFLAGS' ${USERHOME}/.profile >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-	echo "export MAKEFLAGS='${MAKEFLAGS}'" >>/home/${USERNAME}/.profile
+	echo "export MAKEFLAGS='${MAKEFLAGS}'" >>${USERHOME}/.profile
     fi
 fi

@@ -102,6 +102,7 @@ Apache
 Testing and Developing Trip
 
 * Vagrant::
+* Lima::
 * Docker::
 * Using QEMU for Development and Testing::
 * Testing with Curl::
@@ -1113,13 +1114,14 @@ the Apache @code{<VirtualHost/>} sections:
 
 @menu
 * Vagrant::
+* Lima::
 * Docker::
 * Using QEMU for Development and Testing::
 * Testing with Curl::
 * Load Testing::
 @end menu
 
-@node Vagrant, Docker, Testing and Developing Trip, Testing and Developing Trip
+@node Vagrant, Lima, Testing and Developing Trip, Testing and Developing Trip
 @section Vagrant
 @cindex Vagrant
 
@@ -1138,7 +1140,7 @@ development environment.
 
 This option provides a working example of the application running in a
 @url{https://www.virtualbox.org, VirtualBox} virtual machine (VM) for
-those @url{https://www.vagrantup.com/downloads.html, [operating systems
+those @url{https://www.vagrantup.com/downloads.html, operating systems
 supported by Vagrant.}  This also provides a complete example of running
 the application behind the @url{@value{nginxurl},Nginx} (``engineX'')
 HTTP reverse proxy server.  It is suitable for development or
@@ -1168,7 +1170,7 @@ $ git clone git://www.fdsd.co.uk/trip-server-2.git
 Start the Vagrant VM
 
 @example
-$ cd ~/projects/trip-server
+$ cd ~/projects/trip-server-2
 $ vagrant up debian
 @end example
 
@@ -1330,7 +1332,79 @@ This can occur after deleting the project's @code{.vagrant} sub-folder
 Vagrant instance.  Web searches suggest there are other scenarios that
 result in a similarly confusing error message.
 
-@node Docker, Using QEMU for Development and Testing, Vagrant, Testing and Developing Trip
+@node Lima, Docker, Vagrant, Testing and Developing Trip
+@section Lima
+@cindex Lima
+
+This option provides a working example of the application running in a
+virtual machine (VM) for those
+@url{https://lima-vm.io/docs/installation/, operating systems supported by Lima.}.
+
+@enumerate
+@item
+Download and install Lima
+
+@item
+Clone this repository to a suitable location on the machine you are
+going to use to host the application and VM:
+
+@example
+$ cd ~/projects
+$ git clone git://www.fdsd.co.uk/trip-server-2.git
+@end example
+
+@item
+Create the Lima VM
+
+@example
+$ cd ~/projects/trip-server-2
+$ limactl create trip-server.yaml
+@end example
+
+On the first occasion of running Lima, it will download a Debian image
+and create the initial environment setup.
+
+@item
+Start the Lima VM
+
+@example
+$ limactl start trip-server
+@end example
+
+Lima will start the VM and run the scripts to build the application and
+it's dependencies.  This is likely to take some ten minutes or longer.
+
+@item
+Use your browser to navigate to @url{http://localhost:8080/} on the host
+machine and login providing the following credentials:
+
+@itemize
+@item
+user@@trip.test  rasHuthlutcew7
+
+@item
+admin@@trip.test 7TwilfOrucFeug
+@end itemize
+
+@item
+When finished, stop the VM with:
+
+@example
+$ limactl stop trip-server
+@end example
+
+@end enumerate
+
+Lima shares (as read-only) the source folder in the VM at
+@code{~/trip-server-2}.  It creates a build directory at @code{~/build}
+and builds the application running @code{configure} command in that
+folder.  This gives you a working development environment.
+
+@xref{Vagrant}) for further information,
+e.g. configuring time zone and locale settings, as Lima and Vagrant have
+a lot of similarities.
+
+@node Docker, Using QEMU for Development and Testing, Lima, Testing and Developing Trip
 @section Docker
 @cindex Docker
 

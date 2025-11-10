@@ -1,0 +1,31 @@
+# Script to build a [Lima}(https://lima-vm.io) based development environment.
+
+minimumLimaVersion: 1.1.0
+
+cpus: 4
+memory: 4GiB
+disk: 20GiB
+
+base:
+- template://_images/debian-12
+
+vmType: "vz"  # only for macOS; Linux uses 'qemu'
+mountType: "virtiofs"
+mounts:
+  - location: "."
+    mountPoint: "{{.Home}}/trip-server-2"
+    writable: false
+user:
+  name: "lima"
+  home: "/home/{{.User}}"
+
+portForwards:
+  - guestPort: 8080
+    hostPort: 8080
+
+provision:
+  - mode: system
+    script: |
+      #!/bin/bash
+      TRIP_SOURCE={{.Home}}/trip-server-2 USERNAME={{.User}} GROUPNAME={{.User}} USERHOME={{.Home}} bash -x {{.Home}}/trip-server-2/provisioning/bootstrap.sh
+      TRIP_SOURCE={{.Home}}/trip-server-2 USERNAME={{.User}} GROUPNAME={{.User}} USERHOME={{.Home}} bash -x {{.Home}}/trip-server-2/provisioning/bootconfig.sh

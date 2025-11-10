@@ -487,9 +487,10 @@ For further ideas on configuring your environment, see the scripts and files
 under the `./provisioning` directory, which can be used to create a
 development environment using [Vagrant][]. See the `Testing and Developing
 Trip` section of the application manual (`info trip-server`) for more
-information on using and running the application with both Vagrant and
-[Qemu][].
+information on using and running the application with both [Lima][],
+[Vagrant][] and [Qemu][].
 
+[Lima]: https://lima-vm.io "Linux virtual machines, with a focus on running containers"
 [Qemu]: https://www.qemu.org "A generic and open source machine emulator and virtualizer"
 [Vagrant]: https://www.vagrantup.com "Development Environments Made Easy"
 
