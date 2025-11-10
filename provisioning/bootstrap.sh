@@ -74,7 +74,7 @@ if [ -z $ID ];then
     exit 1;
 fi
 
-if [ "$ID" == "fedora" ] || [ "$ID" == "rocky" ]; then
+if [ "$ID" == "fedora" ] || [ "$ID" == "rocky" ] || [ "$ID" == "freebsd" ]; then
     SHASUM=sha256sum
 fi
 if [ ! -d "$DOWNLOAD_CACHE_DIR" ] || [ "$ID" == "freebsd" ]; then
@@ -314,7 +314,7 @@ fi
 #
 ##############################################################################
 if [ "$ID" == "freebsd" ]; then
-    FREEBSD_POSTGRESQL_VERSION=16
+    FREEBSD_POSTGRESQL_VERSION=17
     FREEBSD_PKG_OPTIONS='--yes'
     pkg install $FREEBSD_PKG_OPTIONS pkgconf git boost-all yaml-cpp \
 	postgresql${FREEBSD_POSTGRESQL_VERSION}-client \
@@ -322,8 +322,8 @@ if [ "$ID" == "freebsd" ]; then
 	postgresql${FREEBSD_POSTGRESQL_VERSION}-server \
 	postgresql-libpqxx \
 	postgis33 \
-	python3 pugixml e2fsprogs-libuuid nlohmann-json \
-	texinfo vim python3 apg \
+	python3 pugixml e2fsprogs libuuid nlohmann-json \
+	texinfo curl vim python3 apg \
 	intltool gdb libtool autoconf-archive gettext automake cairomm \
 	cmark
     # Include the textlive-full package to allow building the PDF docs, which
@@ -348,9 +348,10 @@ if [ "$ID" == "freebsd" ]; then
 postgresql_enable="YES"
 EOF
 	fi
-	/usr/local/etc/rc.d/postgresql initdb
-	/usr/local/etc/rc.d/postgresql start
+	service postgresql initdb
+	service postgresql start
 	# Note that the socket is created at /tmp/.s.PGSQL.5432
+	# with database in /var/db/postgres/data${FREEBSD_POSTGRESQL_VERSION}
     fi
     # adduser trip --system --group --home /nonexistent --no-create-home --quiet
     pw useradd -n trip -c 'trip daemon' -d /nonexistent -s /usr/sbin/nologin -w no 2>/dev/null

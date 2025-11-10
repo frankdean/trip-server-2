@@ -4,5 +4,6 @@
 	copytruncate
 	compress
 	notifempty
+	missingok
 	create 0640 vagrant vagrant
 }
