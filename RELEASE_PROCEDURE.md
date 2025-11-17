@@ -69,11 +69,11 @@
 		$ grep 'ARG TRIP_SERVER_VERSION' Dockerfile
 		$ grep LABEL Dockerfile Dockerfile-postgis
 
-1.	Test the Dockerfile
+1.	Build the Docker images:
 
 		$ docker build --platform=linux/arm64 --build-arg MAKEFLAGS='-j 4' \
 		-t fdean/trip-server-2:latest .
-		$ docker compose up --no-recreate --detach
+		$ docker compose up --detach
 		$ docker logs --follow trip-server-2_web_1
 
 	Stop the container, optionally with (use the `--volumes` switch to also

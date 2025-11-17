@@ -74,11 +74,12 @@ AS_IF([test "${have_libpqxx7}" -eq 1],
 PKG_CHECK_MODULES([LIBYAML], [yaml-cpp >= 0.6.2])
 PKG_CHECK_MODULES([LIBPUGIXML], [pugixml >= 1.11])
 PKG_CHECK_MODULES([LIBCMARK], [libcmark >= 0.29])
+AM_CONDITIONAL([USE_CAIRO], [test x$enable_cairo = xyes])
 AS_IF([test "x${enable_cairo}" = xyes], [
    PKG_CHECK_MODULES([LIBCAIROMM], [cairomm-1.0 >= 1.12.2 cairomm-png-1.0 >= 1.12.2])
    AC_DEFINE([HAVE_CAIRO], [1], [Build to use CAIRO library])
 ])
-AM_CONDITIONAL([USE_CAIRO], [test x$enable_cairo = xyes])
+AM_CONDITIONAL([USE_GDAL], [test x$enable_gdal != xno])
 AS_IF([test "x${enable_gdal}" != xno], [
    PKG_CHECK_MODULES([LIBGDAL], [gdal >= 3.2.2])
    AC_DEFINE([HAVE_GDAL], [1], [Build to use GDAL library])
@@ -93,7 +94,6 @@ AS_IF([test "x${enable_tui}" = xyes], [
    AC_DEFINE([HAVE_TUI], [1], [Build with Text-based User Interface])
    PKG_CHECK_MODULES([FINALCUT], [finalcut >= 0.8.0])
 ])
-AM_CONDITIONAL([USE_GDAL], [test x$enable_gdal != xno])
 
 dnl Check we have a UUID library and header
 TRIP_CHECK_UUID_LIBS
@@ -163,14 +163,16 @@ SYSTEMD_CONF
 AC_CONFIG_FILES([Makefile po/Makefile.in
 	         doc/Makefile
                  src/Makefile
-                 tests/Makefile
-		 docker-build.sh
 		 Dockerfile
 		 Dockerfile-postgis
+		 Dockerfile-postgis-trixie
 		 Dockerfile-tile-server
 		 Dockerfile-trixie
-		 docker-entrypoint.sh
+		 docker-build.sh
+		 docker-compose-trixie.yml
 		 docker-compose.yml
+		 docker-entrypoint.sh
+                 tests/Makefile
                  ],
 		 [chmod +x docker-build.sh]
 		 )

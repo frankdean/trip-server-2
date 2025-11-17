@@ -8,7 +8,7 @@ RUN apt-get update \
     make g++ gawk \
     libboost-locale-dev libpqxx-dev libpugixml-dev libyaml-cpp-dev \
     nlohmann-json3-dev uuid-dev uuid-runtime cairomm-1.0-dev \
-    libcmark-dev texlive texinfo vim.tiny \
+    libgdal-dev libcmark-dev texlive texinfo vim.tiny \
     && rm -rf /var/lib/apt/lists/*
 
 RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \
@@ -39,7 +39,7 @@ WORKDIR "/usr/local/src/trip-${TRIP_SERVER_VERSION}"
 ARG MAKEFLAGS
 ENV MAKEFLAGS=${MAKEFLAGS:-'-j 1'}
 
-RUN ./configure --enable-cairo --disable-gdal && make check
+RUN ./configure --enable-cairo && make check
 RUN make html pdf
 
 USER root
@@ -47,7 +47,7 @@ RUN make install install-html install-pdf
 
 WORKDIR /usr/local/etc
 
-FROM  docker.io/debian:bookworm-slim
+FROM docker.io/debian:bookworm-slim
 LABEL uk.co.fdsd.tripserver.version="@PACKAGE_VERSION@"
 
 RUN mkdir /run/uuidd

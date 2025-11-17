@@ -3,6 +3,7 @@
 /.vagrant/
 /Dockerfile
 /Dockerfile-postgis
+/Dockerfile-postgis-trixie
 /Dockerfile-tile-server
 /Dockerfile-trixie
 /INSTALL
@@ -90,3 +91,4 @@
 /trip-*.tar.bz2
 /trip-*.tar.zst
 /trip-*.zip
+/docker-compose-trixie.yml

@@ -31,6 +31,7 @@ TRIP_SOURCE=${TRIP_SOURCE:-/vagrant}
 # The user and group name for building Trip Server
 USERNAME=${USERNAME:-vagrant}
 GROUPNAME=${GROUPNAME:-${USERNAME}}
+USERHOME=${USERHOME:-"/home/${USERNAME}"}
 WEBSERVER=${WEBSERVER:-nginx}
 # Flags to pass to build, e.g. '--jobs 4'
 MAKEFLAGS=${MAKEFLAGS:-}
@@ -38,7 +39,6 @@ MAKEFLAGS=${MAKEFLAGS:-}
 echo "Source folder: ${TRIP_SOURCE}"
 echo "Username: ${USERNAME}"
 echo "Groupname: ${USERNAME}:${GROUPNAME}"
-USERHOME=${USERHOME:-"/home/${USERNAME}"}
 echo "MAKEFLAGS: ${MAKEFLAGS}"
 echo "WEBSERVER: ${WEBSERVER}"
 

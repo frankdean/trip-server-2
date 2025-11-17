@@ -24,6 +24,7 @@ EXTRA_DIST = m4/ChangeLog  .gitignore stamp-h1 \
 	provisioning/apache2/etc-apache2-conf-available-trip.conf \
 	provisioning/bootconfig.sh \
 	provisioning/bootstrap.sh \
+	provisioning/debian-on-macos-setup.sh \
 	provisioning/qemu-init.sh \
 	provisioning/podman-setup.sh \
 	provisioning/docker/tile_server_run.sh \
@@ -47,7 +48,8 @@ EXTRA_DIST = m4/ChangeLog  .gitignore stamp-h1 \
 	provisioning/schema/90_test-data.sql \
 	provisioning/schema/create_gis_indexes.sh \
 	provisioning/schema/revoke_all.sql \
-	provisioning/systemd/trip-server-2.service
+	provisioning/systemd/trip-server-2.service \
+	trip-server.yaml
 
 ACLOCAL_AMFLAGS = -I m4
 

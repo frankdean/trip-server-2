@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2025-10-27 11:00+0000\n"
+"POT-Creation-Date: 2025-11-17 12:12+0000\n"
 "PO-Revision-Date: 2025-05-17 11:23+0100\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
@@ -2147,7 +2147,7 @@ msgstr[1] "Está creando {1} trabajadores"
 msgid "Username"
 msgstr "Identificación del usuario"
 
-#: trip-server-common/src/pg_pool.cpp:45
+#: trip-server-common/src/pg_pool.cpp:46
 #, c++-format
 msgid "Creating database pool with {1} connection"
 msgid_plural "Creating database pool with {1} connections"
