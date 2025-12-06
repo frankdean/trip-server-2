@@ -41,7 +41,7 @@ TripGetOptions::TripGetOptions() : GetOptions()
 
 #ifdef HAVE_GETOPT_H
 
-const char TripGetOptions::short_opts[] = "hs:p:c:vuVe"
+const char TripGetOptions::short_opts[] = "hs:p:c:vuVde"
 #ifdef HAVE_TUI
   "i"
 #endif
@@ -61,6 +61,7 @@ struct option TripGetOptions::long_options[] = {
   {"config-file",         required_argument, NULL,             'c'},
   {"verbose",             no_argument,       &verbose_flag,    1},
   {"version",             no_argument,       NULL,             'v'},
+  {"debug",               no_argument,       NULL,             'd'},
   {"expire_sessions",     no_argument,       &expire_sessions, 1},
   {"upgrade",             no_argument,       &upgrade_flag,    1},
 #ifdef HAVE_TUI
