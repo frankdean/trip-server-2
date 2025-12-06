@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([trip],[2.5.5],[frank.dean@fdsd.co.uk])
+AC_INIT([trip],[2.5.6-rc.1],[frank.dean@fdsd.co.uk])
 TRIP_SOURCE_URL=[https://www.fdsd.co.uk/trip-server-2/]
 AC_SUBST([TRIP_SOURCE_URL])
 AC_DEFINE_UNQUOTED([TRIP_SOURCE_URL], ["${TRIP_SOURCE_URL}"], [The download URL for this application's source code])
@@ -49,7 +49,7 @@ AC_LANG(C++)
 dnl Must set the compiler to use before AX_CXX_COMPILE_STDCXX_17
 #AC_PROG_CXX([clang++ g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC])
 AC_PROG_CXX
-AX_CXX_COMPILE_STDCXX(17)
+AX_CXX_COMPILE_STDCXX(17, ext)
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_CHECK_PROGS([DOCBOOK2TEXI],[docbook2texi docbook2x-texi])

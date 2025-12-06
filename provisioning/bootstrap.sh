@@ -394,7 +394,7 @@ if [ "debian" == "$ID" ] || [ "ubuntu" == "$ID" ]; then
 	    libboost-locale-dev libpugixml-dev autopoint intltool gdb \
 	    libyaml-cpp-dev nlohmann-json3-dev libcmark-dev \
 	    docbook2x texlive info texinfo curl libgdal-dev libcairomm-1.0-dev \
-	    vim libncurses-dev libgpm-dev
+	    vim libncurses-dev libgpm-dev zip
 
     if [ ! -d /etc/apt/keyrings ]; then
 	install -m 0755 -d /etc/apt/keyrings

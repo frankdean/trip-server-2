@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: trip 2.0.0\n"
 "Report-Msgid-Bugs-To: Frank Dean <frank.dean@fdsd.co.uk>\n"
-"POT-Creation-Date: 2025-11-17 12:12+0000\n"
+"POT-Creation-Date: 2025-12-06 14:58+0000\n"
 "PO-Revision-Date: 2025-05-17 17:24+0100\n"
 "Last-Translator: Frank Dean <frank@fdsd.co.uk>\n"
 "Language-Team: French <traduc@traduc.org>\n"
@@ -1980,7 +1980,7 @@ msgid "The {1} locations have been truncated to the most recent {2}"
 msgstr ""
 
 #. Heading before showing command line usage and options with the program name as the parameter
-#: src/trip_get_options.cpp:114
+#: src/trip_get_options.cpp:115
 #, c++-format
 msgid ""
 "Usage:\n"
@@ -1994,69 +1994,69 @@ msgstr ""
 "Options:\n"
 
 #. Command line short description for the --help option
-#: src/trip_get_options.cpp:116
+#: src/trip_get_options.cpp:117
 msgid "show this help, then exit"
 msgstr "afficher cette aide, puis quitte"
 
 #. Command line short description for the --version option
-#: src/trip_get_options.cpp:118
+#: src/trip_get_options.cpp:119
 msgid "show version information, then exit"
 msgstr "afficher les informations de version, puis quitte"
 
 #. Command line short description for the --listen option
-#: src/trip_get_options.cpp:120
+#: src/trip_get_options.cpp:121
 msgid "listen address, e.g. 0.0.0.0"
 msgstr "adresse por écouter sur"
 
 #. Command line short description for the --port option
-#: src/trip_get_options.cpp:122
+#: src/trip_get_options.cpp:123
 msgid "port number, e.g. 8080"
 msgstr "numéro de port"
 
 #. Command line short description for the --root option
-#: src/trip_get_options.cpp:125
+#: src/trip_get_options.cpp:126
 msgid "document root directory"
 msgstr "réportoire racine du document"
 
 #. Command line short description for the --expire-sessions option
-#: src/trip_get_options.cpp:128
+#: src/trip_get_options.cpp:129
 msgid "expires any active user web sessions"
 msgstr "fait expirer toutes les sessions Web des utilisateurs actifs"
 
 #. Command line short description for the --config-file option
-#: src/trip_get_options.cpp:130
+#: src/trip_get_options.cpp:131
 msgid "configuration file name"
 msgstr "nom de fichier de configuration"
 
 #. Command line short description for the --upgrade option
-#: src/trip_get_options.cpp:132
+#: src/trip_get_options.cpp:133
 msgid "upgrade database"
 msgstr "mettre à niveau la base de données"
 
 #. Command line short description for the --interactive option
-#: src/trip_get_options.cpp:135
+#: src/trip_get_options.cpp:136
 msgid "run an interactive session"
 msgstr ""
 
 #. Command line short description for the --verbose option
-#: src/trip_get_options.cpp:138
+#: src/trip_get_options.cpp:139
 msgid "verbose output"
 msgstr "output verbeux"
 
 #. Example usage when the application is configured to serve static files
-#: src/trip_get_options.cpp:142
+#: src/trip_get_options.cpp:143
 #, c++-format
 msgid "Usage: {1} <address> <port> <doc_root>"
 msgstr "Options: {1} <adresse> <port> <doc_racine>"
 
 #. Example usage when the application is not configured to serve static files
-#: src/trip_get_options.cpp:145
+#: src/trip_get_options.cpp:146
 #, c++-format
 msgid "Usage: {1} <address> <port>"
 msgstr "Options: {1} <adresse> <port>"
 
 #. Heading before showing command line usage
-#: src/trip_get_options.cpp:150
+#: src/trip_get_options.cpp:151
 msgid "Example:\n"
 msgstr "Exemple:\n"
 

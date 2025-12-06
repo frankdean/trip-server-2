@@ -38,11 +38,16 @@ tile:
     - cache: true
       prune: true
       # see https://operations.osmfoundation.org/policies/tiles/
-      userAgentInfo: (mailto:your.contact@email.address)
+      userAgentInfo: (mailto:your.contact.email.address@example.com)
       refererInfo: http://link_to_deployed_application_information
       options:
-        protocol: "http:"
-        host: localhost
+        protocol: "https:"
+        # When there is a proxy server proxying HTTP requests to HTTPS, set
+        # 'host' to be the proxy server and 'proxyHost' to be the host that
+        # the request will be redirected to.  Port must be the port of the
+        # proxy server.
+        proxyHost: 127.0.0.1
+        host: tile.openstreetmap.org
         port: "8088"
         path: /tile-proxy/osm/{z}/{x}/{y}.png
         method: GET
@@ -58,6 +63,7 @@ tile:
           - text: " contributors, "
           - text: CC-BY-SA
             link: http://creativecommons.org/licenses/by-sa/2.0/
+            title: Creative Commons Attribution-Sharealike 2.0
 db:
   #uri: postgresql://trip:secret@localhost/trip
   # connect via default socket under /var/run/postgresql

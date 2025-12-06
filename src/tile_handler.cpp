@@ -23,6 +23,7 @@
 #include "tile_handler.hpp"
 #include "trip_config.hpp"
 #include "../trip-server-common/src/date_utils.hpp"
+#include "../trip-server-common/src/get_options.hpp"
 #include "../trip-server-common/src/http_client.hpp"
 #include "../trip-server-common/src/http_response.hpp"
 #include "../trip-server-common/src/uri_utils.hpp"
@@ -88,13 +89,16 @@ TilePgDao::tile_result TileHandler::fetch_remote_tile(
   path.replace(path.find("{x}"), 3, std::to_string(x));
   path.replace(path.find("{y}"), 3, std::to_string(y));
   provider.path = UriUtils::uri_encode_rfc_1738(path);
-  // std::cout << "Path after: \"" << path << "\"\n";
+  // std::cout << "Path after: \"" << path << "\"\n"; When proxying the request,
+  // "Host" header needs to be the host it's being proxied to,
+  // e.g. tile.openstreetmap.org not localhost.
   provider.add_header("Host", provider.host);
   provider.add_header("Referer", UriUtils::uri_encode_rfc_1738(provider.referrer_info));
   provider.add_header("User-Agent", UriUtils::uri_encode_rfc_1738(provider.user_agent_info));
   provider.add_header("Accept", "*/*");
   HttpClient client(provider);
-  // std::cout << "Options: " << provider.HttpOptions::to_string() << '\n';
+  if (GetOptions::debug_flag)
+    std::cout << "Options: " << provider << '\n';
   client.perform_request();
   if (client.status_code != 200) {
     std::ostringstream msg;

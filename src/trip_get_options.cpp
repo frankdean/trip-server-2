@@ -100,7 +100,7 @@ void TripGetOptions::show_version_info() const
 {
   std::cout
     << PACKAGE << " " << VERSION << '\n'
-    << "Copyright (C) 2022-2024 Frank Dean\n"
+    << "Copyright (C) 2022-2025 Frank Dean\n"
     << "This program comes with ABSOLUTELY NO WARRANTY.\n"
     << "This is free software, and you are welcome to redistribute it\n"
     << "under certain conditions.\n"

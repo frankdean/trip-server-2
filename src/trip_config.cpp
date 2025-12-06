@@ -128,6 +128,8 @@ TripConfig::TripConfig(std::string filename) :
           if (auto options = cp["options"]) {
             if (options["protocol"])
               p.protocol = options["protocol"].as<std::string>();
+            if (options["proxyHost"])
+              p.proxyHost = options["proxyHost"].as<std::string>();
             if (options["host"])
               p.host = options["host"].as<std::string>();
             if (options["port"])
@@ -219,12 +221,12 @@ YAML::Node TripConfig::create_default_triplogger_configuration()
 std::string tile_provider::to_string() const
 {
   std::ostringstream os;
-  os << "cache: " << (cache ? "true" : "false") << ", "
+  os << static_cast<const HttpOptions>(*this) << ", "
+     << "cache: " << (cache ? "true" : "false") << ", "
      << "prune: " << prune << ", "
      << "help: \"" << help << "\", "
      << "user_agent_info: \"" << user_agent_info << "\", "
      << "referrer_info: \"" << referrer_info << "\", "
-     << "options: {" << HttpOptions::to_string() << "}, "
      << "name: \"" << name << "\", "
      << "type: \"" << type << "\", "
      << "min_zoom: " << min_zoom << ", "

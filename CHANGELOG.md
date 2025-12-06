@@ -2,6 +2,12 @@
 
 # Changelog
 
+## 2.5.6
+
+* Fix to include target host name when proxying HTTP requests to HTTPS.  Added
+  a `proxyHost` configuration parameter to `trip-server-dist.yaml` with a
+  comment on its usage.
+
 ## 2.5.5
 
 * Fix handling GET and POST query parameters containing '?', '+' or '#'

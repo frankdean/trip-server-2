@@ -50,7 +50,7 @@
 
 1.  Sign the SHA256 sums file:
 
-		gpg --sign --detach-sign --armor $SHA256SUMS
+		gpg --detach-sign --armor $SHA256SUMS
 
 1.  Copy the release files to the download site
 
